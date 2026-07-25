@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
+import geoip from "geoip-lite";
 import User from "../models/users.model.js";
+import LoginHistory from "../models/loginHistory.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { signToken } from "../utils/jwt.js";
 import emailService from "../services/email.service.js";
@@ -366,6 +368,18 @@ export const login = asyncHandler(async (req, res) => {
   // Mettre à jour la date de dernière connexion
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
 
+  // Enregistrer l'historique de connexion
+  const rawIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
+  const geo = geoip.lookup(rawIp);
+  await LoginHistory.create({
+    userId: user._id,
+    timestamp: new Date(),
+    method: "email",
+    location: geo
+      ? { country: geo.country, city: geo.city, timezone: geo.timezone }
+      : { country: "", city: "", timezone: "" },
+  });
+
   const token = signToken({ id: user._id }, rememberMe ? { expiresIn: REMEMBER_ME_EXPIRES_IN } : {});
   console.log(`✅ Connexion : ${user.name} (${user.email}) — rôle: ${user.role}${rememberMe ? " (session prolongée)" : ""}`);
   res.json({ token, user });
@@ -419,6 +433,18 @@ export const googleAuth = asyncHandler(async (req, res) => {
 
   // Mettre à jour la date de dernière connexion
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
+
+  // Enregistrer l'historique de connexion
+  const rawIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
+  const geo = geoip.lookup(rawIp);
+  await LoginHistory.create({
+    userId: user._id,
+    timestamp: new Date(),
+    method: "google",
+    location: geo
+      ? { country: geo.country, city: geo.city, timezone: geo.timezone }
+      : { country: "", city: "", timezone: "" },
+  });
 
   const token = signToken({ id: user._id });
   console.log(`✅ Connexion Google : ${user.name} (${user.email}) — rôle: ${user.role}`);
@@ -499,6 +525,18 @@ export const facebookAuth = asyncHandler(async (req, res) => {
 
   // Mettre à jour la date de dernière connexion
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
+
+  // Enregistrer l'historique de connexion
+  const rawIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
+  const geo = geoip.lookup(rawIp);
+  await LoginHistory.create({
+    userId: user._id,
+    timestamp: new Date(),
+    method: "facebook",
+    location: geo
+      ? { country: geo.country, city: geo.city, timezone: geo.timezone }
+      : { country: "", city: "", timezone: "" },
+  });
 
   const token = signToken({ id: user._id });
   console.log(`✅ Connexion Facebook : ${user.name} (${user.email}) — rôle: ${user.role}`);

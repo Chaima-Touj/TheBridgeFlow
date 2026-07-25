@@ -5,6 +5,11 @@ const loginHistorySchema = new mongoose.Schema(
     userId:    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     timestamp: { type: Date, default: Date.now },
     method:    { type: String, enum: ["email", "google", "facebook"], required: true },
+    location: {
+      country:  { type: String },
+      city:     { type: String },
+      timezone: { type: String },
+    },
   },
   { timestamps: true }
 );
