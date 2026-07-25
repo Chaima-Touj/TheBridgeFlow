@@ -52,12 +52,20 @@ export const getFormationsTechMap = asyncHandler(async (req, res) => {
 export const getFormationBySlug = asyncHandler(async (req, res) => {
   const formation = await Formation.findOne({ slug: req.params.slug }).select("-__v");
   if (!formation) return res.status(404).json({ message: "Formation introuvable." });
+
+  // Incrémenter le compteur de vues
+  await Formation.findByIdAndUpdate(formation._id, { $inc: { views: 1 } }, { runValidators: false });
+
   res.json(formation);
 });
 
 export const getFormationById = asyncHandler(async (req, res) => {
   const formation = await Formation.findById(req.params.id).select("-__v");
   if (!formation) return res.status(404).json({ message: "Formation introuvable." });
+
+  // Incrémenter le compteur de vues
+  await Formation.findByIdAndUpdate(formation._id, { $inc: { views: 1 } }, { runValidators: false });
+
   res.json(formation);
 });
 

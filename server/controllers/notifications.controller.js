@@ -1,8 +1,12 @@
+import User from "../models/users.model.js";
 import Notification from "../models/notification.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 // GET /api/notifications
 export const getNotifications = asyncHandler(async (req, res) => {
+  // Mise à jour légère de l'activité (polling frontend toutes les 30s)
+  await User.findByIdAndUpdate(req.user._id, { lastActiveAt: new Date() });
+
   const page  = Math.max(1, parseInt(req.query.page, 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
   const skip  = (page - 1) * limit;

@@ -65,6 +65,9 @@ const formationSchema = new mongoose.Schema({
   // ── Trailer (vidéo de présentation globale) ───────────────────────────────
   trailerVideoUrl:  { type: String, default: "" },
   trailerThumbnail: { type: String, default: "" },
+
+  // ── Statistiques de consultation ──────────────────────────────────────────
+  views: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export default mongoose.model("Formation", formationSchema);

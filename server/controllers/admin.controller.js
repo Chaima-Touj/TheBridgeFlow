@@ -1,6 +1,7 @@
 import crypto            from "crypto";
 import User             from "../models/users.model.js";
-import Formation         from "../models/formation.model.js";
+import Offer            from "../models/offers.model.js";
+import Formation        from "../models/formation.model.js";
 import Enrollment        from "../models/enrollment.model.js";
 import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import Application       from "../models/applications.model.js";
@@ -121,6 +122,25 @@ export const getAdvancedStats = asyncHandler(async (req, res) => {
     totalRequests,
     conversionRate,
   });
+});
+
+/* ── GET /api/admin/top-offers — 10 offres les plus consultées ─────────────── */
+export const getTopOffers = asyncHandler(async (req, res) => {
+  const offers = await Offer.find().sort({ views: -1 }).limit(10).lean();
+  res.json({ offers });
+});
+
+/* ── GET /api/admin/top-formations — 10 formations les plus consultées ────── */
+export const getTopFormations = asyncHandler(async (req, res) => {
+  const formations = await Formation.find().sort({ views: -1 }).limit(10).lean();
+  res.json({ formations });
+});
+
+/* ── GET /api/admin/online-count — utilisateurs actifs depuis moins de 2 min ── */
+export const getOnlineCount = asyncHandler(async (req, res) => {
+  const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+  const count = await User.countDocuments({ lastActiveAt: { $gte: twoMinutesAgo } });
+  res.json({ online: count });
 });
 
 /* ── POST /api/admin/users — créer un utilisateur (réservé à l'admin) ─────────

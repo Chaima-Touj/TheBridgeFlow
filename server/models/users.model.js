@@ -100,6 +100,9 @@ const userSchema = new mongoose.Schema(
     // ─── Dernière connexion ────────────────────────────────────────────────
     lastLoginAt: { type: Date },
 
+    // ─── Dernière activité (polling /api/notifications) ────────────────────
+    lastActiveAt: { type: Date },
+
     settings: {
       notifications: {
         newOffers:       { type: Boolean, default: true },
