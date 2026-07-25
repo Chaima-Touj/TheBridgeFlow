@@ -3,6 +3,9 @@ import api from "./api.js";
 export const adminService = {
   getDashboardStats: () => api.get("/admin/dashboard-stats"),
   getAdvancedStats:  () => api.get("/admin/stats"),
+  getOnlineCount:    () => api.get("/admin/online-count"),
+  getTopOffers:      () => api.get("/admin/top-offers"),
+  getTopFormations:  () => api.get("/admin/top-formations"),
 
   createUser:        (data)           => api.post("/admin/users", data),
   getUsers:          ()               => api.get("/admin/users"),

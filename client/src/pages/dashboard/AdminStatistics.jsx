@@ -75,9 +75,10 @@ function exportStatisticsPDF({ stats, pipelineByMonth, enrollmentsByFormation, s
 
 export default function AdminStatistics() {
   const { t } = useTranslation();
-  const [stats,   setStats]   = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(false);
+  const [stats,       setStats]       = useState(null);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +87,18 @@ export default function AdminStatistics() {
       .catch(() => { if (active) setError(true); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
+  }, []);
+
+  // Polling du nombre d'utilisateurs connectés toutes les 30s
+  useEffect(() => {
+    const fetchOnline = () => {
+      adminService.getOnlineCount()
+        .then(({ data }) => setOnlineCount(data.online))
+        .catch(() => {});
+    };
+    fetchOnline();
+    const id = setInterval(fetchOnline, 30000);
+    return () => clearInterval(id);
   }, []);
 
   const pipelineByMonth      = stats?.pipelineByMonth || [];
@@ -115,6 +128,17 @@ export default function AdminStatistics() {
 
         {/* ── Indicateurs clés ─────────────────────────────────────────── */}
         <div className="sd-stats">
+          {/* Carte "Étudiants connectés maintenant" avec point vert animé */}
+          <div className="sd-stat-card">
+            <div className="sd-stat-top">
+              <div className="sd-stat-icon" style={{ background: "#10B98118", color: "#10B981" }}>
+                <FiTrendingUp size={20} />
+              </div>
+              <div className="sd-online-dot" />
+            </div>
+            <div className="sd-stat-value">{onlineCount}</div>
+            <div className="sd-stat-label">{t("adminStats.onlineNow")}</div>
+          </div>
           {statCards.map((s, i) => (
             <div key={i} className="sd-stat-card">
               <div className="sd-stat-top">
