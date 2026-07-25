@@ -97,6 +97,9 @@ const userSchema = new mongoose.Schema(
       portfolio: { type: String, default: "" },
     },
 
+    // ─── Dernière connexion ────────────────────────────────────────────────
+    lastLoginAt: { type: Date },
+
     settings: {
       notifications: {
         newOffers:       { type: Boolean, default: true },

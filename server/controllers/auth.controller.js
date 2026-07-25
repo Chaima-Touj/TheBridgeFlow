@@ -363,6 +363,9 @@ export const login = asyncHandler(async (req, res) => {
     });
   }
 
+  // Mettre à jour la date de dernière connexion
+  await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
+
   const token = signToken({ id: user._id }, rememberMe ? { expiresIn: REMEMBER_ME_EXPIRES_IN } : {});
   console.log(`✅ Connexion : ${user.name} (${user.email}) — rôle: ${user.role}${rememberMe ? " (session prolongée)" : ""}`);
   res.json({ token, user });
@@ -413,6 +416,9 @@ export const googleAuth = asyncHandler(async (req, res) => {
     email, name,
     provider: "Google",
   });
+
+  // Mettre à jour la date de dernière connexion
+  await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
 
   const token = signToken({ id: user._id });
   console.log(`✅ Connexion Google : ${user.name} (${user.email}) — rôle: ${user.role}`);
@@ -490,6 +496,9 @@ export const facebookAuth = asyncHandler(async (req, res) => {
     email, name,
     provider: "Facebook",
   });
+
+  // Mettre à jour la date de dernière connexion
+  await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
 
   const token = signToken({ id: user._id });
   console.log(`✅ Connexion Facebook : ${user.name} (${user.email}) — rôle: ${user.role}`);
