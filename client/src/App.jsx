@@ -1,4 +1,6 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { initGA, trackPageView } from "./utils/analytics.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import CustomCursor from "./components/common/CustomCursor.jsx";
 import ScrollToTop from "./components/common/ScrollToTop.jsx";
@@ -58,6 +60,18 @@ function ProtectedRoute({ children, role }) {
 }
 
 export default function App() {
+  const location = useLocation();
+
+  // Initialisation GA4 — une seule fois au montage
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // Tracking de page à chaque changement de route
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+
   return (
     <>
     <ScrollToTop />
