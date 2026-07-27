@@ -7,6 +7,7 @@ import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import Application       from "../models/applications.model.js";
 import Interview         from "../models/interview.model.js";
 import Conversation      from "../models/conversation.model.js";
+import PageVisit        from "../models/pageVisit.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
 import emailService      from "../services/email.service.js";
 
@@ -134,6 +135,29 @@ export const getTopOffers = asyncHandler(async (req, res) => {
 export const getTopFormations = asyncHandler(async (req, res) => {
   const formations = await Formation.find().sort({ views: -1 }).limit(10).lean();
   res.json({ formations });
+});
+
+/* ── GET /api/admin/top-pages — 15 pages les plus visitées ──────────────────── */
+export const getTopPages = asyncHandler(async (req, res) => {
+  const pages = await PageVisit.aggregate([
+    {
+      $group: {
+        _id:   "$path",
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
+    { $limit: 15 },
+    {
+      $project: {
+        _id:   0,
+        path:  "$_id",
+        count: 1,
+      },
+    },
+  ]);
+
+  res.json({ pages });
 });
 
 /* ── GET /api/admin/online-count — utilisateurs actifs depuis moins de 2 min ── */

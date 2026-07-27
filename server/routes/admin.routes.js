@@ -6,6 +6,7 @@ import {
   getOnlineCount,
   getTopOffers,
   getTopFormations,
+  getTopPages,
   createUser,
   getUsers,
   getUserById,
@@ -24,6 +25,7 @@ router.get("/dashboard-stats", getDashboardStats);
 router.get("/stats",           getAdvancedStats);
 router.get("/top-offers",     getTopOffers);
 router.get("/top-formations", getTopFormations);
+router.get("/top-pages",     getTopPages);
 router.get("/online-count",   getOnlineCount);
 
 router.post("/users",              createUser);

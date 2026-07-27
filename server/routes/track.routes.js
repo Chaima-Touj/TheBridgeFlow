@@ -1,0 +1,43 @@
+import express from "express";
+import asyncHandler from "../utils/asyncHandler.js";
+import { verifyToken } from "../utils/jwt.js";
+import PageVisit from "../models/pageVisit.model.js";
+
+const router = express.Router();
+
+/**
+ * POST /api/track/page-visit
+ * Enregistre une visite de page.
+ * Accessible sans authentification stricte — si un token JWT valide est présent
+ * dans le header Authorization, le userId est associé à la visite.
+ */
+router.post("/page-visit", asyncHandler(async (req, res) => {
+  const { path } = req.body;
+
+  if (!path || typeof path !== "string") {
+    return res.status(400).json({ message: "Le champ 'path' est requis." });
+  }
+
+  let userId = undefined;
+
+  // Tentative d'identification de l'utilisateur si un token est présent
+  const authHeader = req.headers.authorization || "";
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = verifyToken(token);
+      if (decoded && decoded.id) {
+        userId = decoded.id;
+      }
+    } catch {
+      // Token invalide ou expiré — on ignore, la visite reste anonyme
+    }
+  }
+
+  await PageVisit.create({ userId, path });
+
+  res.status(201).json({ message: "Visite enregistrée." });
+}));
+
+export default router;
+

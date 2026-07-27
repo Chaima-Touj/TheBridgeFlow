@@ -28,6 +28,7 @@ import enrollmentRequestRoutes from "./routes/enrollmentRequest.routes.js";
 import adminRoutes             from "./routes/admin.routes.js";
 import statsRoutes             from "./routes/stats.routes.js";
 import newsRoutes              from "./routes/news.routes.js";
+import trackRoutes             from "./routes/track.routes.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -121,6 +122,7 @@ app.use("/api/enrollment-requests", apiLimiter, enrollmentRequestRoutes);
 app.use("/api/admin",               apiLimiter, adminRoutes);
 app.use("/api/stats",               apiLimiter, statsRoutes);
 app.use("/api/news",                apiLimiter, newsRoutes);
+app.use("/api/track",               apiLimiter, trackRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────
