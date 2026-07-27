@@ -79,6 +79,8 @@ export default function AdminStatistics() {
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [topOffers,     setTopOffers]     = useState([]);
+  const [topFormations, setTopFormations] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -99,6 +101,20 @@ export default function AdminStatistics() {
     fetchOnline();
     const id = setInterval(fetchOnline, 30000);
     return () => clearInterval(id);
+  }, []);
+
+  // Chargement des offres les plus consultées
+  useEffect(() => {
+    adminService.getTopOffers()
+      .then(({ data }) => setTopOffers(data.offers))
+      .catch(() => {});
+  }, []);
+
+  // Chargement des formations les plus consultées
+  useEffect(() => {
+    adminService.getTopFormations()
+      .then(({ data }) => setTopFormations(data.formations))
+      .catch(() => {});
   }, []);
 
   const pipelineByMonth      = stats?.pipelineByMonth || [];
@@ -153,6 +169,66 @@ export default function AdminStatistics() {
               <div className="sd-stat-label">{s.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* ── Offres les plus consultées ──────────────────────────────── */}
+        <div className="sd-card">
+          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+            {t("adminStats.topOffersTitle")}
+          </h2>
+          {topOffers.length === 0 ? (
+            <div className="sd-empty-box">
+              <FiTrendingUp size={28} style={{ opacity: .3 }} />
+              <p>{t("adminStats.topOffersEmpty")}</p>
+            </div>
+          ) : (
+            <div className="sd-req-list">
+              {topOffers.map((offer, i) => (
+                <div key={i} className="sd-req-item">
+                  <div className="sd-req-icon" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
+                    <FiTrendingUp size={16} />
+                  </div>
+                  <div className="sd-req-info">
+                    <div className="sd-req-title">{offer.title}</div>
+                    <div className="sd-req-meta">{t("adminStats.topOffersViews", { count: offer.views })}</div>
+                  </div>
+                  <span className="sd-req-badge" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
+                    {offer.views} {t("adminStats.views")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── Formations les plus consultées ──────────────────────────── */}
+        <div className="sd-card">
+          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+            {t("adminStats.topFormationsTitle")}
+          </h2>
+          {topFormations.length === 0 ? (
+            <div className="sd-empty-box">
+              <FiBookOpen size={28} style={{ opacity: .3 }} />
+              <p>{t("adminStats.topFormationsEmpty")}</p>
+            </div>
+          ) : (
+            <div className="sd-req-list">
+              {topFormations.map((formation, i) => (
+                <div key={i} className="sd-req-item">
+                  <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB" }}>
+                    <FiBookOpen size={16} />
+                  </div>
+                  <div className="sd-req-info">
+                    <div className="sd-req-title">{formation.title}</div>
+                    <div className="sd-req-meta">{t("adminStats.topFormationsViews", { count: formation.views })}</div>
+                  </div>
+                  <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB" }}>
+                    {formation.views} {t("adminStats.views")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Graphiques ───────────────────────────────────────────────── */}

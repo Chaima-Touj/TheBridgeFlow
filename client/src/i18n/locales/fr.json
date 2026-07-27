@@ -1250,8 +1250,11 @@
     "statTotalRequests": "Demandes soumises au total",
     "statTopFormation": "Formation la plus demandée",
     "onlineNow": "Étudiants connectés",
-    "topFormationsTitle": "Formations les plus consultées",
+"topFormationsTitle":"Formations les plus consultées",
+"topFormationsEmpty":"Aucune formation consultée pour le moment.",
+"topFormationsViews":"{{count}} vues",
     "topOffersTitle": "Offres les plus consultées",
+    "topOffersEmpty": "Aucune offre consultée pour le moment.",
     "pipelineChartTitle": "Demandes vs inscriptions dans le temps",
     "legendRequests": "Demandes soumises",
     "legendEnrollments": "Inscriptions confirmées",
@@ -1266,7 +1269,9 @@
     "pdfColStatus": "Statut",
     "pdfColCount": "Nombre",
     "pdfColPercent": "Pourcentage",
-    "pdfColFormation": "Formation"
+    "pdfColFormation": "Formation",
+    "topOffersViews": "{{count}} vues",
+    "views": "vues"
   },
   "adminProfile": {
     "pageTitle": "Mon profil",
@@ -1614,10 +1619,22 @@
     "badge": "Aide",
     "title": "Centre d'aide",
     "subtitle": "Les réponses aux questions les plus fréquentes.",
-    "faq1": { "q": "Comment créer un compte sur TheBridgeFlow ?", "a": "Cliquez sur « Commencer maintenant » depuis la page d'accueil, renseignez vos informations puis confirmez votre e-mail via le lien reçu." },
-    "faq2": { "q": "Comment postuler à une offre de stage ?", "a": "Depuis votre tableau de bord, ouvrez l'offre qui vous intéresse et cliquez sur « Postuler ». Vous pourrez suivre l'état de votre candidature dans « Mes candidatures »." },
-    "faq3": { "q": "Comment s'inscrire à une formation ?", "a": "Parcourez le catalogue de formations, choisissez la formule En ligne ou Présentiel, puis suivez les instructions d'inscription depuis votre tableau de bord." },
-    "faq4": { "q": "Comment contacter l'équipe TheBridgeFlow ?", "a": "Par e-mail à contact@9antra.tn, par WhatsApp au +216 58 840 064, ou via le formulaire de contact en bas de la page d'accueil." },
+    "faq1": {
+      "q": "Comment créer un compte sur TheBridgeFlow ?",
+      "a": "Cliquez sur « Commencer maintenant » depuis la page d'accueil, renseignez vos informations puis confirmez votre e-mail via le lien reçu."
+    },
+    "faq2": {
+      "q": "Comment postuler à une offre de stage ?",
+      "a": "Depuis votre tableau de bord, ouvrez l'offre qui vous intéresse et cliquez sur « Postuler ». Vous pourrez suivre l'état de votre candidature dans « Mes candidatures »."
+    },
+    "faq3": {
+      "q": "Comment s'inscrire à une formation ?",
+      "a": "Parcourez le catalogue de formations, choisissez la formule En ligne ou Présentiel, puis suivez les instructions d'inscription depuis votre tableau de bord."
+    },
+    "faq4": {
+      "q": "Comment contacter l'équipe TheBridgeFlow ?",
+      "a": "Par e-mail à contact@9antra.tn, par WhatsApp au +216 58 840 064, ou via le formulaire de contact en bas de la page d'accueil."
+    },
     "contactTitle": "Besoin d'aide supplémentaire ?",
     "contactSub": "Notre équipe vous répond rapidement.",
     "whatsapp": "WhatsApp"
@@ -1671,11 +1688,26 @@
     "useTitle": "Comment nous utilisons les informations collectées",
     "useIntro": "TheBridgeFlow peut collecter et utiliser les informations personnelles des utilisateurs aux fins suivantes :",
     "useItems": [
-      { "label": "Améliorer le service client :", "text": "les informations que vous fournissez nous aident à répondre plus efficacement à vos demandes de support et à vos besoins." },
-      { "label": "Personnaliser l'expérience utilisateur :", "text": "nous pouvons utiliser des informations agrégées pour comprendre comment nos utilisateurs, en tant que groupe, utilisent les services et ressources fournis sur notre site." },
-      { "label": "Améliorer notre site :", "text": "nous pouvons utiliser les retours que vous fournissez pour améliorer nos produits et services." },
-      { "label": "Traiter les paiements :", "text": "nous pouvons utiliser les informations fournies par les utilisateurs au moment de passer une commande uniquement pour fournir le service lié à cette commande. Nous ne partageons ces informations avec des tiers que dans la mesure nécessaire à la fourniture du service." },
-      { "label": "Envoyer des e-mails périodiques :", "text": "nous pouvons utiliser l'adresse e-mail pour envoyer aux utilisateurs des informations et des mises à jour concernant leur commande. Elle peut également être utilisée pour répondre à leurs questions et/ou autres demandes." }
+      {
+        "label": "Améliorer le service client :",
+        "text": "les informations que vous fournissez nous aident à répondre plus efficacement à vos demandes de support et à vos besoins."
+      },
+      {
+        "label": "Personnaliser l'expérience utilisateur :",
+        "text": "nous pouvons utiliser des informations agrégées pour comprendre comment nos utilisateurs, en tant que groupe, utilisent les services et ressources fournis sur notre site."
+      },
+      {
+        "label": "Améliorer notre site :",
+        "text": "nous pouvons utiliser les retours que vous fournissez pour améliorer nos produits et services."
+      },
+      {
+        "label": "Traiter les paiements :",
+        "text": "nous pouvons utiliser les informations fournies par les utilisateurs au moment de passer une commande uniquement pour fournir le service lié à cette commande. Nous ne partageons ces informations avec des tiers que dans la mesure nécessaire à la fourniture du service."
+      },
+      {
+        "label": "Envoyer des e-mails périodiques :",
+        "text": "nous pouvons utiliser l'adresse e-mail pour envoyer aux utilisateurs des informations et des mises à jour concernant leur commande. Elle peut également être utilisée pour répondre à leurs questions et/ou autres demandes."
+      }
     ],
     "protectTitle": "Comment nous protégeons vos informations",
     "protectText": "Nous adoptons des pratiques de collecte, de stockage et de traitement des données appropriées, ainsi que des mesures de sécurité pour protéger contre tout accès non autorisé, altération, divulgation ou destruction de vos informations personnelles, nom d'utilisateur, mot de passe, informations de transaction et données stockées sur notre site."

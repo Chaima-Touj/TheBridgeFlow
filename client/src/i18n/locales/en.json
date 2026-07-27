@@ -1250,8 +1250,11 @@
     "statTotalRequests": "Total requests submitted",
     "statTopFormation": "Most requested training",
     "onlineNow": "Students online",
-    "topFormationsTitle": "Most viewed trainings",
+"topFormationsTitle":"Most viewed trainings",
+"topFormationsEmpty":"No trainings have been viewed yet.",
+"topFormationsViews":"{{count}} views",
     "topOffersTitle": "Most viewed offers",
+    "topOffersEmpty": "No offers have been viewed yet.",
     "pipelineChartTitle": "Requests vs enrollments over time",
     "legendRequests": "Requests submitted",
     "legendEnrollments": "Confirmed enrollments",
@@ -1266,7 +1269,9 @@
     "pdfColStatus": "Status",
     "pdfColCount": "Count",
     "pdfColPercent": "Percentage",
-    "pdfColFormation": "Training"
+    "pdfColFormation": "Training",
+    "topOffersViews": "{{count}} views",
+    "views": "views"
   },
   "adminProfile": {
     "pageTitle": "My profile",
@@ -1614,10 +1619,22 @@
     "badge": "Help",
     "title": "Help Center",
     "subtitle": "Answers to the most frequently asked questions.",
-    "faq1": { "q": "How do I create an account on TheBridgeFlow?", "a": "Click \"Get started\" from the homepage, enter your details, then confirm your e-mail via the link you receive." },
-    "faq2": { "q": "How do I apply to an internship offer?", "a": "From your dashboard, open the offer you're interested in and click \"Apply\". You can then track your application status under \"My Applications\"." },
-    "faq3": { "q": "How do I enroll in a training?", "a": "Browse the training catalog, choose the Online or On-site plan, then follow the enrollment instructions from your dashboard." },
-    "faq4": { "q": "How do I contact the TheBridgeFlow team?", "a": "By e-mail at contact@9antra.tn, via WhatsApp at +216 58 840 064, or through the contact form at the bottom of the homepage." },
+    "faq1": {
+      "q": "How do I create an account on TheBridgeFlow?",
+      "a": "Click \"Get started\" from the homepage, enter your details, then confirm your e-mail via the link you receive."
+    },
+    "faq2": {
+      "q": "How do I apply to an internship offer?",
+      "a": "From your dashboard, open the offer you're interested in and click \"Apply\". You can then track your application status under \"My Applications\"."
+    },
+    "faq3": {
+      "q": "How do I enroll in a training?",
+      "a": "Browse the training catalog, choose the Online or On-site plan, then follow the enrollment instructions from your dashboard."
+    },
+    "faq4": {
+      "q": "How do I contact the TheBridgeFlow team?",
+      "a": "By e-mail at contact@9antra.tn, via WhatsApp at +216 58 840 064, or through the contact form at the bottom of the homepage."
+    },
     "contactTitle": "Need more help?",
     "contactSub": "Our team gets back to you quickly.",
     "whatsapp": "WhatsApp"
@@ -1671,11 +1688,26 @@
     "useTitle": "How We Use the Information We Collect",
     "useIntro": "TheBridgeFlow may collect and use users' personal information for the following purposes:",
     "useItems": [
-      { "label": "To improve customer service:", "text": "the information you provide helps us respond more effectively to your support requests and needs." },
-      { "label": "To personalize the user experience:", "text": "we may use aggregated information to understand how our users, as a group, use the services and resources provided on our site." },
-      { "label": "To improve our site:", "text": "we may use the feedback you provide to improve our products and services." },
-      { "label": "To process payments:", "text": "we may use the information users provide when placing an order solely to provide the service related to that order. We do not share this information with third parties except to the extent necessary to provide the service." },
-      { "label": "To send periodic e-mails:", "text": "we may use the e-mail address to send users information and updates related to their order. It may also be used to respond to their inquiries and/or other requests." }
+      {
+        "label": "To improve customer service:",
+        "text": "the information you provide helps us respond more effectively to your support requests and needs."
+      },
+      {
+        "label": "To personalize the user experience:",
+        "text": "we may use aggregated information to understand how our users, as a group, use the services and resources provided on our site."
+      },
+      {
+        "label": "To improve our site:",
+        "text": "we may use the feedback you provide to improve our products and services."
+      },
+      {
+        "label": "To process payments:",
+        "text": "we may use the information users provide when placing an order solely to provide the service related to that order. We do not share this information with third parties except to the extent necessary to provide the service."
+      },
+      {
+        "label": "To send periodic e-mails:",
+        "text": "we may use the e-mail address to send users information and updates related to their order. It may also be used to respond to their inquiries and/or other requests."
+      }
     ],
     "protectTitle": "How We Protect Your Information",
     "protectText": "We adopt appropriate data collection, storage, and processing practices, as well as security measures, to protect against unauthorized access, alteration, disclosure, or destruction of your personal information, username, password, transaction information, and data stored on our site."
