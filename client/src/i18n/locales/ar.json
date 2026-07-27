@@ -1268,6 +1268,8 @@
 "topFormationsTitle":"التكوينات الأكثر مشاهدة",
 "topFormationsEmpty":"لم يتم استشارة أي تكوين بعد.",
 "topFormationsViews":"{{count}} مشاهدة",
+    "topPagesTitle":"الصفحات الأكثر زيارة",
+    "topPagesEmpty":"لم يتم استشارة أي صفحة بعد.",
     "topOffersTitle": "العروض الأكثر مشاهدة",
     "topOffersEmpty": "لم يتم استشارة أي عرض بعد.",
     "topOffersViews": "{{count}} مشاهدة",

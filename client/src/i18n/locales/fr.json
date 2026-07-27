@@ -1253,6 +1253,8 @@
 "topFormationsTitle":"Formations les plus consultées",
 "topFormationsEmpty":"Aucune formation consultée pour le moment.",
 "topFormationsViews":"{{count}} vues",
+    "topPagesTitle":"Pages les plus visitées",
+    "topPagesEmpty":"Aucune page consultée pour le moment.",
     "topOffersTitle": "Offres les plus consultées",
     "topOffersEmpty": "Aucune offre consultée pour le moment.",
     "pipelineChartTitle": "Demandes vs inscriptions dans le temps",

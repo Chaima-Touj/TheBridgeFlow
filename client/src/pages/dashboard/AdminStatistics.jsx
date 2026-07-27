@@ -81,6 +81,7 @@ export default function AdminStatistics() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [topOffers,     setTopOffers]     = useState([]);
   const [topFormations, setTopFormations] = useState([]);
+  const [topPages,      setTopPages]      = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -114,6 +115,13 @@ export default function AdminStatistics() {
   useEffect(() => {
     adminService.getTopFormations()
       .then(({ data }) => setTopFormations(data.formations))
+      .catch(() => {});
+  }, []);
+
+  // Chargement des pages les plus visitées
+  useEffect(() => {
+    adminService.getTopPages()
+      .then(({ data }) => setTopPages(data.pages))
       .catch(() => {});
   }, []);
 
@@ -227,6 +235,53 @@ export default function AdminStatistics() {
                   </span>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── Pages les plus visitées ──────────────────────────────────── */}
+        <div className="sd-card">
+          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+            {t("adminStats.topPagesTitle")}
+          </h2>
+          {topPages.length === 0 ? (
+            <div className="sd-empty-box">
+              <FiTrendingUp size={28} style={{ opacity: .3 }} />
+              <p>{t("adminStats.topPagesEmpty")}</p>
+            </div>
+          ) : (
+            <div className="sd-req-list">
+              {(() => {
+                const maxCount = Math.max(...topPages.map((p) => p.count));
+                return topPages.map((page, i) => (
+                  <div key={i} className="sd-req-item" style={{ position: "relative", overflow: "hidden" }}>
+                    {/* Barre de progression proportionnelle au nb de vues */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        width: `${(page.count / maxCount) * 100}%`,
+                        background: "linear-gradient(90deg, rgba(37,99,235,0.10) 0%, rgba(37,99,235,0.04) 100%)",
+                        borderRadius: "inherit",
+                        transition: "width 0.4s ease",
+                        pointerEvents: "none",
+                      }}
+                    />
+                    <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
+                      <FiTrendingUp size={16} />
+                    </div>
+                    <div className="sd-req-info" style={{ position: "relative", zIndex: 1 }}>
+                      <div className="sd-req-title" style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>{page.path}</div>
+                      <div className="sd-req-meta">{page.count} {t("adminStats.views")}</div>
+                    </div>
+                    <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
+                      {page.count}
+                    </span>
+                  </div>
+                ));
+              })()}
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { initGA, trackPageView } from "./utils/analytics.js";
+import { initGA, trackPageView, trackPageVisit } from "./utils/analytics.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import CustomCursor from "./components/common/CustomCursor.jsx";
 import ScrollToTop from "./components/common/ScrollToTop.jsx";
@@ -70,6 +70,7 @@ export default function App() {
   // Tracking de page à chaque changement de route
   useEffect(() => {
     trackPageView(location.pathname);
+    trackPageVisit(location.pathname);
   }, [location.pathname]);
 
   return (

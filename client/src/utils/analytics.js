@@ -1,4 +1,5 @@
 import ReactGA from "react-ga4";
+import api from "../services/api.js";
 
 const MEASUREMENT_ID = "G-X91NN7VJVZ";
 
@@ -36,5 +37,16 @@ export function trackPageView(path) {
   }
   ReactGA.send({ hitType: "pageview", page: path });
   console.log(`[GA4] Page view tracked: ${path}`);
+}
+
+/**
+ * Envoie une visite de page au serveur pour le tracking interne (top-pages admin).
+ * Fonctionne en dev comme en prod. Silencieuse en cas d'échec.
+ * @param {string} path - Le chemin de la page (location.pathname)
+ */
+export function trackPageVisit(path) {
+  api.post("/track/page-visit", { path })
+    .then(() => console.log(`[Track] Page visit saved: ${path}`))
+    .catch(() => {}); // silencieux — ne doit jamais bloquer l'app
 }
 

@@ -1253,6 +1253,8 @@
 "topFormationsTitle":"Most viewed trainings",
 "topFormationsEmpty":"No trainings have been viewed yet.",
 "topFormationsViews":"{{count}} views",
+    "topPagesTitle":"Most visited pages",
+    "topPagesEmpty":"No pages have been visited yet.",
     "topOffersTitle": "Most viewed offers",
     "topOffersEmpty": "No offers have been viewed yet.",
     "pipelineChartTitle": "Requests vs enrollments over time",
