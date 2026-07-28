@@ -1,0 +1,406 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADMIN STATISTICS — Modern SaaS Dashboard (shadcnblocks-inspired)
+   ═══════════════════════════════════════════════════════════════════════════
+   Overlay on top of StudentDashboard.css / AdminFormations.css.
+   Light + Dark mode via CSS variables.                                    */
+
+/* ── Root — increased gap between all cards ─────────────────────────────── */
+.sd-root {
+  gap: 1.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KPI STAT CARDS — modern SaaS style
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sd-stats {
+  gap: 1.25rem;
+}
+
+.sd-stat-card {
+  position:         relative;
+  background:       var(--bg-card);
+  border:           1px solid var(--border);
+  border-radius:    12px;
+  padding:          1.5rem 1.5rem 1.25rem;
+  box-shadow:       0 1px 2px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
+  transition:       box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+  overflow:         visible;
+  z-index:          0;
+}
+
+.sd-stat-card:hover {
+  box-shadow:       0 6px 20px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  border-color:     var(--text-muted);
+}
+
+/* ── Stat card top row: icon badge left, trend badge right ──────────────── */
+.sd-stat-top {
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  margin-bottom:    1rem;
+}
+
+.sd-stat-icon {
+  width:            40px;
+  height:           40px;
+  border-radius:    10px;
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  flex-shrink:      0;
+}
+
+/* ── Trend badge (top-right of each KPI card) ──────────────────────────── */
+.sd-trend-badge {
+  display:          inline-flex;
+  align-items:      center;
+  gap:              3px;
+  padding:          3px 10px;
+  border-radius:    999px;
+  font-size:        0.72rem;
+  font-weight:      600;
+  line-height:      1.3;
+  white-space:      nowrap;
+  border:           1px solid transparent;
+}
+
+.sd-trend-badge--neutral {
+  background:       var(--bg);
+  color:            var(--text-muted);
+  border-color:     var(--border);
+}
+
+.sd-trend-badge--up {
+  background:       #D1FAE5;
+  color:            #059669;
+  border-color:     transparent;
+}
+
+.sd-trend-badge--down {
+  background:       #FEE2E2;
+  color:            #DC2626;
+  border-color:     transparent;
+}
+
+[data-theme="dark"] .sd-trend-badge--up {
+  background:       #064E3B;
+  color:            #34D399;
+}
+
+[data-theme="dark"] .sd-trend-badge--down {
+  background:       #7F1D1D;
+  color:            #FCA5A5;
+}
+
+[data-theme="dark"] .sd-trend-badge--neutral {
+  background:       #1E293B;
+  color:            #94A3B8;
+  border-color:     #334155;
+}
+
+/* ── Stat value — large, bold, impactful ─────────────────────────────────── */
+.sd-stat-value {
+  font-size:        2.25rem;
+  font-weight:      800;
+  color:            var(--text);
+  line-height:      1;
+  margin-bottom:    0.35rem;
+  letter-spacing:   -1.5px;
+}
+
+/* ── Stat label — subtle, small, gray ──────────────────────────────────── */
+.sd-stat-label {
+  font-size:        0.8125rem;
+  font-weight:      500;
+  color:            var(--text-muted);
+  margin-bottom:    0;
+}
+
+/* ── Online dot — kept, but adjusted ─────────────────────────────────────── */
+.sd-online-dot {
+  width:            10px;
+  height:           10px;
+  border-radius:    50%;
+  background:       #10B981;
+  box-shadow:       0 0 0 0 rgba(16, 185, 129, 0.5);
+  animation:        sd-online-pulse 2s ease-in-out infinite;
+  flex-shrink:      0;
+}
+
+@keyframes sd-online-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REGULAR CARDS (charts, list widgets)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sd-card {
+  background:       var(--bg-card);
+  border:           1px solid var(--border);
+  border-radius:    12px;
+  padding:          1.5rem 1.75rem 1.75rem;
+  box-shadow:       0 1px 2px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
+  transition:       box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.sd-card:hover {
+  box-shadow:       0 6px 20px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* ── Card title — stronger visual hierarchy ──────────────────────────────── */
+.sd-card-title {
+  font-size:        1.05rem;
+  font-weight:      700;
+  color:            var(--text);
+  letter-spacing:   -0.01em;
+  margin:           0;
+}
+
+.sd-card-header {
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  margin-bottom:    1.5rem;
+  gap:              0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHARTS — recharts custom styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Split grid ──────────────────────────────────────────────────────────── */
+.sd-split-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+/* ── Custom tooltip (recharts uses divs inside svg, styled via CSS) ──────── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background:       var(--bg-card) !important;
+  border:           1px solid var(--border) !important;
+  border-radius:    10px !important;
+  box-shadow:       0 8px 24px rgba(0,0,0,0.08) !important;
+  padding:          0.625rem 0.875rem !important;
+}
+
+.recharts-tooltip-wrapper .recharts-tooltip-label {
+  font-size:        0.8125rem !important;
+  font-weight:      600 !important;
+  color:            var(--text) !important;
+  margin-bottom:    0.25rem !important;
+}
+
+.recharts-tooltip-wrapper .recharts-tooltip-item {
+  font-size:        0.75rem !important;
+  color:            var(--text-secondary) !important;
+}
+
+/* ── Legend — smaller, cleaner ──────────────────────────────────────────── */
+.recharts-legend-item-text {
+  font-size:        0.75rem !important;
+  color:            var(--text-secondary) !important;
+}
+
+/* ── Axis ticks ──────────────────────────────────────────────────────────── */
+.recharts-cartesian-axis-tick-value {
+  fill:             var(--text-muted) !important;
+  font-size:        0.7rem !important;
+}
+
+/* ── Grid lines — very faint ─────────────────────────────────────────────── */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke:           var(--border) !important;
+  stroke-opacity:   0.5 !important;
+  stroke-width:     1 !important;
+}
+
+/* ── Skeleton ────────────────────────────────────────────────────────────── */
+.sd-skeleton {
+  border-radius:    10px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PIE / DONUT CHART
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sd-pie-row {
+  display:          flex;
+  align-items:      center;
+  gap:              1.25rem;
+}
+
+.sd-pie-legend {
+  display:          flex;
+  flex-direction:   column;
+  gap:              0.5rem;
+  flex:             1;
+}
+
+.sd-pie-item {
+  display:          flex;
+  align-items:      center;
+  gap:              0.5rem;
+  font-size:        0.8125rem;
+}
+
+.sd-pie-dot {
+  width:            11px;
+  height:           11px;
+  border-radius:    50%;
+  flex-shrink:      0;
+}
+
+.sd-pie-name {
+  flex:             1;
+  color:            var(--text-secondary);
+  font-weight:      500;
+}
+
+.sd-pie-pct {
+  font-size:        0.7rem;
+  font-weight:      600;
+  margin-left:      0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIST WIDGETS (top offers, formations, pages)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sd-req-list {
+  display:          flex;
+  flex-direction:   column;
+}
+
+.sd-req-item {
+  display:          flex;
+  align-items:      center;
+  gap:              0.875rem;
+  padding:          0.875rem 0;
+  border-bottom:    1px solid var(--border);
+  transition:       background 0.15s ease;
+  border-radius:    0;
+  margin:           0;
+}
+
+.sd-req-item:last-of-type {
+  border-bottom:    none;
+}
+
+.sd-req-item:hover {
+  background:       var(--bg);
+  margin-left:      -0.5rem;
+  margin-right:     -0.5rem;
+  padding-left:     0.5rem;
+  padding-right:    0.5rem;
+  border-radius:    8px;
+  /* Keep border visible inside the hover zone */
+  border-bottom-color: var(--border);
+}
+
+.sd-req-item:last-of-type:hover {
+  border-bottom:    none;
+}
+
+.sd-req-icon {
+  width:            36px;
+  height:           36px;
+  border-radius:    9px;
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  flex-shrink:      0;
+}
+
+.sd-req-info {
+  flex:             1;
+  min-width:        0;
+}
+
+.sd-req-title {
+  font-size:        0.875rem;
+  font-weight:      600;
+  color:            var(--text);
+  white-space:      nowrap;
+  overflow:         hidden;
+  text-overflow:    ellipsis;
+}
+
+.sd-req-meta {
+  font-size:        0.75rem;
+  color:            var(--text-muted);
+  margin-top:       2px;
+}
+
+/* ── Badge pill for view counts ──────────────────────────────────────────── */
+.sd-req-badge {
+  flex-shrink:      0;
+  padding:          3px 10px;
+  border-radius:    999px;
+  font-size:        0.72rem;
+  font-weight:      600;
+  white-space:      nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sd-empty-box {
+  display:          flex;
+  flex-direction:   column;
+  align-items:      center;
+  gap:              0.625rem;
+  padding:          2.5rem 1rem;
+  color:            var(--text-muted);
+  font-size:        0.875rem;
+  text-align:       center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXPORT BUTTON
+   ═══════════════════════════════════════════════════════════════════════════ */
+.af-toolbar-btn {
+  border-radius:    9px;
+  padding:          9px 15px;
+  font-weight:      500;
+  font-size:        0.8125rem;
+  transition:       all 0.2s ease;
+}
+
+.af-toolbar-btn:hover {
+  transform:        translateY(-1px);
+  box-shadow:       0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .sd-stat-value {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 960px) {
+  .sd-split-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .sd-stat-card {
+    padding: 1.25rem;
+  }
+  .sd-card {
+    padding: 1.25rem;
+  }
+  .sd-stat-value {
+    font-size: 1.5rem;
+  }
+  .sd-stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+

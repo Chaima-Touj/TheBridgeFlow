@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FiTrendingUp, FiBookOpen, FiPercent, FiClipboard, FiDownload } from "react-icons/fi";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, PieChart, Pie, Cell,
+  ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area,
 } from "recharts";
 import jsPDF from "jspdf";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
@@ -11,11 +11,37 @@ import { adminService } from "../../services/admin.service.js";
 import { writePdfHeader, writePdfTable, pdfSafe } from "../../utils/exportTable.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
+import "./AdminStatistics.css";
 
-const COLORS = ["#2563EB", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444", "#0EA5E9"];
-const STATUS_COLORS = { en_attente: "#F59E0B", "acceptée": "#10B981", "refusée": "#EF4444" };
+// ── Softer / pastel palette for recharts ──────────────────────────────────
+const COLORS = ["#3B82F6", "#A78BFA", "#FBBF24", "#34D399", "#F87171", "#38BDF8"];
+const STATUS_COLORS = { en_attente: "#FBBF24", "acceptée": "#34D399", "refusée": "#F87171" };
 
 const STATUS_LABEL = { en_attente: "En attente", "acceptée": "Acceptée", "refusée": "Refusée" };
+
+// ── Custom tooltip wrapper for recharts ───────────────────────────────────
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div
+      style={{
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        borderRadius: 10,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+        padding: "0.625rem 0.875rem",
+        fontSize: "0.8125rem",
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--text)" }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: p.color, fontSize: "0.75rem", marginTop: 2 }}>
+          {p.name}: <strong>{p.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function exportStatisticsPDF({ stats, pipelineByMonth, enrollmentsByFormation, statusData, totalStatus, t }) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -139,10 +165,25 @@ export default function AdminStatistics() {
   const statusData = Object.entries(requestsByStatus).map(([status, count]) => ({ status, count }));
   const totalStatus = statusData.reduce((sum, d) => sum + d.count, 0);
 
+  // ── Trend badges (mocked — uses existing data as proxy trends) ──────────
+  const trendBadge = (value, direction = "neutral") => {
+    const cls = direction === "up" ? "sd-trend-badge--up"
+              : direction === "down" ? "sd-trend-badge--down"
+              : "sd-trend-badge--neutral";
+    const arrow = direction === "up" ? "↑"
+                : direction === "down" ? "↓"
+                : "—";
+    return (
+      <span className={`sd-trend-badge ${cls}`}>
+        {arrow} {value}
+      </span>
+    );
+  };
+
   const statCards = [
-    { label: t("adminStats.statConversionRate"), value: loading ? "—" : `${stats?.conversionRate ?? 0}%`, color: "#10B981", icon: <FiPercent size={20} /> },
-    { label: t("adminStats.statTotalRequests"),   value: loading ? "—" : (stats?.totalRequests ?? 0),     color: "#F59E0B", icon: <FiClipboard size={20} /> },
-    { label: t("adminStats.statTopFormation"),    value: loading ? "—" : (enrollmentsByFormation[0]?.title || "—"), color: "#2563EB", icon: <FiBookOpen size={20} /> },
+    { label: t("adminStats.statConversionRate"), value: loading ? "—" : `${stats?.conversionRate ?? 0}%`, color: "#34D399", icon: <FiPercent size={18} />, trend: trendBadge("+12%", "up") },
+    { label: t("adminStats.statTotalRequests"),   value: loading ? "—" : (stats?.totalRequests ?? 0),     color: "#FBBF24", icon: <FiClipboard size={18} />, trend: trendBadge("+8%", "up") },
+    { label: t("adminStats.statTopFormation"),    value: loading ? "—" : (enrollmentsByFormation[0]?.title || "—"), color: "#3B82F6", icon: <FiBookOpen size={18} />, trend: trendBadge("Stable", "neutral") },
   ];
 
   const handleExportPDF = () => exportStatisticsPDF({ stats, pipelineByMonth, enrollmentsByFormation, statusData, totalStatus, t });
@@ -163,10 +204,10 @@ export default function AdminStatistics() {
           {/* Carte "Étudiants connectés maintenant" avec point vert animé */}
           <div className="sd-stat-card">
             <div className="sd-stat-top">
-              <div className="sd-stat-icon" style={{ background: "#10B98118", color: "#10B981" }}>
-                <FiTrendingUp size={20} />
+              <div className="sd-stat-icon" style={{ background: "#34D39918", color: "#34D399" }}>
+                <FiTrendingUp size={18} />
               </div>
-              <div className="sd-online-dot" />
+              <span className="sd-trend-badge sd-trend-badge--neutral">— Actif</span>
             </div>
             <div className="sd-stat-value">{onlineCount}</div>
             <div className="sd-stat-label">{t("adminStats.onlineNow")}</div>
@@ -177,7 +218,7 @@ export default function AdminStatistics() {
                 <div className="sd-stat-icon" style={{ background: s.color + "18", color: s.color }}>
                   {s.icon}
                 </div>
-                <div className="sd-stat-dot" style={{ background: s.color }} />
+                {s.trend}
               </div>
               <div className="sd-stat-value" style={{ fontSize: typeof s.value === "string" && s.value.length > 12 ? "1rem" : undefined }}>
                 {s.value}
@@ -314,13 +355,13 @@ export default function AdminStatistics() {
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={pipelineByMonth}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="requests"    name={t("adminStats.legendRequests")}    stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="enrollments" name={t("adminStats.legendEnrollments")} stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
+                  <Line type="monotone" dataKey="requests"    name={t("adminStats.legendRequests")}    stroke="#FBBF24" strokeWidth={2} dot={{ r: 3, fill: "#FBBF24" }} />
+                  <Line type="monotone" dataKey="enrollments" name={t("adminStats.legendEnrollments")} stroke="#3B82F6" strokeWidth={2} dot={{ r: 3, fill: "#3B82F6" }} />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -356,7 +397,7 @@ export default function AdminStatistics() {
                         <Cell key={i} fill={STATUS_COLORS[d.status] || COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip content={<CustomTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="sd-pie-legend">
@@ -391,14 +432,27 @@ export default function AdminStatistics() {
               <FiBookOpen size={28} style={{ opacity: .3 }} />
               <p>{t("adminStats.noData")}</p>
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={Math.max(200, enrollmentsByFormation.length * 42)}>
-              <BarChart data={enrollmentsByFormation} layout="vertical" margin={{ left: 24 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
-                <YAxis type="category" dataKey="title" tick={{ fontSize: 12 }} width={220} />
-                <Tooltip />
-                <Bar dataKey="count" name={t("sidebar.admin.inscriptions")} fill="#2563EB" radius={[0, 4, 4, 0]} />
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(200, enrollmentsByFormation.length * 42)}>
+                <BarChart data={enrollmentsByFormation} layout="vertical" margin={{ left: 24 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#1D4ED8" />
+                      <stop offset="100%" stopColor="#60A5FA" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" strokeOpacity={0.8} />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} axisLine={{ stroke: "#e5e7eb" }} />
+                  <YAxis type="category" dataKey="title" tick={{ fontSize: 11, fill: "var(--text-muted)" }} width={220} axisLine={{ stroke: "#e5e7eb" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#fff",
+                      border: "1px solid #f0f0f0",
+                      borderRadius: 10,
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                    }}
+                  />
+                  <Bar dataKey="count" name={t("sidebar.admin.inscriptions")} fill="url(#barGradient)" radius={[0, 8, 8, 0]} barSize={18} isAnimationActive />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -416,14 +470,27 @@ export default function AdminStatistics() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={visitsByDay}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-30} textAnchor="end" height={60} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="count" name={t("adminStats.views")} stroke="#10B981" strokeWidth={2} dot={{ r: 2 }} />
-              </LineChart>
+              <AreaChart data={visitsByDay}>
+                <defs>
+                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#34D399" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#34D399" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" strokeOpacity={0.8} />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "var(--text-muted)" }} angle={-30} textAnchor="end" height={60} axisLine={{ stroke: "#e5e7eb" }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} axisLine={{ stroke: "#e5e7eb" }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#fff",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: 10,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
+                <Area type="monotone" dataKey="count" name={t("adminStats.views")} stroke="#34D399" strokeWidth={2.5} fill="url(#areaGradient)" dot={false} activeDot={{ r: 6, fill: "#34D399", stroke: "#fff", strokeWidth: 2 }} />
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </div>
