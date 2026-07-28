@@ -8,6 +8,7 @@ import Application       from "../models/applications.model.js";
 import Interview         from "../models/interview.model.js";
 import Conversation      from "../models/conversation.model.js";
 import PageVisit        from "../models/pageVisit.model.js";
+import VideoView        from "../models/videoView.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
 import emailService      from "../services/email.service.js";
 
@@ -152,6 +153,31 @@ export const getVisitsByDay = asyncHandler(async (req, res) => {
     { $project: { _id: 0, date: "$_id", count: 1 } },
   ]);
   res.json({ visits });
+});
+
+/* ── GET /api/admin/top-videos — 15 vidéos les plus regardées ─────────────── */
+export const getTopVideos = asyncHandler(async (req, res) => {
+  const videos = await VideoView.aggregate([
+    {
+      $group: {
+        _id:   "$videoIdentifier",
+        count: { $sum: 1 },
+        label: { $last: "$videoLabel" },
+      },
+    },
+    { $sort: { count: -1 } },
+    { $limit: 15 },
+    {
+      $project: {
+        _id:      0,
+        videoId:  "$_id",
+        videoLabel: "$label",
+        count: 1,
+      },
+    },
+  ]);
+
+  res.json({ videos });
 });
 
 /* ── GET /api/admin/top-pages — 15 pages les plus visitées ──────────────────── */
