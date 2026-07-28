@@ -137,6 +137,23 @@ export const getTopFormations = asyncHandler(async (req, res) => {
   res.json({ formations });
 });
 
+/* ── GET /api/admin/visits-by-day — visites/jour sur les 30 derniers jours ──── */
+export const getVisitsByDay = asyncHandler(async (req, res) => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const visits = await PageVisit.aggregate([
+    { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+    {
+      $group: {
+        _id:   { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    { $project: { _id: 0, date: "$_id", count: 1 } },
+  ]);
+  res.json({ visits });
+});
+
 /* ── GET /api/admin/top-pages — 15 pages les plus visitées ──────────────────── */
 export const getTopPages = asyncHandler(async (req, res) => {
   const pages = await PageVisit.aggregate([

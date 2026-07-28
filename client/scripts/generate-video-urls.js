@@ -7,6 +7,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
+import process from "node:process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MAPPING_PATH = path.join(__dirname, "cloudinary-urls.json");

@@ -1,10 +1,11 @@
-# TODO - Widget "Formations les plus consultées"
+# TODO: Ajout graphique "Évolution des visites par jour"
 
-- [x] Étape 0 : Analyser les fichiers existants (AdminStatistics.jsx, admin.service.js, i18n)
-- [x] Étape 1 : Ajouter `topFormationsEmpty` et `topFormationsViews` dans fr.json
-- [x] Étape 2 : Ajouter `topFormationsEmpty` et `topFormationsViews` dans en.json
-- [x] Étape 3 : Ajouter `topFormationsEmpty` et `topFormationsViews` dans ar.json
-- [x] Étape 4 : Ajouter état + useEffect + widget card dans AdminStatistics.jsx
+## Backend
+- [x] Étape 1: Ajouter `getVisitsByDay` dans `admin.controller.js`
+- [x] Étape 2: Ajouter la route GET `/api/admin/visits-by-day` dans `admin.routes.js`
 
-✅ Terminé !
+## Frontend
+- [x] Étape 3: Ajouter `getVisitsByDay()` dans `admin.service.js`
+- [x] Étape 4: Ajouter le graphique LineChart dans `AdminStatistics.jsx`
+- [x] Étape 5: Ajouter les clés de traduction dans fr/en/ar.json
 

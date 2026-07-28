@@ -1272,8 +1272,9 @@
     "pdfColCount": "Count",
     "pdfColPercent": "Percentage",
     "pdfColFormation": "Training",
-    "topOffersViews": "{{count}} views",
-    "views": "views"
+    "topOffersViews":"{{count}} views",
+    "views":"views",
+    "visitsByDayTitle":"Daily visits evolution"
   },
   "adminProfile": {
     "pageTitle": "My profile",

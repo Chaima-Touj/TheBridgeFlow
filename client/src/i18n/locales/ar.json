@@ -1272,8 +1272,9 @@
     "topPagesEmpty":"لم يتم استشارة أي صفحة بعد.",
     "topOffersTitle": "العروض الأكثر مشاهدة",
     "topOffersEmpty": "لم يتم استشارة أي عرض بعد.",
-    "topOffersViews": "{{count}} مشاهدة",
-    "views": "مشاهدة"
+    "topOffersViews":"{{count}} مشاهدة",
+    "views":"مشاهدة",
+    "visitsByDayTitle":"تطور الزيارات اليومية"
   },
   "adminProfile": {
     "pageTitle": "ملفي الشخصي",

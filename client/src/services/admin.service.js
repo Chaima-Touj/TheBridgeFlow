@@ -7,6 +7,7 @@ export const adminService = {
   getTopOffers:      () => api.get("/admin/top-offers"),
   getTopFormations:  () => api.get("/admin/top-formations"),
   getTopPages:       () => api.get("/admin/top-pages"),
+  getVisitsByDay:    () => api.get("/admin/visits-by-day"),
 
   createUser:        (data)           => api.post("/admin/users", data),
   getUsers:          ()               => api.get("/admin/users"),

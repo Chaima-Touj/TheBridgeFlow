@@ -81,7 +81,8 @@ export default function AdminStatistics() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [topOffers,     setTopOffers]     = useState([]);
   const [topFormations, setTopFormations] = useState([]);
-  const [topPages,      setTopPages]      = useState([]);
+  const [topPages,        setTopPages]        = useState([]);
+  const [visitsByDay,     setVisitsByDay]     = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -122,6 +123,13 @@ export default function AdminStatistics() {
   useEffect(() => {
     adminService.getTopPages()
       .then(({ data }) => setTopPages(data.pages))
+      .catch(() => {});
+  }, []);
+
+  // Chargement des visites par jour (30 derniers jours)
+  useEffect(() => {
+    adminService.getVisitsByDay()
+      .then(({ data }) => setVisitsByDay(data.visits))
       .catch(() => {});
   }, []);
 
@@ -392,6 +400,30 @@ export default function AdminStatistics() {
                 <Tooltip />
                 <Bar dataKey="count" name={t("sidebar.admin.inscriptions")} fill="#2563EB" radius={[0, 4, 4, 0]} />
               </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* ── Évolution des visites par jour ───────────────────────────────── */}
+        <div className="sd-card" style={{ marginTop: "1.5rem" }}>
+          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+            {t("adminStats.visitsByDayTitle")}
+          </h2>
+          {visitsByDay.length === 0 ? (
+            <div className="sd-empty-box">
+              <FiTrendingUp size={28} style={{ opacity: .3 }} />
+              <p>{t("adminStats.noData")}</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={visitsByDay}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-30} textAnchor="end" height={60} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Line type="monotone" dataKey="count" name={t("adminStats.views")} stroke="#10B981" strokeWidth={2} dot={{ r: 2 }} />
+              </LineChart>
             </ResponsiveContainer>
           )}
         </div>
