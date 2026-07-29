@@ -168,20 +168,26 @@ const FormationDetail = () => {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(null);
-    formationsService.getBySlug(slug)
-      .then(res => {
+
+    const fetchFormation = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await formationsService.getBySlug(slug);
         if (!active) return;
         const f = res.data;
         if (!f?._id) throw new Error(t("formationDetail.notFound"));
         setFormation(f);
-      })
-      .catch(err => {
+      } catch (err) {
         if (!active) return;
         setError(err?.response?.data?.message ?? err.message ?? t("formationDetail.error"));
-      })
-      .finally(() => { if (active) setLoading(false); });
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchFormation();
     return () => { active = false; };
   }, [slug, t]);
 
@@ -291,11 +297,6 @@ const FormationDetail = () => {
                       <FiMonitor size={13} />{formation.mode}
                     </span>
                   )}
-                  {formation.schedule && (
-                    <span className="fd-hero__badge">
-                      <FiUsers size={13} />{formation.schedule}
-                    </span>
-                  )}
                 </div>
               </motion.div>
 
@@ -356,6 +357,19 @@ const FormationDetail = () => {
                 <button className="fd-enroll-btn" onClick={handleEnroll}>
                   {user ? t("formationDetail.enroll") : t("formationDetail.loginToEnroll")}
                 </button>
+
+                {/* WhatsApp button */}
+                <a
+                  href={`https://wa.me/21658840064?text=${encodeURIComponent(
+                    `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="fd-whatsapp-btn"
+                >
+                  <FiMessageCircle size={18} />
+                  {t("formationDetail.whatsapp")}
+                </a>
               </motion.div>
             </div>
           </section>
@@ -632,6 +646,18 @@ const FormationDetail = () => {
                     <FiChevronRight size={15} />
                   </button>
 
+                  <a
+                    href={`https://wa.me/21658840064?text=${encodeURIComponent(
+                      `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fd-whatsapp-btn"
+                  >
+                    <FiMessageCircle size={16} />
+                    {t("formationDetail.whatsapp")}
+                  </a>
+
                   <Link to="/formations" className="fd-sidebar-back">{t("formationDetail.back")}</Link>
                 </div>
 
@@ -641,7 +667,7 @@ const FormationDetail = () => {
                     {[
                       { icon: <FiClock size={15} />,   label: t("formationDetail.duration"), val: formation.duration },
                       { icon: <FiTarget size={15} />,  label: t("formationDetail.level"),    val: formation.level },
-                      { icon: <FiMonitor size={15} />, label: t("formationDetail.mode"),     val: formation.mode || formation.schedule },
+                      { icon: <FiMonitor size={15} />, label: t("formationDetail.mode"),     val: formation.mode },
                       formation.certificate != null
                         ? { icon: <FiAward size={15} />, label: t("formationDetail.certificate"),
                             val: formation.certificate ? t("formationDetail.certificateYes") : t("formationDetail.certificateNo") }

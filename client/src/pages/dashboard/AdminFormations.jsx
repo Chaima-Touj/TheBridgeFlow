@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiPlus, FiBookOpen, FiAlertTriangle,
-  FiMoreVertical, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
+  FiPlus, FiBookOpen, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
+  FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
 } from "react-icons/fi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -53,16 +53,49 @@ function avatarColor(name = "") {
 
 const PAGE_SIZES = [6, 10, 25, 50];
 
+const WEEK_TYPES = ["cours", "encadrement"];
+
+// "duree"/"gratuit" ne sont pas édités par cette carte (non demandés dans la
+// section Vidéos), mais doivent être conservés tels quels au round-trip —
+// sinon chaque sauvegarde via updateWeeks/updateSupervision (qui remplace le
+// tableau entier) les écraserait silencieusement pour toutes les semaines
+// existantes de la formation.
+const EMPTY_WEEK = {
+  type: "cours",
+  phase: "",
+  week: "",
+  videoTitle: "",
+  content: "",
+  thumbnail: "",
+  driveUrl: "",
+  duree: "",
+  gratuit: false,
+};
+
+function weekToCard(w, type) {
+  return {
+    type,
+    phase:      w.phase || "",
+    week:       w.week ?? "",
+    videoTitle: w.videoTitle || "",
+    content:    w.content || "",
+    thumbnail:  w.thumbnail || "",
+    driveUrl:   w.videoUrl || w.driveUrl || "",
+    duree:      w.duree || "",
+    gratuit:    !!w.gratuit,
+  };
+}
+
 const EMPTY_FORM = {
   title: "",
   duration: "",
   onsite: "",
   online: "",
-  schedule: "",
   level: "",
   description: "",
   mode: "Hybride",
   certificate: false,
+  weeks: [],
 };
 
 function formationToForm(formation) {
@@ -71,11 +104,14 @@ function formationToForm(formation) {
     duration:    formation.duration || "",
     onsite:      formation.price?.onsite || "",
     online:      formation.price?.online || "",
-    schedule:    formation.schedule || "",
     level:       formation.level || "",
     description: formation.description || "",
     mode:        formation.mode || "Hybride",
     certificate: !!formation.certificate,
+    weeks: [
+      ...(formation.weeks || []).map((w) => weekToCard(w, "cours")),
+      ...(formation.supervision || []).map((w) => weekToCard(w, "encadrement")),
+    ],
   };
 }
 
@@ -177,33 +213,30 @@ function SortIcon({ active, dir }) {
   );
 }
 
-/* ─── Menu d'actions par ligne ("•••" → Modifier / Supprimer) ────────────── */
+/* ─── Actions par ligne (Modifier / Supprimer, toujours visibles) ────────── */
 function RowActionsMenu({ onEdit, onDelete }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   return (
-    <div className="af-row-menu" ref={ref}>
-      <button type="button" className="af-icon-btn" onClick={() => setOpen((v) => !v)} aria-label={t("adminFormations.actionsAriaLabel")}>
-        <FiMoreVertical size={16} />
+    <div className="af-row-actions">
+      <button
+        type="button"
+        className="af-action-btn af-action-btn--edit"
+        onClick={onEdit}
+        title={t("adminFormations.editAction")}
+        aria-label={t("adminFormations.editAction")}
+      >
+        <FiEdit2 size={15} />
       </button>
-      {open && (
-        <div className="af-row-menu-dropdown" role="menu">
-          <button type="button" role="menuitem" onClick={() => { setOpen(false); onEdit(); }}>
-            {t("adminFormations.editAction")}
-          </button>
-          <button type="button" role="menuitem" className="af-row-menu-danger" onClick={() => { setOpen(false); onDelete(); }}>
-            {t("notifications.deleteLabel")}
-          </button>
-        </div>
-      )}
+      <button
+        type="button"
+        className="af-action-btn af-action-btn--delete"
+        onClick={onDelete}
+        title={t("notifications.deleteLabel")}
+        aria-label={t("notifications.deleteLabel")}
+      >
+        <FiTrash2 size={15} />
+      </button>
     </div>
   );
 }
@@ -213,10 +246,35 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
   const { t } = useTranslation();
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [uploadingIdx, setUploadingIdx] = useState(null);
+  const [thumbErrors, setThumbErrors] = useState({});
 
   const set = (key) => (e) => {
     const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [key]: value }));
+  };
+
+  const addWeek = () => setForm((f) => ({ ...f, weeks: [...f.weeks, { ...EMPTY_WEEK }] }));
+  const removeWeek = (idx) => setForm((f) => ({ ...f, weeks: f.weeks.filter((_, i) => i !== idx) }));
+  const updateWeek = (idx, key) => (e) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, [key]: value } : w)) }));
+  };
+
+  const handleThumbnailUpload = (idx) => async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingIdx(idx);
+    setThumbErrors((prev) => ({ ...prev, [idx]: undefined }));
+    try {
+      const { data } = await formationsService.uploadVideoThumbnail(file);
+      setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, thumbnail: data.url } : w)) }));
+    } catch (err) {
+      setThumbErrors((prev) => ({ ...prev, [idx]: extractErrorMessage(err, t("adminFormations.errors.thumbnailUploadFailed")) }));
+    } finally {
+      setUploadingIdx(null);
+      e.target.value = "";
+    }
   };
 
   const validate = () => {
@@ -225,7 +283,6 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
     if (!form.duration.trim()) errors.duration = t("adminFormations.errors.durationRequired");
     if (!form.onsite.trim())   errors.onsite   = t("adminFormations.errors.onsiteRequired");
     if (!form.online.trim())   errors.online   = t("adminFormations.errors.onlineRequired");
-    if (!form.schedule.trim()) errors.schedule = t("adminFormations.errors.scheduleRequired");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -233,15 +290,29 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
+    // videoUrl (pas driveUrl) : patchFormationWeeks/patchFormationSupervision
+    // normalisent ce champ précis (normalizeDriveUrl) — driveUrl sur weekSchema
+    // n'est lu par aucune route, y écrire laisserait la vidéo injouable.
+    const toWeekPayload = (w) => ({
+      week:       Number(w.week) || 0,
+      phase:      w.phase.trim(),
+      content:    w.content.trim(),
+      videoTitle: w.videoTitle.trim(),
+      thumbnail:  w.thumbnail,
+      videoUrl:   w.driveUrl.trim(),
+      duree:      w.duree,
+      gratuit:    w.gratuit,
+    });
     onSubmit({
       title:       form.title.trim(),
       duration:    form.duration.trim(),
       price:       { onsite: form.onsite.trim(), online: form.online.trim() },
-      schedule:    form.schedule.trim(),
       level:       form.level.trim(),
       description: form.description.trim(),
       mode:        form.mode,
       certificate: form.certificate,
+      weeksData:       form.weeks.filter((w) => w.type === "cours").map(toWeekPayload),
+      supervisionData: form.weeks.filter((w) => w.type === "encadrement").map(toWeekPayload),
     });
   };
 
@@ -285,12 +356,6 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
         </div>
       </div>
 
-      <div className="af-form-row">
-        <label className="label" htmlFor="af-schedule">{t("adminFormations.scheduleLabel")}</label>
-        <input id="af-schedule" className="input" placeholder={t("adminFormations.schedulePlaceholder")} value={form.schedule} onChange={set("schedule")} />
-        {fieldErrors.schedule && <span className="af-field-error">{fieldErrors.schedule}</span>}
-      </div>
-
       <div className="af-form-grid">
         <div className="af-form-row">
           <label className="label" htmlFor="af-mode">{t("formationDetail.mode")}</label>
@@ -305,6 +370,122 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
           </label>
         </div>
       </div>
+
+      {/* ── Semaines (cours + encadrement, vidéos Google Drive) ──────────── */}
+      <fieldset className="af-video-fieldset">
+        <legend className="af-video-legend">{t("adminFormations.videosSection")}</legend>
+
+        {form.weeks.length === 0 && (
+          <p className="af-video-empty">{t("adminFormations.videosEmpty")}</p>
+        )}
+
+        <div className="af-video-list">
+          {form.weeks.map((week, idx) => (
+            <div className="af-video-card" key={idx}>
+              <div className="af-video-card-header">
+                <span className="af-video-card-title">{t("adminFormations.videoCardTitle", { n: idx + 1 })}</span>
+                <button type="button" className="af-video-remove-btn" onClick={() => removeWeek(idx)}>
+                  <FiTrash2 size={13} /> {t("adminFormations.removeVideo")}
+                </button>
+              </div>
+
+              <div className="af-form-grid">
+                <div className="af-form-row">
+                  <label className="label" htmlFor={`af-week-type-${idx}`}>{t("adminFormations.weekTypeLabel")}</label>
+                  <select id={`af-week-type-${idx}`} className="input" value={week.type} onChange={updateWeek(idx, "type")}>
+                    {WEEK_TYPES.map((wt) => (
+                      <option key={wt} value={wt}>{t(`adminFormations.weekType.${wt}`)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="af-form-row">
+                  <label className="label" htmlFor={`af-week-number-${idx}`}>{t("adminFormations.weekNumberLabel")}</label>
+                  <input
+                    id={`af-week-number-${idx}`}
+                    type="number"
+                    min="1"
+                    className="input"
+                    value={week.week}
+                    onChange={updateWeek(idx, "week")}
+                  />
+                </div>
+              </div>
+
+              <div className="af-form-row">
+                <label className="label" htmlFor={`af-week-phase-${idx}`}>{t("adminFormations.weekPhaseLabel")}</label>
+                <input
+                  id={`af-week-phase-${idx}`}
+                  className="input"
+                  placeholder={t("adminFormations.weekPhasePlaceholder")}
+                  value={week.phase}
+                  onChange={updateWeek(idx, "phase")}
+                />
+              </div>
+
+              <div className="af-form-row">
+                <label className="label" htmlFor={`af-week-title-${idx}`}>{t("adminFormations.videoTitleLabel")}</label>
+                <input
+                  id={`af-week-title-${idx}`}
+                  className="input"
+                  value={week.videoTitle}
+                  onChange={updateWeek(idx, "videoTitle")}
+                />
+              </div>
+
+              <div className="af-form-row">
+                <label className="label" htmlFor={`af-week-content-${idx}`}>{t("adminFormations.videoDescLabel")}</label>
+                <textarea
+                  id={`af-week-content-${idx}`}
+                  className="input"
+                  rows={2}
+                  value={week.content}
+                  onChange={updateWeek(idx, "content")}
+                />
+              </div>
+
+              <div className="af-form-row">
+                <label className="label">{t("adminFormations.videoThumbnailLabel")}</label>
+                <label className="af-video-thumb-upload" htmlFor={`af-week-thumb-${idx}`}>
+                  {week.thumbnail ? (
+                    <img src={week.thumbnail} alt="" className="af-video-thumb-preview" />
+                  ) : (
+                    <div className="af-video-thumb-placeholder">
+                      <FiImage size={20} />
+                      <span>{t("adminFormations.videoThumbnailChoose")}</span>
+                    </div>
+                  )}
+                  {uploadingIdx === idx && (
+                    <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>
+                  )}
+                </label>
+                <input
+                  id={`af-week-thumb-${idx}`}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleThumbnailUpload(idx)}
+                  hidden
+                />
+                {thumbErrors[idx] && <span className="af-field-error">{thumbErrors[idx]}</span>}
+              </div>
+
+              <div className="af-form-row" style={{ marginBottom: 0 }}>
+                <label className="label" htmlFor={`af-week-drive-${idx}`}>{t("adminFormations.videoDriveLabel")}</label>
+                <input
+                  id={`af-week-drive-${idx}`}
+                  className="input"
+                  placeholder="https://drive.google.com/file/d/..."
+                  value={week.driveUrl}
+                  onChange={updateWeek(idx, "driveUrl")}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button type="button" className="af-video-add-btn" onClick={addWeek}>
+          <FiPlus size={14} /> {t("adminFormations.addVideo")}
+        </button>
+      </fieldset>
 
       <div className="af-form-row">
         <label className="label" htmlFor="af-description">{t("profileEditor.description")}</label>
@@ -396,11 +577,17 @@ export default function AdminFormations() {
     setSubmitting(true);
     setFormError("");
     try {
+      const { weeksData, supervisionData, ...baseFields } = payload;
+      let slug;
       if (formModal === "create") {
-        await formationsService.createFormation(payload);
+        const { data } = await formationsService.createFormation(baseFields);
+        slug = data.slug;
       } else {
-        await formationsService.updateFormation(formModal._id, payload);
+        await formationsService.updateFormation(formModal._id, baseFields);
+        slug = formModal.slug;
       }
+      await formationsService.updateWeeks(slug, weeksData);
+      await formationsService.updateSupervision(slug, supervisionData);
       setFormModal(null);
       loadFormations();
     } catch (err) {

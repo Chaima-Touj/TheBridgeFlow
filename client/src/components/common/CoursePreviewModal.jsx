@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FiX, FiPlay, FiLock, FiMaximize, FiMinimize } from "react-icons/fi";
 import { DEFAULT_THUMB, getWeekThumb } from "../../utils/thumbUtils.js";
-import { resolveVideoUrl } from "../../constants/videoUrls.js";
+import { resolveVideoUrl, isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./CoursePreviewModal.css";
 
 function getYoutubeId(url = "") {
@@ -111,6 +111,14 @@ export default function CoursePreviewModal({
             <iframe
               className="cpm-iframe"
               src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+              title={isTrailer ? t("coursePreview.trailer") : week.content}
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
+            />
+          ) : videoUrl && isGoogleDriveUrl(videoUrl) ? (
+            <iframe
+              className="cpm-iframe"
+              src={resolveDriveUrl(videoUrl, "video")}
               title={isTrailer ? t("coursePreview.trailer") : week.content}
               allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen

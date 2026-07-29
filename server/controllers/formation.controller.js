@@ -2,6 +2,7 @@ import Formation         from "../models/formation.model.js";
 import Enrollment        from "../models/enrollment.model.js";
 import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
+import { normalizeDriveUrl } from "../utils/driveHelper.js";
 
 // Kebab-case, sans accents (ex: "Business Intelligence (BI)" → "business-intelligence-bi")
 const ACCENT_MAP = {
@@ -73,10 +74,10 @@ export const getFormationById = asyncHandler(async (req, res) => {
    Crée une nouvelle formation (champs de base uniquement). weeks/supervision/
    videos/reviews/faq restent vides — ils ont leurs propres routes dédiées.    */
 export const createFormation = asyncHandler(async (req, res) => {
-  const { title, slug, duration, price, schedule, level, description, mode, certificate } = req.body;
+  const { title, slug, duration, price, level, description, mode, certificate, image, trailerVideoUrl, trailerThumbnail } = req.body;
 
-  if (!title || !duration || !price?.onsite || !price?.online || !schedule) {
-    const err = new Error("Champs requis manquants : title, duration, price.onsite, price.online, schedule.");
+  if (!title || !duration || !price?.onsite || !price?.online) {
+    const err = new Error("Champs requis manquants : title, duration, price.onsite, price.online.");
     err.statusCode = 400;
     throw err;
   }
@@ -101,11 +102,13 @@ export const createFormation = asyncHandler(async (req, res) => {
     slug: finalSlug,
     duration,
     price: { onsite: price.onsite, online: price.online },
-    schedule,
     level,
     description,
     mode,
     certificate,
+    image,
+    trailerVideoUrl:  trailerVideoUrl  ? normalizeDriveUrl(trailerVideoUrl, "video") : undefined,
+    trailerThumbnail: trailerThumbnail ? normalizeDriveUrl(trailerThumbnail, "image") : undefined,
   });
 
   res.status(201).json(formation);
@@ -121,7 +124,7 @@ export const updateFormationInfo = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const { title, slug, duration, price, schedule, level, description, mode, certificate, technologies } = req.body;
+  const { title, slug, duration, price, level, description, mode, certificate, technologies, image } = req.body;
 
   if (title !== undefined) {
     const dup = await Formation.findOne({ title, _id: { $ne: formation._id } });
@@ -152,12 +155,12 @@ export const updateFormationInfo = asyncHandler(async (req, res) => {
   if (duration !== undefined)             formation.duration = duration;
   if (price?.onsite !== undefined)        formation.price.onsite = price.onsite;
   if (price?.online !== undefined)        formation.price.online = price.online;
-  if (schedule !== undefined)             formation.schedule = schedule;
   if (level !== undefined)                formation.level = level;
   if (description !== undefined)          formation.description = description;
   if (mode !== undefined)                 formation.mode = mode;
   if (certificate !== undefined)          formation.certificate = certificate;
   if (technologies !== undefined)         formation.technologies = technologies;
+  if (image !== undefined)                formation.image = image;
 
   await formation.save();
   res.json(formation);
@@ -191,14 +194,75 @@ export const deleteFormation = asyncHandler(async (req, res) => {
   res.json({ message: "Formation supprimée.", id: formation._id });
 });
 
+/* ── PATCH /api/formations/:id/trailer ───────────────────────────────────────
+   Met à jour la vidéo de présentation (trailer) et sa vignette.
+   Normalise automatiquement les URLs Google Drive.                          */
+export const patchFormationTrailer = asyncHandler(async (req, res) => {
+  const { trailerVideoUrl, trailerThumbnail, trailerProvider, trailerDriveUrl } = req.body;
+  const formation = await Formation.findById(req.params.id);
+  if (!formation) {
+    const err = new Error("Formation introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+  if (trailerVideoUrl !== undefined)  formation.trailerVideoUrl  = normalizeDriveUrl(trailerVideoUrl, "video");
+  if (trailerThumbnail !== undefined) formation.trailerThumbnail = normalizeDriveUrl(trailerThumbnail, "image");
+  if (trailerProvider !== undefined)  formation.trailerProvider  = trailerProvider;
+  if (trailerDriveUrl !== undefined)  formation.trailerDriveUrl  = trailerDriveUrl;
+  await formation.save();
+  res.json({ message: "Trailer mis à jour.", trailerVideoUrl: formation.trailerVideoUrl, trailerThumbnail: formation.trailerThumbnail });
+});
+
+/* ── PATCH /api/formations/slug/:slug/videos ─────────────────────────────────
+   Remplace intégralement le tableau `videos` d'une formation.               */
+export const patchFormationVideos = asyncHandler(async (req, res) => {
+  const { videos } = req.body;
+  if (!Array.isArray(videos)) {
+    return res.status(400).json({ message: "videos doit être un tableau." });
+  }
+  // Normalize Google Drive URLs in videos : driveUrl (lien saisi par l'admin) → url (lien /preview)
+  const normalizedVideos = videos.map((v) => ({
+    ...v,
+    url:       v.driveUrl ? normalizeDriveUrl(v.driveUrl, "video") : v.url,
+    thumbnail: v.thumbnail ? normalizeDriveUrl(v.thumbnail, "image") : v.thumbnail,
+  }));
+  const formation = await Formation.findOneAndUpdate(
+    { slug: req.params.slug },
+    { $set: { videos: normalizedVideos } },
+    { new: true }
+  ).select("-__v");
+  if (!formation) return res.status(404).json({ message: "Formation introuvable." });
+  res.json({ message: "videos mis à jour.", slug: formation.slug, count: formation.videos.length });
+});
+
+/* ── POST /api/formations/upload-thumbnail ────────────────────────────────────
+   Upload d'une image de couverture pour une carte vidéo (voir uploadVideoThumbnail,
+   upload.middleware.js). Retourne l'URL du fichier stocké — ne touche à aucune
+   formation, l'admin l'utilise ensuite comme valeur du champ `thumbnail`.      */
+export const uploadFormationVideoThumbnail = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    const err = new Error("Aucune image fournie.");
+    err.statusCode = 400;
+    throw err;
+  }
+  const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  res.status(201).json({ url });
+});
+
 export const patchFormationWeeks = asyncHandler(async (req, res) => {
   const { weeks } = req.body;
   if (!Array.isArray(weeks)) {
     return res.status(400).json({ message: "weeks doit être un tableau." });
   }
+  // Normalize Google Drive URLs in weeks
+  const normalizedWeeks = weeks.map((w) => ({
+    ...w,
+    videoUrl:  w.videoUrl  ? normalizeDriveUrl(w.videoUrl, "video") : w.videoUrl,
+    thumbnail: w.thumbnail ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
+  }));
   const formation = await Formation.findOneAndUpdate(
     { slug: req.params.slug },
-    { $set: { weeks } },
+    { $set: { weeks: normalizedWeeks } },
     { new: true }
   ).select("-__v");
   if (!formation) return res.status(404).json({ message: "Formation introuvable." });
@@ -210,9 +274,15 @@ export const patchFormationSupervision = asyncHandler(async (req, res) => {
   if (!Array.isArray(supervision)) {
     return res.status(400).json({ message: "supervision doit être un tableau." });
   }
+  // Normalize Google Drive URLs in supervision weeks
+  const normalizedSupervision = supervision.map((w) => ({
+    ...w,
+    videoUrl:  w.videoUrl  ? normalizeDriveUrl(w.videoUrl, "video") : w.videoUrl,
+    thumbnail: w.thumbnail ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
+  }));
   const formation = await Formation.findOneAndUpdate(
     { slug: req.params.slug },
-    { $set: { supervision } },
+    { $set: { supervision: normalizedSupervision } },
     { new: true }
   ).select("-__v");
   if (!formation) return res.status(404).json({ message: "Formation introuvable." });

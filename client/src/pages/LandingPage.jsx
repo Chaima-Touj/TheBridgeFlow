@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   FiArrowRight, FiPlay, FiX,
   FiMapPin, FiPhone, FiMail, FiSend,
@@ -122,6 +122,24 @@ export default function LandingPage() {
     setForm({ name: "", email: "", subject: "", message: "" });
     setTimeout(() => setSent(false), 4000);
   };
+
+  // ── Scroll-tilt 3D effect for promo video section ─────────────────────
+  const promoSectionRef = useRef(null);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const { scrollYProgress } = useScroll({
+    target: promoSectionRef,
+    offset: ["start end", "end start"],
+  });
+  const rotateX = useTransform(
+    scrollYProgress,
+    [0, 0.3, 0.7, 1],
+    isMobile ? [8, 3, 0, 0] : [18, 6, 0, -2]
+  );
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.7, 1],
+    isMobile ? [0.97, 0.99, 1, 1] : [0.92, 0.97, 1, 1]
+  );
 
   return (
     <div className="landing" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -291,7 +309,7 @@ export default function LandingPage() {
       />
 
       {/* ── PRÉSENTATION VIDÉO ──────────────────────────────────────────── */}
-      <section className="lp-promo-video">
+      <section className="lp-promo-video" ref={promoSectionRef}>
         <div className="lp-promo-video__inner">
 
           {/* Header */}
@@ -309,12 +327,13 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Video card */}
+          {/* Video card with scroll-tilt 3D effect */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55, delay: 0.1 }}
+            style={{
+              perspective: "1000px",
+              rotateX,
+              scale,
+            }}
           >
             <button
               className="lp-promo-video__card"
@@ -368,18 +387,28 @@ export default function LandingPage() {
               >
                 <FiX size={18} />
               </button>
-              <video
-                className="lp-promo-video__modal-video"
-                src={VIDEO_URLS["/stageflow-promo.mp4"]}
-                controls
-                autoPlay
-                preload="metadata"
-                controlsList="nodownload"
-                disablePictureInPicture
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                <track kind="captions" />
-              </video>
+              {VIDEO_URLS["/stageflow-promo.mp4"].includes("drive.google.com") ? (
+                <iframe
+                  className="lp-promo-video__modal-video"
+                  src={VIDEO_URLS["/stageflow-promo.mp4"]}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  title="Stageflow Coding Academy"
+                />
+              ) : (
+                <video
+                  className="lp-promo-video__modal-video"
+                  src={VIDEO_URLS["/stageflow-promo.mp4"]}
+                  controls
+                  autoPlay
+                  preload="metadata"
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <track kind="captions" />
+                </video>
+              )}
             </motion.div>
           </div>
         )}

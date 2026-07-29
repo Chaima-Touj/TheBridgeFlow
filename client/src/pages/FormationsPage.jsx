@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FiClock, FiMonitor, FiUsers, FiCpu, FiLock, FiTrendingUp } from "react-icons/fi";
+import { FiClock, FiMonitor, FiUsers, FiCpu, FiLock, FiTrendingUp, FiMessageCircle } from "react-icons/fi";
 import { FaChartBar, FaRobot } from "react-icons/fa";
 import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiKubernetes } from "react-icons/si";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -204,6 +204,17 @@ const FormationsPage = () => {
                     >
                       {user ? t("formations.enroll") : t("formations.loginToEnroll")}
                     </button>
+                    <a
+                      href={`https://wa.me/21658840064?text=${encodeURIComponent(
+                        `Bonjour 👋 Je suis intéressé(e) par la formation ${f.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="fp-card__whatsapp"
+                      aria-label={t("formationDetail.whatsapp")}
+                    >
+                      <FiMessageCircle size={16} />
+                    </a>
                   </div>
                 </motion.article>
               );

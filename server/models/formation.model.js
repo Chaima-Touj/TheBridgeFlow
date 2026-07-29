@@ -1,20 +1,25 @@
 import mongoose from "mongoose";
 
 const weekSchema = new mongoose.Schema({
-  week:     { type: Number, required: true },
-  phase:    { type: String, default: "" },
-  content:  { type: String, required: true },
+  week:       { type: Number, required: true },
+  phase:      { type: String, default: "" },
+  content:    { type: String, required: true },
   videoUrl:   { type: String, default: "" },
   videoTitle: { type: String, default: "" },
   thumbnail:  { type: String, default: "" },
-  duree:    { type: String, default: "" },
-  gratuit:  { type: Boolean, default: false },
+  provider:   { type: String, enum: ["cloudinary", "google_drive"], default: "google_drive" },
+  driveUrl:   { type: String, default: "" },
+  duree:      { type: String, default: "" },
+  gratuit:    { type: Boolean, default: false },
 }, { _id: false });
 
 const videoSchema = new mongoose.Schema({
-  url:       { type: String, required: true },
-  title:     { type: String, default: "" },
-  thumbnail: { type: String, default: "" },
+  url:         { type: String, default: "" },
+  title:       { type: String, default: "" },
+  description: { type: String, default: "" },
+  thumbnail:   { type: String, default: "" },
+  provider:    { type: String, enum: ["cloudinary", "google_drive"], default: "google_drive" },
+  driveUrl:    { type: String, default: "" },
 }, { _id: false });
 
 const reviewSchema = new mongoose.Schema({
@@ -38,7 +43,6 @@ const formationSchema = new mongoose.Schema({
     onsite: { type: String, required: true },
     online: { type: String, required: true },
   },
-  schedule:    { type: String, required: true },
   level:       { type: String, default: "Intermédiaire" },
   description: { type: String, default: "" },
   weeks:      [weekSchema],
@@ -65,6 +69,8 @@ const formationSchema = new mongoose.Schema({
   // ── Trailer (vidéo de présentation globale) ───────────────────────────────
   trailerVideoUrl:  { type: String, default: "" },
   trailerThumbnail: { type: String, default: "" },
+  trailerProvider:  { type: String, enum: ["cloudinary", "google_drive"], default: "google_drive" },
+  trailerDriveUrl:  { type: String, default: "" },
 
   // ── Statistiques de consultation ──────────────────────────────────────────
   views: { type: Number, default: 0 },

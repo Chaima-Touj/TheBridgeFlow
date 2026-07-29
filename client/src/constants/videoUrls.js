@@ -13,7 +13,7 @@
 // a video in the Cloudinary dashboard (same public_id) shows up on the site
 // immediately, with no regeneration needed.
 export const VIDEO_URLS = {
-  "/stageflow-promo.mp4": "https://res.cloudinary.com/ychbkjbp/video/upload/stageflow/stageflow-promo.mp4",
+  "/stageflow-promo.mp4": "https://drive.google.com/file/d/18hg1ho24_o1d9lFy-_w1AOCAYXpg_TM5/preview",
   "/videos-AI/AI1-enca-month1.mp4": "https://res.cloudinary.com/ychbkjbp/video/upload/stageflow/videos-AI/AI1-enca-month1.mp4",
   "/videos-AI/AI1-form-month1.mp4": "https://res.cloudinary.com/ychbkjbp/video/upload/stageflow/videos-AI/AI1-form-month1.mp4",
   "/videos-AI/AI2-enca-month1.mp4": "https://res.cloudinary.com/ychbkjbp/video/upload/stageflow/videos-AI/AI2-enca-month1.mp4",
@@ -170,5 +170,70 @@ export const VIDEO_URLS = {
 // through the mapping for the old "/videos-..." local-path shape.
 export function resolveVideoUrl(localPathOrUrl) {
   if (!localPathOrUrl) return localPathOrUrl;
+  // If it's a Google Drive URL, normalize it for iframe preview
+  if (isGoogleDriveUrl(localPathOrUrl)) {
+    return resolveDriveUrl(localPathOrUrl);
+  }
+  // Check the VIDEO_URLS mapping first (legacy Cloudinary paths)
   return VIDEO_URLS[localPathOrUrl] || localPathOrUrl;
+}
+
+/**
+ * Google Drive URL helpers (frontend)
+ * These mirror the backend helpers for display purposes.
+ */
+
+const DRIVE_FILE_REGEX = /\/file\/d\/([^/?#&]+)/;
+const DRIVE_UC_REGEX   = /\/uc\?.*[&?]id=([^&]+)/;
+const DRIVE_OPEN_REGEX = /\/open\?.*[&?]id=([^&]+)/;
+
+/**
+ * Extracts the Google Drive file ID from various sharing link formats.
+ */
+export function extractDriveFileId(url = "") {
+  for (const regex of [DRIVE_FILE_REGEX, DRIVE_UC_REGEX, DRIVE_OPEN_REGEX]) {
+    const m = url.match(regex);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+/**
+ * Checks if a URL is a Google Drive sharing link.
+ */
+export function isGoogleDriveUrl(url = "") {
+  return url.includes("drive.google.com") && extractDriveFileId(url) !== null;
+}
+
+/**
+ * Converts a Google Drive sharing link to the appropriate format.
+ * For videos: returns a /preview link suitable for <iframe> playback.
+ * For images: returns a direct thumbnail URL suitable for <img> tags.
+ * For non-Drive URLs: returns the URL unchanged.
+ *
+ * @param {string} url - The original URL (Drive sharing link or other)
+ * @param {"video"|"image"} type - The type of media
+ * @returns {string} Normalized URL
+ */
+export function resolveDriveUrl(url = "", type = "video") {
+  const fileId = extractDriveFileId(url);
+  if (!fileId) return url; // Not a Drive URL, return as-is
+
+  if (type === "image") {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+  }
+
+  // Default: video preview URL for iframe
+  return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+/**
+ * Auto-detects the type from the URL context and normalizes.
+ */
+export function autoResolveDriveUrl(url = "") {
+  if (!isGoogleDriveUrl(url)) return url;
+  const path = url.toLowerCase();
+  const isImage = path.includes("image") ||
+                  path.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)/) !== null;
+  return resolveDriveUrl(url, isImage ? "image" : "video");
 }

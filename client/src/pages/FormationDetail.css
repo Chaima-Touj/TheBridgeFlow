@@ -219,6 +219,34 @@
   box-shadow: 0 6px 20px rgba(37,99,235,0.35);
 }
 
+/* WhatsApp button */
+.fd-whatsapp-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid #25D366;
+  border-radius: var(--radius-sm);
+  background: rgba(37, 211, 102, 0.1);
+  color: #25D366;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.fd-whatsapp-btn:hover {
+  background: #25D366;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(37,211,102,0.35);
+}
+.fd-whatsapp-btn svg {
+  flex-shrink: 0;
+}
+
 /* ── Skeleton hero ────────────────────────────────────────────────────────── */
 .fd-hero--skeleton {
   min-height: 360px;

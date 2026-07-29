@@ -316,10 +316,33 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
+/* WhatsApp icon button on card */
+.fp-card__whatsapp {
+  width:          40px;
+  height:         40px;
+  flex-shrink:    0;
+  display:        inline-flex;
+  align-items:    center;
+  justify-content: center;
+  border:         2px solid #25D366;
+  border-radius:  var(--radius-sm);
+  background:     rgba(37, 211, 102, 0.1);
+  color:          #25D366;
+  text-decoration: none;
+  transition:     background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.fp-card__whatsapp:hover {
+  background:  #25D366;
+  color:       #fff;
+  transform:   translateY(-1px);
+  box-shadow:  0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
 @media (max-width: 480px) {
   .fp-card__actions          { flex-direction: column; }
   .fp-card__details,
-  .fp-card__cta              { width: 100%; flex-shrink: unset; }
+  .fp-card__cta,
+  .fp-card__whatsapp         { width: 100%; flex-shrink: unset; }
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */

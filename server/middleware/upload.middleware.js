@@ -90,3 +90,31 @@ export const uploadNewsImage = multer({
   fileFilter: newsImageFileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 }).single("image");
+
+// ── Formation video thumbnail upload (PNG/JPG/JPEG/WEBP, 5 MB) ──────────────
+const videoThumbnailStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../uploads"));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `video-thumb-${unique}${ext}`);
+  },
+});
+
+const videoThumbnailFileFilter = (req, file, cb) => {
+  const allowed = [".png", ".jpg", ".jpeg", ".webp"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Seuls les fichiers PNG, JPG, JPEG et WEBP sont acceptés"));
+  }
+};
+
+export const uploadVideoThumbnail = multer({
+  storage: videoThumbnailStorage,
+  fileFilter: videoThumbnailFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).single("thumbnail");
