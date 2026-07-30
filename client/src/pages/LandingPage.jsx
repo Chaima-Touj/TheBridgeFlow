@@ -155,6 +155,42 @@ export default function LandingPage() {
   const promoIsDrive  = actionVideo
     ? actionVideo.provider === "google_drive"
     : promoVideoUrl.includes("drive.google.com");
+  // Best-effort autoplay params for the Drive iframe preview — Google Drive's
+  // embedded /preview player has no postMessage control API (unlike YouTube),
+  // so play()/pause() can't be called on it from outside. `mute=1` is
+  // undocumented/unverified; browsers may block audible autoplay entirely if
+  // Drive ignores it. Mount/unmount (below) is the only reliable lever we have.
+  const promoDriveEmbedSrc = promoVideoUrl.includes("?")
+    ? `${promoVideoUrl}&autoplay=1&mute=1`
+    : `${promoVideoUrl}?autoplay=1&mute=1`;
+
+  /* ── Preview card muted-autoplay, gated by viewport visibility (économie
+     de ressources) — même pattern que VideoTestimonialCarousel.jsx. Pour la
+     source Cloudinary (<video>), play()/pause() est appelé directement ;
+     pour Google Drive (<iframe>), l'iframe est simplement monté/démonté
+     (aucune API de contrôle externe possible sur le lecteur intégré). ── */
+  const promoCardRef  = useRef(null);
+  const promoVideoRef = useRef(null);
+  const [promoInView, setPromoInView] = useState(false);
+
+  useEffect(() => {
+    const el = promoCardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPromoInView(entry.isIntersecting),
+      { threshold: 0.25 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (promoIsDrive) return; // iframe: géré par mount/unmount, pas par play()/pause()
+    const v = promoVideoRef.current;
+    if (!v) return;
+    if (promoInView) v.play().catch(() => {});
+    else v.pause();
+  }, [promoInView, promoIsDrive]);
 
   return (
     <div className="landing" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -356,20 +392,36 @@ export default function LandingPage() {
             <div className="lp-promo-video__frame">
               <button
                 className="lp-promo-video__card"
+                ref={promoCardRef}
                 onClick={() => setPromoOpen(true)}
                 aria-label={t("landing.promoPlayAriaLabel")}
               >
-                {/* Autoplay preview — muted, loop, no controls */}
-                <video
-                  className="lp-promo-video__preview"
-                  src={promoVideoUrl}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  tabIndex={-1}
-                />
+                {/* Autoplay preview — muted, loop, no controls. Play/pause
+                    piloté par IntersectionObserver (voir promoInView) :
+                    ne consomme des ressources que quand la section est
+                    visible à l'écran. */}
+                {promoIsDrive ? (
+                  promoInView && (
+                    <iframe
+                      className="lp-promo-video__preview"
+                      src={promoDriveEmbedSrc}
+                      allow="autoplay; encrypted-media"
+                      title={t("landing.promoVideoLabel")}
+                      tabIndex={-1}
+                    />
+                  )
+                ) : (
+                  <video
+                    ref={promoVideoRef}
+                    className="lp-promo-video__preview"
+                    src={promoVideoUrl}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    tabIndex={-1}
+                  />
+                )}
                 {/* Subtle gradient overlay (glassmorphism feel) */}
                 <div className="lp-promo-video__card-overlay" />
                 <div className="lp-promo-video__play-ring">

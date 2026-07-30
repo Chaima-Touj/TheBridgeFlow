@@ -1,0 +1,348 @@
+{
+  "generatedAt": "2026-07-30T16:24:17.659Z",
+  "promoVideo": {
+    "name": "stageflow-promo.mp4",
+    "size": "33.2 Mo",
+    "driveLink": "https://drive.google.com/file/d/1W4UpaiH6qUU-h8m1Sfk82lFtmdn9MO4C/view?usp=drivesdk",
+    "alreadyInSiteSettings": true,
+    "currentActionVideoDriveUrl": "https://drive.google.com/file/d/1W4UpaiH6qUU-h8m1Sfk82lFtmdn9MO4C/view?usp=drive_link"
+  },
+  "testimonialVideos": {
+    "categorized": [
+      {
+        "name": "summer-camp9.mp4",
+        "size": "36.8 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1lAv9lDX8wO2Hcmt7I6duWo1k5HN3XUvq/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp8.mp4",
+        "size": "3.9 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1_FLhjwffO_3MYAsxSLRX46WDMlF-TcBn/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp1.mp4",
+        "size": "6.0 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1KTXjSrzIq9CTmysSpCoCgdJZHjnIIqAM/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp2.mp4",
+        "size": "3.0 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1hJknz_BscgUIKhnJ_teqv3HIYF_zv4Q9/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp7.mp4",
+        "size": "16.6 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/196sjhulNPp1Ib1DXT8Ke2hWMknRGs_ZB/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp4.mp4",
+        "size": "11.7 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/11EtvDxSsfGhGpzq3rkWqTlv9m-mIi5aX/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp10.mp4",
+        "size": "4.1 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/12dUXp8G6Xyk9rXWY3mx2rGtzB8T9jStd/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp6.mp4",
+        "size": "6.0 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1DxrHZX2UmUUX6R-gIoOz7lPnyNgXQdZI/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp3.mp4",
+        "size": "5.2 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1H1u7o3Qdj6VNorEyz3NsPefpYTX7X8Br/view?usp=drivesdk"
+      },
+      {
+        "name": "summer-camp5.mp4",
+        "size": "6.7 Mo",
+        "category": "summer-camp",
+        "driveLink": "https://drive.google.com/file/d/1rci1JJD7Hj-TLEhhFXpi9OQ5WftQV4yI/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe5.mp4",
+        "size": "8.8 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1BEAyZkX99XPUXGaKTvosvSW3yS32LBHp/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe6.mp4",
+        "size": "4.0 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1CTaIBSKETNASPhG9nKL5ljzvo_L-101k/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe3.mp4",
+        "size": "7.6 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/17XJm1OKTJD9MhjLkpGM3jqlzBiOhR1cY/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe8.mp4",
+        "size": "11.0 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1MjGAbCqzahsb3TDQe0DX6cyefVcpP3e8/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe7.mp4",
+        "size": "20.1 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1CYc8s7nrupdX0f-HKTvuHFyuqpyUC9re/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe4.mp4",
+        "size": "3.4 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1yVplXvxaAzuJHaWr4GXoDVStbKfRvcnu/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation6.mp4",
+        "size": "9.6 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/11ut1UOhMbuRfr5w0B3k5TlOZtfaTGx5z/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation8.mp4",
+        "size": "8.8 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1nTmDTsu1xL1QQ7-FypG1ILpDdWVpueL3/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation5.mp4",
+        "size": "5.7 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/11btb2Z4qqQnXV0FdzibiriupOgG9YWbe/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe2.mp4",
+        "size": "11.2 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1gQ4SWL8TuVQO2081vukQoKHZMyfGevcB/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-pfe1.mp4",
+        "size": "10.0 Mo",
+        "category": "pfe",
+        "driveLink": "https://drive.google.com/file/d/1pAQhz2f0CnB4I-8Z6-SYIkYcuXraMqvg/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation9.mp4",
+        "size": "14.2 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1Ei9xcZbgiFJh9OFlGn7R22V3DHuApVJg/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation7.mp4",
+        "size": "4.0 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1C85YMHOadls6YcQvNjnKYmqfpMvKvQZ5/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation1.mp4",
+        "size": "8.3 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1zMGo9jvOep2-SSprg7Du7aRE1sfsF2oi/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation4.mp4",
+        "size": "6.9 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1SkFKXaZvsMw5j1bGNn9dAtpj7ts-kmrP/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation2.mp4",
+        "size": "4.4 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1sMlk6m6nqQc_V3GoQldfr6PKMrzJw5Rd/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation3.mp4",
+        "size": "12.4 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1boCzj7x0AkkKkf_yWQg6o_tGEZSfcBEm/view?usp=drivesdk"
+      },
+      {
+        "name": "feedback-formation10.mp4",
+        "size": "10.3 Mo",
+        "category": "formation",
+        "driveLink": "https://drive.google.com/file/d/1W9HnIgPltmymfiBU-oDS582LQ_ECrb0A/view?usp=drivesdk"
+      }
+    ],
+    "ambiguous": []
+  },
+  "imgFeedbacks": {
+    "files": [
+      {
+        "name": "img29.jpg",
+        "size": "117 Ko",
+        "driveLink": "https://drive.google.com/file/d/1-CsgF1cjieYSfdbKB2ypb_ukq51tkhdL/view?usp=drivesdk"
+      },
+      {
+        "name": "img28.jpg",
+        "size": "69 Ko",
+        "driveLink": "https://drive.google.com/file/d/1B92O2bdz4nQLjuGCZW_esZeIQQQl7WA-/view?usp=drivesdk"
+      },
+      {
+        "name": "img27.jpg",
+        "size": "66 Ko",
+        "driveLink": "https://drive.google.com/file/d/1AtLCD5skyOT7DUUXOczrOxcR3QtwnRlV/view?usp=drivesdk"
+      },
+      {
+        "name": "img26.jpg",
+        "size": "88 Ko",
+        "driveLink": "https://drive.google.com/file/d/1K23yWVJdXHoWgW6DpfYOZPWxBGTdr1In/view?usp=drivesdk"
+      },
+      {
+        "name": "img25.jpg",
+        "size": "112 Ko",
+        "driveLink": "https://drive.google.com/file/d/1i0iIQanDkE_RHW1-EZhLX6dB1dfPxQOZ/view?usp=drivesdk"
+      },
+      {
+        "name": "img24.jpg",
+        "size": "73 Ko",
+        "driveLink": "https://drive.google.com/file/d/1yFXLjczzjj8bYplShUVRBGWn9-EavOia/view?usp=drivesdk"
+      },
+      {
+        "name": "img23.jpg",
+        "size": "111 Ko",
+        "driveLink": "https://drive.google.com/file/d/1vVaqB_0oQJNB9kR8PQp3srJIAVQv8zYD/view?usp=drivesdk"
+      },
+      {
+        "name": "img22.jpg",
+        "size": "74 Ko",
+        "driveLink": "https://drive.google.com/file/d/1xpYFq9wKC8WUo_allPr9RqibOglyXkiT/view?usp=drivesdk"
+      },
+      {
+        "name": "img21.jpg",
+        "size": "86 Ko",
+        "driveLink": "https://drive.google.com/file/d/18cHQUcq8oa8JNNP9cA0fahB7-7j0siZS/view?usp=drivesdk"
+      },
+      {
+        "name": "img20.jpg",
+        "size": "114 Ko",
+        "driveLink": "https://drive.google.com/file/d/1YTzib5JpUFCwx9A41UJahyjGKMJflpsy/view?usp=drivesdk"
+      },
+      {
+        "name": "img19.jpg",
+        "size": "136 Ko",
+        "driveLink": "https://drive.google.com/file/d/1wYNhE2puciKWofVT5gp-I9IDXe9SNwin/view?usp=drivesdk"
+      },
+      {
+        "name": "img18.jpg",
+        "size": "104 Ko",
+        "driveLink": "https://drive.google.com/file/d/1NYsiCLOr-i6V3EfydIfSHp9THwbZFsD3/view?usp=drivesdk"
+      },
+      {
+        "name": "img17.jpg",
+        "size": "88 Ko",
+        "driveLink": "https://drive.google.com/file/d/1kXNeL0RzgcyxlXNPBvgqLwC4nD-V__ul/view?usp=drivesdk"
+      },
+      {
+        "name": "img16.jpg",
+        "size": "119 Ko",
+        "driveLink": "https://drive.google.com/file/d/1p0FYsEuDHmAcYqzCy0gYy97l_O0hUKhk/view?usp=drivesdk"
+      },
+      {
+        "name": "img15.jpg",
+        "size": "113 Ko",
+        "driveLink": "https://drive.google.com/file/d/142DATDGmf-g07h9Ezl3uhXtrvRODstbs/view?usp=drivesdk"
+      },
+      {
+        "name": "img14.jpg",
+        "size": "121 Ko",
+        "driveLink": "https://drive.google.com/file/d/1r0fRLl6k9KID6D0KwW9-AT5FW6hfFtk_/view?usp=drivesdk"
+      },
+      {
+        "name": "img13.jpg",
+        "size": "134 Ko",
+        "driveLink": "https://drive.google.com/file/d/1z97QsBY6GaOn3MDR82hQPZQtEgFivJ47/view?usp=drivesdk"
+      },
+      {
+        "name": "img12.jpg",
+        "size": "134 Ko",
+        "driveLink": "https://drive.google.com/file/d/1Fpy5iUvX0vRcZBiAQiZ2Y7v6lRrKacwa/view?usp=drivesdk"
+      },
+      {
+        "name": "img11.jpg",
+        "size": "75 Ko",
+        "driveLink": "https://drive.google.com/file/d/13bM0XP5kLgNB3PYSoZ2a9VPiblMABZg2/view?usp=drivesdk"
+      },
+      {
+        "name": "img10.jpg",
+        "size": "353 Ko",
+        "driveLink": "https://drive.google.com/file/d/1PoSu_WwvsdP-XQLjRmmvKMYXgjlMgQDX/view?usp=drivesdk"
+      },
+      {
+        "name": "img9.jpg",
+        "size": "431 Ko",
+        "driveLink": "https://drive.google.com/file/d/18DJp9UYeSY7YarxWeMicDE6dyWGAFqt6/view?usp=drivesdk"
+      },
+      {
+        "name": "img8.jpg",
+        "size": "397 Ko",
+        "driveLink": "https://drive.google.com/file/d/1xmajHKvZuaEuNiQF6kFuSJopGwAyfs8X/view?usp=drivesdk"
+      },
+      {
+        "name": "img7.jpg",
+        "size": "474 Ko",
+        "driveLink": "https://drive.google.com/file/d/1hP4KFBlZpvtBSiyReVfDz7Ci1CAnLXgv/view?usp=drivesdk"
+      },
+      {
+        "name": "img6.jpg",
+        "size": "197 Ko",
+        "driveLink": "https://drive.google.com/file/d/1bsjpA_7_Dl5OwEOpoU7dyXlqMXO9G7ui/view?usp=drivesdk"
+      },
+      {
+        "name": "img5.jpg",
+        "size": "236 Ko",
+        "driveLink": "https://drive.google.com/file/d/1npYAtLWnyTExZl_dfPnmKdf7iuH890tl/view?usp=drivesdk"
+      },
+      {
+        "name": "img4.jpg",
+        "size": "351 Ko",
+        "driveLink": "https://drive.google.com/file/d/1Ix5ulIw4OLU03fZ7igIHBCw4dbZ9k_iU/view?usp=drivesdk"
+      },
+      {
+        "name": "img3.jpg",
+        "size": "368 Ko",
+        "driveLink": "https://drive.google.com/file/d/1VsN_SWaqvlQ-a2GcQRyCEKdRn_DesAlj/view?usp=drivesdk"
+      },
+      {
+        "name": "img2.jpg",
+        "size": "380 Ko",
+        "driveLink": "https://drive.google.com/file/d/1s8wY4HSSaZTmPGZhU3CAC9arQL9AIuHB/view?usp=drivesdk"
+      },
+      {
+        "name": "img1.jpg",
+        "size": "377 Ko",
+        "driveLink": "https://drive.google.com/file/d/1RLxMd4Qm1gzvZVCvZE7heg5rWrXyZE-D/view?usp=drivesdk"
+      }
+    ],
+    "note": "❌ EXCLU de la migration (confirmé) — 29 image(s) nommées img1.jpg…img29.jpg, déjà utilisées indépendamment par client/src/constants/screenshotTestimonials.js (carrousel \"Ce que dit notre communauté\" / TestimonialsScreenshotCarousel, FEEDBACK_IMAGE_COUNT = 29). Listé ici pour mémoire uniquement — aucune entrée ne sera créée dans SiteSettings pour ce dossier."
+  },
+  "avatars": {
+    "files": [
+      {
+        "name": "avatar-homme.png",
+        "size": "295 Ko",
+        "driveLink": "https://drive.google.com/file/d/1Jikxlwlf8cBvc9shM69brful4sDvEIcB/view?usp=drivesdk"
+      },
+      {
+        "name": "avatar-femme.png",
+        "size": "324 Ko",
+        "driveLink": "https://drive.google.com/file/d/1odCENUwfWvkISP5AEH6eGQ5B6VqHC2ME/view?usp=drivesdk"
+      }
+    ],
+    "note": "❌ EXCLU de la migration (confirmé) — 2 fichier(s) génériques (avatar-homme.png, avatar-femme.png), non utilisés actuellement sur la Landing Page. Listé ici pour mémoire uniquement — aucune entrée ne sera créée dans SiteSettings.communityAvatars pour ce dossier."
+  }
+}
