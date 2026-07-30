@@ -5,6 +5,14 @@ node_modules/
 .env
 .env.local
 
+# Credentials OAuth Google Drive (migration Cloudinary → Drive) + tokens générés
+server/credentials-drive*.json
+server/token-drive*.json
+
+# Backups locaux de la collection Formation (migration Drive) — restauration
+# manuelle uniquement, pas destinés à être versionnés
+server/scripts/drive/backups/
+
 # Build frontend
 client/dist/
 
