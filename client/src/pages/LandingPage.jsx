@@ -33,6 +33,7 @@ import TechMarquee from "../components/common/TechMarquee.jsx";
 import FormationCategories from "../components/common/FormationCategories.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
+import { settingsService } from "../services/settings.service.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import "./LandingPage.css";
@@ -140,6 +141,20 @@ export default function LandingPage() {
     [0, 0.4, 0.7, 1],
     isMobile ? [0.97, 0.99, 1, 1] : [0.92, 0.97, 1, 1]
   );
+
+  // ── Vidéo "Découvrez TheBridgeFlow en action" — pilotée par SiteSettings
+  // (MongoDB), plus l'ancien VIDEO_URLS["/stageflow-promo.mp4"] codé en dur.
+  // Fallback conservé si le fetch échoue ou tant qu'il n'a pas résolu.
+  const [actionVideo, setActionVideo] = useState(null);
+  useEffect(() => {
+    settingsService.get()
+      .then(({ data }) => setActionVideo(data.actionVideo))
+      .catch(() => {}); // silencieux — le fallback VIDEO_URLS prend le relais
+  }, []);
+  const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
+  const promoIsDrive  = actionVideo
+    ? actionVideo.provider === "google_drive"
+    : promoVideoUrl.includes("drive.google.com");
 
   return (
     <div className="landing" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -327,7 +342,10 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Video card with scroll-tilt 3D effect */}
+          {/* Cadre "tablette" avec effet de tilt 3D au scroll — le tilt
+              s'applique à l'ensemble du cadre (bordure + vidéo), pas
+              seulement au contenu vidéo, pour un vrai effet d'appareil qui
+              se redresse. */}
           <motion.div
             style={{
               perspective: "1000px",
@@ -335,32 +353,34 @@ export default function LandingPage() {
               scale,
             }}
           >
-            <button
-              className="lp-promo-video__card"
-              onClick={() => setPromoOpen(true)}
-              aria-label={t("landing.promoPlayAriaLabel")}
-            >
-              {/* Autoplay preview — muted, loop, no controls */}
-              <video
-                className="lp-promo-video__preview"
-                src={VIDEO_URLS["/stageflow-promo.mp4"]}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                tabIndex={-1}
-              />
-              {/* Subtle gradient overlay (glassmorphism feel) */}
-              <div className="lp-promo-video__card-overlay" />
-              <div className="lp-promo-video__play-ring">
-                <FiPlay size={28} />
-              </div>
-              <div className="lp-promo-video__caption">
-                <span className="lp-promo-video__caption-label">{t("landing.promoVideoLabel")}</span>
-                <span className="lp-promo-video__caption-sub">{t("landing.promoVideoSub")}</span>
-              </div>
-            </button>
+            <div className="lp-promo-video__frame">
+              <button
+                className="lp-promo-video__card"
+                onClick={() => setPromoOpen(true)}
+                aria-label={t("landing.promoPlayAriaLabel")}
+              >
+                {/* Autoplay preview — muted, loop, no controls */}
+                <video
+                  className="lp-promo-video__preview"
+                  src={promoVideoUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  tabIndex={-1}
+                />
+                {/* Subtle gradient overlay (glassmorphism feel) */}
+                <div className="lp-promo-video__card-overlay" />
+                <div className="lp-promo-video__play-ring">
+                  <FiPlay size={28} />
+                </div>
+                <div className="lp-promo-video__caption">
+                  <span className="lp-promo-video__caption-label">{t("landing.promoVideoLabel")}</span>
+                  <span className="lp-promo-video__caption-sub">{t("landing.promoVideoSub")}</span>
+                </div>
+              </button>
+            </div>
           </motion.div>
         </div>
 
@@ -387,10 +407,10 @@ export default function LandingPage() {
               >
                 <FiX size={18} />
               </button>
-              {VIDEO_URLS["/stageflow-promo.mp4"].includes("drive.google.com") ? (
+              {promoIsDrive ? (
                 <iframe
                   className="lp-promo-video__modal-video"
-                  src={VIDEO_URLS["/stageflow-promo.mp4"]}
+                  src={promoVideoUrl}
                   allow="autoplay; encrypted-media"
                   allowFullScreen
                   title="Stageflow Coding Academy"
@@ -398,7 +418,7 @@ export default function LandingPage() {
               ) : (
                 <video
                   className="lp-promo-video__modal-video"
-                  src={VIDEO_URLS["/stageflow-promo.mp4"]}
+                  src={promoVideoUrl}
                   controls
                   autoPlay
                   preload="metadata"

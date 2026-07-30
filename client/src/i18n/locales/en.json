@@ -917,7 +917,9 @@
     "noPreviewWeek": "Preview unavailable for this week",
     "exitFullscreen": "Exit fullscreen",
     "fullscreen": "Fullscreen",
-    "supervisionSessions": "Supervision sessions"
+    "supervisionSessions": "Supervision sessions",
+    "openExternal": "Open in a new tab",
+    "openExternalHint": "Open in a new tab for smoother playback"
   },
   "register": {
     "stepAccount": "Account",

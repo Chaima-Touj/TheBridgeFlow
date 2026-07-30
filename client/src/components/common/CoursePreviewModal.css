@@ -199,6 +199,63 @@
 /* Suppress native download button (Chromium / Safari) */
 .cpm-video::-webkit-media-controls-download-button { display: none !important; }
 
+/* ── Spinner de chargement (iframe Drive/YouTube) ─────────────────────────── */
+.cpm-loading {
+  position:        absolute;
+  inset:           0;
+  z-index:         1;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      rgba(0, 0, 0, 0.35);
+  /* pointer-events: none — ne doit jamais intercepter le survol de l'iframe
+     en dessous (le spinner disparaît de toute façon dès onLoad). */
+  pointer-events:  none;
+}
+.cpm-spinner {
+  width:        34px;
+  height:       34px;
+  border:       3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation:    cpmSpin 0.8s linear infinite;
+}
+@keyframes cpmSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Bouton "Ouvrir dans Google Drive" ─────────────────────────────────────
+   Coin opposé au bouton plein écran (top-left / top-right) pour ne jamais
+   les superposer quand les deux sont visibles simultanément (trailer Drive). */
+.cpm-external-link {
+  position:        absolute;
+  top:             8px;
+  left:            8px;
+  z-index:         2;
+  display:         flex;
+  align-items:     center;
+  gap:             6px;
+  padding:         6px 10px;
+  border-radius:   999px;
+  background:      rgba(0, 0, 0, 0.65);
+  color:           #fff;
+  font-size:       0.72rem;
+  font-weight:     600;
+  text-decoration: none;
+  white-space:     nowrap;
+  max-width:       calc(100% - 16px);
+  overflow:        hidden;
+  transition:      background 0.15s;
+}
+.cpm-external-link span {
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+.cpm-external-link:hover,
+.cpm-external-link:focus-visible {
+  background: rgba(0, 0, 0, 0.85);
+}
+
 .cpm-no-video {
   position:        absolute;
   inset:           0;
@@ -380,4 +437,7 @@
     max-height:    92vh;
     border-radius: 16px 16px 0 0;
   }
+  /* Espace réduit : icône seule, le texte complet reste dans le title="" */
+  .cpm-external-link span { display: none; }
+  .cpm-external-link { padding: 7px; border-radius: 50%; }
 }

@@ -917,7 +917,9 @@
     "noPreviewWeek": "Aperçu non disponible pour cette semaine",
     "exitFullscreen": "Quitter le plein écran",
     "fullscreen": "Plein écran",
-    "supervisionSessions": "Sessions d'encadrement"
+    "supervisionSessions": "Sessions d'encadrement",
+    "openExternal": "Ouvrir dans un nouvel onglet",
+    "openExternalHint": "Ouvrir dans un nouvel onglet pour une lecture fluide"
   },
   "register": {
     "stepAccount": "Compte",

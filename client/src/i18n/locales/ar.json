@@ -917,7 +917,9 @@
     "noPreviewWeek": "المعاينة غير متوفرة لهذا الأسبوع",
     "exitFullscreen": "الخروج من ملء الشاشة",
     "fullscreen": "ملء الشاشة",
-    "supervisionSessions": "جلسات الإشراف"
+    "supervisionSessions": "جلسات الإشراف",
+    "openExternal": "فتح في علامة تبويب جديدة",
+    "openExternalHint": "افتح في علامة تبويب جديدة لمشاهدة أكثر سلاسة"
   },
   "register": {
     "stepAccount": "الحساب",

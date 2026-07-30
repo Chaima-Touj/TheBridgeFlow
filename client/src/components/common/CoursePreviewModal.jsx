@@ -1,13 +1,73 @@
 import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiX, FiPlay, FiLock, FiMaximize, FiMinimize } from "react-icons/fi";
+import { FiX, FiPlay, FiLock, FiMaximize, FiMinimize, FiExternalLink } from "react-icons/fi";
 import { DEFAULT_THUMB, getWeekThumb } from "../../utils/thumbUtils.js";
-import { resolveVideoUrl, isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
+import { resolveVideoUrl, isGoogleDriveUrl, resolveDriveUrl, extractDriveFileId } from "../../constants/videoUrls.js";
 import "./CoursePreviewModal.css";
 
 function getYoutubeId(url = "") {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]{11})/);
   return m ? m[1] : null;
+}
+
+/* Isolé dans son propre composant, monté avec key={videoUrl} par le parent :
+   le spinner "loaded" repart naturellement à false à chaque changement de
+   vidéo via le remount React, sans ref/effect pour resynchroniser un state
+   dérivé d'une prop (pattern déconseillé par le linter react-hooks ici). */
+function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter, onIframeLeave }) {
+  const [loaded, setLoaded] = useState(false);
+  const isIframeSource = !!ytId || isDrive;
+
+  return (
+    <>
+      {ytId ? (
+        <iframe
+          className="cpm-iframe"
+          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+          title={isTrailer ? t("coursePreview.trailer") : week.content}
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          onLoad={() => setLoaded(true)}
+          onMouseEnter={onIframeEnter}
+          onMouseLeave={onIframeLeave}
+        />
+      ) : isDrive ? (
+        <iframe
+          className="cpm-iframe"
+          src={resolveDriveUrl(videoUrl, "video")}
+          title={isTrailer ? t("coursePreview.trailer") : week.content}
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          onLoad={() => setLoaded(true)}
+          onMouseEnter={onIframeEnter}
+          onMouseLeave={onIframeLeave}
+        />
+      ) : videoUrl ? (
+        <video
+          className="cpm-video"
+          controls
+          autoPlay
+          src={videoUrl}
+          poster={week?.thumbnail || undefined}
+          controlsList={isTrailer ? "nodownload nofullscreen" : "nodownload"}
+          disablePictureInPicture
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <track kind="captions" />
+        </video>
+      ) : (
+        <div className="cpm-no-video">
+          <FiPlay size={42} />
+          <p>{isTrailer ? t("coursePreview.noPreview") : t("coursePreview.noPreviewWeek")}</p>
+        </div>
+      )}
+      {isIframeSource && !loaded && (
+        <div className="cpm-loading" aria-hidden="true">
+          <span className="cpm-spinner" />
+        </div>
+      )}
+    </>
+  );
 }
 
 export default function CoursePreviewModal({
@@ -34,6 +94,26 @@ export default function CoursePreviewModal({
 
   const videoUrl = resolveVideoUrl(week?.videoUrl) || "";
   const ytId = getYoutubeId(videoUrl);
+  const isDrive = !!videoUrl && isGoogleDriveUrl(videoUrl);
+  const driveFileId = isDrive ? extractDriveFileId(videoUrl) : null;
+  const driveViewUrl = driveFileId ? `https://drive.google.com/file/d/${driveFileId}/view` : null;
+
+  /* Curseur custom bloqué au-dessus d'un iframe cross-origin (les mousemove
+     internes à l'iframe ne remontent jamais au document parent — limitation
+     navigateur). On informe CustomCursor.jsx via un événement global pour
+     qu'il se masque et laisse place au curseur natif le temps du survol. */
+  const handleIframeMouseEnter = useCallback(() => {
+    window.dispatchEvent(new Event("customcursor:suspend"));
+  }, []);
+  const handleIframeMouseLeave = useCallback(() => {
+    window.dispatchEvent(new Event("customcursor:resume"));
+  }, []);
+  useEffect(() => {
+    // Filet de sécurité : si la modale se ferme pendant que la souris est
+    // encore sur l'iframe, mouseleave ne se déclenche jamais — sans ce
+    // nettoyage le curseur custom resterait masqué en permanence.
+    return () => window.dispatchEvent(new Event("customcursor:resume"));
+  }, []);
 
   /* Custom fullscreen for trailer (keeps blurred background layer) */
   const wrapperRef = useRef(null);
@@ -107,40 +187,28 @@ export default function CoursePreviewModal({
               style={{ backgroundImage: `url(${week.thumbnail})` }}
             />
           )}
-          {ytId ? (
-            <iframe
-              className="cpm-iframe"
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
-              title={isTrailer ? t("coursePreview.trailer") : week.content}
-              allow="autoplay; encrypted-media; fullscreen"
-              allowFullScreen
-            />
-          ) : videoUrl && isGoogleDriveUrl(videoUrl) ? (
-            <iframe
-              className="cpm-iframe"
-              src={resolveDriveUrl(videoUrl, "video")}
-              title={isTrailer ? t("coursePreview.trailer") : week.content}
-              allow="autoplay; encrypted-media; fullscreen"
-              allowFullScreen
-            />
-          ) : videoUrl ? (
-            <video
-              className="cpm-video"
-              controls
-              autoPlay
-              src={videoUrl}
-              poster={week?.thumbnail || undefined}
-              controlsList={isTrailer ? "nodownload nofullscreen" : "nodownload"}
-              disablePictureInPicture
-              onContextMenu={(e) => e.preventDefault()}
+          <VideoFrame
+            key={videoUrl}
+            ytId={ytId}
+            isDrive={isDrive}
+            videoUrl={videoUrl}
+            isTrailer={isTrailer}
+            week={week}
+            t={t}
+            onIframeEnter={handleIframeMouseEnter}
+            onIframeLeave={handleIframeMouseLeave}
+          />
+          {isDrive && driveViewUrl && (
+            <a
+              className="cpm-external-link"
+              href={driveViewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t("coursePreview.openExternalHint")}
             >
-              <track kind="captions" />
-            </video>
-          ) : (
-            <div className="cpm-no-video">
-              <FiPlay size={42} />
-              <p>{isTrailer ? t("coursePreview.noPreview") : t("coursePreview.noPreviewWeek")}</p>
-            </div>
+              <FiExternalLink size={13} />
+              <span>{t("coursePreview.openExternal")}</span>
+            </a>
           )}
           {isTrailer && (
             <button

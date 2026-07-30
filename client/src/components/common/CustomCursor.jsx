@@ -39,6 +39,12 @@ const REDUCED_EASE = 1;
  */
 export default function CustomCursor() {
   const [active, setActive] = useState(false);
+  // Suspendu temporairement au survol d'un iframe cross-origin (voir
+  // CoursePreviewModal.jsx) : les mousemove internes à l'iframe ne remontent
+  // jamais au document parent, ce qui fige le curseur custom à la position
+  // d'entrée sans jamais le masquer. Un événement global permet à n'importe
+  // quel composant de demander la reprise du curseur natif le temps du survol.
+  const [suspended, setSuspended] = useState(false);
   const dotPosRef  = useRef(null); // wrapper positionné (translate3d, sans transition)
   const ringPosRef = useRef(null);
   const dotRef     = useRef(null); // visuel (scale/opacité au survol, transitionné)
@@ -59,18 +65,25 @@ export default function CustomCursor() {
       setActive(true);
     };
 
+    const onSuspend = () => setSuspended(true);
+    const onResume  = () => setSuspended(false);
+
     document.addEventListener("touchstart", onTouchStart, { passive: true });
     document.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("customcursor:suspend", onSuspend);
+    window.addEventListener("customcursor:resume", onResume);
 
     return () => {
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("customcursor:suspend", onSuspend);
+      window.removeEventListener("customcursor:resume", onResume);
     };
   }, []);
 
   useEffect(() => {
     const html = document.documentElement;
-    if (!active) {
+    if (!active || suspended) {
       html.classList.remove("cc-active");
       return;
     }
@@ -165,9 +178,9 @@ export default function CustomCursor() {
       document.removeEventListener("mouseenter", onMouseEnterDoc);
       html.classList.remove("cc-active");
     };
-  }, [active]);
+  }, [active, suspended]);
 
-  if (!active) return null;
+  if (!active || suspended) return null;
 
   return (
     <>
