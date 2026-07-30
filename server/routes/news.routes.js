@@ -1,6 +1,5 @@
 import express from "express";
 import { protect, authorize } from "../middleware/auth.middleware.js";
-import { uploadNewsImage } from "../middleware/upload.middleware.js";
 import {
   getAllNews,
   getNewsById,
@@ -16,8 +15,11 @@ router.get("/", getAllNews);
 router.get("/:id", getNewsById);
 
 // ─── Écriture — réservée à l'admin ──────────────────────────────────────────
-router.post("/",   protect, authorize("admin"), uploadNewsImage, createNews);
-router.put("/:id", protect, authorize("admin"), uploadNewsImage, updateNews);
+// image = lien Google Drive ou base64 (JSON, plus d'upload disque — voir
+// news.controller.js). uploadNewsImage (upload.middleware.js) n'est plus
+// utilisée ici mais reste définie, au cas où.
+router.post("/",   protect, authorize("admin"), createNews);
+router.put("/:id", protect, authorize("admin"), updateNews);
 router.delete("/:id", protect, authorize("admin"), deleteNews);
 
 export default router;

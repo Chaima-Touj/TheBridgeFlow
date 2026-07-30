@@ -530,6 +530,19 @@
   font-size: 0.75rem;
   font-weight: 500;
 }
+
+/* Aperçu live du lien Google Drive collé (mode "Lien Google Drive") — même
+   gabarit que la zone d'upload, sans bordure pointillée ni curseur cliquable
+   puisqu'il n'est pas interactif, juste une prévisualisation. */
+.af-video-thumb-drive-preview {
+  margin-top: 8px;
+  width: 100%;
+  height: 120px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-card);
+}
 .af-video-add-btn {
   display: inline-flex;
   align-items: center;
@@ -547,3 +560,28 @@
   transition: background 150ms ease, border-color 150ms ease;
 }
 .af-video-add-btn:hover { background: var(--bg); border-color: var(--primary); }
+
+/* ── Choix Drive / Upload PC (miniature vidéo, image actualité) ───────────── */
+.af-thumb-mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.af-thumb-mode-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.af-thumb-mode-btn:hover { background: var(--bg); }
+.af-thumb-mode-btn--active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}

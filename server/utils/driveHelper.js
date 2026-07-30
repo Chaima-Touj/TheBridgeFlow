@@ -62,6 +62,22 @@ export function normalizeDriveUrl(url = "", type = "video") {
 }
 
 /**
+ * Détecte une image encodée en base64 (data URI), produite par la
+ * compression côté client (FileReader + canvas, voir
+ * client/src/utils/imageCompression.js). Ces chaînes ne sont jamais des
+ * liens Google Drive et ne doivent jamais passer par normalizeDriveUrl —
+ * extractDriveFileId() y échouerait de toute façon (aucun des 3 formats
+ * d'URL Drive ne peut matcher), mais lancer une regex sur une chaîne de
+ * plusieurs centaines de Ko à chaque sauvegarde est un gaspillage inutile ;
+ * ce garde-fou l'évite explicitement.
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isBase64Image(value = "") {
+  return typeof value === "string" && value.startsWith("data:image/");
+}
+
+/**
  * Auto-detects the type from the URL context and normalizes.
  * If the URL contains common image extensions or "image" in path, treats as image.
  * @param {string} url

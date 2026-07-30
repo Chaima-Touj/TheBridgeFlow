@@ -1016,6 +1016,8 @@
     "videoThumbnailLabel": "Cover image",
     "videoThumbnailChoose": "Choose an image",
     "videoDriveLabel": "Google Drive link",
+    "thumbnailModeDrive": "Google Drive link",
+    "thumbnailModeUpload": "Upload from my computer",
     "inProgress": "In progress…",
     "create": "Create",
     "editFormationTitle": "Edit — {{title}}",

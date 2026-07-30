@@ -2,7 +2,7 @@ import Formation         from "../models/formation.model.js";
 import Enrollment        from "../models/enrollment.model.js";
 import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
-import { normalizeDriveUrl } from "../utils/driveHelper.js";
+import { normalizeDriveUrl, isBase64Image } from "../utils/driveHelper.js";
 
 // Kebab-case, sans accents (ex: "Business Intelligence (BI)" → "business-intelligence-bi")
 const ACCENT_MAP = {
@@ -221,10 +221,13 @@ export const patchFormationVideos = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "videos doit être un tableau." });
   }
   // Normalize Google Drive URLs in videos : driveUrl (lien saisi par l'admin) → url (lien /preview)
+  // thumbnail peut être une image base64 (compression côté client) plutôt
+  // qu'un lien Drive — ne jamais la faire passer par normalizeDriveUrl (voir
+  // isBase64Image).
   const normalizedVideos = videos.map((v) => ({
     ...v,
     url:       v.driveUrl ? normalizeDriveUrl(v.driveUrl, "video") : v.url,
-    thumbnail: v.thumbnail ? normalizeDriveUrl(v.thumbnail, "image") : v.thumbnail,
+    thumbnail: v.thumbnail && !isBase64Image(v.thumbnail) ? normalizeDriveUrl(v.thumbnail, "image") : v.thumbnail,
   }));
   const formation = await Formation.findOneAndUpdate(
     { slug: req.params.slug },
@@ -254,11 +257,12 @@ export const patchFormationWeeks = asyncHandler(async (req, res) => {
   if (!Array.isArray(weeks)) {
     return res.status(400).json({ message: "weeks doit être un tableau." });
   }
-  // Normalize Google Drive URLs in weeks
+  // Normalize Google Drive URLs in weeks — thumbnail peut être une image
+  // base64 (compression côté client), jamais passée à normalizeDriveUrl.
   const normalizedWeeks = weeks.map((w) => ({
     ...w,
     videoUrl:  w.videoUrl  ? normalizeDriveUrl(w.videoUrl, "video") : w.videoUrl,
-    thumbnail: w.thumbnail ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
+    thumbnail: w.thumbnail && !isBase64Image(w.thumbnail) ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
   }));
   const formation = await Formation.findOneAndUpdate(
     { slug: req.params.slug },
@@ -274,11 +278,12 @@ export const patchFormationSupervision = asyncHandler(async (req, res) => {
   if (!Array.isArray(supervision)) {
     return res.status(400).json({ message: "supervision doit être un tableau." });
   }
-  // Normalize Google Drive URLs in supervision weeks
+  // Normalize Google Drive URLs in supervision weeks — thumbnail peut être
+  // une image base64 (compression côté client), jamais passée à normalizeDriveUrl.
   const normalizedSupervision = supervision.map((w) => ({
     ...w,
     videoUrl:  w.videoUrl  ? normalizeDriveUrl(w.videoUrl, "video") : w.videoUrl,
-    thumbnail: w.thumbnail ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
+    thumbnail: w.thumbnail && !isBase64Image(w.thumbnail) ? normalizeDriveUrl(w.thumbnail, "image") : w.thumbnail,
   }));
   const formation = await Formation.findOneAndUpdate(
     { slug: req.params.slug },

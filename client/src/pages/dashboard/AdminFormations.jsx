@@ -10,6 +10,8 @@ import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { formationsService } from "../../services/formations.service.js";
+import { compressImageToBase64 } from "../../utils/imageCompression.js";
+import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 
@@ -67,19 +69,25 @@ const EMPTY_WEEK = {
   videoTitle: "",
   content: "",
   thumbnail: "",
+  // "drive" (lien texte, normalisé côté serveur) ou "upload" (compression
+  // locale FileReader+canvas → base64, voir imageCompression.js). Purement
+  // un état d'UI — jamais envoyé au backend (voir toWeekPayload).
+  thumbnailMode: "drive",
   driveUrl: "",
   duree: "",
   gratuit: false,
 };
 
 function weekToCard(w, type) {
+  const thumbnail = w.thumbnail || "";
   return {
     type,
     phase:      w.phase || "",
     week:       w.week ?? "",
     videoTitle: w.videoTitle || "",
     content:    w.content || "",
-    thumbnail:  w.thumbnail || "",
+    thumbnail,
+    thumbnailMode: thumbnail.startsWith("data:image/") ? "upload" : "drive",
     driveUrl:   w.videoUrl || w.driveUrl || "",
     duree:      w.duree || "",
     gratuit:    !!w.gratuit,
@@ -246,7 +254,7 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
   const { t } = useTranslation();
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [uploadingIdx, setUploadingIdx] = useState(null);
+  const [compressingIdx, setCompressingIdx] = useState(null);
   const [thumbErrors, setThumbErrors] = useState({});
 
   const set = (key) => (e) => {
@@ -260,19 +268,25 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
     const value = e.target.value;
     setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, [key]: value } : w)) }));
   };
+  const setThumbnailMode = (idx, mode) =>
+    setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, thumbnailMode: mode } : w)) }));
 
-  const handleThumbnailUpload = (idx) => async (e) => {
+  // Compression 100% locale (FileReader + canvas, voir imageCompression.js) —
+  // plus d'appel réseau vers l'ancienne route upload-thumbnail (stockage
+  // disque, non persistant en production). await avant setForm : le state
+  // ne reçoit la chaîne base64 qu'une fois toute la conversion terminée.
+  const handleThumbnailFileChange = (idx) => async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadingIdx(idx);
+    setCompressingIdx(idx);
     setThumbErrors((prev) => ({ ...prev, [idx]: undefined }));
     try {
-      const { data } = await formationsService.uploadVideoThumbnail(file);
-      setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, thumbnail: data.url } : w)) }));
+      const base64 = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
+      setForm((f) => ({ ...f, weeks: f.weeks.map((w, i) => (i === idx ? { ...w, thumbnail: base64 } : w)) }));
     } catch (err) {
-      setThumbErrors((prev) => ({ ...prev, [idx]: extractErrorMessage(err, t("adminFormations.errors.thumbnailUploadFailed")) }));
+      setThumbErrors((prev) => ({ ...prev, [idx]: err.message || t("adminFormations.errors.thumbnailUploadFailed") }));
     } finally {
-      setUploadingIdx(null);
+      setCompressingIdx(null);
       e.target.value = "";
     }
   };
@@ -445,26 +459,72 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
 
               <div className="af-form-row">
                 <label className="label">{t("adminFormations.videoThumbnailLabel")}</label>
-                <label className="af-video-thumb-upload" htmlFor={`af-week-thumb-${idx}`}>
-                  {week.thumbnail ? (
-                    <img src={week.thumbnail} alt="" className="af-video-thumb-preview" />
-                  ) : (
-                    <div className="af-video-thumb-placeholder">
-                      <FiImage size={20} />
-                      <span>{t("adminFormations.videoThumbnailChoose")}</span>
-                    </div>
-                  )}
-                  {uploadingIdx === idx && (
-                    <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>
-                  )}
-                </label>
-                <input
-                  id={`af-week-thumb-${idx}`}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={handleThumbnailUpload(idx)}
-                  hidden
-                />
+                <div className="af-thumb-mode-toggle">
+                  <button
+                    type="button"
+                    className={`af-thumb-mode-btn${week.thumbnailMode === "drive" ? " af-thumb-mode-btn--active" : ""}`}
+                    onClick={() => setThumbnailMode(idx, "drive")}
+                  >
+                    {t("adminFormations.thumbnailModeDrive")}
+                  </button>
+                  <button
+                    type="button"
+                    className={`af-thumb-mode-btn${week.thumbnailMode === "upload" ? " af-thumb-mode-btn--active" : ""}`}
+                    onClick={() => setThumbnailMode(idx, "upload")}
+                  >
+                    {t("adminFormations.thumbnailModeUpload")}
+                  </button>
+                </div>
+
+                {week.thumbnailMode === "upload" ? (
+                  <>
+                    <label className="af-video-thumb-upload" htmlFor={`af-week-thumb-${idx}`}>
+                      {week.thumbnail ? (
+                        <img src={week.thumbnail} alt="" className="af-video-thumb-preview" />
+                      ) : (
+                        <div className="af-video-thumb-placeholder">
+                          <FiImage size={20} />
+                          <span>{t("adminFormations.videoThumbnailChoose")}</span>
+                        </div>
+                      )}
+                      {compressingIdx === idx && (
+                        <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>
+                      )}
+                    </label>
+                    <input
+                      id={`af-week-thumb-${idx}`}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handleThumbnailFileChange(idx)}
+                      hidden
+                    />
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className="input"
+                      placeholder="https://drive.google.com/file/d/..."
+                      value={week.thumbnail}
+                      onChange={updateWeek(idx, "thumbnail")}
+                    />
+                    {/* Aperçu live côté client — normalisé en type "image" (format
+                        /thumbnail?id=..., adapté à <img>), jamais "video" (/preview,
+                        fait pour les iframes). Le champ garde le lien brut collé par
+                        l'admin ; seule cette prévisualisation est normalisée — la
+                        normalisation définitive et persistée se fait côté serveur au
+                        submit (patchFormationWeeks/Supervision), avec la même logique. */}
+                    {week.thumbnail && isGoogleDriveUrl(week.thumbnail) && (
+                      <div className="af-video-thumb-drive-preview">
+                        <img
+                          src={resolveDriveUrl(week.thumbnail, "image")}
+                          alt=""
+                          className="af-video-thumb-preview"
+                          onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
                 {thumbErrors[idx] && <span className="af-field-error">{thumbErrors[idx]}</span>}
               </div>
 

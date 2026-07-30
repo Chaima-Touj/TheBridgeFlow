@@ -6,6 +6,8 @@ import {
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { newsService } from "../../services/news.service.js";
+import { compressImageToBase64 } from "../../utils/imageCompression.js";
+import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 import "./AdminNews.css";
@@ -77,18 +79,29 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
   const { t } = useTranslation();
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(initial.image || "");
+  const [imageMode, setImageMode] = useState(initial.image?.startsWith("data:image/") ? "upload" : "drive");
+  const [compressing, setCompressing] = useState(false);
   const fileInputRef = useRef(null);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleImageChange = (e) => {
+  // Compression 100% locale (FileReader + canvas, voir imageCompression.js) —
+  // plus d'upload disque : le champ image part directement en base64 avec le
+  // reste du formulaire (JSON), ou reste un lien Drive saisi en mode "drive".
+  const handleImageFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setCompressing(true);
     setFieldErrors((prev) => ({ ...prev, image: undefined }));
+    try {
+      const base64 = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
+      setForm((f) => ({ ...f, image: base64 }));
+    } catch (err) {
+      setFieldErrors((prev) => ({ ...prev, image: err.message || t("adminNews.errors.imageRequired") }));
+    } finally {
+      setCompressing(false);
+      e.target.value = "";
+    }
   };
 
   const validate = () => {
@@ -96,7 +109,7 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
     if (!form.title.trim())    errors.title    = t("adminNews.errors.titleRequired");
     if (!form.excerpt.trim())  errors.excerpt  = t("adminNews.errors.excerptRequired");
     if (!form.category.trim()) errors.category = t("adminNews.errors.categoryRequired");
-    if (!isEdit && !imageFile) errors.image    = t("adminNews.errors.imageRequired");
+    if (!form.image.trim())    errors.image    = t("adminNews.errors.imageRequired");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -104,14 +117,14 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-    const fd = new FormData();
-    fd.append("title", form.title.trim());
-    fd.append("excerpt", form.excerpt.trim());
-    fd.append("content", form.content.trim());
-    fd.append("category", form.category.trim());
-    fd.append("publishedAt", form.publishedAt);
-    if (imageFile) fd.append("image", imageFile);
-    onSubmit(fd);
+    onSubmit({
+      title:       form.title.trim(),
+      excerpt:     form.excerpt.trim(),
+      content:     form.content.trim(),
+      category:    form.category.trim(),
+      publishedAt: form.publishedAt,
+      image:       form.image.trim(),
+    });
   };
 
   return (
@@ -125,28 +138,71 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
 
       <div className="af-form-row">
         <label className="label">{t("adminNews.imageLabel")}</label>
-        <button
-          type="button"
-          className="an-image-upload"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {imagePreview ? (
-            <img src={imagePreview} alt="" className="an-image-preview" />
-          ) : (
-            <div className="an-image-placeholder">
-              <FiImage size={24} />
-              <span>{t("adminNews.imageChoose")}</span>
-            </div>
-          )}
-          <div className="an-image-overlay"><FiUpload size={16} /> {t("adminNews.imageChange")}</div>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          onChange={handleImageChange}
-          hidden
-        />
+        <div className="af-thumb-mode-toggle">
+          <button
+            type="button"
+            className={`af-thumb-mode-btn${imageMode === "drive" ? " af-thumb-mode-btn--active" : ""}`}
+            onClick={() => setImageMode("drive")}
+          >
+            {t("adminFormations.thumbnailModeDrive")}
+          </button>
+          <button
+            type="button"
+            className={`af-thumb-mode-btn${imageMode === "upload" ? " af-thumb-mode-btn--active" : ""}`}
+            onClick={() => setImageMode("upload")}
+          >
+            {t("adminFormations.thumbnailModeUpload")}
+          </button>
+        </div>
+
+        {imageMode === "upload" ? (
+          <>
+            <button
+              type="button"
+              className="an-image-upload"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {form.image ? (
+                <img src={form.image} alt="" className="an-image-preview" />
+              ) : (
+                <div className="an-image-placeholder">
+                  <FiImage size={24} />
+                  <span>{t("adminNews.imageChoose")}</span>
+                </div>
+              )}
+              <div className="an-image-overlay"><FiUpload size={16} /> {t("adminNews.imageChange")}</div>
+              {compressing && <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleImageFileChange}
+              hidden
+            />
+          </>
+        ) : (
+          <>
+            <input
+              className="input"
+              placeholder="https://drive.google.com/file/d/..."
+              value={form.image}
+              onChange={set("image")}
+            />
+            {/* Aperçu live — normalisé en type "image" (format /thumbnail?id=...,
+                adapté à <img>), pas "video" (/preview, fait pour les iframes). */}
+            {form.image && isGoogleDriveUrl(form.image) && (
+              <div className="af-video-thumb-drive-preview">
+                <img
+                  src={resolveDriveUrl(form.image, "image")}
+                  alt=""
+                  className="af-video-thumb-preview"
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+              </div>
+            )}
+          </>
+        )}
         {fieldErrors.image && <span className="af-field-error">{fieldErrors.image}</span>}
       </div>
 
@@ -229,14 +285,14 @@ export default function AdminNews() {
   const openEdit   = (article) => { setFormError(""); setFormModal(article); };
   const closeForm  = () => { if (!submitting) { setFormModal(null); setFormError(""); } };
 
-  const handleFormSubmit = async (formData) => {
+  const handleFormSubmit = async (payload) => {
     setSubmitting(true);
     setFormError("");
     try {
       if (formModal === "create") {
-        await newsService.createNews(formData);
+        await newsService.createNews(payload);
       } else {
-        await newsService.updateNews(formModal._id, formData);
+        await newsService.updateNews(formModal._id, payload);
       }
       setFormModal(null);
       loadNews();

@@ -1016,6 +1016,8 @@
     "videoThumbnailLabel": "صورة الغلاف",
     "videoThumbnailChoose": "اختر صورة",
     "videoDriveLabel": "رابط Google Drive",
+    "thumbnailModeDrive": "رابط Google Drive",
+    "thumbnailModeUpload": "رفع من جهازي",
     "inProgress": "جارٍ التنفيذ…",
     "create": "إنشاء",
     "editFormationTitle": "تعديل — {{title}}",
