@@ -121,6 +121,13 @@
   width:     100%;
   background: #000;
   overflow:  hidden;
+  /* Isole ce conteneur sur son propre calque de composition dès sa création,
+     indépendamment de .cpm-overlay (backdrop-filter) et .cpm-modal (transform
+     persistant via animation ... forwards) qui l'englobent. Sans ça, l'iframe
+     qu'il contient peut rester "figé" sans repaint tant qu'un événement
+     externe (scroll) ne force pas le compositeur à le recomposer — cause la
+     plus probable du chargement qui semble bloqué avant tout scroll. */
+  transform: translateZ(0);
 }
 
 .cpm-iframe,

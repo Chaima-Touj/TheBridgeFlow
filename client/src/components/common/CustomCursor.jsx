@@ -81,9 +81,32 @@ export default function CustomCursor() {
     };
   }, []);
 
+  /* Suspend/resume : ne touche QUE l'affichage (classe .cc-hidden, déjà
+     transitionnée en CSS — opacity 0.2s), jamais au tracking souris/rAF
+     ci-dessous. Avant ce correctif, suspended faisait partie des deps de
+     l'effet lourd : il démontait tout (return null au rendu) à chaque
+     suspension, ce qui empêchait toute transition de jouer (rien à
+     transitionner sur un nœud retiré du DOM) — d'où le saut brutal signalé.
+     Le curseur reste maintenant monté et son opacité fond en douceur. */
+  useEffect(() => {
+    if (!active) return;
+    const html = document.documentElement;
+    const dot  = dotRef.current;
+    const ring = ringRef.current;
+    if (suspended) {
+      html.classList.remove("cc-active"); // réactive le curseur natif du navigateur
+      dot?.classList.add("cc-hidden");
+      ring?.classList.add("cc-hidden");
+    } else {
+      html.classList.add("cc-active");
+      dot?.classList.remove("cc-hidden");
+      ring?.classList.remove("cc-hidden");
+    }
+  }, [active, suspended]);
+
   useEffect(() => {
     const html = document.documentElement;
-    if (!active || suspended) {
+    if (!active) {
       html.classList.remove("cc-active");
       return;
     }
@@ -178,9 +201,9 @@ export default function CustomCursor() {
       document.removeEventListener("mouseenter", onMouseEnterDoc);
       html.classList.remove("cc-active");
     };
-  }, [active, suspended]);
+  }, [active]);
 
-  if (!active || suspended) return null;
+  if (!active) return null;
 
   return (
     <>

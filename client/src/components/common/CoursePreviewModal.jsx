@@ -16,7 +16,41 @@ function getYoutubeId(url = "") {
    dérivé d'une prop (pattern déconseillé par le linter react-hooks ici). */
 function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter, onIframeLeave }) {
   const [loaded, setLoaded] = useState(false);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
   const isIframeSource = !!ytId || isDrive;
+
+  // Instrumentation de diagnostic — mesure le délai réel entre le montage de
+  // l'iframe et son onLoad. Actif en production (pas de gate DEV) : le
+  // précédent gate `if (import.meta.env.DEV)` rendait ce log invisible en
+  // prod (build Vite, DEV=false), alors que c'est justement en prod que le
+  // bug de chargement Drive a été signalé. Lazy initializer : n'appelle
+  // performance.now() qu'une seule fois, au premier rendu de ce composant
+  // (jamais réinvoqué aux rendus suivants) — c'est le seul moyen pur d'y
+  // accéder pendant le rendu (accéder à un ref pendant le rendu est proscrit
+  // par le linter de ce projet).
+  const [mountedAt] = useState(() => performance.now());
+
+  // Watchdog de chargement — si l'iframe ne déclenche jamais onLoad (blocage
+  // CSP côté Google Drive, fichier mal partagé...), bascule loadTimedOut à
+  // true après 7s au lieu de laisser le spinner tourner indéfiniment sans
+  // feedback. Se réinitialise naturellement à chaque nouvelle vidéo car
+  // VideoFrame est remonté via key={videoUrl} par le parent (voir plus haut)
+  // — pas besoin de reset manuel. Le timer est nettoyé au démontage (cleanup
+  // de l'effect, ex: changement de vidéo avant l'expiration) et annulé
+  // explicitement dans handleLoad si le chargement finit par réussir après coup.
+  const timeoutIdRef = useRef(null);
+  useEffect(() => {
+    if (!isIframeSource) return undefined;
+    timeoutIdRef.current = setTimeout(() => setLoadTimedOut(true), 7000);
+    return () => clearTimeout(timeoutIdRef.current);
+  }, [isIframeSource, videoUrl]);
+
+  const handleLoad = () => {
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+    const elapsed = Math.round(performance.now() - mountedAt);
+    console.log(`[CoursePreviewModal] iframe onLoad après ${elapsed}ms (videoUrl: ${videoUrl})`);
+    setLoaded(true);
+  };
 
   return (
     <>
@@ -27,7 +61,7 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
           title={isTrailer ? t("coursePreview.trailer") : week.content}
           allow="autoplay; encrypted-media; fullscreen"
           allowFullScreen
-          onLoad={() => setLoaded(true)}
+          onLoad={handleLoad}
           onMouseEnter={onIframeEnter}
           onMouseLeave={onIframeLeave}
         />
@@ -38,7 +72,7 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
           title={isTrailer ? t("coursePreview.trailer") : week.content}
           allow="autoplay; encrypted-media; fullscreen"
           allowFullScreen
-          onLoad={() => setLoaded(true)}
+          onLoad={handleLoad}
           onMouseEnter={onIframeEnter}
           onMouseLeave={onIframeLeave}
         />
@@ -62,9 +96,18 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
         </div>
       )}
       {isIframeSource && !loaded && (
-        <div className="cpm-loading" aria-hidden="true">
-          <span className="cpm-spinner" />
-        </div>
+        loadTimedOut ? (
+          <div className="cpm-loading" role="status">
+            <p style={{ color: "#fff", textAlign: "center", padding: "0 1.5rem", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 320, margin: 0 }}>
+              Le chargement prend plus de temps que prévu.
+              {isDrive ? " Si la vidéo ne s'affiche pas, vous pouvez l'ouvrir directement dans Google Drive." : ""}
+            </p>
+          </div>
+        ) : (
+          <div className="cpm-loading" aria-hidden="true">
+            <span className="cpm-spinner" />
+          </div>
+        )
       )}
     </>
   );
@@ -118,6 +161,27 @@ export default function CoursePreviewModal({
   /* Custom fullscreen for trailer (keeps blurred background layer) */
   const wrapperRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  /* Filet de sécurité pour le figement d'iframe observé avant tout scroll
+     (voir .cpm-player-wrap en CSS pour la cause probable — backdrop-filter +
+     transform persistant sur .cpm-overlay/.cpm-modal, ancêtres de l'iframe,
+     empêchent le compositeur de le peindre tant qu'aucun repaint externe
+     n'est déclenché). Un double rAF (attend deux peintures, pas juste une
+     frame planifiée) force une lecture de layout juste après le premier
+     affichage réel de la modale — le même effet qu'un scroll, sans attendre
+     que l'utilisateur le fasse lui-même. */
+  useEffect(() => {
+    let raf2 = null;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        if (wrapperRef.current) void wrapperRef.current.offsetHeight;
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isTrailer) return;
