@@ -7,9 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "upload-videos": "node scripts/upload-to-cloudinary.js",
-    "compress-large-videos": "node scripts/compress-large-videos.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -6,7 +6,7 @@
 
 ## Étape 1 — Analyse du Dashboard Student existant
 
-### Routes (depuis `client/src/App.jsx`)
+### Routes (depuis `thebridgeflow-front/src/App.jsx`)
 
 | Route | Composant | Fonctionnalités réelles |
 |---|---|---|
@@ -43,7 +43,7 @@
 
 ## Étape 2 — Analyse du modèle de données (backend)
 
-### Modèles Mongoose (`server/models/`)
+### Modèles Mongoose (`thebridgeflow-back/models/`)
 
 | Modèle | Champs clés | Rôle |
 |---|---|---|
@@ -60,9 +60,9 @@
 
 ### Routes/contrôleurs admin existants : aucun
 
-Recherche explicite (`admin`, `authorize`, RBAC) dans tout `server/` :
+Recherche explicite (`admin`, `authorize`, RBAC) dans tout `thebridgeflow-back/` :
 
-- Le middleware `authorize(...roles)` (`server/middleware/auth.middleware.js`) est **générique et déjà prêt** — utilisé aujourd'hui pour `"étudiant"` et `"entreprise"`. Il suffit d'appeler `authorize("admin")` sur de nouvelles routes ; aucune infrastructure à créer.
+- Le middleware `authorize(...roles)` (`thebridgeflow-back/middleware/auth.middleware.js`) est **générique et déjà prêt** — utilisé aujourd'hui pour `"étudiant"` et `"entreprise"`. Il suffit d'appeler `authorize("admin")` sur de nouvelles routes ; aucune infrastructure à créer.
 - **Zéro route n'utilise `authorize("admin")` aujourd'hui.** Il n'existe donc **aucun CRUD utilisateurs, aucune gestion de formations protégée, aucun traitement des demandes** côté admin. Tout est à construire.
 
 ### Trois découvertes concrètes qui doivent orienter la structure
