@@ -1118,29 +1118,13 @@
     }
   },
   "adminFeedbacks": {
-    "pageSubtitle": "Manage reviews, video testimonials, and screenshots shown on the site",
+    "pageSubtitle": "Manage video testimonials and screenshots shown on the site",
     "tabs": {
       "formations": "Formations",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
       "screenshots": "Screenshots"
     },
-    "formationSelectLabel": "Formation",
-    "noFormations": "No formations available.",
-    "addReview": "Add a review",
-    "editReview": "Edit review",
-    "emptyReviews": "No reviews for this formation.",
-    "colName": "Name",
-    "colRating": "Rating",
-    "colComment": "Comment",
-    "colDate": "Date",
-    "reviewNameLabel": "Name *",
-    "reviewRatingLabel": "Rating",
-    "reviewDateLabel": "Date",
-    "reviewCommentLabel": "Comment",
-    "starAriaLabel": "{{n}} star(s)",
-    "deleteReviewTitle": "Delete review",
-    "confirmDeleteReview": "Are you sure you want to delete the review from",
     "addTestimonial": "Add a testimonial",
     "editTestimonial": "Edit testimonial",
     "emptyTestimonials": "No video testimonials for this category.",
@@ -1160,7 +1144,6 @@
     "deleteScreenshotTitle": "Delete screenshot",
     "confirmDeleteScreenshot": "Are you sure you want to delete this screenshot?",
     "errors": {
-      "nameRequired": "Name is required",
       "driveUrlRequired": "Video link is required",
       "imageRequired": "An image is required",
       "generic": "An error occurred. Please try again.",

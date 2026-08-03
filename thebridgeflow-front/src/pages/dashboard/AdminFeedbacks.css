@@ -1,8 +1,8 @@
-/* AdminFeedbacks.css — styles spécifiques à la page Feedbacks (avis
-   formations + témoignages vidéo + captures d'écran). Le tableau/toolbar/
-   menu d'actions générique vient de AdminFormations.css (classes af-*), la
-   zone d'upload d'image de AdminNews.css (classes an-*) — déjà réutilisées
-   ailleurs. Ici : onglets, étoiles de notation, grille de cartes. */
+/* AdminFeedbacks.css — styles spécifiques à la page Feedbacks (témoignages
+   vidéo + captures d'écran). Le tableau/toolbar/menu d'actions générique
+   vient de AdminFormations.css (classes af-*), la zone d'upload d'image de
+   AdminNews.css (classes an-*) — déjà réutilisées ailleurs. Ici : onglets,
+   grille de cartes. */
 
 /* ── Onglets ──────────────────────────────────────────────────────────────── */
 .afd-tabs {
@@ -28,37 +28,6 @@
 .afd-tab--active {
   color: var(--primary);
   border-bottom-color: var(--primary);
-}
-
-/* ── Étoiles ──────────────────────────────────────────────────────────────── */
-.afd-star-display {
-  display: inline-flex;
-  gap: 2px;
-}
-.afd-star--filled { color: #F59E0B; }
-.afd-star--empty  { color: var(--border); }
-
-.afd-star-input {
-  display: inline-flex;
-  gap: 4px;
-}
-.afd-star-btn {
-  position: relative;
-  border: none;
-  background: none;
-  padding: 2px;
-  cursor: pointer;
-  line-height: 0;
-}
-/* Élargit la zone cliquable à ~28px (WCAG 2.5.5) sans agrandir l'étoile visible */
-.afd-star-btn::before { content: ""; position: absolute; inset: -4px; }
-
-/* ── Cellule commentaire (tableau avis) — tronquée, tooltip natif au survol ── */
-.afd-comment-cell {
-  max-width: 280px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Indice de catégorie fixe (formulaire témoignage vidéo) ─────────────────── */

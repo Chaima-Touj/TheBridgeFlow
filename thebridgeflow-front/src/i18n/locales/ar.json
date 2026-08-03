@@ -1118,29 +1118,13 @@
     }
   },
   "adminFeedbacks": {
-    "pageSubtitle": "إدارة التقييمات وشهادات الفيديو ولقطات الشاشة المعروضة على الموقع",
+    "pageSubtitle": "إدارة شهادات الفيديو ولقطات الشاشة المعروضة على الموقع",
     "tabs": {
       "formations": "التكوينات",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
       "screenshots": "لقطات الشاشة"
     },
-    "formationSelectLabel": "التكوين",
-    "noFormations": "لا توجد تكوينات متاحة.",
-    "addReview": "إضافة تقييم",
-    "editReview": "تعديل التقييم",
-    "emptyReviews": "لا توجد تقييمات لهذا التكوين.",
-    "colName": "الاسم",
-    "colRating": "التقييم",
-    "colComment": "التعليق",
-    "colDate": "التاريخ",
-    "reviewNameLabel": "الاسم *",
-    "reviewRatingLabel": "التقييم",
-    "reviewDateLabel": "التاريخ",
-    "reviewCommentLabel": "التعليق",
-    "starAriaLabel": "{{n}} نجمة/نجوم",
-    "deleteReviewTitle": "حذف التقييم",
-    "confirmDeleteReview": "هل تريد فعلاً حذف تقييم",
     "addTestimonial": "إضافة شهادة",
     "editTestimonial": "تعديل الشهادة",
     "emptyTestimonials": "لا توجد شهادات فيديو لهذه الفئة.",
@@ -1160,7 +1144,6 @@
     "deleteScreenshotTitle": "حذف لقطة الشاشة",
     "confirmDeleteScreenshot": "هل تريد فعلاً حذف لقطة الشاشة هذه؟",
     "errors": {
-      "nameRequired": "الاسم مطلوب",
       "driveUrlRequired": "رابط الفيديو مطلوب",
       "imageRequired": "الصورة مطلوبة",
       "generic": "حدث خطأ ما. حاول مرة أخرى.",

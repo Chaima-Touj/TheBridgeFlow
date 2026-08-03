@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiPlus, FiStar, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
-  FiMessageSquare, FiExternalLink, FiVideo,
+  FiPlus, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
+  FiExternalLink, FiVideo,
 } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
-import { formationsService } from "../../services/formations.service.js";
 import { settingsService } from "../../services/settings.service.js";
 import { feedbacksService } from "../../services/feedbacks.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
@@ -24,51 +22,20 @@ const TABS = [
   { id: "screenshots",  labelKey: "adminFeedbacks.tabs.screenshots" },
 ];
 
+// L'onglet "formations" gère SiteSettings.testimonialVideos dont
+// category="formation" (vidéos portraits/ambiance des étudiants, confirmé
+// visuellement — pas "summer-camp", qui montre en réalité des captures
+// d'écran/salles de formation). Les ids d'onglet "summer-camp"/"pfe"
+// correspondent déjà tels quels à leur valeur category.
+const TAB_CATEGORY = {
+  formations: "formation",
+  "summer-camp": "summer-camp",
+  pfe: "pfe",
+};
+const TESTIMONIAL_TABS = ["formations", "summer-camp", "pfe"];
+
 function extractErrorMessage(err, fallback) {
   return err?.response?.data?.message || fallback;
-}
-
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function toDateInputValue(value) {
-  return value ? new Date(value).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-}
-
-/* ─── Étoiles — affichage lecture seule (tableau des avis) ────────────────── */
-function StarRatingDisplay({ value = 0 }) {
-  return (
-    <div className="afd-star-display" aria-label={`${value}/5`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        n <= value
-          ? <FaStar key={n} size={13} className="afd-star--filled" />
-          : <FiStar key={n} size={13} className="afd-star--empty" />
-      ))}
-    </div>
-  );
-}
-
-/* ─── Étoiles — sélecteur cliquable (formulaire) ───────────────────────────── */
-function StarRatingInput({ value, onChange }) {
-  const { t } = useTranslation();
-  return (
-    <div className="afd-star-input" role="radiogroup" aria-label={t("adminFeedbacks.reviewRatingLabel")}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          type="button"
-          key={n}
-          className="afd-star-btn"
-          onClick={() => onChange(n)}
-          aria-label={t("adminFeedbacks.starAriaLabel", { n })}
-          aria-pressed={n === value}
-        >
-          {n <= value ? <FaStar size={20} className="afd-star--filled" /> : <FiStar size={20} className="afd-star--empty" />}
-        </button>
-      ))}
-    </div>
-  );
 }
 
 /* ─── Menu d'actions par ligne/carte (Modifier / Supprimer) ────────────────── */
@@ -172,92 +139,6 @@ function DriveOrUploadField({ value, onChange, label }) {
       )}
       {error && <span className="af-field-error">{error}</span>}
     </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Formulaire — Avis de formation (Formation.reviews[])
-   ═══════════════════════════════════════════════════════════════════════════ */
-function ReviewForm({ initial, submitting, formError, onSubmit, onCancel }) {
-  const { t } = useTranslation();
-  const [form, setForm] = useState(initial);
-  const [fieldErrors, setFieldErrors] = useState({});
-
-  const validate = () => {
-    const errors = {};
-    if (!form.name.trim()) errors.name = t("adminFeedbacks.errors.nameRequired");
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    onSubmit({
-      name:    form.name.trim(),
-      rating:  form.rating,
-      comment: form.comment.trim(),
-      date:    form.date,
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} noValidate>
-      {formError && (
-        <div className="af-form-error">
-          <FiAlertTriangle size={15} />
-          <span>{formError}</span>
-        </div>
-      )}
-
-      <div className="af-form-row">
-        <label className="label" htmlFor="afd-review-name">{t("adminFeedbacks.reviewNameLabel")}</label>
-        <input
-          id="afd-review-name"
-          className="input"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-        />
-        {fieldErrors.name && <span className="af-field-error">{fieldErrors.name}</span>}
-      </div>
-
-      <div className="af-form-grid">
-        <div className="af-form-row">
-          <label className="label">{t("adminFeedbacks.reviewRatingLabel")}</label>
-          <StarRatingInput value={form.rating} onChange={(rating) => setForm((f) => ({ ...f, rating }))} />
-        </div>
-        <div className="af-form-row">
-          <label className="label" htmlFor="afd-review-date">{t("adminFeedbacks.reviewDateLabel")}</label>
-          <input
-            id="afd-review-date"
-            type="date"
-            className="input"
-            value={form.date}
-            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-          />
-        </div>
-      </div>
-
-      <div className="af-form-row">
-        <label className="label" htmlFor="afd-review-comment">{t("adminFeedbacks.reviewCommentLabel")}</label>
-        <textarea
-          id="afd-review-comment"
-          className="input"
-          rows={3}
-          value={form.comment}
-          onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
-        />
-      </div>
-
-      <div className="modal-footer" style={{ padding: "16px 0 0", borderTop: "none" }}>
-        <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
-          {t("common.cancel")}
-        </button>
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? t("adminFormations.inProgress") : t("common.save")}
-        </button>
-      </div>
-    </form>
   );
 }
 
@@ -410,20 +291,7 @@ export default function AdminFeedbacks() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("formations");
 
-  // ── Formations (avis) ──────────────────────────────────────────────────
-  const [formations, setFormations] = useState([]);
-  const [formationsLoading, setFormationsLoading] = useState(true);
-  const [formationsError, setFormationsError] = useState(false);
-  const [selectedFormationId, setSelectedFormationId] = useState("");
-
-  const [reviewModal, setReviewModal] = useState(null); // null | "create" | review
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewFormError, setReviewFormError] = useState("");
-  const [reviewDeleteTarget, setReviewDeleteTarget] = useState(null);
-  const [reviewDeleting, setReviewDeleting] = useState(false);
-  const [reviewDeleteError, setReviewDeleteError] = useState("");
-
-  // ── Témoignages vidéo (Summer Camp / PFE) ──────────────────────────────
+  // ── Témoignages vidéo (Formations / Summer Camp / PFE) ─────────────────
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [testimonialsError, setTestimonialsError] = useState(false);
@@ -447,19 +315,8 @@ export default function AdminFeedbacks() {
   const [screenshotDeleting, setScreenshotDeleting] = useState(false);
   const [screenshotDeleteError, setScreenshotDeleteError] = useState("");
 
-  // ── Chargement initial (les 3 sources, une seule fois — la page bascule
+  // ── Chargement initial (les 2 sources, une seule fois — la page bascule
   //    ensuite entre onglets sans refetch, sauf après une action CRUD) ──────
-  const loadFormations = useCallback(() => {
-    formationsService.getAll()
-      .then(({ data }) => {
-        setFormations(data);
-        setFormationsError(false);
-        setSelectedFormationId((prev) => (prev && data.some((f) => f._id === prev)) ? prev : (data[0]?._id || ""));
-      })
-      .catch(() => setFormationsError(true))
-      .finally(() => setFormationsLoading(false));
-  }, []);
-
   const loadTestimonials = useCallback(() => {
     settingsService.get()
       .then(({ data }) => { setTestimonials(data.testimonialVideos || []); setTestimonialsError(false); })
@@ -476,59 +333,13 @@ export default function AdminFeedbacks() {
 
   // Un effet séparé par source — les regrouper en un seul déclenche plusieurs
   // setState synchrones d'affilée dans le même effet (règle react-hooks/set-state-in-effect).
-  useEffect(() => { loadFormations(); }, [loadFormations]);
   useEffect(() => { loadTestimonials(); }, [loadTestimonials]);
   useEffect(() => { loadScreenshots(); }, [loadScreenshots]);
 
-  const currentFormation = useMemo(
-    () => formations.find((f) => f._id === selectedFormationId) || null,
-    [formations, selectedFormationId]
-  );
-
   const testimonialsForTab = useMemo(
-    () => testimonials.filter((v) => v.category === activeTab),
+    () => testimonials.filter((v) => v.category === TAB_CATEGORY[activeTab]),
     [testimonials, activeTab]
   );
-
-  // ── Avis — handlers ─────────────────────────────────────────────────────
-  const openReviewCreate = () => { setReviewFormError(""); setReviewModal("create"); };
-  const openReviewEdit   = (review) => { setReviewFormError(""); setReviewModal(review); };
-  const closeReviewForm  = () => { if (!reviewSubmitting) { setReviewModal(null); setReviewFormError(""); } };
-
-  const handleReviewSubmit = async (payload) => {
-    if (!selectedFormationId) return;
-    setReviewSubmitting(true);
-    setReviewFormError("");
-    try {
-      if (reviewModal === "create") {
-        await feedbacksService.addReview(selectedFormationId, payload);
-      } else {
-        await feedbacksService.updateReview(selectedFormationId, reviewModal._id, payload);
-      }
-      setReviewModal(null);
-      loadFormations();
-    } catch (err) {
-      setReviewFormError(extractErrorMessage(err, t("adminFeedbacks.errors.generic")));
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
-
-  const openReviewDelete  = (review) => { setReviewDeleteError(""); setReviewDeleteTarget(review); };
-  const closeReviewDelete = () => { if (!reviewDeleting) { setReviewDeleteTarget(null); setReviewDeleteError(""); } };
-  const confirmReviewDelete = async () => {
-    setReviewDeleting(true);
-    setReviewDeleteError("");
-    try {
-      await feedbacksService.deleteReview(selectedFormationId, reviewDeleteTarget._id);
-      setReviewDeleteTarget(null);
-      loadFormations();
-    } catch (err) {
-      setReviewDeleteError(extractErrorMessage(err, t("adminFeedbacks.errors.deleteFailed")));
-    } finally {
-      setReviewDeleting(false);
-    }
-  };
 
   // ── Témoignages vidéo — handlers ────────────────────────────────────────
   const openTestimonialCreate = () => { setTestimonialFormError(""); setTestimonialModal("create"); };
@@ -540,10 +351,9 @@ export default function AdminFeedbacks() {
     setTestimonialFormError("");
     try {
       if (testimonialModal === "create") {
-        // Catégorie fixée à l'onglet actif — Summer Camp et PFE sont deux
-        // catégories distinctes des avis de formation (Formation.reviews),
-        // jamais mélangées.
-        await feedbacksService.addTestimonialVideo({ ...payload, category: activeTab });
+        // Catégorie fixée à l'onglet actif — voir TAB_CATEGORY (l'id d'onglet
+        // "formations" correspond à category="formation", singulier, en base).
+        await feedbacksService.addTestimonialVideo({ ...payload, category: TAB_CATEGORY[activeTab] });
       } else {
         await feedbacksService.updateTestimonialVideo(testimonialModal._id, payload);
       }
@@ -613,16 +423,12 @@ export default function AdminFeedbacks() {
 
   // ── Bouton "Ajouter" de la toolbar — dépend de l'onglet actif ───────────
   const handleAddClick = () => {
-    if (activeTab === "formations")  return openReviewCreate();
     if (activeTab === "screenshots") return openScreenshotCreate();
     return openTestimonialCreate();
   };
-  const addDisabled = activeTab === "formations" && !selectedFormationId;
-  const addLabel = activeTab === "formations"
-    ? t("adminFeedbacks.addReview")
-    : activeTab === "screenshots"
-      ? t("adminFeedbacks.addScreenshot")
-      : t("adminFeedbacks.addTestimonial");
+  const addLabel = activeTab === "screenshots"
+    ? t("adminFeedbacks.addScreenshot")
+    : t("adminFeedbacks.addTestimonial");
 
   return (
     <DashboardLayout title={t("sidebar.admin.feedbacks")} subtitle={t("adminFeedbacks.pageSubtitle")}>
@@ -649,76 +455,14 @@ export default function AdminFeedbacks() {
           <div className="af-toolbar">
             <h1 className="af-toolbar-title">{t(TABS.find((tb) => tb.id === activeTab).labelKey)}</h1>
             <div className="af-toolbar-actions">
-              {activeTab === "formations" && (
-                <div className="af-select-wrap">
-                  <label htmlFor="afd-formation-select">{t("adminFeedbacks.formationSelectLabel")}</label>
-                  <select
-                    id="afd-formation-select"
-                    className="af-select"
-                    value={selectedFormationId}
-                    onChange={(e) => setSelectedFormationId(e.target.value)}
-                  >
-                    {formations.map((f) => <option key={f._id} value={f._id}>{f.title}</option>)}
-                  </select>
-                </div>
-              )}
-              <button type="button" className="btn btn-primary" onClick={handleAddClick} disabled={addDisabled}>
+              <button type="button" className="btn btn-primary" onClick={handleAddClick}>
                 <FiPlus size={15} /> {addLabel}
               </button>
             </div>
           </div>
 
-          {/* ── Onglet : Formations (avis) ────────────────────────────── */}
-          {activeTab === "formations" && (
-            formationsLoading ? (
-              <div className="sd-skeleton" style={{ height: 240, margin: "0 20px 20px" }} />
-            ) : formationsError ? (
-              <div className="sd-empty-box"><p>{t("adminFeedbacks.errors.loadFailed")}</p></div>
-            ) : !currentFormation ? (
-              <div className="sd-empty-box">
-                <FiMessageSquare size={28} style={{ opacity: .3 }} />
-                <p>{t("adminFeedbacks.noFormations")}</p>
-              </div>
-            ) : currentFormation.reviews?.length === 0 ? (
-              <div className="sd-empty-box">
-                <FiMessageSquare size={28} style={{ opacity: .3 }} />
-                <p>{t("adminFeedbacks.emptyReviews")}</p>
-                <button type="button" className="btn btn-primary" onClick={openReviewCreate}>
-                  <FiPlus size={15} /> {t("adminFeedbacks.addReview")}
-                </button>
-              </div>
-            ) : (
-              <div className="af-table-wrap">
-                <table className="af-table">
-                  <thead>
-                    <tr>
-                      <th>{t("adminFeedbacks.colName")}</th>
-                      <th>{t("adminFeedbacks.colRating")}</th>
-                      <th>{t("adminFeedbacks.colComment")}</th>
-                      <th>{t("adminFeedbacks.colDate")}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...currentFormation.reviews].sort((a, b) => new Date(b.date) - new Date(a.date)).map((review) => (
-                      <tr key={review._id}>
-                        <td className="af-cell-title">{review.name}</td>
-                        <td><StarRatingDisplay value={review.rating} /></td>
-                        <td className="afd-comment-cell" title={review.comment}>{review.comment || "—"}</td>
-                        <td>{formatDate(review.date)}</td>
-                        <td>
-                          <RowActionsMenu onEdit={() => openReviewEdit(review)} onDelete={() => openReviewDelete(review)} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          )}
-
-          {/* ── Onglets : Summer Camp / PFE (témoignages vidéo) ─────────── */}
-          {(activeTab === "summer-camp" || activeTab === "pfe") && (
+          {/* ── Onglets : Formations / Summer Camp / PFE (témoignages vidéo) ── */}
+          {TESTIMONIAL_TABS.includes(activeTab) && (
             testimonialsLoading ? (
               <div className="sd-skeleton" style={{ height: 240, margin: "0 20px 20px" }} />
             ) : testimonialsError ? (
@@ -786,54 +530,6 @@ export default function AdminFeedbacks() {
         </div>
       </div>
 
-      {/* ── Modale — Avis de formation ─────────────────────────────────── */}
-      {reviewModal && (
-        <Modal
-          title={reviewModal === "create" ? t("adminFeedbacks.addReview") : t("adminFeedbacks.editReview")}
-          onClose={closeReviewForm}
-          maxWidth={520}
-        >
-          <ReviewForm
-            initial={reviewModal === "create"
-              ? { name: "", rating: 5, comment: "", date: toDateInputValue() }
-              : { name: reviewModal.name || "", rating: reviewModal.rating || 5, comment: reviewModal.comment || "", date: toDateInputValue(reviewModal.date) }}
-            submitting={reviewSubmitting}
-            formError={reviewFormError}
-            onSubmit={handleReviewSubmit}
-            onCancel={closeReviewForm}
-          />
-        </Modal>
-      )}
-
-      {reviewDeleteTarget && (
-        <Modal
-          title={t("adminFeedbacks.deleteReviewTitle")}
-          onClose={closeReviewDelete}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeReviewDelete} disabled={reviewDeleting}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmReviewDelete} disabled={reviewDeleting}>
-                {reviewDeleting ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminFeedbacks.confirmDeleteReview")} <strong>{reviewDeleteTarget.name}</strong> ?
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {reviewDeleteError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{reviewDeleteError}</span>
-            </div>
-          )}
-        </Modal>
-      )}
-
       {/* ── Modale — Témoignage vidéo ──────────────────────────────────── */}
       {testimonialModal && (
         <Modal
@@ -845,7 +541,7 @@ export default function AdminFeedbacks() {
             initial={testimonialModal === "create"
               ? { driveUrl: "", thumbnail: "" }
               : { driveUrl: testimonialModal.driveUrl || testimonialModal.url || "", thumbnail: testimonialModal.thumbnail || "" }}
-            categoryLabel={t(activeTab === "summer-camp" ? "adminFeedbacks.tabs.summerCamp" : "adminFeedbacks.tabs.pfe")}
+            categoryLabel={t(TABS.find((tb) => tb.id === activeTab).labelKey)}
             submitting={testimonialSubmitting}
             formError={testimonialFormError}
             onSubmit={handleTestimonialSubmit}

@@ -248,11 +248,20 @@
   max-width: 100%;
   max-height: 100%;
 }
+/* La largeur combine 3 contraintes dans le même min() : 90vw, 420px, et
+   l'équivalent en largeur d'un plafond de 88vh à ratio 9:16
+   (calc(88vh * 9 / 16)) — remplace l'ancien `max-height: 88vh` séparé, qui
+   entrait en conflit avec `width` + `aspect-ratio` sur les viewports bas
+   (ex: 1280x720) : le navigateur respectait `max-height` en priorité, ce qui
+   cassait le ratio 9:16 réellement rendu (ex: 420×634 au lieu de 420×747) et
+   pilarboxait (barres noires gauche/droite) les vidéos natives 9:16 — la
+   barre de contrôles native suit alors la largeur visible de la vidéo, pas
+   celle de la carte. Avec un seul `width` cohérent + `aspect-ratio`, la
+   hauteur en découle toujours correctement, ratio jamais violé. */
 .vtc-modal__video-wrap {
   position: relative;
-  width: min(90vw, 420px);
+  width: min(90vw, 420px, calc(88vh * 9 / 16));
   aspect-ratio: 9 / 16;
-  max-height: 88vh;
   background: #000;
   border-radius: 14px;
   overflow: hidden;
@@ -354,7 +363,7 @@
     max-width: 300px;
     scroll-snap-align: start;
   }
-  .vtc-modal__video-wrap { width: min(88vw, 340px); }
+  .vtc-modal__video-wrap { width: min(88vw, 340px, calc(88vh * 9 / 16)); }
   .vtc-modal__nav { width: 38px; height: 38px; }
 }
 

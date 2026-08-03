@@ -1118,29 +1118,13 @@
     }
   },
   "adminFeedbacks": {
-    "pageSubtitle": "Gérer les avis, témoignages vidéo et captures d'écran affichés sur le site",
+    "pageSubtitle": "Gérer les témoignages vidéo et captures d'écran affichés sur le site",
     "tabs": {
       "formations": "Formations",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
       "screenshots": "Captures d'écran"
     },
-    "formationSelectLabel": "Formation",
-    "noFormations": "Aucune formation disponible.",
-    "addReview": "Ajouter un avis",
-    "editReview": "Modifier l'avis",
-    "emptyReviews": "Aucun avis pour cette formation.",
-    "colName": "Nom",
-    "colRating": "Note",
-    "colComment": "Commentaire",
-    "colDate": "Date",
-    "reviewNameLabel": "Nom *",
-    "reviewRatingLabel": "Note",
-    "reviewDateLabel": "Date",
-    "reviewCommentLabel": "Commentaire",
-    "starAriaLabel": "{{n}} étoile(s)",
-    "deleteReviewTitle": "Supprimer l'avis",
-    "confirmDeleteReview": "Voulez-vous vraiment supprimer l'avis de",
     "addTestimonial": "Ajouter un témoignage",
     "editTestimonial": "Modifier le témoignage",
     "emptyTestimonials": "Aucun témoignage vidéo pour cette catégorie.",
@@ -1160,7 +1144,6 @@
     "deleteScreenshotTitle": "Supprimer la capture",
     "confirmDeleteScreenshot": "Voulez-vous vraiment supprimer cette capture d'écran ?",
     "errors": {
-      "nameRequired": "Le nom est requis",
       "driveUrlRequired": "Le lien vidéo est requis",
       "imageRequired": "Une image est requise",
       "generic": "Une erreur est survenue. Réessayez.",
