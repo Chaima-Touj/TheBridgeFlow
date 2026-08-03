@@ -1,0 +1,135 @@
+/* AdminFeedbacks.css — styles spécifiques à la page Feedbacks (avis
+   formations + témoignages vidéo + captures d'écran). Le tableau/toolbar/
+   menu d'actions générique vient de AdminFormations.css (classes af-*), la
+   zone d'upload d'image de AdminNews.css (classes an-*) — déjà réutilisées
+   ailleurs. Ici : onglets, étoiles de notation, grille de cartes. */
+
+/* ── Onglets ──────────────────────────────────────────────────────────────── */
+.afd-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 20px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.afd-tab {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.afd-tab:hover { color: var(--text); }
+.afd-tab--active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* ── Étoiles ──────────────────────────────────────────────────────────────── */
+.afd-star-display {
+  display: inline-flex;
+  gap: 2px;
+}
+.afd-star--filled { color: #F59E0B; }
+.afd-star--empty  { color: var(--border); }
+
+.afd-star-input {
+  display: inline-flex;
+  gap: 4px;
+}
+.afd-star-btn {
+  position: relative;
+  border: none;
+  background: none;
+  padding: 2px;
+  cursor: pointer;
+  line-height: 0;
+}
+/* Élargit la zone cliquable à ~28px (WCAG 2.5.5) sans agrandir l'étoile visible */
+.afd-star-btn::before { content: ""; position: absolute; inset: -4px; }
+
+/* ── Cellule commentaire (tableau avis) — tronquée, tooltip natif au survol ── */
+.afd-comment-cell {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Indice de catégorie fixe (formulaire témoignage vidéo) ─────────────────── */
+.afd-category-hint {
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ── Grille de cartes (témoignages vidéo / captures d'écran) ────────────────── */
+.afd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+.afd-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.afd-card-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--bg);
+}
+.afd-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.afd-card-thumb--placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.afd-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+}
+.afd-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.afd-card-link:hover { text-decoration: underline; }
+.afd-card-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.afd-card-order {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}

@@ -11,11 +11,17 @@ import "./TestimonialsScreenshotCarousel.css";
  * VideoTestimonialCarousel, aucun état/donnée partagé.
  * Clic sur une carte : ouvre l'image en grand dans une lightbox, la boucle
  * en arrière-plan continue de tourner (aucun changement à cette mécanique).
+ *
+ * `items` : tableau [{id, src}] fourni par l'appelant (ex: données réelles de
+ * l'API /api/testimonial-screenshots dans LandingPage.jsx). Retombe sur le
+ * fichier statique SCREENSHOT_FEEDBACKS si non fourni, pour rester utilisable
+ * telle quelle par tout autre appelant existant ou futur.
  */
-export default function TestimonialsScreenshotCarousel({ title, subtitle }) {
+export default function TestimonialsScreenshotCarousel({ title, subtitle, items }) {
   const { t } = useTranslation();
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const overlayRef = useRef(null);
+  const feedbacks = items || SCREENSHOT_FEEDBACKS;
 
   const closeLightbox = useCallback(() => setLightboxSrc(null), []);
 
@@ -35,9 +41,9 @@ export default function TestimonialsScreenshotCarousel({ title, subtitle }) {
     if (e.target === overlayRef.current) closeLightbox();
   };
 
-  if (SCREENSHOT_FEEDBACKS.length === 0) return null;
+  if (feedbacks.length === 0) return null;
 
-  const track = [...SCREENSHOT_FEEDBACKS, ...SCREENSHOT_FEEDBACKS];
+  const track = [...feedbacks, ...feedbacks];
 
   return (
     <section id="screenshot-testimonials" className="stc-section">

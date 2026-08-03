@@ -72,7 +72,9 @@ export const getFormationById = asyncHandler(async (req, res) => {
 
 /* ── POST /api/formations ─────────────────────────────────────────────────────
    Crée une nouvelle formation (champs de base uniquement). weeks/supervision/
-   videos/reviews/faq restent vides — ils ont leurs propres routes dédiées.    */
+   videos restent vides — ils ont leurs propres routes dédiées. reviews a ses
+   propres routes CRUD par avis (voir addReview/updateReview/deleteReview
+   plus bas) ; faq n'a pas encore de route dédiée.                           */
 export const createFormation = asyncHandler(async (req, res) => {
   const { title, slug, duration, price, level, description, mode, certificate, image, trailerVideoUrl, trailerThumbnail } = req.body;
 
@@ -292,4 +294,83 @@ export const patchFormationSupervision = asyncHandler(async (req, res) => {
   ).select("-__v");
   if (!formation) return res.status(404).json({ message: "Formation introuvable." });
   res.json({ message: "supervision mis à jour.", slug: formation.slug, count: formation.supervision.length });
+});
+
+/* ── POST /api/formations/:formationId/reviews ────────────────────────────────
+   Ajoute un avis à une formation. Réservé admin. */
+export const addReview = asyncHandler(async (req, res) => {
+  const { name, avatar, rating, comment, date } = req.body;
+  if (!name) {
+    const err = new Error("Champ requis manquant : name.");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const formation = await Formation.findById(req.params.formationId);
+  if (!formation) {
+    const err = new Error("Formation introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  formation.reviews.push({
+    name,
+    avatar:  avatar || "",
+    rating:  rating !== undefined ? rating : 5,
+    comment: comment || "",
+    date:    date || Date.now(),
+  });
+  await formation.save();
+
+  res.status(201).json(formation.reviews[formation.reviews.length - 1]);
+});
+
+/* ── PATCH /api/formations/:formationId/reviews/:reviewId ─────────────────────
+   Modifie un avis existant. Réservé admin. */
+export const updateReview = asyncHandler(async (req, res) => {
+  const formation = await Formation.findById(req.params.formationId);
+  if (!formation) {
+    const err = new Error("Formation introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const review = formation.reviews.id(req.params.reviewId);
+  if (!review) {
+    const err = new Error("Avis introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const { name, avatar, rating, comment, date } = req.body;
+  if (name !== undefined)    review.name = name;
+  if (avatar !== undefined)  review.avatar = avatar;
+  if (rating !== undefined)  review.rating = rating;
+  if (comment !== undefined) review.comment = comment;
+  if (date !== undefined)    review.date = date;
+
+  await formation.save();
+  res.json(review);
+});
+
+/* ── DELETE /api/formations/:formationId/reviews/:reviewId ────────────────────
+   Supprime un avis. Réservé admin. */
+export const deleteReview = asyncHandler(async (req, res) => {
+  const formation = await Formation.findById(req.params.formationId);
+  if (!formation) {
+    const err = new Error("Formation introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const review = formation.reviews.id(req.params.reviewId);
+  if (!review) {
+    const err = new Error("Avis introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  review.deleteOne();
+  await formation.save();
+  res.json({ message: "Avis supprimé.", id: req.params.reviewId });
 });

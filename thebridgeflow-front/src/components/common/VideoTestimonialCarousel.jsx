@@ -5,15 +5,23 @@ import {
   FiVolume2, FiVolumeX, FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
+import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./VideoTestimonialCarousel.css";
 
 const AUTO_ADVANCE_MS = 4500;
 const RESUME_DELAY_MS = 5000;
 
-/* ─── Une carte "story" (9:16) — lecture pilotée par le parent, pas par elle-même ── */
+/* ─── Une carte "story" (9:16) — lecture pilotée par le parent, pas par elle-même ──
+   Google Drive n'a pas d'API postMessage pour piloter play()/pause()/muted comme un
+   <video> natif (voir promoDriveEmbedSrc dans LandingPage.jsx pour la même limitation
+   sur la vidéo promo) — un item Drive est donc rendu en <iframe>, monté/démonté selon
+   isActive+canPlay plutôt que piloté par videoRef (que le coordinateur du parent laisse
+   simplement à `null` pour ces cartes, son `if (!v) return` existant l'gère déjà). */
 function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen }) {
   const { t } = useTranslation();
   const [muted, setMuted] = useState(true);
+  const isDrive = isGoogleDriveUrl(item.videoUrl);
+  const showDriveFrame = isDrive && isActive && canPlay;
 
   const toggleMute = (e) => {
     e.stopPropagation();
@@ -30,18 +38,35 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
         aria-label={t("testimonials.openAria")}
       >
-        <video
-          ref={videoRef}
-          className="vtc-card__video"
-          src={item.videoUrl}
-          poster={item.posterUrl || undefined}
-          muted={muted}
-          loop
-          playsInline
-          preload="metadata"
-        >
-          {item.vttUrl && <track kind="subtitles" src={item.vttUrl} default />}
-        </video>
+        {isDrive ? (
+          showDriveFrame ? (
+            <iframe
+              className="vtc-card__video"
+              style={{ border: 0, pointerEvents: "none" }}
+              src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
+              allow="autoplay; encrypted-media"
+              tabIndex={-1}
+              title=""
+            />
+          ) : item.posterUrl ? (
+            <img className="vtc-card__video" src={item.posterUrl} alt="" />
+          ) : (
+            <div className="vtc-card__video" style={{ background: "#111" }} />
+          )
+        ) : (
+          <video
+            ref={videoRef}
+            className="vtc-card__video"
+            src={item.videoUrl}
+            poster={item.posterUrl || undefined}
+            muted={muted}
+            loop
+            playsInline
+            preload="metadata"
+          >
+            {item.vttUrl && <track kind="subtitles" src={item.vttUrl} default />}
+          </video>
+        )}
 
         <div className="vtc-card__scrim" />
 
@@ -49,14 +74,18 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
           {item.category === "pfe" && (
             <span className="vtc-card__badge">🎓 {t("testimonials.badgeCompany")}</span>
           )}
-          <button
-            type="button"
-            className="vtc-card__mute"
-            onClick={toggleMute}
-            aria-label={t(muted ? "testimonials.unmute" : "testimonials.mute")}
-          >
-            {muted ? <FiVolumeX size={15} /> : <FiVolume2 size={15} />}
-          </button>
+          {/* Pas de contrôle mute pour Drive — aucune API pour agir sur le son de
+              l'iframe intégrée, contrairement au <video> natif. */}
+          {!isDrive && (
+            <button
+              type="button"
+              className="vtc-card__mute"
+              onClick={toggleMute}
+              aria-label={t(muted ? "testimonials.unmute" : "testimonials.mute")}
+            >
+              {muted ? <FiVolumeX size={15} /> : <FiVolume2 size={15} />}
+            </button>
+          )}
         </div>
 
         <div className="vtc-card__play-hint" aria-hidden="true"><FiPlay size={20} /></div>
@@ -99,6 +128,7 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
   }, [activeIndex]);
 
   if (!item) return null;
+  const isDrive = isGoogleDriveUrl(item.videoUrl);
 
   return (
     <div className="vtc-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -119,18 +149,30 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
         )}
 
         <div className="vtc-modal__video-wrap">
-          <video
-            ref={videoRef}
-            key={item.id}
-            className="vtc-modal__video"
-            src={item.videoUrl}
-            poster={item.posterUrl || undefined}
-            controls
-            playsInline
-            autoPlay
-          >
-            {item.vttUrl && <track kind="subtitles" src={item.vttUrl} default />}
-          </video>
+          {isDrive ? (
+            <iframe
+              key={item.id}
+              className="vtc-modal__video"
+              style={{ border: 0 }}
+              src={resolveDriveUrl(item.videoUrl, "video")}
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
+              title={t("testimonials.openAria")}
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              key={item.id}
+              className="vtc-modal__video"
+              src={item.videoUrl}
+              poster={item.posterUrl || undefined}
+              controls
+              playsInline
+              autoPlay
+            >
+              {item.vttUrl && <track kind="subtitles" src={item.vttUrl} default />}
+            </video>
+          )}
 
           {item.category === "pfe" && (
             <div className="vtc-modal__info">

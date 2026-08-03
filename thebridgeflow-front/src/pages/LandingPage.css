@@ -940,3 +940,33 @@
    dans Settings.css — pointent vers la gauche (sens de lecture) en arabe. */
 [dir="rtl"] .lp-hero__ctas .btn svg,
 [dir="rtl"] .lp-pop-card__cta svg { transform: scaleX(-1); }
+
+/* ── Skeleton de chargement des témoignages/captures (voir TestimonialsLoadingSkeleton
+   dans LandingPage.jsx) — mêmes dimensions de section que .vtc-section pour éviter
+   un saut de mise en page une fois les vraies données chargées. ──────────────────── */
+.lp-testi-skeleton {
+  background: var(--bg);
+  padding: 3rem 2rem;
+}
+.lp-testi-skeleton__row {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  gap: 1.25rem;
+}
+.lp-testi-skeleton__card {
+  flex: 0 0 auto;
+  width: calc((100% - 3 * 1.25rem) / 4);
+  aspect-ratio: 9 / 16;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg-card) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: lp-testi-skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes lp-testi-skeleton-pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (max-width: 900px) {
+  .lp-testi-skeleton__card { width: calc((100% - 1 * 1.25rem) / 2); }
+}

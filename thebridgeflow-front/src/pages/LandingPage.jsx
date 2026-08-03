@@ -26,7 +26,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { scrollToSection } from "../utils/scrollToSection.js";
 import { VIDEO_URLS, extractDriveFileId } from "../constants/videoUrls.js";
-import { getFeaturedSummerCampTestimonials, getFeaturedPfeTestimonials, getFeaturedFormationTestimonials } from "../constants/testimonials.js";
+import { feedbacksService } from "../services/feedbacks.service.js";
+import { getFeaturedFormationTestimonials } from "../constants/testimonials.js";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
 import TestimonialsScreenshotCarousel from "../components/common/TestimonialsScreenshotCarousel.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
@@ -65,6 +66,19 @@ const ICON_MAP = {
 };
 
 const getIconEntry = (slug = "") => ICON_MAP[slug] ?? [{ Comp: SiReact, color: "#61DAFB" }];
+
+/* Placeholder discret pendant le chargement des témoignages/captures depuis
+   l'API — évite un flash de section vide entre le montage et la résolution
+   du fetch (voir testimonialVideos/screenshotItems, initialisés à `null`). */
+function TestimonialsLoadingSkeleton() {
+  return (
+    <div className="lp-testi-skeleton" aria-hidden="true">
+      <div className="lp-testi-skeleton__row">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="lp-testi-skeleton__card" />)}
+      </div>
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
@@ -146,10 +160,31 @@ export default function LandingPage() {
   // (MongoDB), plus l'ancien VIDEO_URLS["/stageflow-promo.mp4"] codé en dur.
   // Fallback conservé si le fetch échoue ou tant qu'il n'a pas résolu.
   const [actionVideo, setActionVideo] = useState(null);
+  // Témoignages vidéo Summer Camp/PFE — pilotés par SiteSettings.testimonialVideos
+  // (MongoDB, gérés depuis /dashboard/admin/feedbacks), plus l'ancien
+  // testimonials.js codé en dur en fallback. `null` = pas encore chargé (affiche
+  // TestimonialsLoadingSkeleton), `[]` = chargé mais vide pour cette catégorie.
+  const [testimonialVideos, setTestimonialVideos] = useState(null);
   useEffect(() => {
     settingsService.get()
-      .then(({ data }) => setActionVideo(data.actionVideo))
-      .catch(() => {}); // silencieux — le fallback VIDEO_URLS prend le relais
+      .then(({ data }) => {
+        setActionVideo(data.actionVideo);
+        setTestimonialVideos(data.testimonialVideos || []);
+      })
+      .catch(() => setTestimonialVideos([])); // actionVideo garde son fallback VIDEO_URLS
+  }, []);
+
+  const toTestimonialItem = (v) => ({ id: v._id, videoUrl: v.url, posterUrl: v.thumbnail, category: v.category });
+  const summerCampTestimonials = testimonialVideos?.filter((v) => v.category === "summer-camp").map(toTestimonialItem) ?? null;
+  const pfeTestimonials        = testimonialVideos?.filter((v) => v.category === "pfe").map(toTestimonialItem) ?? null;
+
+  // Captures d'écran de témoignages — pilotées par TestimonialScreenshot
+  // (MongoDB), plus l'ancien screenshotTestimonials.js codé en dur en fallback.
+  const [screenshotItems, setScreenshotItems] = useState(null);
+  useEffect(() => {
+    feedbacksService.getScreenshots()
+      .then(({ data }) => setScreenshotItems(data.map((s) => ({ id: s._id, src: s.imageUrl }))))
+      .catch(() => setScreenshotItems([]));
   }, []);
   const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
   const promoIsDrive  = actionVideo
@@ -333,15 +368,21 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Summer Camp, PFE, puis Formation ── */}
-      <VideoTestimonialCarousel
-        sectionId="testimonials"
-        items={getFeaturedSummerCampTestimonials()}
-        title={t("landing.testiSummerCampTitle")}
-        subtitle={t("landing.testiSummerCampSub")}
-        ctaLabel={t("testimonials.ctaDefault")}
-        ctaHref="/formations"
-      />
+      {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Summer Camp, PFE, puis Formation.
+          Summer Camp/PFE viennent de l'API (SiteSettings.testimonialVideos) ; Formation
+          reste sur testimonials.js — pas de gestion admin dédiée pour cette catégorie. ── */}
+      {summerCampTestimonials === null ? (
+        <TestimonialsLoadingSkeleton />
+      ) : (
+        <VideoTestimonialCarousel
+          sectionId="testimonials"
+          items={summerCampTestimonials}
+          title={t("landing.testiSummerCampTitle")}
+          subtitle={t("landing.testiSummerCampSub")}
+          ctaLabel={t("testimonials.ctaDefault")}
+          ctaHref="/formations"
+        />
+      )}
       <VideoTestimonialCarousel
         sectionId="testimonials-formation"
         items={getFeaturedFormationTestimonials()}
@@ -350,21 +391,31 @@ export default function LandingPage() {
         ctaLabel={t("testimonials.ctaDefault")}
         ctaHref="/formations"
       />
-      <VideoTestimonialCarousel
-        sectionId="testimonials-pfe"
-        items={getFeaturedPfeTestimonials()}
-        title={t("landing.testiPfeTitle")}
-        subtitle={t("landing.testiPfeSub")}
-        ctaLabel={t("testimonials.ctaDefault")}
-        ctaHref="/formations"
-      />
+      {pfeTestimonials === null ? (
+        <TestimonialsLoadingSkeleton />
+      ) : (
+        <VideoTestimonialCarousel
+          sectionId="testimonials-pfe"
+          items={pfeTestimonials}
+          title={t("landing.testiPfeTitle")}
+          subtitle={t("landing.testiPfeSub")}
+          ctaLabel={t("testimonials.ctaDefault")}
+          ctaHref="/formations"
+        />
+      )}
 
       {/* ── TÉMOIGNAGES (screenshots) — section distincte, indépendante du
-          carousel vidéo ci-dessus ─────────────────────────────────────── */}
-      <TestimonialsScreenshotCarousel
-        title={t("landing.screenshotTestiTitle")}
-        subtitle={t("landing.screenshotTestiSub")}
-      />
+          carousel vidéo ci-dessus. Données réelles depuis TestimonialScreenshot
+          (API /api/testimonial-screenshots), gérées depuis /dashboard/admin/feedbacks. ── */}
+      {screenshotItems === null ? (
+        <TestimonialsLoadingSkeleton />
+      ) : (
+        <TestimonialsScreenshotCarousel
+          title={t("landing.screenshotTestiTitle")}
+          subtitle={t("landing.screenshotTestiSub")}
+          items={screenshotItems}
+        />
+      )}
 
       {/* ── PRÉSENTATION VIDÉO ──────────────────────────────────────────── */}
       <section className="lp-promo-video" ref={promoSectionRef}>

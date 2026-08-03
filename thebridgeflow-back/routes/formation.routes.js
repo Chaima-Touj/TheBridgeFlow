@@ -14,6 +14,9 @@ import {
   patchFormationTrailer,
   patchFormationVideos,
   uploadFormationVideoThumbnail,
+  addReview,
+  updateReview,
+  deleteReview,
 } from "../controllers/formation.controller.js";
 
 const router = express.Router();
@@ -32,6 +35,11 @@ router.post("/upload-thumbnail",          protect, authorize("admin"), uploadVid
 router.patch("/:id/trailer",              protect, authorize("admin"), patchFormationTrailer);
 router.patch("/:id",                      protect, authorize("admin"), updateFormationInfo);
 router.delete("/:id",                     protect, authorize("admin"), deleteFormation);
+
+// ─── Avis (reviews) — CRUD par avis, réservé admin ──────────────────────────
+router.post("/:formationId/reviews",              protect, authorize("admin"), addReview);
+router.patch("/:formationId/reviews/:reviewId",   protect, authorize("admin"), updateReview);
+router.delete("/:formationId/reviews/:reviewId",  protect, authorize("admin"), deleteReview);
 
 router.get("/:id",                        getFormationById);
 
