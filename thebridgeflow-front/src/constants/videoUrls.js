@@ -228,6 +228,28 @@ export function resolveDriveUrl(url = "", type = "video") {
 }
 
 /**
+ * Vignette d'un fichier Google Drive (image OU vidéo) via notre proxy backend
+ * (/api/drive-thumbnail/:fileId), plutôt que le lien direct
+ * drive.google.com/thumbnail?id=... — celui-ci répond correctement en
+ * navigation directe ou en requête serveur-à-serveur, mais le navigateur
+ * refuse de suivre sa redirection (302 → lh3.googleusercontent.com) quand la
+ * requête vient d'une <img> intégrée cross-site (restriction anti-hotlinking
+ * détectée côté Google via les en-têtes Sec-Fetch-*, vérifié sur le carousel
+ * de témoignages : vignette qui reste noire malgré une URL fonctionnelle
+ * isolément). Le proxy récupère l'image côté serveur (pas cette restriction
+ * pour une requête serveur-à-serveur) et la reesert depuis notre propre
+ * origine — voir driveProxy.controller.js.
+ * @param {string} url - Lien Google Drive (n'importe quel format supporté)
+ * @returns {string|null} URL du proxy, ou null si `url` n'est pas un lien Drive
+ */
+export function resolveDriveThumbnailProxyUrl(url = "") {
+  const fileId = extractDriveFileId(url);
+  if (!fileId) return null;
+  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  return `${apiBase}/drive-thumbnail/${fileId}`;
+}
+
+/**
  * Auto-detects the type from the URL context and normalizes.
  */
 export function autoResolveDriveUrl(url = "") {

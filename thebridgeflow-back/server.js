@@ -31,6 +31,7 @@ import newsRoutes              from "./routes/news.routes.js";
 import trackRoutes             from "./routes/track.routes.js";
 import settingsRoutes          from "./routes/settings.routes.js";
 import testimonialScreenshotRoutes from "./routes/testimonialScreenshot.routes.js";
+import driveProxyRoutes            from "./routes/driveProxy.routes.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -127,6 +128,7 @@ app.use("/api/news",                apiLimiter, newsRoutes);
 app.use("/api/track",               apiLimiter, trackRoutes);
 app.use("/api/settings",            apiLimiter, settingsRoutes);
 app.use("/api/testimonial-screenshots", apiLimiter, testimonialScreenshotRoutes);
+app.use("/api/drive-thumbnail",     apiLimiter, driveProxyRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────

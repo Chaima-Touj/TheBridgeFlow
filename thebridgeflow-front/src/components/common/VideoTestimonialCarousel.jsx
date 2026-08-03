@@ -5,7 +5,7 @@ import {
   FiVolume2, FiVolumeX, FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
-import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
+import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
 import "./VideoTestimonialCarousel.css";
 
 const AUTO_ADVANCE_MS = 4500;
@@ -22,6 +22,13 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
   const [muted, setMuted] = useState(true);
   const isDrive = isGoogleDriveUrl(item.videoUrl);
   const showDriveFrame = isDrive && isActive && canPlay;
+  // Vignette dérivée à la volée depuis l'URL vidéo elle-même quand aucune
+  // n'est fournie — Drive génère aussi une image depuis un fichier vidéo, pas
+  // seulement depuis une image (endpoint /thumbnail, même que pour les images).
+  // Contrairement à l'iframe (montée seulement pour la carte active), cette
+  // <img> est rendue pour TOUTES les cartes dès le montage du composant — plus
+  // de carte noire en attendant un clic/scroll individuel.
+  const posterSrc = item.posterUrl || (isDrive ? resolveDriveThumbnailProxyUrl(item.videoUrl) : undefined);
 
   const toggleMute = (e) => {
     e.stopPropagation();
@@ -39,26 +46,27 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
         aria-label={t("testimonials.openAria")}
       >
         {isDrive ? (
-          showDriveFrame ? (
-            <iframe
-              className="vtc-card__video"
-              style={{ border: 0, pointerEvents: "none" }}
-              src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
-              allow="autoplay; encrypted-media"
-              tabIndex={-1}
-              title=""
-            />
-          ) : item.posterUrl ? (
-            <img className="vtc-card__video" src={item.posterUrl} alt="" />
-          ) : (
-            <div className="vtc-card__video" style={{ background: "#111" }} />
-          )
+          <>
+            {posterSrc
+              ? <img className="vtc-card__video" src={posterSrc} alt="" loading="eager" />
+              : <div className="vtc-card__video" style={{ background: "#111" }} />}
+            {showDriveFrame && (
+              <iframe
+                className="vtc-card__video"
+                style={{ border: 0, pointerEvents: "none" }}
+                src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
+                allow="autoplay; encrypted-media"
+                tabIndex={-1}
+                title=""
+              />
+            )}
+          </>
         ) : (
           <video
             ref={videoRef}
             className="vtc-card__video"
             src={item.videoUrl}
-            poster={item.posterUrl || undefined}
+            poster={posterSrc || undefined}
             muted={muted}
             loop
             playsInline

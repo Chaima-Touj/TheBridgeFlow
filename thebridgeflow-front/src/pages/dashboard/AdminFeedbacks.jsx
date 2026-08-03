@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiPlus, FiStar, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
@@ -335,24 +335,6 @@ function ScreenshotForm({ initial, isEdit, submitting, formError, onSubmit, onCa
   const { t } = useTranslation();
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [compressing, setCompressing] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCompressing(true);
-    setFieldErrors((prev) => ({ ...prev, imageUrl: undefined }));
-    try {
-      const base64 = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
-      setForm((f) => ({ ...f, imageUrl: base64 }));
-    } catch (err) {
-      setFieldErrors((prev) => ({ ...prev, imageUrl: err.message || t("adminFormations.errors.thumbnailUploadFailed") }));
-    } finally {
-      setCompressing(false);
-      e.target.value = "";
-    }
-  };
 
   const validate = () => {
     const errors = {};
@@ -379,23 +361,13 @@ function ScreenshotForm({ initial, isEdit, submitting, formError, onSubmit, onCa
       )}
 
       {!isEdit && (
-        <div className="af-form-row">
-          <label className="label">{t("adminFeedbacks.screenshotImageLabel")}</label>
-          <button type="button" className="an-image-upload" onClick={() => fileInputRef.current?.click()}>
-            {form.imageUrl ? (
-              <img src={form.imageUrl} alt="" className="an-image-preview" />
-            ) : (
-              <div className="an-image-placeholder">
-                <FiImage size={24} />
-                <span>{t("adminNews.imageChoose")}</span>
-              </div>
-            )}
-            {compressing && <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>}
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} hidden />
-          {fieldErrors.imageUrl && <span className="af-field-error">{fieldErrors.imageUrl}</span>}
-        </div>
+        <DriveOrUploadField
+          label={t("adminFeedbacks.screenshotImageLabel")}
+          value={form.imageUrl}
+          onChange={(imageUrl) => { setForm((f) => ({ ...f, imageUrl })); setFieldErrors((prev) => ({ ...prev, imageUrl: undefined })); }}
+        />
       )}
+      {fieldErrors.imageUrl && <span className="af-field-error">{fieldErrors.imageUrl}</span>}
 
       <div className="af-form-grid">
         <div className="af-form-row">
