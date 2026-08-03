@@ -6,19 +6,19 @@ node_modules/
 .env.local
 
 # Credentials OAuth Google Drive (migration Cloudinary → Drive) + tokens générés
-server/credentials-drive*.json
-server/token-drive*.json
+thebridgeflow-back/credentials-drive*.json
+thebridgeflow-back/token-drive*.json
 
 # Backups locaux de la collection Formation (migration Drive) — restauration
 # manuelle uniquement, pas destinés à être versionnés
-server/scripts/drive/backups/
+thebridgeflow-back/scripts/drive/backups/
 
 # Build frontend
-client/dist/
+thebridgeflow-front/dist/
 
 # Fichiers uploadés par les utilisateurs
-server/uploads/*
-!server/uploads/.gitkeep
+thebridgeflow-back/uploads/*
+!thebridgeflow-back/uploads/.gitkeep
 
 # Logs
 *.log
@@ -30,5 +30,5 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-client/public/videos-*/
-client/public/*.mp4
+thebridgeflow-front/public/videos-*/
+thebridgeflow-front/public/*.mp4

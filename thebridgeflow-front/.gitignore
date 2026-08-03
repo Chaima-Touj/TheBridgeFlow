@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables (Cloudinary credentials, API URLs...)
+# Already covered by the repo-root .gitignore too — kept here explicitly
+# since this file is what people actually look at from thebridgeflow-front/.
+.env
+
+# Demo videos — migrated to Cloudinary (see scripts/upload-to-cloudinary.js,
+# src/constants/videoUrls.js). Kept locally as originals, never tracked.
+# public/videos-*/ and public/*.mp4 were already covered by the repo-root
+# .gitignore; explicit here too for the same reason as .env above.
+public/videos-AI/
+public/videos-BI/
+public/videos-FLUTTER/
+public/videos-IoT/
+public/videos-MERN/
+public/videos-ANGU-SPRING/
+public/videos-DEV/
+public/videos-CYBER/
+public/stageflow-promo.mp4
+public-compressed/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

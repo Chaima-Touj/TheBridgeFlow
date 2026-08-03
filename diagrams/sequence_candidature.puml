@@ -1,0 +1,99 @@
+@startuml sequence_candidature
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+
+' Basé sur thebridgeflow-back/controllers/applications.controller.js (createApplication,
+' lignes 9-83), thebridgeflow-back/controllers/interviews.controller.js (proposeInterview
+' lignes 10-84, updateInterviewStatus lignes 105-165),
+' thebridgeflow-back/routes/applications.routes.js, thebridgeflow-back/routes/interviews.routes.js.
+' Toutes les routes ne portent que protect (JWT) -- le contrôle de rôle
+' ("étudiant" pour postuler, "admin" pour proposer un entretien) est fait
+' explicitement DANS le corps des contrôleurs (pas de middleware authorize
+' dédié sur ces deux routes).
+
+actor "Étudiant" as E
+participant "Frontend" as FE
+participant "API Express" as API
+participant "ApplicationsController" as APPC
+participant "InterviewsController" as INTC
+database "MongoDB\n(Application / Offer /\nInterview / Notification)" as DB
+participant "EmailService" as MAIL
+actor "Administrateur" as A
+
+== Candidature ==
+
+E -> FE : Postule à une offre\n(+ CV, coverLetter)
+FE -> API : POST /api/applications\n(multipart, CV via multer)
+API -> APPC : createApplication(req, res)
+APPC -> APPC : vérifie req.user.role === "étudiant"
+APPC -> DB : Application.findOne({ offerId, studentId })
+alt candidature déjà existante
+  DB --> APPC : trouvé
+  APPC --> FE : 409 "Tu as déjà postulé"
+else pas de doublon
+  DB --> APPC : null
+  APPC -> DB : Offer.findById(offerId)
+  DB --> APPC : offer
+  APPC -> DB : Application.create({ offerId, studentId, coverLetter, cvUrl })
+  DB --> APPC : application créée
+  APPC ->> MAIL : sendApplicationSent(étudiant)
+  APPC -> DB : User.find({ role:"admin", isActive:true })
+  DB --> APPC : liste des admins
+  loop pour chaque admin
+    APPC -> DB : Notification.create(...)
+    APPC ->> MAIL : sendApplicationReceived(admin)
+  end
+  APPC --> FE : 201 { application }
+end
+
+... l'administrateur consulte les candidatures reçues ...
+
+== Proposition d'entretien ==
+
+A -> FE : Ouvre la candidature,\nrenseigne date/mode/lieu
+FE -> API : POST /api/interviews\n{ applicationId, scheduledAt, mode, location, notes }
+API -> INTC : proposeInterview(req, res)
+INTC -> DB : Application.findById(applicationId).populate("offerId")
+DB --> INTC : application
+INTC -> INTC : vérifie req.user.role === "admin"
+alt statut de la candidature != "en attente"
+  INTC --> FE : 409 "Entretien déjà proposé\nou décision déjà prise"
+else statut "en attente"
+  INTC -> DB : Interview.create({ applicationId, studentId,\n  companyId: admin._id, scheduledAt, mode, location, notes })
+  DB --> INTC : interview créé
+  INTC -> DB : application.status = "en cours"\napplication.save()
+  INTC -> DB : Notification.create(étudiant, "Entretien proposé")
+  INTC ->> MAIL : sendInterviewProposed(étudiant)
+  INTC --> FE : 201 { interview, application }
+end
+
+... l'étudiant est notifié (cloche, polling 30s -- voir DashboardLayout.jsx) ...
+
+== Confirmation par l'étudiant ==
+
+E -> FE : Consulte l'entretien proposé,\nclique "Confirmer"
+FE -> API : PUT /api/interviews/:id/status\n{ status: "confirmé" }
+API -> INTC : updateInterviewStatus(req, res)
+INTC -> DB : Interview.findById(id).populate(...)
+DB --> INTC : interview
+INTC -> INTC : vérifie req.user._id == interview.studentId\n(ou role admin)
+INTC -> DB : interview.status = "confirmé"\ninterview.save()
+INTC -> DB : User.findById(studentId / companyId)
+DB --> INTC : student, company
+INTC ->> MAIL : sendInterviewStatus(étudiant, "confirmé")
+INTC ->> MAIL : sendInterviewStatus(admin, "confirmé")
+INTC --> FE : 200 { interview }
+FE --> E : Entretien affiché "confirmé"
+
+note over APPC, INTC
+  La décision finale (acceptée/refusée) via
+  PUT /api/applications/:id/status n'est possible
+  que si application.status === "en cours"
+  (donc seulement après un entretien proposé) --
+  voir applications.controller.js:149-153.
+  Hors du périmètre de ce diagramme.
+end note
+
+@enduml

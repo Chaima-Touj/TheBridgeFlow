@@ -9,8 +9,8 @@
 - ODM: Mongoose (remove this line if using the native MongoDB driver instead)
 
 ## Project Structure
-- `/client` → React frontend (adjust path if different)
-- `/server` → Express backend: routes, controllers, models (adjust path if different)
+- `/thebridgeflow-front` → React frontend (Vite)
+- `/thebridgeflow-back` → Express backend: routes, controllers, models
 - This is an EXISTING project. Never assume a folder layout or naming convention —
   always inspect the real files first (`ls`, `view`, grep for similar features) before
   creating anything new. Reuse existing patterns; don't invent a parallel structure.

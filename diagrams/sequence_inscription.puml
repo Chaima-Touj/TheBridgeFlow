@@ -1,0 +1,71 @@
+@startuml sequence_inscription
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+
+' Basé sur thebridgeflow-back/controllers/auth.controller.js : register() (lignes 73-145)
+' et verifyEmail() (lignes 148-196), thebridgeflow-back/routes/auth.routes.js,
+' thebridgeflow-back/services/email.service.js.
+
+actor "Visiteur" as V
+participant "Frontend\n(Register.jsx)" as FE
+participant "API Express\n(auth.routes.js)" as API
+participant "AuthController" as CTRL
+database "MongoDB\n(User)" as DB
+participant "EmailService\n(Brevo)" as MAIL
+
+V -> FE : Remplit le formulaire\n(name, email, password, gender, ...)
+FE -> API : POST /api/auth/register
+API -> CTRL : register(req, res)
+
+CTRL -> CTRL : Valide les champs requis\n(name, email, password, gender)
+alt champ manquant ou gender invalide
+  CTRL --> FE : 400 Bad Request
+end
+
+CTRL -> DB : User.findOne({ email })
+DB --> CTRL : résultat
+alt email déjà utilisé
+  CTRL --> FE : 409 Conflict "Email déjà utilisé"
+end
+
+CTRL -> CTRL : generateCode() -- code à 6 chiffres\nexpires = Date.now() + 15 min
+CTRL -> DB : User.create({..., isVerified:false,\n  verifyCode, verifyCodeExpires })
+DB --> CTRL : user créé
+
+CTRL ->> MAIL : sendWelcome(user.email) [asynchrone, non bloquant]
+CTRL ->> MAIL : sendNewUserAdmin(admin.email) [asynchrone, non bloquant]
+CTRL -> MAIL : sendVerifyCode(user.email, { name, code }) [attendu]
+MAIL --> CTRL : { success, messageId }
+
+CTRL --> FE : 201 { message, email, needsVerify:true, emailSent }
+FE --> V : Redirection vers la page\nde vérification du code
+
+... l'utilisateur consulte son email ...
+
+V -> FE : Saisit le code reçu
+FE -> API : POST /api/auth/verify-email\n{ email, code }
+API -> CTRL : verifyEmail(req, res)
+
+CTRL -> DB : User.findOne({ email })\n.select("+verifyCode +verifyCodeExpires +password")
+DB --> CTRL : user
+
+alt utilisateur introuvable
+  CTRL --> FE : 404 Not Found
+else déjà vérifié
+  CTRL --> FE : 400 "Email déjà vérifié"
+else code expiré (verifyCodeExpires < now)
+  CTRL --> FE : 400 "Code expiré"
+else code incorrect
+  CTRL --> FE : 400 "Code incorrect"
+else code valide
+  CTRL -> DB : user.isVerified = true\nverifyCode/verifyCodeExpires = undefined\nuser.save()
+  DB --> CTRL : ok
+  CTRL -> CTRL : signToken({ id: user._id })\n(JWT_EXPIRES_IN par défaut "7d")
+  CTRL --> FE : 200 { token, user }
+  FE -> FE : Stocke le token\n(localStorage ou sessionStorage)
+  FE --> V : Redirection vers le dashboard
+end
+
+@enduml

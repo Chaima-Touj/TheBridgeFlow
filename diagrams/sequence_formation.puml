@@ -1,0 +1,100 @@
+@startuml sequence_formation
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+
+' Basé sur thebridgeflow-back/controllers/enrollmentRequest.controller.js (createRequest
+' lignes 11-40, acceptRequest lignes 72-109), thebridgeflow-back/controllers/
+' enrollment.controller.js (enroll lignes 77-104, updateWeekStatus lignes
+' 108-149), thebridgeflow-back/utils/enrollmentProgress.js (buildInitialWeekProgress),
+' thebridgeflow-back/routes/enrollmentRequest.routes.js, thebridgeflow-back/routes/enrollment.routes.js.
+'
+' IMPORTANT (vérifié par recherche exhaustive dans thebridgeflow-front/src) : le flux
+' réellement câblé côté frontend pour "s'inscrire à une formation" est
+' EnrollmentRequest (demande -> validation admin), via
+' enrollmentRequestsService.create() appelé dans
+' thebridgeflow-front/src/pages/dashboard/DashboardFormationDetail.jsx:181.
+' L'endpoint direct POST /api/enrollments (fonction enroll(), le service
+' correspondant enrollmentsService.enroll()) existe côté backend mais n'est
+' appelé par AUCUN composant frontend (grep exhaustif sans résultat) --
+' représenté ci-dessous en "note", pas comme un chemin utilisateur réel.
+
+actor "Étudiant" as E
+participant "Frontend\n(DashboardFormationDetail.jsx)" as FE
+participant "API Express" as API
+participant "EnrollmentRequestController" as REQC
+participant "EnrollmentController" as ENRC
+database "MongoDB\n(EnrollmentRequest /\nEnrollment / Formation)" as DB
+actor "Administrateur" as A
+participant "Frontend Admin\n(AdminEnrollmentRequests.jsx)" as FEA
+
+== Demande d'inscription ==
+
+E -> FE : Choisit une formation,\nrenseigne mode (Présentiel/En ligne)
+FE -> API : POST /api/enrollment-requests\n{ formationId, mode, message }
+API -> REQC : createRequest(req, res)
+REQC -> DB : Formation.findById(formationId)
+DB --> REQC : formation
+REQC -> DB : EnrollmentRequest.findOne({ student, formation })
+alt demande déjà existante
+  DB --> REQC : trouvée
+  REQC --> FE : 409 "Demande déjà soumise"
+else pas de doublon
+  DB --> REQC : null
+  REQC -> DB : EnrollmentRequest.create({ student, formation, mode, message,\n  status: "en_attente" })
+  DB --> REQC : requête créée
+  REQC --> FE : 201 { request }
+  FE --> E : "Demande envoyée, en attente de validation"
+end
+
+... l'administrateur consulte les demandes en attente ...
+
+== Validation par l'administrateur ==
+
+A -> FEA : Ouvre la liste des demandes,\nclique "Accepter"
+FEA -> API : PATCH /api/enrollment-requests/:id/accept
+API -> REQC : acceptRequest(req, res)
+REQC -> DB : EnrollmentRequest.findById(id)
+DB --> REQC : request
+alt statut != "en_attente"
+  REQC --> FEA : 409 "Déjà traitée"
+else statut "en_attente"
+  REQC -> DB : request.status = "acceptée"\nrequest.save()
+  REQC -> DB : Enrollment.findOne({ student, formation })
+  DB --> REQC : (aucune inscription existante)
+  REQC -> DB : Formation.findById(request.formation)
+  DB --> REQC : formation (avec weeks[])
+  REQC -> REQC : buildInitialWeekProgress(formation.weeks)\n-- semaine 1 = "in_progress", reste = "not_started"
+  REQC -> DB : Enrollment.create({ student, formation, weekProgress })
+  DB --> REQC : enrollment créé
+  REQC -> DB : Notification.create(étudiant,\n"Demande d'inscription acceptée")
+  REQC --> FEA : 200 { request }
+end
+
+... l'étudiant est notifié (polling 30s) et consulte sa formation ...
+
+== Suivi de progression semaine par semaine ==
+
+E -> FE : Consulte sa progression\n(GET /api/enrollments/:formationId)
+FE -> API : GET /api/enrollments/:formationId
+API -> ENRC : getMyEnrollment(req, res)
+ENRC -> DB : Enrollment.findOne({ student, formation }).populate("formation")
+DB --> ENRC : enrollment (weekProgress[])
+ENRC --> FE : 200 enrollment
+FE --> E : Affiche l'état de chaque semaine\n(not_started / in_progress / done)
+
+note over FE, ENRC
+  PATCH /api/enrollments/:formationId/weeks/:weekNum
+  (updateWeekStatus, enrollment.controller.js:108-149)
+  existe et gère correctement le passage à "done",
+  le déblocage automatique de la semaine suivante et
+  le recalcul de overallStatus -- MAIS aucun appel à
+  cet endpoint n'a été trouvé dans thebridgeflow-front/src (recherche
+  exhaustive de enrollmentsService.updateWeekStatus).
+  TODO: à vérifier -- fonctionnalité back-end prête,
+  action utilisateur "marquer comme terminé" non
+  câblée dans l'interface actuelle.
+end note
+
+@enduml
