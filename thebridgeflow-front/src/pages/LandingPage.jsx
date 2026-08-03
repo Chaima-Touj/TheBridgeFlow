@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  FiArrowRight, FiPlay, FiX,
+  FiArrowRight, FiPlay, FiX, FiExternalLink,
   FiMapPin, FiPhone, FiMail, FiSend,
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
   FiUsers, FiAward, FiTarget, FiBookOpen,
@@ -25,7 +25,7 @@ import { useLang } from "../context/LangContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { scrollToSection } from "../utils/scrollToSection.js";
-import { VIDEO_URLS } from "../constants/videoUrls.js";
+import { VIDEO_URLS, extractDriveFileId } from "../constants/videoUrls.js";
 import { getFeaturedSummerCampTestimonials, getFeaturedPfeTestimonials, getFeaturedFormationTestimonials } from "../constants/testimonials.js";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
 import TestimonialsScreenshotCarousel from "../components/common/TestimonialsScreenshotCarousel.jsx";
@@ -163,6 +163,13 @@ export default function LandingPage() {
   const promoDriveEmbedSrc = promoVideoUrl.includes("?")
     ? `${promoVideoUrl}&autoplay=1&mute=1`
     : `${promoVideoUrl}?autoplay=1&mute=1`;
+  // Fallback pour la modale : navigation privée = cookies tiers bloqués par le
+  // navigateur, donc l'iframe Drive peut rester bloquée sur un écran de
+  // consentement au lieu de jouer la vidéo. Un lien qui ouvre le fichier sur
+  // drive.google.com dans un nouvel onglet contourne le problème (ce n'est
+  // alors plus une requête cross-site en iframe, donc plus soumis au blocage).
+  const promoDriveFileId = promoIsDrive ? extractDriveFileId(promoVideoUrl) : null;
+  const promoDriveViewUrl = promoDriveFileId ? `https://drive.google.com/file/d/${promoDriveFileId}/view` : null;
 
   /* ── Preview card muted-autoplay, gated by viewport visibility (économie
      de ressources) — même pattern que VideoTestimonialCarousel.jsx. Pour la
@@ -459,6 +466,18 @@ export default function LandingPage() {
               >
                 <FiX size={18} />
               </button>
+              {promoIsDrive && promoDriveViewUrl && (
+                <a
+                  className="lp-promo-video__modal-external"
+                  href={promoDriveViewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={t("coursePreview.openExternalHint")}
+                >
+                  <FiExternalLink size={13} />
+                  <span>{t("coursePreview.openExternal")}</span>
+                </a>
+              )}
               {promoIsDrive ? (
                 <iframe
                   className="lp-promo-video__modal-video"

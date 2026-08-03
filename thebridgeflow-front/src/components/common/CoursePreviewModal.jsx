@@ -14,7 +14,7 @@ function getYoutubeId(url = "") {
    le spinner "loaded" repart naturellement à false à chaque changement de
    vidéo via le remount React, sans ref/effect pour resynchroniser un state
    dérivé d'une prop (pattern déconseillé par le linter react-hooks ici). */
-function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter, onIframeLeave }) {
+function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter, onIframeLeave, driveViewUrl }) {
   const [loaded, setLoaded] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
   const isIframeSource = !!ytId || isDrive;
@@ -97,11 +97,22 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
       )}
       {isIframeSource && !loaded && (
         loadTimedOut ? (
-          <div className="cpm-loading" role="status">
+          <div className="cpm-loading cpm-loading--timeout" role="status">
             <p style={{ color: "#fff", textAlign: "center", padding: "0 1.5rem", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 320, margin: 0 }}>
               Le chargement prend plus de temps que prévu.
-              {isDrive ? " Si la vidéo ne s'affiche pas, vous pouvez l'ouvrir directement dans Google Drive." : ""}
+              {isDrive ? " Cela peut arriver si votre navigateur bloque les cookies tiers (ex : navigation privée)." : ""}
             </p>
+            {isDrive && driveViewUrl && (
+              <a
+                className="cpm-timeout-link"
+                href={driveViewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FiExternalLink size={14} />
+                <span>{t("coursePreview.openExternal")}</span>
+              </a>
+            )}
           </div>
         ) : (
           <div className="cpm-loading" aria-hidden="true">
@@ -261,6 +272,7 @@ export default function CoursePreviewModal({
             t={t}
             onIframeEnter={handleIframeMouseEnter}
             onIframeLeave={handleIframeMouseLeave}
+            driveViewUrl={driveViewUrl}
           />
           {isDrive && driveViewUrl && (
             <a

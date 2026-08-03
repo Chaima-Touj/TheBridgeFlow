@@ -231,6 +231,33 @@
   to { transform: rotate(360deg); }
 }
 
+/* Timeout state (7s watchdog) — text + fallback link stacked, unlike the
+   plain centered spinner above. */
+.cpm-loading--timeout {
+  flex-direction: column;
+  gap:            14px;
+}
+/* Only this link needs to be clickable — the rest of .cpm-loading stays
+   pointer-events: none so it never intercepts hover on the iframe below. */
+.cpm-timeout-link {
+  pointer-events:  auto;
+  display:         flex;
+  align-items:     center;
+  gap:             6px;
+  padding:         8px 14px;
+  border-radius:   999px;
+  background:      #fff;
+  color:           #111;
+  font-size:       0.8rem;
+  font-weight:     600;
+  text-decoration: none;
+  transition:      background 0.15s;
+}
+.cpm-timeout-link:hover,
+.cpm-timeout-link:focus-visible {
+  background: rgba(255, 255, 255, 0.85);
+}
+
 /* ── Bouton "Ouvrir dans Google Drive" ─────────────────────────────────────
    Coin opposé au bouton plein écran (top-left / top-right) pour ne jamais
    les superposer quand les deux sont visibles simultanément (trailer Drive). */
