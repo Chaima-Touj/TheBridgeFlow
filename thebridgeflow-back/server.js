@@ -84,6 +84,18 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Dédié à /api/drive-thumbnail : un seul chargement de la Landing Page
+// déclenche déjà ~28 requêtes de vignettes simultanées (VideoTestimonialCarousel,
+// 3 catégories confondues) — ça sature rapidement le quota de apiLimiter,
+// partagé avec toutes les autres routes /api/*. Plafond dédié plus permissif,
+// fenêtre plus courte, pour ne pas priver le reste du site de son propre quota.
+const thumbnailLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // ─── Parsers ──────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -128,7 +140,7 @@ app.use("/api/news",                apiLimiter, newsRoutes);
 app.use("/api/track",               apiLimiter, trackRoutes);
 app.use("/api/settings",            apiLimiter, settingsRoutes);
 app.use("/api/testimonial-screenshots", apiLimiter, testimonialScreenshotRoutes);
-app.use("/api/drive-thumbnail",     apiLimiter, driveProxyRoutes);
+app.use("/api/drive-thumbnail",     thumbnailLimiter, driveProxyRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────

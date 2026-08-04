@@ -68,7 +68,17 @@
   display: flex;
   gap: 1.25rem;
   transition: transform 480ms ease;
-  will-change: transform;
+  /* will-change: transform retiré — c'était la cause du gel de peinture des
+     cartes (vignettes chargées mais jamais affichées, confirmé en test réel :
+     naturalWidth correct mais rendu noir). will-change promeut .vtc-row sur
+     son propre calque composité en continu ; avec ~28 vignettes chargées
+     quasi simultanément (3 sections), certaines ne sont jamais invalidées
+     correctement sur ce calque. Le correctif "forcer un repaint" (double rAF,
+     bascule will-change, onLoad par image) n'éliminait pas l'écart de façon
+     fiable, testé à plusieurs reprises. `transition: transform` seul reste
+     fluide sans `will-change` — la promotion de calque n'est utile que pour
+     éviter un micro-à-coup sur la toute première transition, un compromis qui
+     ne vaut pas le risque de cartes qui restent noires. */
 }
 
 .vtc-card-wrap {

@@ -27,7 +27,6 @@ import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { scrollToSection } from "../utils/scrollToSection.js";
 import { VIDEO_URLS, extractDriveFileId } from "../constants/videoUrls.js";
 import { feedbacksService } from "../services/feedbacks.service.js";
-import { getFeaturedFormationTestimonials } from "../constants/testimonials.js";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
 import TestimonialsScreenshotCarousel from "../components/common/TestimonialsScreenshotCarousel.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
@@ -160,10 +159,13 @@ export default function LandingPage() {
   // (MongoDB), plus l'ancien VIDEO_URLS["/stageflow-promo.mp4"] codé en dur.
   // Fallback conservé si le fetch échoue ou tant qu'il n'a pas résolu.
   const [actionVideo, setActionVideo] = useState(null);
-  // Témoignages vidéo Summer Camp/PFE — pilotés par SiteSettings.testimonialVideos
-  // (MongoDB, gérés depuis /dashboard/admin/feedbacks), plus l'ancien
-  // testimonials.js codé en dur en fallback. `null` = pas encore chargé (affiche
-  // TestimonialsLoadingSkeleton), `[]` = chargé mais vide pour cette catégorie.
+  // Témoignages vidéo Summer Camp/PFE/Formation — pilotés par
+  // SiteSettings.testimonialVideos (MongoDB, gérés depuis
+  // /dashboard/admin/feedbacks), plus l'ancien testimonials.js codé en dur en
+  // fallback. `null` = pas encore chargé (affiche TestimonialsLoadingSkeleton),
+  // `[]` = chargé mais vide pour cette catégorie. Un seul fetch sert les 3
+  // catégories (déjà toutes dans data.testimonialVideos), pas besoin d'un
+  // appel séparé par section.
   const [testimonialVideos, setTestimonialVideos] = useState(null);
   useEffect(() => {
     settingsService.get()
@@ -177,6 +179,7 @@ export default function LandingPage() {
   const toTestimonialItem = (v) => ({ id: v._id, videoUrl: v.url, posterUrl: v.thumbnail, category: v.category });
   const summerCampTestimonials = testimonialVideos?.filter((v) => v.category === "summer-camp").map(toTestimonialItem) ?? null;
   const pfeTestimonials        = testimonialVideos?.filter((v) => v.category === "pfe").map(toTestimonialItem) ?? null;
+  const formationTestimonials  = testimonialVideos?.filter((v) => v.category === "formation").map(toTestimonialItem) ?? null;
 
   // Captures d'écran de témoignages — pilotées par TestimonialScreenshot
   // (MongoDB), plus l'ancien screenshotTestimonials.js codé en dur en fallback.
@@ -383,14 +386,18 @@ export default function LandingPage() {
           ctaHref="/formations"
         />
       )}
-      <VideoTestimonialCarousel
-        sectionId="testimonials-formation"
-        items={getFeaturedFormationTestimonials()}
-        title={t("landing.testiFormationTitle")}
-        subtitle={t("landing.testiFormationSub")}
-        ctaLabel={t("testimonials.ctaDefault")}
-        ctaHref="/formations"
-      />
+      {formationTestimonials === null ? (
+        <TestimonialsLoadingSkeleton />
+      ) : (
+        <VideoTestimonialCarousel
+          sectionId="testimonials-formation"
+          items={formationTestimonials}
+          title={t("landing.testiFormationTitle")}
+          subtitle={t("landing.testiFormationSub")}
+          ctaLabel={t("testimonials.ctaDefault")}
+          ctaHref="/formations"
+        />
+      )}
       {pfeTestimonials === null ? (
         <TestimonialsLoadingSkeleton />
       ) : (

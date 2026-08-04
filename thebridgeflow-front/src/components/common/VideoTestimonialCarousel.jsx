@@ -48,7 +48,31 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
         {isDrive ? (
           <>
             {posterSrc
-              ? <img className="vtc-card__video" src={posterSrc} alt="" loading="eager" />
+              ? (
+                <img
+                  className="vtc-card__video"
+                  src={posterSrc}
+                  alt=""
+                  loading="eager"
+                  // Filet de sécurité complémentaire à l'effet sectionInView du
+                  // parent (.vtc-row) : quand la page charge ~28 vignettes
+                  // simultanément (3 catégories confondues), certaines
+                  // terminent leur chargement bien après le double rAF déclenché
+                  // à l'entrée dans le viewport — observé en test réel : une
+                  // vignette peut rester noire alors que ses données sont
+                  // intégralement chargées (`complete: true`, dimensions
+                  // correctes), preuve d'un défaut de peinture, pas de
+                  // chargement. Un `offsetHeight` seul ne suffisait pas à la
+                  // débloquer (testé) ; basculer légèrement l'opacité force un
+                  // recompositing de CET élément précisément, sans lien avec
+                  // l'ancêtre transformé — technique standard, imperceptible.
+                  onLoad={(e) => {
+                    const el = e.currentTarget;
+                    el.style.opacity = "0.999";
+                    requestAnimationFrame(() => { el.style.opacity = ""; });
+                  }}
+                />
+              )
               : <div className="vtc-card__video" style={{ background: "#111" }} />}
             {showDriveFrame && (
               <iframe
@@ -257,6 +281,29 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  /* ── Filet de sécurité pour un éventuel défaut de peinture au premier
+     affichage (voir .vtc-row en CSS — plus de will-change:transform
+     permanent, retiré à la cause du problème observé en test réel : des
+     vignettes chargées mais jamais peintes). Un double rAF force une
+     relecture de layout dès que la section devient visible — le même effet
+     qu'un scroll, sans attendre que l'utilisateur le refasse. Ceinture et
+     bretelles avec le onLoad par <img> (voir TestimonialCard) qui couvre le
+     cas d'une vignette dont le chargement se termine après ce déclenchement. ── */
+  useEffect(() => {
+    if (!sectionInView) return undefined;
+    let raf2 = null;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        if (trackRef.current) void trackRef.current.offsetHeight;
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
+  }, [sectionInView]);
+
 
   /* ── Mesure du pas de glissement (largeur carte + gap) et du nombre visible ── */
   const measure = useCallback(() => {
