@@ -1,0 +1,650 @@
+{
+  "ai": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Month 1",
+        "filename": "AI1-form-month1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Month 1",
+        "filename": "AI2-form-month1.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Month 1",
+        "filename": "AI3-form-month1.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Month 1",
+        "filename": "AI4-form-month1.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Month 2",
+        "filename": "chatbot1-form-month2.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Month 2",
+        "filename": "chatbot2-form-month2.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Month 2",
+        "filename": "chatbot3-form-month2.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Month 2",
+        "filename": "chatbot4-form-month2.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Month 1",
+        "filename": "AI1-enca-month1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Month 1",
+        "filename": "AI2-enca-month1.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Month 1",
+        "filename": "AI3-enca-month1.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Month 1",
+        "filename": "AI4-enca-month1.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Month 2",
+        "filename": "chatbot1-enca-month2.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Month 2",
+        "filename": "chatbot2-enca-month2.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Month 2",
+        "filename": "chatbot3-enca-month2.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Month 2",
+        "filename": "chatbot4-enca-month2.mp4"
+      }
+    ]
+  },
+  "cyber-security": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Month 1",
+        "filename": "form-cyber-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Month 1",
+        "filename": "form-cyber-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Month 1",
+        "filename": "form-cyber-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Month 1",
+        "filename": "form-cyber-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Month 2",
+        "filename": "form-cyber-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Month 2",
+        "filename": "form-cyber-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Month 2",
+        "filename": "form-cyber-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Month 2",
+        "filename": "form-cyber-sem8.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Month 1",
+        "filename": "enca-cyber-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Month 1",
+        "filename": "enca-cyber-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Month 1",
+        "filename": "enca-cyber-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Month 1",
+        "filename": "enca-cyber-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Month 2",
+        "filename": "enca-cyber-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Month 2",
+        "filename": "enca-cyber-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Month 2",
+        "filename": "enca-cyber-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Month 2",
+        "filename": "enca-cyber-sem8.mp4"
+      }
+    ]
+  },
+  "devops": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Level 1",
+        "filename": "form-dev-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Level 1",
+        "filename": "form-dev-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Level 1",
+        "filename": "form-dev-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Level 1",
+        "filename": "form-dev-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Level 2",
+        "filename": "form-dev-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Level 2",
+        "filename": "form-dev-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Level 2",
+        "filename": "form-dev-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Level 2",
+        "filename": "form-dev-sem8.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Level 1",
+        "filename": "enca-dev-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Level 1",
+        "filename": "enca-dev-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Level 1",
+        "filename": "enca-dev-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Level 1",
+        "filename": "enca-dev-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Level 2",
+        "filename": "enca-dev-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Level 2",
+        "filename": "enca-dev-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Level 2",
+        "filename": "enca-dev-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Level 2",
+        "filename": "enca-dev-sem8.mp4"
+      }
+    ]
+  },
+  "mobile-flutter": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Frontend",
+        "filename": "sem1-form-flutter.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Frontend",
+        "filename": "sem2-form-flutter.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Frontend",
+        "filename": "sem3-form-flutter.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Frontend",
+        "filename": "sem4-form-flutter.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Mobile",
+        "filename": "sem1-enca-flutter-mob.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Mobile",
+        "filename": "sem2-enca-flutter-mob.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Mobile",
+        "filename": "sem3-enca-flutter-mob.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Mobile",
+        "filename": "sem4-enca-flutter-mob.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Backend Mobile",
+        "filename": "sem1-enca-flutter-backend.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Backend Mobile",
+        "filename": "sem2-enca-flutter-backend.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Backend Mobile",
+        "filename": "sem3-enca-flutter-backend.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Backend Mobile",
+        "filename": "sem4-enca-flutter-backend.mp4"
+      }
+    ]
+  },
+  "mern-stack": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Frontend",
+        "filename": "sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Frontend",
+        "filename": "sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Frontend",
+        "filename": "sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Frontend",
+        "filename": "sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Backend",
+        "filename": "sem5-backend.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Backend",
+        "filename": "sem6-backend.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Backend",
+        "filename": "sem7-backend.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Backend",
+        "filename": "sem8-backend.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Frontend",
+        "filename": "encad1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Frontend",
+        "filename": "encad2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Frontend",
+        "filename": "encad3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Frontend",
+        "filename": "encad4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Backend",
+        "filename": "encad5-backend.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Backend",
+        "filename": "encad6-backend.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Backend",
+        "filename": "encad7-backend.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Backend",
+        "filename": "encad8-backend.mp4"
+      }
+    ]
+  },
+  "fullstack-spring-angular": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Frontend",
+        "filename": "form-angu-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Frontend",
+        "filename": "form-angu-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Frontend",
+        "filename": "form-angu-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Frontend",
+        "filename": "form-angu-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Backend",
+        "filename": "back-spring-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Backend",
+        "filename": "back-spring-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Backend",
+        "filename": "back-spring-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Backend",
+        "filename": "back-spring-sem8.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Frontend",
+        "filename": "enca-angu-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Frontend",
+        "filename": "enca-angu-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Frontend",
+        "filename": "enca-angu-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Frontend",
+        "filename": "enca-angu-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Backend",
+        "filename": "enca-back-spring-sem5.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Backend",
+        "filename": "enca-back-spring-sem6.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Backend",
+        "filename": "enca-back-spring-sem7.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Backend",
+        "filename": "enca-back-spring-sem8.mp4"
+      }
+    ]
+  },
+  "bi": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "Level 1",
+        "filename": "sem1-level1-form.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Level 1",
+        "filename": "sem2-level1-form.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Level 1",
+        "filename": "sem3-level1-form.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Level 1",
+        "filename": "sem4-level1-form.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Level 2",
+        "filename": "sem5-level2-form.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Level 2",
+        "filename": "sem6-level2-form.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Level 2",
+        "filename": "sem7-level2-form.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Level 2",
+        "filename": "sem8-level2-form.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement Level 1",
+        "filename": "sem1-level1-encad.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement Level 1",
+        "filename": "sem2-level1-encad.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement Level 1",
+        "filename": "sem3-level1-encad.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement Level 1",
+        "filename": "sem4-level1-encad.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Level 2",
+        "filename": "sem5-level2-enca.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Level 2",
+        "filename": "sem6-level2-enca.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Level 2",
+        "filename": "sem7-level2-enca.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Level 2",
+        "filename": "sem8-level2-enca.mp4"
+      }
+    ]
+  },
+  "iot": {
+    "weeks": [
+      {
+        "week": 1,
+        "phase": "IoT",
+        "filename": "form-iot-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "IoT",
+        "filename": "form-iot-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "IoT",
+        "filename": "form-iot-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "IoT",
+        "filename": "form-iot-sem4.mp4"
+      }
+    ],
+    "supervision": [
+      {
+        "week": 1,
+        "phase": "Encadrement IoT",
+        "filename": "enca-iot-sem1.mp4"
+      },
+      {
+        "week": 2,
+        "phase": "Encadrement IoT",
+        "filename": "enca-iot-sem2.mp4"
+      },
+      {
+        "week": 3,
+        "phase": "Encadrement IoT",
+        "filename": "enca-iot-sem3.mp4"
+      },
+      {
+        "week": 4,
+        "phase": "Encadrement IoT",
+        "filename": "enca-iot-sem4.mp4"
+      },
+      {
+        "week": 5,
+        "phase": "Encadrement Framework",
+        "filename": "enca-frame-sem1.mp4"
+      },
+      {
+        "week": 6,
+        "phase": "Encadrement Framework",
+        "filename": "enca-frame-sem2.mp4"
+      },
+      {
+        "week": 7,
+        "phase": "Encadrement Framework",
+        "filename": "enca-frame-sem3.mp4"
+      },
+      {
+        "week": 8,
+        "phase": "Encadrement Framework",
+        "filename": "enca-frame-sem4.mp4"
+      }
+    ]
+  }
+}

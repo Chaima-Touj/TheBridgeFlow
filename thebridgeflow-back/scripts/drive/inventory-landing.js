@@ -1,6 +1,6 @@
 /**
  * Étape 1 — Inventaire des contenus média de la Landing Page à migrer depuis
- * Google Drive 2 vers SiteSettings (LECTURE SEULE, DRY RUN).
+ * Google Drive vers SiteSettings (LECTURE SEULE, DRY RUN).
  *
  * N'écrit RIEN dans MongoDB. Génère un rapport (landing-migration-report.md
  * + .json, dans ce même dossier) listant tout ce qui serait migré, avec les
@@ -8,7 +8,9 @@
  * séparément pour validation manuelle — même logique que inventory.js.
  *
  * Usage : node thebridgeflow-back/scripts/drive/inventory-landing.js
- * Prérequis : avoir lancé authenticate.js pour drive2 au préalable.
+ * Prérequis : avoir lancé authenticate.js pour drive1 au préalable (drive2
+ * n'est plus utilisé — tout vit désormais dans le Shared Drive "Formation"
+ * sur drive1).
  */
 import "dotenv/config";
 import fs from "fs";
@@ -25,7 +27,12 @@ const REPORT_JSON_PATH = path.join(__dirname, "landing-migration-report.json");
 
 const FOLDER_MIME = "application/vnd.google-apps.folder";
 
-// ── Dossiers Drive 2 concernés ──────────────────────────────────────────────
+// Shared Drive "Formation" (drive1) — voir inventory.js pour le détail de
+// la vérification (drive.drives.get confirme un Shared Drive, pas un
+// dossier "My Drive" classique).
+const FORMATION_DRIVE_ID = "0AOffyQncQYm5Uk9PVA";
+
+// ── Dossiers concernés, tous à la racine du Shared Drive "Formation" ───────
 const FOLDER_PROMO      = "TheBridgeFlow Video-Promo";
 const FOLDER_FEEDBACKS  = "TheBridgeFlow Feedbacks";
 const FOLDER_IMG_FEED   = "TheBridgeFlow Img-Feedbacks";
@@ -39,7 +46,13 @@ async function findFolderIdByName(drive, name, parentId = "root") {
     "trashed = false",
   ];
   if (parentId) clauses.push(`'${parentId}' in parents`);
-  const res = await drive.files.list({ q: clauses.join(" and "), fields: "files(id, name)", pageSize: 10 });
+  const res = await drive.files.list({
+    q: clauses.join(" and "),
+    fields: "files(id, name)",
+    pageSize: 10,
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+  });
   if (res.data.files.length === 0) return null;
   if (res.data.files.length > 1) {
     console.warn(`  ⚠ Plusieurs dossiers nommés "${name}" trouvés — le premier est utilisé.`);
@@ -56,6 +69,8 @@ async function listFilesInFolder(drive, folderId) {
       fields: "nextPageToken, files(id, name, mimeType, size, webViewLink)",
       pageSize: 200,
       pageToken,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
     files = files.concat(res.data.files || []);
     pageToken = res.data.nextPageToken;
@@ -87,8 +102,8 @@ function categorizeFeedbackVideo(filename) {
 }
 
 async function main() {
-  console.log("Connexion à Google Drive 2...");
-  const auth = await getAuthorizedClient("drive2");
+  console.log("Connexion à Google Drive (drive1)...");
+  const auth = await getAuthorizedClient("drive1");
   const drive = google.drive({ version: "v3", auth });
 
   console.log("Connexion à MongoDB (lecture seule)...");
@@ -105,7 +120,7 @@ async function main() {
 
   // ── 1) Vidéo promo ─────────────────────────────────────────────────────
   console.log(`Résolution "${FOLDER_PROMO}"...`);
-  const promoFolderId = await findFolderIdByName(drive, FOLDER_PROMO, "root");
+  const promoFolderId = await findFolderIdByName(drive, FOLDER_PROMO, FORMATION_DRIVE_ID);
   if (promoFolderId) {
     const files = await listFilesInFolder(drive, promoFolderId);
     const video = files.find((f) => f.mimeType?.startsWith("video/"));
@@ -124,7 +139,7 @@ async function main() {
 
   // ── 2) Vidéos de témoignages ───────────────────────────────────────────
   console.log(`Résolution "${FOLDER_FEEDBACKS}"...`);
-  const feedbacksFolderId = await findFolderIdByName(drive, FOLDER_FEEDBACKS, "root");
+  const feedbacksFolderId = await findFolderIdByName(drive, FOLDER_FEEDBACKS, FORMATION_DRIVE_ID);
   if (feedbacksFolderId) {
     const files = await listFilesInFolder(drive, feedbacksFolderId);
     const videos = files.filter((f) => f.mimeType?.startsWith("video/"));
@@ -139,7 +154,7 @@ async function main() {
   // ── 3) Img-Feedbacks — probable carrousel "communauté", pas des avatars
   //      par vidéo (voir note dans le rapport) ────────────────────────────
   console.log(`Résolution "${FOLDER_IMG_FEED}"...`);
-  const imgFeedFolderId = await findFolderIdByName(drive, FOLDER_IMG_FEED, "root");
+  const imgFeedFolderId = await findFolderIdByName(drive, FOLDER_IMG_FEED, FORMATION_DRIVE_ID);
   if (imgFeedFolderId) {
     const files = await listFilesInFolder(drive, imgFeedFolderId);
     report.imgFeedbacks.files = files.map((f) => ({ name: f.name, size: formatBytes(f.size), driveLink: driveLinkOf(f) }));
@@ -153,7 +168,7 @@ async function main() {
   // ── 4) Dossier "avatars" — 2 fichiers seulement, ne correspond pas à
   //      "un avatar par carte témoignage" ────────────────────────────────
   console.log(`Résolution "${FOLDER_AVATARS}"...`);
-  const avatarsFolderId = await findFolderIdByName(drive, FOLDER_AVATARS, "root");
+  const avatarsFolderId = await findFolderIdByName(drive, FOLDER_AVATARS, FORMATION_DRIVE_ID);
   if (avatarsFolderId) {
     const files = await listFilesInFolder(drive, avatarsFolderId);
     report.avatars.files = files.map((f) => ({ name: f.name, size: formatBytes(f.size), driveLink: driveLinkOf(f) }));

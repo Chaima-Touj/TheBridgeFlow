@@ -1,6 +1,7 @@
 /**
- * Étape 3 — Écriture en base (Cloudinary → Google Drive), à partir du
- * rapport d'inventaire déjà validé (drive-migration-report.json).
+ * Étape 3 — Écriture en base (ancienne structure Drive1/Drive2 → nouveau
+ * Shared Drive "Formation"), à partir du rapport d'inventaire déjà validé
+ * (drive-migration-report.json).
  *
  * SANS --confirm : DRY RUN uniquement — génère un aperçu complet
  * (migration-write-preview.md) de ce qui serait écrit. AUCUNE écriture Mongo.
@@ -10,22 +11,27 @@
  *   node thebridgeflow-back/scripts/drive/migrate.js            (dry run)
  *   node thebridgeflow-back/scripts/drive/migrate.js --confirm  (écriture réelle)
  *
- * ── Stratégie ────────────────────────────────────────────────────────────
- * Les formations cibles ont déjà des weeks[]/supervision[] en base avec du
- * contenu rédigé (content, videoTitle, duree, gratuit) — un remplacement
- * complet du tableau ($set brut, comme patchFormationWeeks) les effacerait.
+ * ── Stratégie (matching par nom de fichier exact, PAS par (type, semaine)) ──
+ * La toute première migration (Cloudinary → Drive, commit b4fb545) a déjà
+ * normalisé videoUrl/driveUrl en base vers des liens Drive (/preview,
+ * /view?...) — le nom de fichier d'origine (ex: "AI1-form-month1.mp4") n'est
+ * donc plus présent nulle part dans les documents Formation actuels. Un
+ * matching par (type, semaine) déduit du nom de fichier (comme dans
+ * inventory.js) a été envisagé puis écarté : il collisionne pour videos-AI
+ * (AI1-4 et chatbot1-4 partagent seulement 2 valeurs "week" déduites du
+ * pattern month1/month2) et échoue pour les vidéos "weeks" de videos-MERN
+ * (semN.mp4 sans "form" dans le nom → type non détectable).
  *
- * Vérifié avant d'écrire ce script : le nom de fichier Drive inventorié
- * (ex: "AI1-form-month1.mp4") correspond EXACTEMENT au basename de l'ancien
- * videoUrl local déjà en base (ex: "/videos-AI/AI1-form-month1.mp4") — pour
- * les 6 formations à mapping manuel ET Cyber/Devops. Ce script matche donc
- * chaque vidéo Drive à son entrée existante PAR NOM DE FICHIER, et ne met à
- * jour que videoUrl/thumbnail/provider/driveUrl sur l'entrée trouvée. week,
- * phase, content, videoTitle, duree, gratuit sont préservés tels quels.
- *
- * Les vidéos Drive sans entrée existante correspondante, et les entrées
- * existantes sans fichier Drive correspondant, sont signalées dans l'aperçu
- * mais jamais modifiées automatiquement (pas de content à inventer).
+ * La correspondance exacte fichier↔(formation, tableau, index) de la TOUTE
+ * PREMIÈRE migration a été récupérée depuis l'historique Git (le rapport
+ * d'origine, supprimé au commit fd16737, a été retrouvé via
+ * `git show fd16737^:...migration-write-preview.md`) et figée dans
+ * original-filenames.json, à côté de ce script. Les noms de fichiers Drive
+ * sont inchangés par la réorganisation en Shared Drive (vérifié) — seuls les
+ * ID Drive changent. Ce script matche donc chaque vidéo du nouvel inventaire
+ * PAR NOM DE FICHIER EXACT contre ce mapping figé, et ne met à jour que
+ * videoUrl/thumbnail/provider/driveUrl sur l'entrée trouvée. week, phase,
+ * content, videoTitle, duree, gratuit sont préservés tels quels.
  */
 import "dotenv/config";
 import fs from "fs";
@@ -33,80 +39,31 @@ import path from "path";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import Formation from "../../models/formation.model.js";
-import { normalizeDriveUrl } from "../../utils/driveHelper.js";
+import { normalizeDriveUrl, extractDriveFileId } from "../../utils/driveHelper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPORT_JSON_PATH = path.join(__dirname, "drive-migration-report.json");
-const PREVIEW_MD_PATH  = path.join(__dirname, "migration-write-preview.md");
+const REPORT_JSON_PATH   = path.join(__dirname, "drive-migration-report.json");
+const FILENAME_MAP_PATH  = path.join(__dirname, "original-filenames.json");
+const PREVIEW_MD_PATH    = path.join(__dirname, "migration-write-preview.md");
 
 const CONFIRM = process.argv.includes("--confirm");
 
-function basenameLower(url = "") {
-  return path.posix.basename(url).toLowerCase();
-}
+const STATUS_LABEL = {
+  update:        "✅ à mettre à jour",
+  unchanged:      "⚪ inchangé (même ID Drive)",
+  not_found:     "⚠ fichier introuvable dans l'inventaire Drive actuel",
+  slot_missing:  "⚠ index absent en base (tableau plus court que prévu)",
+};
 
-function fieldDiffLine(label, before, after) {
-  const b = before || "—";
-  const a = after || "—";
-  if (b === a) return `  - ${label} : \`${b}\` (inchangé)`;
-  return `  - ${label} : \`${b}\` → \`${a}\``;
-}
-
-function renderEntry(u) {
+function renderTable(rows) {
   const lines = [];
-  lines.push(
-    `- **${u.array}[${u.idx}]** — semaine ${u.before.week}, phase "${u.before.phase}" ` +
-    `(fichier Drive : \`${u.driveFile}\`)` +
-    (u.typeMismatch ? " ⚠ type déduit du nom Drive incohérent avec le tableau où l'entrée existe déjà" : "")
-  );
-  lines.push(fieldDiffLine("videoUrl", u.before.videoUrl, u.after.videoUrl));
-  lines.push(fieldDiffLine("thumbnail", u.before.thumbnail, u.after.thumbnail));
-  lines.push(fieldDiffLine("provider", u.before.provider, u.after.provider));
-  lines.push(fieldDiffLine("driveUrl", u.before.driveUrl, u.after.driveUrl));
-  lines.push(`  - content (inchangé) : "${u.before.content}"`);
-  lines.push(`  - videoTitle (inchangé) : "${u.before.videoTitle || "—"}"`);
-  lines.push(`  - duree (inchangé) : "${u.before.duree || "—"}" | gratuit (inchangé) : ${u.before.gratuit}`);
-  return lines.join("\n");
-}
-
-function renderFormationPreview(folder, formation, updates, noExistingEntry, untouched) {
-  const lines = [];
-  lines.push(`## ${folder.folder} → ${formation.title} (slug: \`${formation.slug}\`)`);
-  lines.push("");
-  lines.push(
-    `${updates.length} entrée(s) à mettre à jour, ${noExistingEntry.length} vidéo(s) Drive sans entrée ` +
-    `existante correspondante, ${untouched.length} entrée(s) existante(s) non touchée(s).`
-  );
-  lines.push("");
-
-  if (updates.length) {
-    lines.push("### Mises à jour");
-    lines.push("");
-    const sorted = [...updates].sort((a, b) => (a.array === b.array ? a.idx - b.idx : a.array.localeCompare(b.array)));
-    for (const u of sorted) {
-      lines.push(renderEntry(u));
-      lines.push("");
-    }
+  lines.push("| Formation | Semaine | Type | Ancien ID Drive (en base) | Nouveau ID Drive (proposé) | Fichier Drive | Statut |");
+  lines.push("|---|---|---|---|---|---|---|");
+  for (const r of rows) {
+    lines.push(
+      `| ${r.formation} | ${r.week} | ${r.type} | \`${r.oldId}\` | \`${r.newId}\` | ${r.filename} | ${STATUS_LABEL[r.status]} |`
+    );
   }
-
-  if (noExistingEntry.length) {
-    lines.push("### ⚠ Vidéos Drive sans entrée existante correspondante (non ajoutées — pas de `content` rédigé disponible)");
-    lines.push("");
-    for (const v of noExistingEntry) {
-      lines.push(`- \`${v.name}\` (${v.type}, semaine ${v.week ?? "?"}) — [ouvrir](${v.driveLink})`);
-    }
-    lines.push("");
-  }
-
-  if (untouched.length) {
-    lines.push("### Entrées existantes non touchées (aucun fichier Drive correspondant trouvé)");
-    lines.push("");
-    for (const u of untouched) {
-      lines.push(`- ${u.array}[${u.idx}] — semaine ${u.entry.week}, videoUrl actuel : \`${u.entry.videoUrl}\``);
-    }
-    lines.push("");
-  }
-
   return lines.join("\n");
 }
 
@@ -114,104 +71,136 @@ async function main() {
   if (!fs.existsSync(REPORT_JSON_PATH)) {
     throw new Error(`Rapport introuvable : ${REPORT_JSON_PATH}. Lance d'abord inventory.js.`);
   }
+  if (!fs.existsSync(FILENAME_MAP_PATH)) {
+    throw new Error(`Mapping introuvable : ${FILENAME_MAP_PATH}.`);
+  }
   const report = JSON.parse(fs.readFileSync(REPORT_JSON_PATH, "utf8"));
+  const filenameMap = JSON.parse(fs.readFileSync(FILENAME_MAP_PATH, "utf8"));
 
   console.log("Connexion à MongoDB...");
   await mongoose.connect(process.env.MONGO_URI);
 
-  const sections = [];
-  const pendingWrites = [];
-  let totalUpdates = 0, totalUnmatchedDrive = 0, totalUntouched = 0;
-
+  // Dossier Drive actuel par slug de formation (issu de l'inventaire déjà validé).
+  const folderBySlug = {};
   for (const folder of report.folders) {
     if (folder.error || folder.matchStatus !== "matched" || !folder.matchedFormation) continue;
-    if (!folder.videos || folder.videos.length === 0) continue; // ex: videos-Marketing, vide
+    folderBySlug[folder.matchedFormation.slug] = folder;
+  }
 
-    const slug = folder.matchedFormation.slug;
+  const allRows = [];
+  const missingSections = [];
+  const pendingWrites = [];
+  let totalUpdate = 0, totalUnchanged = 0, totalNotFound = 0, totalSlotMissing = 0;
+
+  for (const [slug, arrays] of Object.entries(filenameMap)) {
     const formation = await Formation.findOne({ slug });
     if (!formation) {
-      sections.push(`## ${folder.folder} → ⚠ formation "${slug}" introuvable en base (disparue depuis l'inventaire ?)\n`);
+      missingSections.push(`⚠ Formation "${slug}" introuvable en base (disparue depuis la migration d'origine ?) — ignorée.`);
       continue;
     }
+    const folder = folderBySlug[slug];
+    if (!folder) {
+      missingSections.push(`⚠ Aucun dossier Drive résolu pour "${slug}" dans l'inventaire actuel — ignorée (rien mis à jour pour cette formation).`);
+      continue;
+    }
+
+    const videoByFilename = new Map(folder.videos.map((v) => [v.name.toLowerCase(), v]));
 
     const weeks = formation.weeks.map((w) => (w.toObject ? w.toObject() : { ...w }));
     const supervision = formation.supervision.map((w) => (w.toObject ? w.toObject() : { ...w }));
 
-    // Index des entrées existantes par nom de fichier (basename de videoUrl)
-    const existingIndex = new Map();
-    weeks.forEach((w, idx) => { if (w.videoUrl) existingIndex.set(basenameLower(w.videoUrl), { array: "weeks", idx }); });
-    supervision.forEach((w, idx) => { if (w.videoUrl) existingIndex.set(basenameLower(w.videoUrl), { array: "supervision", idx }); });
+    let formationUpdates = 0;
 
-    const matchedBasenames = new Set();
-    const updates = [];
-    const noExistingEntry = [];
+    for (const arrayName of ["weeks", "supervision"]) {
+      const slots = arrays[arrayName] || [];
+      const targetArray = arrayName === "weeks" ? weeks : supervision;
+      const type = arrayName === "weeks" ? "cours" : "encadrement";
 
-    for (const video of folder.videos) {
-      const basename = video.name.toLowerCase();
-      const found = existingIndex.get(basename);
-      if (!found) {
-        noExistingEntry.push(video);
-        continue;
-      }
-      matchedBasenames.add(basename);
-      const targetArray = found.array === "weeks" ? weeks : supervision;
-      const entry = targetArray[found.idx];
-      const before = { ...entry };
+      slots.forEach((slot, idx) => {
+        const entry = targetArray[idx];
+        const row = {
+          formation: formation.title,
+          week: slot.week,
+          type,
+          filename: slot.filename,
+        };
 
-      entry.provider = "google_drive";
-      entry.driveUrl = video.driveLink;
-      entry.videoUrl = normalizeDriveUrl(video.driveLink, "video");
-      if (video.thumbnail) {
-        entry.thumbnail = normalizeDriveUrl(video.thumbnail.driveLink, "image");
-      }
+        if (!entry) {
+          row.oldId = "—";
+          row.newId = "—";
+          row.status = "slot_missing";
+          allRows.push(row);
+          totalSlotMissing++;
+          return;
+        }
 
-      const expectedArray = video.type === "encadrement" ? "supervision" : video.type === "cours" ? "weeks" : null;
-      const typeMismatch = !!expectedArray && expectedArray !== found.array;
+        const oldId = extractDriveFileId(entry.driveUrl || entry.videoUrl || "") || "—";
+        row.oldId = oldId;
 
-      updates.push({ array: found.array, idx: found.idx, before, after: { ...entry }, typeMismatch, driveFile: video.name });
+        const video = videoByFilename.get(slot.filename.toLowerCase());
+        if (!video) {
+          row.newId = "—";
+          row.status = "not_found";
+          allRows.push(row);
+          totalNotFound++;
+          return;
+        }
+
+        const newId = extractDriveFileId(video.driveLink) || "—";
+        row.newId = newId;
+
+        if (oldId === newId) {
+          row.status = "unchanged";
+          totalUnchanged++;
+        } else {
+          row.status = "update";
+          totalUpdate++;
+          formationUpdates++;
+        }
+
+        // Appliqué dans les deux cas (inchangé = ré-écriture idempotente) :
+        // rafraîchit aussi thumbnail/provider même si l'ID vidéo n'a pas bougé.
+        entry.provider = "google_drive";
+        entry.driveUrl = video.driveLink;
+        entry.videoUrl = normalizeDriveUrl(video.driveLink, "video");
+        if (video.thumbnail) {
+          entry.thumbnail = normalizeDriveUrl(video.thumbnail.driveLink, "image");
+        }
+
+        allRows.push(row);
+      });
     }
 
-    // IMPORTANT : dérivé de existingIndex (construit AVANT la boucle de mise à
-    // jour ci-dessus, sur les basenames d'origine), jamais de w.videoUrl relu
-    // après coup — entry est muté en place par la boucle précédente, donc
-    // relire w.videoUrl ici donnerait le NOUVEAU lien Drive et ferait
-    // apparaître à tort chaque entrée mise à jour comme "non touchée" aussi
-    // (bug détecté et corrigé avant validation : les deux compteurs
-    // affichaient exactement le même total, ce qui a mis la puce à l'oreille).
-    const untouched = [];
-    for (const [basename, loc] of existingIndex.entries()) {
-      if (matchedBasenames.has(basename)) continue;
-      const arr = loc.array === "weeks" ? weeks : supervision;
-      untouched.push({ array: loc.array, idx: loc.idx, entry: arr[loc.idx] });
-    }
-
-    totalUpdates += updates.length;
-    totalUnmatchedDrive += noExistingEntry.length;
-    totalUntouched += untouched.length;
-
-    sections.push(renderFormationPreview(folder, formation, updates, noExistingEntry, untouched));
-
-    if (CONFIRM && updates.length > 0) {
+    if (CONFIRM && formationUpdates > 0) {
       pendingWrites.push({ formationId: formation._id, title: formation.title, weeks, supervision });
     }
   }
 
-  const header = [
-    `# ${CONFIRM ? "Écriture réelle — exécutée" : "Aperçu de l'écriture (DRY RUN — rien écrit en base)"}`,
-    "",
-    `Généré le ${new Date().toISOString()}`,
-    "",
-    "## Résumé global",
-    "",
-    `- ${totalUpdates} entrée(s) à mettre à jour au total`,
-    `- ${totalUnmatchedDrive} vidéo(s) Drive sans entrée existante correspondante`,
-    `- ${totalUntouched} entrée(s) existante(s) non touchée(s) (pas de fichier Drive trouvé)`,
-    "",
-  ];
+  const lines = [];
+  lines.push(`# ${CONFIRM ? "Écriture réelle — exécutée" : "Aperçu de l'écriture (DRY RUN — rien écrit en base)"}`);
+  lines.push("");
+  lines.push(`Généré le ${new Date().toISOString()}`);
+  lines.push("");
+  lines.push("## Résumé global");
+  lines.push("");
+  lines.push(`- ${allRows.length} ligne(s) au total (attendu : 120)`);
+  lines.push(`- ${totalUpdate} entrée(s) **à mettre à jour** (nouvel ID Drive détecté)`);
+  lines.push(`- ${totalUnchanged} entrée(s) inchangée(s) (même ID Drive qu'en base)`);
+  lines.push(`- ${totalNotFound} entrée(s) ⚠ fichier introuvable dans l'inventaire Drive actuel`);
+  lines.push(`- ${totalSlotMissing} entrée(s) ⚠ index absent en base`);
+  if (missingSections.length) {
+    lines.push("");
+    missingSections.forEach((m) => lines.push(`- ${m}`));
+  }
+  lines.push("");
+  lines.push("## Tableau détaillé (120 lignes attendues, une par semaine/type/formation)");
+  lines.push("");
+  lines.push(renderTable(allRows));
+  lines.push("");
 
-  fs.writeFileSync(PREVIEW_MD_PATH, header.join("\n") + sections.join("\n"));
+  fs.writeFileSync(PREVIEW_MD_PATH, lines.join("\n"));
   console.log(`\n${CONFIRM ? "✅ Écriture" : "👁  Aperçu (dry run)"} généré : ${PREVIEW_MD_PATH}`);
-  console.log(`   ${totalUpdates} entrée(s) à mettre à jour, ${totalUnmatchedDrive} sans correspondance Drive→existant, ${totalUntouched} non touchées.`);
+  console.log(`   ${allRows.length} ligne(s) — ${totalUpdate} à mettre à jour, ${totalUnchanged} inchangées, ${totalNotFound} introuvables, ${totalSlotMissing} index absents.`);
 
   if (CONFIRM) {
     console.log(`\nÉcriture réelle en base pour ${pendingWrites.length} formation(s)...`);

@@ -9,7 +9,9 @@
  * proposition de correspondance avec une formation existante en base.
  *
  * Usage : node thebridgeflow-back/scripts/drive/inventory.js
- * Prérequis : avoir lancé authenticate.js pour drive1 ET drive2 au préalable.
+ * Prérequis : avoir lancé authenticate.js pour drive1 au préalable (drive2
+ * n'est plus utilisé — tout le contenu vidéo a été réorganisé dans un
+ * unique Shared Drive "Formation" sur drive1).
  */
 import "dotenv/config";
 import fs from "fs";
@@ -26,21 +28,29 @@ const REPORT_JSON_PATH = path.join(__dirname, "drive-migration-report.json");
 
 const FOLDER_MIME = "application/vnd.google-apps.folder";
 
-// ── Structure des dossiers (telle que décrite par Chaima) ──────────────────
-const DRIVE1_ROOT_FOLDER = "TheBridgeFlow Videos";
-const DRIVE1_VIDEO_FOLDERS = [
-  "videos-AI", "videos-Cyber", "videos-Devops", "videos-Flutter", "videos-Marketing", "videos-MERN",
+// ── Structure des dossiers (Shared Drive "Formation", drive1) ──────────────
+// Tout le contenu (vidéos + miniatures) vit désormais dans un unique Shared
+// Drive nommé "Formation" sur le compte drive1 — confirmé via l'API
+// (drive.drives.get) : l'ID commence par "0A", format réservé aux Shared
+// Drives, jamais aux dossiers "My Drive" classiques. D'où supportsAllDrives/
+// includeItemsFromAllDrives sur tous les appels Drive de ce script (requis
+// par l'API pour lister/lire le contenu d'un Shared Drive).
+const FORMATION_DRIVE_ID = "0AOffyQncQYm5Uk9PVA";
+
+const VIDEO_FOLDERS = [
+  "videos-AI", "videos-Angular", "videos-Bi", "videos-Cyber", "videos-Devops",
+  "videos-Flutter", "videos-Iot", "videos-Marketing", "videos-MERN",
 ];
 
-// Drive 2 : pas de dossier racine dédié aux vidéos — les dossiers vivent
-// directement à la racine du compte, tout comme "imgs".
-const DRIVE2_VIDEO_FOLDERS = ["videos-Angular", "videos-Bi", "videos-Iot"];
-const DRIVE2_THUMBS_PARENT_FOLDER = "imgs";
+// Les dossiers de miniatures ne sont PAS directement à la racine de
+// "Formation" : 8 des 9 vivent dans un sous-dossier "Thumbs-videos" (vérifié
+// via l'API — structure équivalente à l'ancien dossier "imgs" sur drive2,
+// juste renommée et déplacée dans le nouveau Shared Drive).
+const THUMBS_VIDEOS_PARENT_FOLDER = "Thumbs-videos";
 
-// Mapping dossier vidéo → dossier miniatures (Drive 2). Pas de règle
-// générique fiable (ex: Devops → dev-thumbs n'est qu'une hypothèse) donc
-// écrit explicitement. null = aucun dossier thumbs identifié dans la liste
-// fournie par Chaima pour ce dossier vidéo.
+// Mapping dossier vidéo → dossier miniatures. Pas de règle générique fiable
+// (ex: Devops → dev-thumbs n'est qu'une hypothèse) donc écrit explicitement.
+// null = aucun dossier thumbs identifié pour ce dossier vidéo.
 const THUMBS_FOLDER_MAP = {
   "videos-AI":       { name: "ai-thumbs",      confidence: "certain" },
   "videos-Cyber":     { name: "cyber-thumbs",   confidence: "certain" },
@@ -88,6 +98,8 @@ async function findFolderIdByName(drive, name, parentId = "root") {
     q: clauses.join(" and "),
     fields: "files(id, name)",
     pageSize: 10,
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
   });
   if (res.data.files.length === 0) return null;
   if (res.data.files.length > 1) {
@@ -105,6 +117,8 @@ async function listFilesInFolder(drive, folderId) {
       fields: "nextPageToken, files(id, name, mimeType, size, webViewLink)",
       pageSize: 200,
       pageToken,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
     files = files.concat(res.data.files || []);
     pageToken = res.data.nextPageToken;
@@ -178,6 +192,26 @@ function extractSeriesPrefix(filename) {
   return m ? m[1] : null;
 }
 
+// Priorité 1.5 — repli pour les fichiers sans "form"/"enca(d)" dans le nom
+// (type non détectable par parseVideoFilename, donc priorité 1 inapplicable
+// puisqu'elle exige videoType !== "unknown") mais où vidéo et miniature
+// partagent exactement les mêmes mots, dans un ordre différent (constaté sur
+// videos-MERN : vidéo "sem5-backend.mp4" vs miniature
+// "backend-sem5-thumb.jpg"). Comparaison par ensemble de tokens (insensible
+// à l'ordre), après retrait du mot générique "thumb" — plus strict qu'une
+// simple inclusion de sous-chaîne (priorité 2 ci-dessous), donc essayé avant.
+function nameTokenSet(filename) {
+  return new Set(
+    stripExt(filename).toLowerCase().split(/[^a-z0-9]+/).filter((t) => t && t !== "thumb")
+  );
+}
+
+function sameTokenSet(a, b) {
+  if (a.size === 0 || a.size !== b.size) return false;
+  for (const t of a) if (!b.has(t)) return false;
+  return true;
+}
+
 function findMatchingThumb(videoFile, thumbFiles, folderName) {
   const { type: videoType, week: videoWeek } = parseVideoFilename(videoFile.name);
   const requirePrefix = PREFIX_MATCH_FOLDERS.has(folderName);
@@ -192,6 +226,10 @@ function findMatchingThumb(videoFile, thumbFiles, folderName) {
     });
     if (byWeekAndType) return byWeekAndType;
   }
+
+  const videoTokens = nameTokenSet(videoFile.name);
+  const byTokenSet = thumbFiles.find((t) => sameTokenSet(videoTokens, nameTokenSet(t.name)));
+  if (byTokenSet) return byTokenSet;
 
   const v = stripExt(videoFile.name).toLowerCase();
   return (
@@ -239,11 +277,9 @@ function matchFormation(folderName, formations) {
 
 // ── Programme principal ──────────────────────────────────────────────────
 async function main() {
-  console.log("Connexion aux 2 comptes Google Drive...");
+  console.log("Connexion au compte Google Drive (drive1)...");
   const authDrive1 = await getAuthorizedClient("drive1");
-  const authDrive2 = await getAuthorizedClient("drive2");
   const drive1 = google.drive({ version: "v3", auth: authDrive1 });
-  const drive2 = google.drive({ version: "v3", auth: authDrive2 });
 
   console.log("Connexion à MongoDB (lecture seule)...");
   await mongoose.connect(process.env.MONGO_URI);
@@ -252,31 +288,32 @@ async function main() {
 
   const report = { generatedAt: new Date().toISOString(), folders: [] };
 
-  // Résolution des dossiers thumbs (Drive 2), une seule fois.
-  console.log("Résolution des dossiers de miniatures (Drive 2 / imgs)...");
-  const thumbsParentId = await findFolderIdByName(drive2, DRIVE2_THUMBS_PARENT_FOLDER, "root");
+  // Résolution des dossiers thumbs (sous-dossier "Thumbs-videos" du Shared
+  // Drive "Formation"), une seule fois.
+  console.log(`Résolution des dossiers de miniatures (${THUMBS_VIDEOS_PARENT_FOLDER})...`);
+  const thumbsParentId = await findFolderIdByName(drive1, THUMBS_VIDEOS_PARENT_FOLDER, FORMATION_DRIVE_ID);
   const thumbsFolderIds = {};
   for (const [videoFolder, thumbsInfo] of Object.entries(THUMBS_FOLDER_MAP)) {
     if (!thumbsInfo) continue;
     thumbsFolderIds[videoFolder] = thumbsParentId
-      ? await findFolderIdByName(drive2, thumbsInfo.name, thumbsParentId)
+      ? await findFolderIdByName(drive1, thumbsInfo.name, thumbsParentId)
       : null;
   }
 
-  async function processFolder(drive, driveLabel, folderName, parentId) {
-    console.log(`  → ${driveLabel}/${folderName}`);
-    const folderId = await findFolderIdByName(drive, folderName, parentId);
+  async function processFolder(folderName) {
+    console.log(`  → ${folderName}`);
+    const folderId = await findFolderIdByName(drive1, folderName, FORMATION_DRIVE_ID);
     if (!folderId) {
-      report.folders.push({ drive: driveLabel, folder: folderName, error: "Dossier introuvable sur Drive" });
+      report.folders.push({ drive: "drive1", folder: folderName, error: "Dossier introuvable sur Drive" });
       return;
     }
 
-    const files = await listFilesInFolder(drive, folderId);
+    const files = await listFilesInFolder(drive1, folderId);
     const videoFiles = files.filter((f) => f.mimeType?.startsWith("video/"));
 
     const thumbFolderId = thumbsFolderIds[folderName] || null;
     const thumbsConfidence = THUMBS_FOLDER_MAP[folderName]?.confidence || null;
-    const thumbFiles = thumbFolderId ? await listFilesInFolder(drive2, thumbFolderId) : [];
+    const thumbFiles = thumbFolderId ? await listFilesInFolder(drive1, thumbFolderId) : [];
 
     const videos = videoFiles.map((f) => {
       const { type, week } = parseVideoFilename(f.name);
@@ -297,7 +334,7 @@ async function main() {
     const { status, best, top3, source } = matchFormation(folderName, formations);
 
     report.folders.push({
-      drive: driveLabel,
+      drive: "drive1",
       folder: folderName,
       videoCount: videos.length,
       thumbsFolderResolved: !!thumbFolderId,
@@ -314,20 +351,9 @@ async function main() {
     });
   }
 
-  console.log(`Résolution du dossier racine Drive 1 "${DRIVE1_ROOT_FOLDER}"...`);
-  const drive1RootId = await findFolderIdByName(drive1, DRIVE1_ROOT_FOLDER, "root");
-  if (!drive1RootId) {
-    console.warn(`  ⚠ Dossier racine "${DRIVE1_ROOT_FOLDER}" introuvable à la racine de Drive 1 — recherche globale en secours.`);
-  }
-
-  console.log("Inventaire Drive 1...");
-  for (const folder of DRIVE1_VIDEO_FOLDERS) {
-    await processFolder(drive1, "drive1", folder, drive1RootId || null);
-  }
-
-  console.log("Inventaire Drive 2...");
-  for (const folder of DRIVE2_VIDEO_FOLDERS) {
-    await processFolder(drive2, "drive2", folder, "root");
+  console.log(`Inventaire du Shared Drive "Formation" (${FORMATION_DRIVE_ID})...`);
+  for (const folder of VIDEO_FOLDERS) {
+    await processFolder(folder);
   }
 
   fs.writeFileSync(REPORT_JSON_PATH, JSON.stringify(report, null, 2));

@@ -13,10 +13,13 @@
  *   node thebridgeflow-back/scripts/drive/migrate-landing.js --confirm  (écriture réelle)
  *
  * ── Portée ──────────────────────────────────────────────────────────────
- * Seules les 28 vidéos catégorisées de report.testimonialVideos.categorized
- * sont concernées. La vidéo promo est déjà migrée (section 1 du rapport,
- * aucune action) et Img-Feedbacks/avatars restent explicitement exclus
- * (sections 3 et 4) — ni l'un ni l'autre n'est touché par ce script.
+ * Vidéo promo (SiteSettings.actionVideo) : mise à jour à partir du fichier
+ * trouvé dans "Formation" / TheBridgeFlow Video-Promo, source de vérité
+ * même si son ID Drive diffère de celui déjà en base (fichier remplacé lors
+ * de la réorganisation Drive). Vidéos de témoignages : les 28 vidéos
+ * catégorisées de report.testimonialVideos.categorized. Img-Feedbacks et
+ * avatars restent explicitement exclus (sections 3 et 4 du rapport
+ * d'inventaire) — ni l'un ni l'autre n'est touché par ce script.
  *
  * Contrairement à migrate.js (Formation), SiteSettings.testimonialVideos
  * est actuellement vide (nouveau champ) : il n'y a pas de contenu rédigé
@@ -42,6 +45,13 @@ function fieldLine(label, value) {
   return `  - ${label} : \`${value || "—"}\``;
 }
 
+function fieldDiffLine(label, before, after) {
+  const b = before || "—";
+  const a = after || "—";
+  if (b === a) return `  - ${label} : \`${b}\` (inchangé)`;
+  return `  - ${label} : \`${b}\` → \`${a}\``;
+}
+
 function renderEntry(v, idx) {
   const lines = [];
   lines.push(`- **testimonialVideos[${idx}]** — \`${v.name}\` (${v.size})`);
@@ -49,6 +59,25 @@ function renderEntry(v, idx) {
   lines.push(fieldLine("url", v.after.url));
   lines.push(fieldLine("driveUrl", v.after.driveUrl));
   lines.push(fieldLine("provider", v.after.provider));
+  return lines.join("\n");
+}
+
+function renderPromoSection(promo) {
+  const lines = [];
+  lines.push("## 1. Vidéo promo (`SiteSettings.actionVideo`)");
+  lines.push("");
+  if (!promo) {
+    lines.push("⚠ Aucune vidéo promo trouvée dans le rapport d'inventaire (`TheBridgeFlow Video-Promo`) — `actionVideo` non touché.");
+    lines.push("");
+    return lines.join("\n");
+  }
+  lines.push(`Fichier Drive : \`${promo.driveFile}\` (dossier "Formation" / TheBridgeFlow Video-Promo)`);
+  lines.push("");
+  lines.push(fieldDiffLine("url", promo.before.url, promo.after.url));
+  lines.push(fieldDiffLine("driveUrl", promo.before.driveUrl, promo.after.driveUrl));
+  lines.push(fieldDiffLine("provider", promo.before.provider, promo.after.provider));
+  lines.push(`  - thumbnail : \`${promo.before.thumbnail || "—"}\` (inchangé — non fourni par l'inventaire)`);
+  lines.push("");
   return lines.join("\n");
 }
 
@@ -64,6 +93,30 @@ async function main() {
 
   let settings = await SiteSettings.findOne();
   const existingCount = settings?.testimonialVideos?.length || 0;
+
+  // ── Vidéo promo — le dossier "Formation" (Video-Promo) est désormais la
+  // source de vérité, même quand l'ID Drive diffère de celui déjà en base
+  // (cas constaté à l'inventaire : fichier remplacé lors de la
+  // réorganisation Drive). thumbnail existant préservé tel quel : l'inventaire
+  // ne résout pas de miniature pour la promo.
+  const promoBefore = {
+    url: settings?.actionVideo?.url || "",
+    driveUrl: settings?.actionVideo?.driveUrl || "",
+    provider: settings?.actionVideo?.provider || "",
+    thumbnail: settings?.actionVideo?.thumbnail || "",
+  };
+  const promoUpdate = report.promoVideo
+    ? {
+        driveFile: report.promoVideo.name,
+        before: promoBefore,
+        after: {
+          url: normalizeDriveUrl(report.promoVideo.driveLink, "video"),
+          provider: "google_drive",
+          driveUrl: report.promoVideo.driveLink,
+          thumbnail: promoBefore.thumbnail,
+        },
+      }
+    : null;
 
   const newEntries = categorized.map((v) => ({
     name: v.name,
@@ -90,6 +143,11 @@ async function main() {
   lines.push("");
   lines.push("## Résumé global");
   lines.push("");
+  lines.push(
+    promoUpdate
+      ? `- \`SiteSettings.actionVideo\` : ${promoUpdate.before.driveUrl === promoUpdate.after.driveUrl ? "inchangé (même fichier Drive)" : "à mettre à jour (nouveau fichier Drive détecté)"}`
+      : "- ⚠ Aucune vidéo promo trouvée à l'inventaire — `actionVideo` non touché"
+  );
   lines.push(`- ${newEntries.length} entrée(s) à écrire dans \`SiteSettings.testimonialVideos[]\` (summer-camp: ${byCategory["summer-camp"] || 0}, pfe: ${byCategory.pfe || 0}, formation: ${byCategory.formation || 0})`);
   lines.push(
     existingCount === 0
@@ -97,7 +155,8 @@ async function main() {
       : `- ⚠ ${existingCount} entrée(s) **déjà présente(s)** en base — l'écriture réelle les REMPLACERA entièrement (tableau remplacé en un seul \`$set\`).`
   );
   lines.push("");
-  lines.push("## Détail des entrées");
+  lines.push(renderPromoSection(promoUpdate));
+  lines.push("## 2. Vidéos de témoignages (`SiteSettings.testimonialVideos[]`)");
   lines.push("");
   for (const v of newEntries) {
     lines.push(renderEntry(v, newEntries.indexOf(v)));
@@ -106,14 +165,17 @@ async function main() {
 
   fs.writeFileSync(PREVIEW_MD_PATH, lines.join("\n"));
   console.log(`\n${CONFIRM ? "✅ Écriture" : "👁  Aperçu (dry run)"} généré : ${PREVIEW_MD_PATH}`);
-  console.log(`   ${newEntries.length} entrée(s), ${existingCount} déjà en base avant écriture.`);
+  console.log(`   ${newEntries.length} entrée(s) de témoignage, ${existingCount} déjà en base avant écriture.`);
+  console.log(`   Vidéo promo : ${promoUpdate ? (promoUpdate.before.driveUrl === promoUpdate.after.driveUrl ? "inchangée" : "à mettre à jour") : "non trouvée"}.`);
 
   if (CONFIRM) {
     console.log("\nÉcriture réelle en base...");
     if (!settings) settings = await SiteSettings.create({});
+    if (promoUpdate) settings.actionVideo = promoUpdate.after;
     settings.testimonialVideos = newEntries.map((v) => v.after);
     await settings.save();
     console.log(`✅ ${newEntries.length} vidéo(s) de témoignage écrite(s) dans SiteSettings.testimonialVideos.`);
+    if (promoUpdate) console.log("✅ Vidéo promo mise à jour dans SiteSettings.actionVideo.");
   } else {
     console.log("\nAucune écriture effectuée (dry run). Relance avec --confirm pour écrire réellement.");
   }
