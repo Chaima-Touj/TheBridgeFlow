@@ -53,7 +53,7 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
                   className="vtc-card__video"
                   src={posterSrc}
                   alt=""
-                  loading="eager"
+                  loading={isActive ? "eager" : "lazy"}
                   // Filet de sécurité complémentaire à l'effet sectionInView du
                   // parent (.vtc-row) : quand la page charge ~28 vignettes
                   // simultanément (3 catégories confondues), certaines

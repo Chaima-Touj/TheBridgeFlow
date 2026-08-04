@@ -270,7 +270,7 @@
    hauteur en découle toujours correctement, ratio jamais violé. */
 .vtc-modal__video-wrap {
   position: relative;
-  width: min(90vw, 420px, calc(88vh * 9 / 16));
+  width: min(90vw, 480px, calc(88vh * 9 / 16));
   aspect-ratio: 9 / 16;
   background: #000;
   border-radius: 14px;
@@ -373,7 +373,7 @@
     max-width: 300px;
     scroll-snap-align: start;
   }
-  .vtc-modal__video-wrap { width: min(88vw, 340px, calc(88vh * 9 / 16)); }
+  .vtc-modal__video-wrap { width: min(88vw, 390px, calc(88vh * 9 / 16)); }
   .vtc-modal__nav { width: 38px; height: 38px; }
 }
 
