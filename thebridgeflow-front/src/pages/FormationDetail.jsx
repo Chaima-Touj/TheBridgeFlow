@@ -384,6 +384,28 @@ const FormationDetail = () => {
               <div className="fd-body__left">
 
                 {/* ────────────────────────────────────────────────────
+                    1. VIDÉO RÉSUMÉ (trailer global, distinct des vidéos
+                    par semaine) — masquée si aucune vidéo n'est définie.
+                    Réutilise VideoTestimonialCarousel (déjà utilisé plus
+                    bas dans cette page) : seul composant gérant déjà le
+                    repli miniature via proxy (resolveDriveThumbnailProxyUrl)
+                    quand aucune miniature explicite n'est fournie.
+                ──────────────────────────────────────────────────── */}
+                {formation.trailerVideoUrl && (
+                  <section className="fd-section">
+                    <VideoTestimonialCarousel
+                      items={[{
+                        id: formation._id,
+                        videoUrl: formation.trailerVideoUrl,
+                        posterUrl: formation.trailerThumbnail || undefined,
+                      }]}
+                      title={t("formationDetail.trailerTitle")}
+                      subtitle={t("formationDetail.trailerSubtitle")}
+                    />
+                  </section>
+                )}
+
+                {/* ────────────────────────────────────────────────────
                     2. PROGRAMME / TIMELINE
                 ──────────────────────────────────────────────────── */}
                 {weekGroups.size > 0 && (

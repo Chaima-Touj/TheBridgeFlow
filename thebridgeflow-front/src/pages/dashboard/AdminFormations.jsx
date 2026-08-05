@@ -104,6 +104,8 @@ const EMPTY_FORM = {
   mode: "Hybride",
   certificate: false,
   weeks: [],
+  trailerVideoUrl: "",
+  trailerThumbnail: "",
 };
 
 function formationToForm(formation) {
@@ -120,6 +122,8 @@ function formationToForm(formation) {
       ...(formation.weeks || []).map((w) => weekToCard(w, "cours")),
       ...(formation.supervision || []).map((w) => weekToCard(w, "encadrement")),
     ],
+    trailerVideoUrl:  formation.trailerVideoUrl  || "",
+    trailerThumbnail: formation.trailerThumbnail || "",
   };
 }
 
@@ -249,6 +253,83 @@ function RowActionsMenu({ onEdit, onDelete }) {
   );
 }
 
+/* ─── Champ image réutilisable — bascule lien Google Drive / upload local
+     (base64, compression client canvas 800px, voir imageCompression.js).
+     Même pattern que la miniature des témoignages (AdminFeedbacks.jsx). ──── */
+function DriveOrUploadField({ value, onChange, label }) {
+  const { t } = useTranslation();
+  const [mode, setMode] = useState(value?.startsWith("data:image/") ? "upload" : "drive");
+  const [compressing, setCompressing] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCompressing(true);
+    setError("");
+    try {
+      const base64 = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
+      onChange(base64);
+    } catch (err) {
+      setError(err.message || t("adminFormations.errors.thumbnailUploadFailed"));
+    } finally {
+      setCompressing(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div className="af-form-row">
+      {label && <label className="label">{label}</label>}
+      <div className="af-thumb-mode-toggle">
+        <button type="button" className={`af-thumb-mode-btn${mode === "drive" ? " af-thumb-mode-btn--active" : ""}`} onClick={() => setMode("drive")}>
+          {t("adminFormations.thumbnailModeDrive")}
+        </button>
+        <button type="button" className={`af-thumb-mode-btn${mode === "upload" ? " af-thumb-mode-btn--active" : ""}`} onClick={() => setMode("upload")}>
+          {t("adminFormations.thumbnailModeUpload")}
+        </button>
+      </div>
+
+      {mode === "upload" ? (
+        <>
+          <label className="an-image-upload">
+            {value ? (
+              <img src={value} alt="" className="an-image-preview" />
+            ) : (
+              <div className="an-image-placeholder">
+                <FiImage size={20} />
+                <span>{t("adminFormations.videoThumbnailChoose")}</span>
+              </div>
+            )}
+            {compressing && <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>}
+          </label>
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} hidden />
+        </>
+      ) : (
+        <>
+          <input
+            className="input"
+            placeholder="https://drive.google.com/file/d/..."
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {value && isGoogleDriveUrl(value) && (
+            <div className="af-video-thumb-drive-preview">
+              <img
+                src={resolveDriveUrl(value, "image")}
+                alt=""
+                className="af-video-thumb-preview"
+                onError={(e) => { e.target.style.display = "none"; }}
+              />
+            </div>
+          )}
+        </>
+      )}
+      {error && <span className="af-field-error">{error}</span>}
+    </div>
+  );
+}
+
 /* ─── Formulaire (création + édition) ────────────────────────────────────── */
 function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }) {
   const { t } = useTranslation();
@@ -327,6 +408,8 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
       certificate: form.certificate,
       weeksData:       form.weeks.filter((w) => w.type === "cours").map(toWeekPayload),
       supervisionData: form.weeks.filter((w) => w.type === "encadrement").map(toWeekPayload),
+      trailerVideoUrl:  form.trailerVideoUrl.trim(),
+      trailerThumbnail: form.trailerThumbnail,
     });
   };
 
@@ -384,6 +467,33 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
           </label>
         </div>
       </div>
+
+      {/* ── Vidéo résumé (trailer global, distinct des vidéos par semaine) ──
+          Uniquement en édition : la mise à jour passe par PATCH
+          /api/formations/:id/trailer, qui a besoin d'un _id existant — pas
+          disponible tant que la formation n'a pas été créée. */}
+      {isEdit && (
+        <fieldset className="af-video-fieldset">
+          <legend className="af-video-legend">{t("adminFormations.trailerSection")}</legend>
+
+          <div className="af-form-row">
+            <label className="label" htmlFor="af-trailer-drive">{t("adminFormations.trailerDriveUrlLabel")}</label>
+            <input
+              id="af-trailer-drive"
+              className="input"
+              placeholder="https://drive.google.com/file/d/..."
+              value={form.trailerVideoUrl}
+              onChange={set("trailerVideoUrl")}
+            />
+          </div>
+
+          <DriveOrUploadField
+            label={t("adminFormations.trailerThumbnailLabel")}
+            value={form.trailerThumbnail}
+            onChange={(trailerThumbnail) => setForm((f) => ({ ...f, trailerThumbnail }))}
+          />
+        </fieldset>
+      )}
 
       {/* ── Semaines (cours + encadrement, vidéos Google Drive) ──────────── */}
       <fieldset className="af-video-fieldset">
@@ -637,7 +747,7 @@ export default function AdminFormations() {
     setSubmitting(true);
     setFormError("");
     try {
-      const { weeksData, supervisionData, ...baseFields } = payload;
+      const { weeksData, supervisionData, trailerVideoUrl, trailerThumbnail, ...baseFields } = payload;
       let slug;
       if (formModal === "create") {
         const { data } = await formationsService.createFormation(baseFields);
@@ -645,6 +755,9 @@ export default function AdminFormations() {
       } else {
         await formationsService.updateFormation(formModal._id, baseFields);
         slug = formModal.slug;
+        // Route dédiée (PATCH /:id/trailer) — updateFormation ne gère pas ces
+        // champs. Non applicable à la création : pas encore de _id.
+        await formationsService.updateTrailer(formModal._id, { trailerVideoUrl, trailerThumbnail });
       }
       await formationsService.updateWeeks(slug, weeksData);
       await formationsService.updateSupervision(slug, supervisionData);
