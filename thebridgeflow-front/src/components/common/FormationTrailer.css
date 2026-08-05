@@ -29,16 +29,18 @@
 .ftv-trailer__title { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 0.75rem; margin-top: 1rem; }
 .ftv-trailer__sub   { font-size: 1rem; color: var(--text-secondary); }
 
-/* Cadre "tablette" — bordure épaisse sombre autour de la vidéo. Le tilt 3D
-   (motion.div parent, voir JSX) s'applique à ce cadre en entier. */
+/* Cadre "iPhone" — châssis épais type smartphone, coins très arrondis,
+   île dynamique en haut, format portrait. Le tilt 3D (motion.div parent,
+   voir JSX) s'applique à ce cadre en entier. */
 .ftv-trailer__frame {
   position:      relative;
   width:         100%;
-  max-width:     940px;
+  max-width:     320px;
   margin:        0 auto 3.5rem;
-  padding:       18px;
+  padding:       14px;
   background:    linear-gradient(160deg, #2a2a2a, #161616 65%);
-  border-radius: 30px;
+  border:        3px solid #050505;
+  border-radius: 58px;
   overflow:      hidden;
   box-shadow:
     0 45px 90px rgba(0, 0, 0, 0.35),
@@ -53,15 +55,29 @@
   pointer-events: none;
   background: linear-gradient(115deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 24%);
 }
+/* Île dynamique — pilule noire flottant en haut de l'écran, par-dessus la vidéo. */
+.ftv-trailer__frame::after {
+  content:       "";
+  position:      absolute;
+  top:           26px;
+  left:          50%;
+  transform:     translateX(-50%);
+  width:         84px;
+  height:        24px;
+  background:    #000;
+  border-radius: 14px;
+  z-index:       6;
+  box-shadow:    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
 
-/* Video card */
+/* Video card — écran du téléphone, format portrait 9:16 */
 .ftv-trailer__card {
   position:      relative;
   z-index:       0;
   display:       block;
   width:         100%;
-  aspect-ratio:  16 / 9;
-  border-radius: 16px;
+  aspect-ratio:  9 / 16;
+  border-radius: 46px;
   overflow:      hidden;
   border:        none;
   cursor:        pointer;
@@ -226,11 +242,12 @@
 @media (max-width: 640px) {
   .ftv-trailer { padding: 3.5rem 1.25rem; }
   .ftv-trailer__frame {
+    max-width:     260px;
     margin-bottom: 2.5rem;
-    padding:       8px;
-    border-radius: 20px;
+    padding:       10px;
+    border-radius: 46px;
   }
-  .ftv-trailer__card { border-radius: 12px; }
-  .ftv-trailer__preview { object-fit: contain; }
+  .ftv-trailer__frame::after { top: 18px; width: 70px; height: 20px; }
+  .ftv-trailer__card { border-radius: 36px; }
   .ftv-trailer__caption-sub { font-size: 0.875rem; }
 }
