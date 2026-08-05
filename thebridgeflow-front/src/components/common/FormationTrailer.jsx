@@ -79,7 +79,7 @@ export default function FormationTrailer({ videoUrl }) {
   }, [inView, isDrive]);
 
   return (
-    <section className="ftv-trailer" ref={sectionRef}>
+    <section className="ftv-trailer" id="formation-trailer" ref={sectionRef}>
       <div className="ftv-trailer__inner">
 
         <motion.div

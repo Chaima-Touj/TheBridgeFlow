@@ -275,6 +275,102 @@
 .fd-sk-chip     { height: 30px; width: 100px; border-radius: 999px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   1B. HERO — aside prix/vidéo (page publique uniquement)
+   .fd-hero est de nouveau une bande edge-to-edge (comme avant, comme
+   .lp-hero de la Landing Page) : dégradé + .fd-hero__inner centré, sans
+   carte englobante. .fd-hero / .fd-hero__inner / .fd-hero__left /
+   .fd-hero__card / .fd-price-* / .fd-cert-row restent PARTAGÉS avec
+   DashboardFormationDetail.jsx (même fichier CSS) — inchangés ci-dessus.
+   Seule l'aside prix/vidéo de la page publique (structure différente du
+   dashboard : pas de titre/icônes/ligne certificat, aperçu vidéo optionnel
+   ouvrant un modal) a des classes dédiées ci-dessous.
+═══════════════════════════════════════════════════════════════════════════ */
+.fd-hero__aside {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  align-self: start;
+  margin-top: 0.5rem;
+  color: var(--text);
+}
+.fd-hero__preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.fd-hero__preview-play {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  transition: transform 0.15s;
+}
+.fd-hero__preview:hover .fd-hero__preview-play { transform: scale(1.06); }
+.fd-hero__preview-label {
+  position: absolute;
+  bottom: 10px;
+  inset-inline-start: 12px;
+  font-size: 0.75rem;
+  color: #fff;
+}
+.fd-hero__aside-body {
+  padding: 1.25rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ── "Ce que vous apprendrez" / "Technologies couvertes" / "Cette formation
+   comprend" — sections normales (.fd-section, même gabarit que Programme/
+   Encadrement), dans .fd-body__left : fond clair, largeur de contenu
+   standard, pas edge-to-edge. ── */
+.fd-learn-grid,
+.fd-includes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.fd-learn-item,
+.fd-includes-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.fd-learn-item svg { color: #10b981; flex-shrink: 0; margin-top: 0.15rem; }
+.fd-includes-item { color: var(--text-secondary); }
+.fd-includes-item svg { flex-shrink: 0; margin-top: 0.1rem; }
+
+.fd-tech-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fd-tech-pill {
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .fd-learn-grid,
+  .fd-includes-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    BODY LAYOUT
 ═══════════════════════════════════════════════════════════════════════════ */
 .fd-body { background: var(--bg); }

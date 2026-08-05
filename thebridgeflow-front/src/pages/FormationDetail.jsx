@@ -6,7 +6,7 @@ import {
   FiArrowLeft, FiChevronDown, FiAward, FiClock,
   FiMonitor, FiUsers, FiCheck, FiStar, FiChevronRight, FiPlay,
   FiMessageCircle, FiZap, FiBook, FiTarget, FiShield, FiHelpCircle,
-  FiCpu, FiLock, FiTrendingUp,
+  FiCpu, FiLock, FiTrendingUp, FiVideo, FiSmartphone,
 } from "react-icons/fi";
 import { FaChartBar, FaRobot } from "react-icons/fa";
 import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiKubernetes } from "react-icons/si";
@@ -15,11 +15,12 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CoursePreviewModal from "../components/common/CoursePreviewModal.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
-import FormationTrailer from "../components/common/FormationTrailer.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
 import { formationsService } from "../services/formations.service.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../utils/thumbUtils.js";
 import { getAllFormationTestimonials } from "../constants/testimonials.js";
+import { getTechLogo } from "../constants/techLogos.js";
+import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import "./FormationDetail.css";
 
 // ─── Icon map (keyed by slug for exact matching) ──────────────────────────────
@@ -166,6 +167,7 @@ const FormationDetail = () => {
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
   const [previewWeek,  setPreviewWeek]  = useState(null);
+  const [showTrailerModal, setShowTrailerModal] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -211,6 +213,13 @@ const FormationDetail = () => {
   const hasFaq       = formation?.faq?.length > 0;
   const hasReviews   = formation?.reviews?.length > 0;
   const sortedWeeks  = [...(formation?.weeks ?? [])].sort((a, b) => a.week - b.week);
+  const learnItems   = sortedWeeks.slice(0, 6).map(w => w.content).filter(Boolean);
+  const techPills    = (formation?.technologies ?? [])
+    .map(slug => ({ slug, logo: getTechLogo(slug) }))
+    .filter(t => t.logo);
+  const waMessage = formation
+    ? `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+    : "";
 
   return (
     <div className="fd-page">
@@ -234,144 +243,138 @@ const FormationDetail = () => {
       {!loading && !error && formation && (
         <>
           {/* ══════════════════════════════════════════════════════════════
-              1. HERO SECTION
+              1. HERO — bande edge-to-edge (dégradé + titre/badges + aside
+              prix/vidéo), comme avant la carte englobante (même pattern que
+              .lp-hero de la Landing Page : bande pleine largeur + .fd-hero__inner
+              centré à l'intérieur).
+              NB : .fd-hero / .fd-hero__inner / .fd-hero__left / .fd-price-* /
+              .fd-enroll-btn / .fd-whatsapp-btn restent PARTAGÉS avec
+              DashboardFormationDetail.jsx (même FormationDetail.css) — réutilisés
+              tels quels sans modification. Seule l'aside (structure différente
+              du dashboard : pas de titre/icônes/ligne certificat, aperçu vidéo
+              optionnel en modale) a des classes dédiées.
           ══════════════════════════════════════════════════════════════ */}
           <section className="fd-hero">
-            {/* Decorative background blobs */}
             <div className="fd-hero__blob fd-hero__blob--1" />
             <div className="fd-hero__blob fd-hero__blob--2" />
 
             <div className="fd-hero__inner">
-              {/* ── LEFT: info ─────────────────────────────────────── */}
-              <motion.div
-                className="fd-hero__left"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                <Link to="/formations" className="fd-back">
-                  <FiArrowLeft size={15} /> {t("formationDetail.back")}
-                </Link>
+                  {/* ── LEFT: info ─────────────────────────────────────── */}
+                  <motion.div
+                    className="fd-hero__left"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  >
+                    <Link to="/formations" className="fd-back">
+                      <FiArrowLeft size={15} /> {t("formationDetail.back")}
+                    </Link>
 
-                {/* Icon + badge */}
-                <div className="fd-hero__icon-wrap">
-                  {iconEntries.map(({ Comp: Ic, color: c }, i) => (
-                    <div
-                      key={i}
-                      className="fd-hero__icon"
-                      style={{
-                        background: `${c}22`,
-                        color: c,
-                        ...(iconEntries.length >= 3 && { width: 48, height: 48 }),
-                      }}
-                    >
-                      <Ic size={iconEntries.length >= 3 ? 22 : 36} />
+                    {/* Icon + badge */}
+                    <div className="fd-hero__icon-wrap">
+                      {iconEntries.map(({ Comp: Ic, color: c }, i) => (
+                        <div
+                          key={i}
+                          className="fd-hero__icon"
+                          style={{
+                            background: `${c}22`,
+                            color: c,
+                            ...(iconEntries.length >= 3 && { width: 48, height: 48 }),
+                          }}
+                        >
+                          <Ic size={iconEntries.length >= 3 ? 22 : 36} />
+                        </div>
+                      ))}
+                      {formation.certificate && (
+                        <span className="fd-hero__cert-badge">
+                          <FiAward size={13} /> {t("formationDetail.certificateYes")}
+                        </span>
+                      )}
                     </div>
-                  ))}
-                  {formation.certificate && (
-                    <span className="fd-hero__cert-badge">
-                      <FiAward size={13} /> {t("formationDetail.certificateYes")}
-                    </span>
-                  )}
-                </div>
 
-                <h1 className="fd-hero__title">{formation.title}</h1>
+                    <h1 className="fd-hero__title">{formation.title}</h1>
 
-                {formation.description && (
-                  <p className="fd-hero__desc">{formation.description}</p>
-                )}
+                    {formation.description && (
+                      <p className="fd-hero__desc">{formation.description}</p>
+                    )}
 
-                {/* Meta badges */}
-                <div className="fd-hero__meta">
-                  {formation.level && (
-                    <span className="fd-hero__badge">
-                      <FiTarget size={13} />{t("formationDetail.level")} : {formation.level}
-                    </span>
-                  )}
-                  {formation.duration && (
-                    <span className="fd-hero__badge">
-                      <FiClock size={13} />{formation.duration}
-                    </span>
-                  )}
-                  {formation.mode && (
-                    <span className="fd-hero__badge">
-                      <FiMonitor size={13} />{formation.mode}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* ── RIGHT: pricing card ─────────────────────────────── */}
-              <motion.div
-                className="fd-hero__card"
-                initial={{ opacity: 0, y: 32 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.12, ease: "easeOut" }}
-              >
-                {/* Icon top */}
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  {iconEntries.map(({ Comp: Ic, color: c }, i) => (
-                    <div
-                      key={i}
-                      className="fd-price-icon"
-                      style={{
-                        background: `${c}22`,
-                        color: c,
-                        ...(iconEntries.length >= 3 && { width: 36, height: 36 }),
-                      }}
-                    >
-                      <Ic size={iconEntries.length >= 3 ? 16 : 24} />
+                    {/* Meta badges */}
+                    <div className="fd-hero__meta">
+                      {formation.level && (
+                        <span className="fd-hero__badge">
+                          <FiTarget size={13} />{t("formationDetail.level")} : {formation.level}
+                        </span>
+                      )}
+                      {formation.duration && (
+                        <span className="fd-hero__badge">
+                          <FiClock size={13} />{formation.duration}
+                        </span>
+                      )}
+                      {formation.mode && (
+                        <span className="fd-hero__badge">
+                          <FiMonitor size={13} />{formation.mode}
+                        </span>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </motion.div>
 
-                <h2 className="fd-price-title">{formation.title}</h2>
+                  {/* ── RIGHT: aside prix ─────────────────────────────── */}
+                  <motion.aside
+                    className="fd-hero__aside"
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.12, ease: "easeOut" }}
+                  >
+                    {/* Aperçu vidéo — uniquement si un trailer réel existe,
+                        ouvre le modal plein écran (CoursePreviewModal en mode
+                        isTrailer) qui habille l'iframe Drive existant. */}
+                    {formation.trailerVideoUrl && (
+                      <button
+                        type="button"
+                        className="fd-hero__preview"
+                        aria-label={t("formationDetail.previewAriaLabel")}
+                        onClick={() => setShowTrailerModal(true)}
+                      >
+                        <span className="fd-hero__preview-play"><FiPlay size={22} /></span>
+                        <span className="fd-hero__preview-label">{t("formationDetail.previewLabel")}</span>
+                      </button>
+                    )}
 
-                {/* Price rows */}
-                <div className="fd-price-rows">
-                  <div className="fd-price-row">
-                    <span className="fd-price-row__label">
-                      <FiUsers size={14} /> {t("formationDetail.priceOnsite")}
-                    </span>
-                    <span className="fd-price-row__value">{formation.price?.onsite}</span>
-                  </div>
-                  <div className="fd-price-row">
-                    <span className="fd-price-row__label">
-                      <FiMonitor size={14} /> {t("formationDetail.priceOnline")}
-                    </span>
-                    <span className="fd-price-row__value">{formation.price?.online}</span>
-                  </div>
-                </div>
+                    <div className="fd-hero__aside-body">
+                      {/* Price rows */}
+                      <div className="fd-price-rows">
+                        <div className="fd-price-row">
+                          <span className="fd-price-row__label">
+                            <FiUsers size={14} /> {t("formationDetail.priceOnsite")}
+                          </span>
+                          <span className="fd-price-row__value">{formation.price?.onsite}</span>
+                        </div>
+                        <div className="fd-price-row">
+                          <span className="fd-price-row__label">
+                            <FiMonitor size={14} /> {t("formationDetail.priceOnline")}
+                          </span>
+                          <span className="fd-price-row__value">{formation.price?.online}</span>
+                        </div>
+                      </div>
 
-                {/* Certificate */}
-                <div className="fd-cert-row">
-                  <FiAward size={15} className={formation.certificate ? "fd-cert--yes" : "fd-cert--no"} />
-                  <span className={formation.certificate ? "fd-cert--yes" : "fd-cert--no"}>
-                    {t("formationDetail.certificate")} :{" "}
-                    {formation.certificate
-                      ? t("formationDetail.certificateYes")
-                      : t("formationDetail.certificateNo")}
-                  </span>
-                </div>
+                      {/* CTA — connecté : flux d'inscription réel (handleEnroll
+                          navigue vers /dashboard) ; non connecté : /login */}
+                      <button className="fd-enroll-btn" onClick={handleEnroll}>
+                        {user ? t("formationDetail.enroll") : t("formationDetail.loginToEnroll")}
+                      </button>
 
-                {/* CTA */}
-                <button className="fd-enroll-btn" onClick={handleEnroll}>
-                  {user ? t("formationDetail.enroll") : t("formationDetail.loginToEnroll")}
-                </button>
-
-                {/* WhatsApp button */}
-                <a
-                  href={`https://wa.me/21658840064?text=${encodeURIComponent(
-                    `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="fd-whatsapp-btn"
-                >
-                  <FiMessageCircle size={18} />
-                  {t("formationDetail.whatsapp")}
-                </a>
-              </motion.div>
+                      {/* WhatsApp — via l'utilitaire partagé buildWhatsAppLink */}
+                      <a
+                        href={buildWhatsAppLink(waMessage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fd-whatsapp-btn"
+                      >
+                        <FiMessageCircle size={18} />
+                        {t("formationDetail.whatsapp")}
+                      </a>
+                    </div>
+                  </motion.aside>
             </div>
           </section>
 
@@ -385,18 +388,59 @@ const FormationDetail = () => {
               <div className="fd-body__left">
 
                 {/* ────────────────────────────────────────────────────
-                    1. VIDÉO RÉSUMÉ (trailer global, distinct des vidéos
-                    par semaine) — masquée si aucune vidéo n'est définie.
-                    Même design/comportement que la vidéo promo de la
-                    Landing Page (cadre "tablette", tilt au scroll, modale
-                    plein cadre) — voir FormationTrailer.jsx pour le détail
-                    de la duplication (LandingPage.jsx non modifiable).
-                    Rend déjà son propre <section>, pas de wrapper fd-section
-                    ici (design pleine largeur distinct des autres sections).
+                    1. CE QUE VOUS APPRENDREZ / TECHNOLOGIES / CETTE FORMATION
+                    COMPREND — sections normales (même gabarit que Programme/
+                    Encadrement ci-dessous), fond clair, largeur de contenu
+                    standard. La vidéo résumé elle-même se regarde désormais
+                    via le modal ouvert depuis la vignette de l'aside (plus
+                    de section dédiée pleine largeur).
                 ──────────────────────────────────────────────────── */}
-                {formation.trailerVideoUrl && (
-                  <FormationTrailer videoUrl={formation.trailerVideoUrl} />
+                {learnItems.length > 0 && (
+                  <section className="fd-section">
+                    <h2 className="fd-section__title">{t("formationDetail.whatYouWillLearn")}</h2>
+                    <div className="fd-learn-grid">
+                      {learnItems.map((item, i) => (
+                        <div key={i} className="fd-learn-item">
+                          <FiCheck size={15} />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 )}
+
+                {techPills.length > 0 && (
+                  <section className="fd-section">
+                    <h2 className="fd-section__title">{t("formationDetail.technologiesTitle")}</h2>
+                    <div className="fd-tech-pills">
+                      {techPills.map(({ slug, logo }) => (
+                        <span key={slug} className="fd-tech-pill">{logo.label}</span>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="fd-section">
+                  <h2 className="fd-section__title">{t("formationDetail.formationIncludes")}</h2>
+                  <div className="fd-includes-grid">
+                    {formation.weeks?.length > 0 && (
+                      <div className="fd-includes-item">
+                        <FiVideo size={16} /><span>{t("formationDetail.includeVideoSessions")}</span>
+                      </div>
+                    )}
+                    <div className="fd-includes-item">
+                      <FiSmartphone size={16} /><span>{t("formationDetail.includeMobileDesktop")}</span>
+                    </div>
+                    {formation.certificate && (
+                      <div className="fd-includes-item">
+                        <FiAward size={16} /><span>{t("formationDetail.includeCertificate")}</span>
+                      </div>
+                    )}
+                    <div className="fd-includes-item">
+                      <FiMessageCircle size={16} /><span>{t("formationDetail.includeCoaching")}</span>
+                    </div>
+                  </div>
+                </section>
 
                 {/* ────────────────────────────────────────────────────
                     2. PROGRAMME / TIMELINE
@@ -785,6 +829,18 @@ const FormationDetail = () => {
           allWeeks={sortedWeeks}
           onClose={() => setPreviewWeek(null)}
           onSelectWeek={setPreviewWeek}
+        />
+      )}
+
+      {/* ── Modal vidéo résumé (trailer) — réutilise CoursePreviewModal en
+          mode isTrailer (déjà prévu pour ça, jamais invoqué jusqu'ici) :
+          habille l'iframe Drive existant, pas de faux contrôles. ── */}
+      {showTrailerModal && formation?.trailerVideoUrl && (
+        <CoursePreviewModal
+          formation={formation}
+          week={{ videoUrl: formation.trailerVideoUrl, thumbnail: formation.trailerThumbnail }}
+          isTrailer
+          onClose={() => setShowTrailerModal(false)}
         />
       )}
 
