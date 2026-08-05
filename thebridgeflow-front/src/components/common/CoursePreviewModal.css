@@ -485,6 +485,19 @@
     max-height:    92vh;
     border-radius: 16px 16px 0 0;
   }
+  /* .cpm-modal--trailer réaffirme sa propre largeur ici : la règle plus haut
+     (même spécificité qu'un simple .cpm-modal) était silencieusement écrasée
+     par le .cpm-modal{width:100%} ci-dessus (dernier déclaré = gagnant à
+     spécificité égale) — le cadre profitait de fait déjà de 100% de large
+     sur mobile, mais par accident de cascade, pas par intention. Rendu
+     explicite ici, avec un plafond dérivé de la hauteur dispo (92vh moins
+     ~75px d'en-tête) pour ne jamais déborder sur les écrans plus courts
+     qu'un iPhone 12 (ex: iPhone SE, 375×667) où 100% de large casserait le
+     ratio 9:16 en dépassant max-height. */
+  .cpm-modal--trailer {
+    width:     min(100%, calc((92vh - 75px) * 9 / 16));
+    max-width: min(100%, calc((92vh - 75px) * 9 / 16));
+  }
   /* Espace réduit : icône seule, le texte complet reste dans le title="" */
   .cpm-external-link span { display: none; }
   .cpm-external-link { padding: 7px; border-radius: 50%; }

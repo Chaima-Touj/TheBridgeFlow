@@ -373,8 +373,27 @@
     max-width: 300px;
     scroll-snap-align: start;
   }
-  .vtc-modal__video-wrap { width: min(88vw, 390px, calc(88vh * 9 / 16)); }
-  .vtc-modal__nav { width: 38px; height: 38px; }
+  /* Modale plein écran : les flèches passent en overlay absolu sur la vidéo
+     au lieu d'être des flex-siblings se partageant la largeur avec elle —
+     sur un viewport étroit, .vtc-modal{max-width:100%} forçait le
+     video-wrap à rétrécir (flex-shrink, pas de flex-shrink:0 dessus) pour
+     laisser la place aux 2×38px de flèches + 2×1rem de gap (~108px au
+     total), le limitant à 250px de large sur 390px d'écran alors que
+     ~350px+ étaient réellement disponibles une fois les flèches sorties du
+     flux. Récupère cette largeur pour la vidéo ; flèches toujours visibles
+     et cliquables, superposées aux bords gauche/droite. */
+  .vtc-modal { display: block; }
+  .vtc-modal__nav {
+    position:  absolute;
+    top:       50%;
+    transform: translateY(-50%);
+    z-index:   2;
+    width: 38px;
+    height: 38px;
+  }
+  .vtc-modal__nav--prev { left:  8px; }
+  .vtc-modal__nav--next { right: 8px; }
+  .vtc-modal__video-wrap { width: min(90vw, 400px, calc(88vh * 9 / 16)); }
 }
 
 @media (max-width: 400px) {
