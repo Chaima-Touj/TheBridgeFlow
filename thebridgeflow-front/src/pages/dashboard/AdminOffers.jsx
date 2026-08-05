@@ -6,6 +6,7 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { offersService } from "../../services/offers.service.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -74,6 +75,38 @@ function extractErrorMessage(err, fallback) {
 function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("fr-FR");
+}
+
+function csvEscape(value) {
+  const s = String(value ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportOffersCSV(rows, t) {
+  const headers = [
+    t("adminOffers.colOffer"), t("adminOffers.colType"), t("adminOffers.colDomain"),
+    t("adminOffers.colCompany"), t("adminOffers.colStatus"),
+    t("adminOffers.colCreatedAt"), t("adminOffers.colViews"),
+  ];
+  const lines = rows.map((o) => [
+    o.title,
+    t(TYPE_LABEL_KEY[o.type] || o.type),
+    o.domain,
+    o.companyName,
+    o.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
+    formatDate(o.createdAt),
+    o.views ?? 0,
+  ].map(csvEscape).join(","));
+  const csv = [headers.join(","), ...lines].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `offres-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function getPageNumbers(current, total) {
@@ -468,6 +501,8 @@ export default function AdminOffers() {
                   {PAGE_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
+
+              <ExportMenu onExportCSV={() => exportOffersCSV(filteredSorted, t)} />
 
               <button type="button" className="btn btn-primary" onClick={openCreate}>
                 <FiPlus size={15} /> {t("adminOffers.newOffer")}

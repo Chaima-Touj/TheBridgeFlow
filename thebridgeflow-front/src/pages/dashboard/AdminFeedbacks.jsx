@@ -9,7 +9,7 @@ import Modal from "../../components/common/Modal.jsx";
 import { settingsService } from "../../services/settings.service.js";
 import { feedbacksService } from "../../services/feedbacks.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
-import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
+import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 import "./AdminNews.css";
@@ -477,11 +477,18 @@ export default function AdminFeedbacks() {
               </div>
             ) : (
               <div className="afd-grid">
-                {testimonialsForTab.map((item) => (
+                {testimonialsForTab.map((item) => {
+                  // Repli : la migration n'a jamais renseigné thumbnail pour les
+                  // témoignages vidéo (voir migrate-landing.js) — même dérivation
+                  // que le carousel public (VideoTestimonialCarousel) depuis l'URL
+                  // Drive de la vidéo, via le proxy backend (évite le blocage
+                  // cross-origin du endpoint /thumbnail de Drive sur un <img>).
+                  const posterSrc = item.thumbnail || (isGoogleDriveUrl(item.url) ? resolveDriveThumbnailProxyUrl(item.url) : null);
+                  return (
                   <div className="afd-card" key={item._id}>
                     <div className="afd-card-thumb">
-                      {item.thumbnail
-                        ? <img src={item.thumbnail} alt="" />
+                      {posterSrc
+                        ? <img src={posterSrc} alt="" />
                         : <div className="afd-card-thumb--placeholder"><FiVideo size={22} /></div>}
                     </div>
                     <div className="afd-card-body">
@@ -491,7 +498,8 @@ export default function AdminFeedbacks() {
                       <RowActionsMenu onEdit={() => openTestimonialEdit(item)} onDelete={() => openTestimonialDelete(item)} />
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )
           )}

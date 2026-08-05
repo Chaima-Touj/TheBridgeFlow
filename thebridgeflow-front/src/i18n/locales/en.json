@@ -1051,6 +1051,9 @@
     "colDeadline": "Deadline",
     "colStatus": "Status",
     "colApplications": "Applications",
+    "colCompany": "Company",
+    "colCreatedAt": "Created on",
+    "colViews": "Views",
     "titleLabel": "Title",
     "descriptionLabel": "Description",
     "companyNameLabel": "Displayed company name",
@@ -1120,7 +1123,7 @@
   "adminFeedbacks": {
     "pageSubtitle": "Manage video testimonials and screenshots shown on the site",
     "tabs": {
-      "formations": "Formations",
+      "formations": "Trainings",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
       "screenshots": "Screenshots"
@@ -1306,6 +1309,9 @@
     "statTotalRequests": "Total requests submitted",
     "statTopFormation": "Most requested training",
     "onlineNow": "Students online",
+    "trendActive": "Active",
+    "trendNew": "New",
+    "trendEnrollmentsCount": "{{count}} enrollments",
 "topFormationsTitle":"Most viewed trainings",
 "topFormationsEmpty":"No trainings have been viewed yet.",
 "topFormationsViews":"{{count}} views",

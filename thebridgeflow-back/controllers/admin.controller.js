@@ -75,11 +75,17 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
    compteurs déjà affichés sur le Tableau de bord : pipeline demandes vs
    inscriptions dans le temps, répartition par formation, taux de conversion.  */
 export const getAdvancedStats = asyncHandler(async (req, res) => {
+  const now           = new Date();
+  const sevenDaysAgo   = new Date(now - 7  * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000);
+
   const [
     enrollmentsByMonthRaw,
     requestsByMonthRaw,
     enrollmentsByFormationRaw,
     requestsByStatusRaw,
+    requestsThisWeek,
+    requestsPrevWeek,
   ] = await Promise.all([
     Enrollment.aggregate([
       { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, count: { $sum: 1 } } },
@@ -98,6 +104,10 @@ export const getAdvancedStats = asyncHandler(async (req, res) => {
     EnrollmentRequest.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]),
+    // Tendance réelle de statTotalRequests (7 derniers jours vs 7 précédents),
+    // via EnrollmentRequest.createdAt — remplace l'ancien badge mocké "+8%".
+    EnrollmentRequest.countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
+    EnrollmentRequest.countDocuments({ createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo } }),
   ]);
 
   // Fusionne les deux séries mensuelles (demandes / inscriptions) sur un même
@@ -115,7 +125,20 @@ export const getAdvancedStats = asyncHandler(async (req, res) => {
   const requestsByStatus = { en_attente: 0, "acceptée": 0, "refusée": 0 };
   for (const s of requestsByStatusRaw) requestsByStatus[s._id] = s.count;
   const totalRequests = requestsByStatus.en_attente + requestsByStatus["acceptée"] + requestsByStatus["refusée"];
+  // Global, sur tout l'historique disponible — pas de fenêtre glissante ni de
+  // cohorte : le taux de conversion reste une mesure cumulative simple.
   const conversionRate = totalRequests > 0 ? Math.round((requestsByStatus["acceptée"] / totalRequests) * 100) : 0;
+
+  // requestsPrevWeek === 0 rend un delta en % non significatif (division par
+  // zéro ou "infini") — signalé explicitement via pct: null plutôt que deviné.
+  let requestsTrendPct = null;
+  let requestsTrendDirection = "neutral";
+  if (requestsPrevWeek > 0) {
+    requestsTrendPct = Math.round(((requestsThisWeek - requestsPrevWeek) / requestsPrevWeek) * 100);
+    requestsTrendDirection = requestsTrendPct > 0 ? "up" : requestsTrendPct < 0 ? "down" : "neutral";
+  } else if (requestsThisWeek > 0) {
+    requestsTrendDirection = "up"; // activité nouvelle sans référence la semaine précédente
+  }
 
   res.json({
     pipelineByMonth,
@@ -123,6 +146,7 @@ export const getAdvancedStats = asyncHandler(async (req, res) => {
     requestsByStatus,
     totalRequests,
     conversionRate,
+    totalRequestsTrend: { pct: requestsTrendPct, direction: requestsTrendDirection },
   });
 });
 

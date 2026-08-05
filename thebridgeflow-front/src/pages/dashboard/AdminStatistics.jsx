@@ -165,7 +165,6 @@ export default function AdminStatistics() {
   const statusData = Object.entries(requestsByStatus).map(([status, count]) => ({ status, count }));
   const totalStatus = statusData.reduce((sum, d) => sum + d.count, 0);
 
-  // ── Trend badges (mocked — uses existing data as proxy trends) ──────────
   const trendBadge = (value, direction = "neutral") => {
     const cls = direction === "up" ? "sd-trend-badge--up"
               : direction === "down" ? "sd-trend-badge--down"
@@ -180,10 +179,23 @@ export default function AdminStatistics() {
     );
   };
 
+  // Tendance réelle (7 derniers jours vs 7 précédents, via EnrollmentRequest.
+  // createdAt — voir getAdvancedStats côté backend). pct === null quand la
+  // semaine précédente n'a aucune donnée de référence (division non
+  // significative) : direction "up" = activité nouvelle sans référence,
+  // "neutral" = aucune activité du tout sur les 14 derniers jours.
+  const requestsTrend = stats?.totalRequestsTrend || { pct: null, direction: "neutral" };
+  const requestsTrendLabel = requestsTrend.pct !== null
+    ? `${requestsTrend.pct > 0 ? "+" : ""}${requestsTrend.pct}%`
+    : (requestsTrend.direction === "up" ? t("adminStats.trendNew") : "—");
+
+  const acceptedCount = requestsByStatus["acceptée"] ?? 0;
+  const topFormationCount = enrollmentsByFormation[0]?.count;
+
   const statCards = [
-    { label: t("adminStats.statConversionRate"), value: loading ? "—" : `${stats?.conversionRate ?? 0}%`, color: "#34D399", icon: <FiPercent size={18} />, trend: trendBadge("+12%", "up") },
-    { label: t("adminStats.statTotalRequests"),   value: loading ? "—" : (stats?.totalRequests ?? 0),     color: "#FBBF24", icon: <FiClipboard size={18} />, trend: trendBadge("+8%", "up") },
-    { label: t("adminStats.statTopFormation"),    value: loading ? "—" : (enrollmentsByFormation[0]?.title || "—"), color: "#3B82F6", icon: <FiBookOpen size={18} />, trend: trendBadge("Stable", "neutral") },
+    { label: t("adminStats.statConversionRate"), value: loading ? "—" : `${stats?.conversionRate ?? 0}%`, color: "#34D399", icon: <FiPercent size={18} />, trend: trendBadge(loading ? "—" : `${acceptedCount}/${stats?.totalRequests ?? 0}`, "neutral") },
+    { label: t("adminStats.statTotalRequests"),   value: loading ? "—" : (stats?.totalRequests ?? 0),     color: "#FBBF24", icon: <FiClipboard size={18} />, trend: trendBadge(loading ? "—" : requestsTrendLabel, loading ? "neutral" : requestsTrend.direction) },
+    { label: t("adminStats.statTopFormation"),    value: loading ? "—" : (enrollmentsByFormation[0]?.title || "—"), color: "#3B82F6", icon: <FiBookOpen size={18} />, trend: trendBadge(loading || topFormationCount == null ? "—" : t("adminStats.trendEnrollmentsCount", { count: topFormationCount }), "neutral") },
   ];
 
   const handleExportPDF = () => exportStatisticsPDF({ stats, pipelineByMonth, enrollmentsByFormation, statusData, totalStatus, t });
@@ -207,7 +219,7 @@ export default function AdminStatistics() {
               <div className="sd-stat-icon" style={{ background: "#34D39918", color: "#34D399" }}>
                 <FiTrendingUp size={18} />
               </div>
-              <span className="sd-trend-badge sd-trend-badge--neutral">— Actif</span>
+              {trendBadge(t("adminStats.trendActive"), "neutral")}
             </div>
             <div className="sd-stat-value">{onlineCount}</div>
             <div className="sd-stat-label">{t("adminStats.onlineNow")}</div>

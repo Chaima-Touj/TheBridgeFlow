@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { FiDownload, FiChevronDown } from "react-icons/fi";
 
 /**
- * Menu déroulant "Exporter" (PDF + CSV optionnel) — utilisé sur toutes les
+ * Menu déroulant "Exporter" (PDF et CSV optionnels, au moins un des deux
+ * fourni) — utilisé sur toutes les
  * pages admin listant des données tabulaires (Utilisateurs, Formations,
  * Demandes d'inscription, Inscriptions, Candidatures...). Les classes af-*
  * viennent de AdminFormations.css, déjà importé par ces pages.
@@ -26,9 +27,11 @@ export default function ExportMenu({ onExportPDF, onExportCSV }) {
       </button>
       {open && (
         <div className="af-row-menu-dropdown af-export-dropdown" role="menu">
-          <button type="button" role="menuitem" onClick={() => { setOpen(false); onExportPDF(); }}>
-            {t("adminFormations.exportPdf")}
-          </button>
+          {onExportPDF && (
+            <button type="button" role="menuitem" onClick={() => { setOpen(false); onExportPDF(); }}>
+              {t("adminFormations.exportPdf")}
+            </button>
+          )}
           {onExportCSV && (
             <button type="button" role="menuitem" onClick={() => { setOpen(false); onExportCSV(); }}>
               {t("adminFormations.exportCsv")}
