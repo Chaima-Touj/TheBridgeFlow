@@ -52,6 +52,20 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
     setLoaded(true);
   };
 
+  // Retrait du spinner en fondu plutôt qu'en coupe sèche : au moment où
+  // l'iframe Drive/YouTube a fini de charger, elle affiche déjà son propre
+  // bouton "lecture" natif à la même position — démonter .cpm-loading
+  // instantanément créait une bascule brutale entre les deux ronds, perçue
+  // comme "deux ronds qui se chargent l'un sur l'autre". `loaded` déclenche
+  // la classe --fade-out (transition CSS, voir .css) ; l'élément ne quitte
+  // le DOM qu'une fois le fondu terminé.
+  const [showLoading, setShowLoading] = useState(true);
+  useEffect(() => {
+    if (!loaded) return undefined;
+    const t = setTimeout(() => setShowLoading(false), 250);
+    return () => clearTimeout(t);
+  }, [loaded]);
+
   return (
     <>
       {ytId ? (
@@ -95,9 +109,9 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
           <p>{isTrailer ? t("coursePreview.noPreview") : t("coursePreview.noPreviewWeek")}</p>
         </div>
       )}
-      {isIframeSource && !loaded && (
+      {isIframeSource && showLoading && (
         loadTimedOut && !isTrailer ? (
-          <div className="cpm-loading cpm-loading--timeout" role="status">
+          <div className={`cpm-loading cpm-loading--timeout${loaded ? " cpm-loading--fade-out" : ""}`} role="status">
             <p style={{ color: "#fff", textAlign: "center", padding: "0 1.5rem", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 320, margin: 0 }}>
               Le chargement prend plus de temps que prévu.
               {isDrive ? " Cela peut arriver si votre navigateur bloque les cookies tiers (ex : navigation privée)." : ""}
@@ -118,7 +132,7 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
           // En mode trailer, le lien permanent .cpm-external-link (toujours
           // affiché, indépendant de ce timeout) suffit déjà comme repli —
           // pas besoin de dupliquer le message/lien ici après 7s.
-          <div className="cpm-loading" aria-hidden="true">
+          <div className={`cpm-loading${loaded ? " cpm-loading--fade-out" : ""}`} aria-hidden="true">
             <span className="cpm-spinner" />
           </div>
         )

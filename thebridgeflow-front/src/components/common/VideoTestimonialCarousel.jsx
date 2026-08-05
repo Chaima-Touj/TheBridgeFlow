@@ -46,45 +46,45 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
         aria-label={t("testimonials.openAria")}
       >
         {isDrive ? (
-          <>
-            {posterSrc
-              ? (
-                <img
-                  className="vtc-card__video"
-                  src={posterSrc}
-                  alt=""
-                  loading={isActive ? "eager" : "lazy"}
-                  // Filet de sécurité complémentaire à l'effet sectionInView du
-                  // parent (.vtc-row) : quand la page charge ~28 vignettes
-                  // simultanément (3 catégories confondues), certaines
-                  // terminent leur chargement bien après le double rAF déclenché
-                  // à l'entrée dans le viewport — observé en test réel : une
-                  // vignette peut rester noire alors que ses données sont
-                  // intégralement chargées (`complete: true`, dimensions
-                  // correctes), preuve d'un défaut de peinture, pas de
-                  // chargement. Un `offsetHeight` seul ne suffisait pas à la
-                  // débloquer (testé) ; basculer légèrement l'opacité force un
-                  // recompositing de CET élément précisément, sans lien avec
-                  // l'ancêtre transformé — technique standard, imperceptible.
-                  onLoad={(e) => {
-                    const el = e.currentTarget;
-                    el.style.opacity = "0.999";
-                    requestAnimationFrame(() => { el.style.opacity = ""; });
-                  }}
-                />
-              )
-              : <div className="vtc-card__video" style={{ background: "#111" }} />}
-            {showDriveFrame && (
-              <iframe
+          showDriveFrame ? (
+            // Une fois active+jouable, l'iframe remplace le poster au lieu de
+            // se superposer à lui — un seul "rond de chargement" possible à
+            // la fois (voir .vtc-card__play-hint plus bas, masqué ici aussi).
+            <iframe
+              className="vtc-card__video"
+              style={{ border: 0, pointerEvents: "none" }}
+              src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
+              allow="autoplay; encrypted-media"
+              tabIndex={-1}
+              title=""
+            />
+          ) : posterSrc
+            ? (
+              <img
                 className="vtc-card__video"
-                style={{ border: 0, pointerEvents: "none" }}
-                src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
-                allow="autoplay; encrypted-media"
-                tabIndex={-1}
-                title=""
+                src={posterSrc}
+                alt=""
+                loading={isActive ? "eager" : "lazy"}
+                // Filet de sécurité complémentaire à l'effet sectionInView du
+                // parent (.vtc-row) : quand la page charge ~28 vignettes
+                // simultanément (3 catégories confondues), certaines
+                // terminent leur chargement bien après le double rAF déclenché
+                // à l'entrée dans le viewport — observé en test réel : une
+                // vignette peut rester noire alors que ses données sont
+                // intégralement chargées (`complete: true`, dimensions
+                // correctes), preuve d'un défaut de peinture, pas de
+                // chargement. Un `offsetHeight` seul ne suffisait pas à la
+                // débloquer (testé) ; basculer légèrement l'opacité force un
+                // recompositing de CET élément précisément, sans lien avec
+                // l'ancêtre transformé — technique standard, imperceptible.
+                onLoad={(e) => {
+                  const el = e.currentTarget;
+                  el.style.opacity = "0.999";
+                  requestAnimationFrame(() => { el.style.opacity = ""; });
+                }}
               />
-            )}
-          </>
+            )
+            : <div className="vtc-card__video" style={{ background: "#111" }} />
         ) : (
           <video
             ref={videoRef}
@@ -120,7 +120,11 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
           )}
         </div>
 
-        <div className="vtc-card__play-hint" aria-hidden="true"><FiPlay size={20} /></div>
+        {/* Masqué pendant la lecture Drive active : plus rien à "suggérer"
+            une fois l'iframe affichée, évite un rond superposé à la vidéo. */}
+        {!showDriveFrame && (
+          <div className="vtc-card__play-hint" aria-hidden="true"><FiPlay size={20} /></div>
+        )}
       </div>
 
       {!item.vttUrl && item.captionText && (

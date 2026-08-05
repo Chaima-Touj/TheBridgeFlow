@@ -226,7 +226,13 @@
   /* pointer-events: none — ne doit jamais intercepter le survol de l'iframe
      en dessous (le spinner disparaît de toute façon dès onLoad). */
   pointer-events:  none;
+  opacity:         1;
+  transition:      opacity 0.25s ease;
 }
+/* Fondu déclenché dès onLoad (voir VideoFrame) — évite la coupe sèche entre
+   notre spinner et le bouton "lecture" natif que l'iframe affiche déjà en
+   dessous à ce moment-là (perçu comme deux ronds superposés). */
+.cpm-loading--fade-out { opacity: 0; }
 .cpm-spinner {
   width:        34px;
   height:       34px;
