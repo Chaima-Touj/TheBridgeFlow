@@ -183,15 +183,24 @@ export function resolveVideoUrl(localPathOrUrl) {
  * These mirror the backend helpers for display purposes.
  */
 
-const DRIVE_FILE_REGEX = /\/file\/d\/([^/?#&]+)/;
-const DRIVE_UC_REGEX   = /\/uc\?.*[&?]id=([^&]+)/;
-const DRIVE_OPEN_REGEX = /\/open\?.*[&?]id=([^&]+)/;
+const DRIVE_FILE_REGEX      = /\/file\/d\/([^/?#&]+)/;
+const DRIVE_UC_REGEX        = /\/uc\?.*[&?]id=([^&]+)/;
+const DRIVE_OPEN_REGEX      = /\/open\?.*[&?]id=([^&]+)/;
+// Format renvoyé par resolveDriveUrl(url, "image") lui-même (ex:
+// trailerThumbnail stocké en base) — sans ce pattern, extractDriveFileId
+// (et donc resolveDriveThumbnailProxyUrl) échouait silencieusement sur ces
+// URLs, empêchant le proxy de fonctionner sur une vignette déjà résolue.
+// (?:[^&]*&)* saute les éventuels paramètres précédant "id=" — nécessaire
+// car resolveDriveUrl(url,"image") génère "?id=X&sz=..." où id est le
+// PREMIER paramètre, donc jamais précédé d'un "&" ou "?" littéral contre
+// lequel matcher (contrairement à DRIVE_UC_REGEX/DRIVE_OPEN_REGEX ci-dessus).
+const DRIVE_THUMBNAIL_REGEX = /\/thumbnail\?(?:[^&]*&)*id=([^&]+)/;
 
 /**
  * Extracts the Google Drive file ID from various sharing link formats.
  */
 export function extractDriveFileId(url = "") {
-  for (const regex of [DRIVE_FILE_REGEX, DRIVE_UC_REGEX, DRIVE_OPEN_REGEX]) {
+  for (const regex of [DRIVE_FILE_REGEX, DRIVE_UC_REGEX, DRIVE_OPEN_REGEX, DRIVE_THUMBNAIL_REGEX]) {
     const m = url.match(regex);
     if (m) return m[1];
   }

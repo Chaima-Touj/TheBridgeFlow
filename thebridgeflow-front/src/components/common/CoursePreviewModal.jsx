@@ -96,7 +96,7 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
         </div>
       )}
       {isIframeSource && !loaded && (
-        loadTimedOut ? (
+        loadTimedOut && !isTrailer ? (
           <div className="cpm-loading cpm-loading--timeout" role="status">
             <p style={{ color: "#fff", textAlign: "center", padding: "0 1.5rem", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 320, margin: 0 }}>
               Le chargement prend plus de temps que prévu.
@@ -115,6 +115,9 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
             )}
           </div>
         ) : (
+          // En mode trailer, le lien permanent .cpm-external-link (toujours
+          // affiché, indépendant de ce timeout) suffit déjà comme repli —
+          // pas besoin de dupliquer le message/lien ici après 7s.
           <div className="cpm-loading" aria-hidden="true">
             <span className="cpm-spinner" />
           </div>

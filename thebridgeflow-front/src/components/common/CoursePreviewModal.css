@@ -144,14 +144,22 @@
   display:    block;
 }
 
-/* Trailer modal — modal auto-sized to header + 16:9 player, no empty space */
+/* Trailer modal — cadre 9:16 (vidéo portrait, comme VideoTestimonialCarousel
+   .vtc-modal__video-wrap) au lieu du cadre large 16:9 hérité de .cpm-modal.
+   Triple min() : 90vw / 480px / hauteur dispo à ratio 9:16 (88vh moins ~70px
+   d'en-tête) — même logique que VTC pour ne jamais laisser max-height (base
+   .cpm-modal) entrer en conflit avec width + aspect-ratio et casser le ratio
+   réellement rendu. width ET max-width sont overridés : .cpm-modal fixe déjà
+   max-width:78vw, qui sinon écraserait ce calcul sur les petits viewports. */
 .cpm-modal--trailer {
-  height: auto;
+  height:    auto;
+  width:     min(90vw, 480px, calc((88vh - 70px) * 9 / 16));
+  max-width: min(90vw, 480px, calc((88vh - 70px) * 9 / 16));
 }
 
 .cpm-modal--trailer .cpm-player-wrap {
   flex:         0 0 auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16;
 }
 
 /* Blurred background layer (portrait video in 16:9 frame) */

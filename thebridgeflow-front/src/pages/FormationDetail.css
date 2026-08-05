@@ -302,11 +302,22 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
+  background-size: cover;
+  background-position: center;
   border: none;
   padding: 0;
   cursor: pointer;
 }
+/* Léger voile en bas pour garder le label lisible par-dessus une vraie
+   vignette claire (même logique que .ftv-trailer__card-overlay). */
+.fd-hero__preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.04) 45%, rgba(0,0,0,0.58) 100%);
+}
 .fd-hero__preview-play {
+  position: relative;
   width: 56px;
   height: 56px;
   border-radius: 50%;

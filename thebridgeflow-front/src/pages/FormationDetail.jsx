@@ -20,6 +20,7 @@ import { formationsService } from "../services/formations.service.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../utils/thumbUtils.js";
 import { getAllFormationTestimonials } from "../constants/testimonials.js";
 import { getTechLogo } from "../constants/techLogos.js";
+import { resolveDriveThumbnailProxyUrl } from "../constants/videoUrls.js";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import "./FormationDetail.css";
 
@@ -220,6 +221,12 @@ const FormationDetail = () => {
   const waMessage = formation
     ? `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
     : "";
+  // Vignette de l'aside : priorité à trailerThumbnail (image dédiée choisie
+  // par l'admin) via le proxy Drive, sinon dérivée de trailerVideoUrl.
+  const previewThumb = formation
+    ? resolveDriveThumbnailProxyUrl(formation.trailerThumbnail)
+      || resolveDriveThumbnailProxyUrl(formation.trailerVideoUrl)
+    : null;
 
   return (
     <div className="fd-page">
@@ -332,6 +339,7 @@ const FormationDetail = () => {
                       <button
                         type="button"
                         className="fd-hero__preview"
+                        style={previewThumb ? { backgroundImage: `url(${previewThumb})` } : undefined}
                         aria-label={t("formationDetail.previewAriaLabel")}
                         onClick={() => setShowTrailerModal(true)}
                       >
