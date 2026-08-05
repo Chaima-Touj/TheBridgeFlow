@@ -15,6 +15,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CoursePreviewModal from "../components/common/CoursePreviewModal.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
+import FormationTrailer from "../components/common/FormationTrailer.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
 import { formationsService } from "../services/formations.service.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../utils/thumbUtils.js";
@@ -386,23 +387,15 @@ const FormationDetail = () => {
                 {/* ────────────────────────────────────────────────────
                     1. VIDÉO RÉSUMÉ (trailer global, distinct des vidéos
                     par semaine) — masquée si aucune vidéo n'est définie.
-                    Réutilise VideoTestimonialCarousel (déjà utilisé plus
-                    bas dans cette page) : seul composant gérant déjà le
-                    repli miniature via proxy (resolveDriveThumbnailProxyUrl)
-                    quand aucune miniature explicite n'est fournie.
+                    Même design/comportement que la vidéo promo de la
+                    Landing Page (cadre "tablette", tilt au scroll, modale
+                    plein cadre) — voir FormationTrailer.jsx pour le détail
+                    de la duplication (LandingPage.jsx non modifiable).
+                    Rend déjà son propre <section>, pas de wrapper fd-section
+                    ici (design pleine largeur distinct des autres sections).
                 ──────────────────────────────────────────────────── */}
                 {formation.trailerVideoUrl && (
-                  <section className="fd-section">
-                    <VideoTestimonialCarousel
-                      items={[{
-                        id: formation._id,
-                        videoUrl: formation.trailerVideoUrl,
-                        posterUrl: formation.trailerThumbnail || undefined,
-                      }]}
-                      title={t("formationDetail.trailerTitle")}
-                      subtitle={t("formationDetail.trailerSubtitle")}
-                    />
-                  </section>
+                  <FormationTrailer videoUrl={formation.trailerVideoUrl} />
                 )}
 
                 {/* ────────────────────────────────────────────────────

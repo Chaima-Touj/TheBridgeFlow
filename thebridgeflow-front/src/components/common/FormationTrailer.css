@@ -1,0 +1,236 @@
+/* Dupliqué depuis LandingPage.css (.lp-promo-video*) — voir FormationTrailer.jsx
+   pour l'explication. Règles identiques, préfixe renommé "ftv-trailer". */
+
+.ftv-trailer {
+  padding: 3.5rem 2rem;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.ftv-trailer__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.ftv-trailer__header { text-align: center; margin-bottom: 3rem; }
+.ftv-trailer__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.1);
+}
+.ftv-trailer__title { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 0.75rem; margin-top: 1rem; }
+.ftv-trailer__sub   { font-size: 1rem; color: var(--text-secondary); }
+
+/* Cadre "tablette" — bordure épaisse sombre autour de la vidéo. Le tilt 3D
+   (motion.div parent, voir JSX) s'applique à ce cadre en entier. */
+.ftv-trailer__frame {
+  position:      relative;
+  width:         100%;
+  max-width:     940px;
+  margin:        0 auto 3.5rem;
+  padding:       18px;
+  background:    linear-gradient(160deg, #2a2a2a, #161616 65%);
+  border-radius: 30px;
+  overflow:      hidden;
+  box-shadow:
+    0 45px 90px rgba(0, 0, 0, 0.35),
+    0 12px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.ftv-trailer__frame::before {
+  content:        "";
+  position:       absolute;
+  inset:          0;
+  z-index:        1;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 24%);
+}
+
+/* Video card */
+.ftv-trailer__card {
+  position:      relative;
+  z-index:       0;
+  display:       block;
+  width:         100%;
+  aspect-ratio:  16 / 9;
+  border-radius: 16px;
+  overflow:      hidden;
+  border:        none;
+  cursor:        pointer;
+  background:    #000;
+  padding:       0;
+  transition:    transform 0.25s;
+}
+.ftv-trailer__card:hover { transform: scale(1.012); }
+
+.ftv-trailer__preview {
+  position:   absolute;
+  inset:      0;
+  z-index:    0;
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  border:     0;
+  pointer-events: none;
+}
+
+.ftv-trailer__card-overlay {
+  position:   absolute;
+  inset:      0;
+  z-index:    1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.06) 0%,
+    rgba(0,0,0,0.04) 45%,
+    rgba(0,0,0,0.58) 100%
+  );
+}
+
+.ftv-trailer__play-ring {
+  position:        absolute;
+  inset:           0;
+  z-index:         2;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+.ftv-trailer__play-ring::before {
+  content:          "";
+  position:         absolute;
+  width:            80px;
+  height:           80px;
+  border-radius:    50%;
+  background:       rgba(255,255,255,0.15);
+  backdrop-filter:  blur(4px);
+  border:           2px solid rgba(255,255,255,0.45);
+  animation:        ftv-trailer-pulse 2.2s ease-in-out infinite;
+}
+.ftv-trailer__play-ring > svg {
+  position: relative;
+  z-index:  1;
+  color:    #fff;
+  filter:   drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
+@keyframes ftv-trailer-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.14); opacity: 0.7; }
+}
+
+.ftv-trailer__caption {
+  position:    absolute;
+  bottom:      0;
+  left:        0;
+  right:       0;
+  z-index:     3;
+  padding:     1.25rem 1.5rem;
+  background:  linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%);
+  display:     flex;
+  flex-direction: column;
+  gap:         0.2rem;
+  text-align:  start;
+}
+.ftv-trailer__caption-label {
+  font-size:   0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:       rgba(255,255,255,0.65);
+}
+.ftv-trailer__caption-sub {
+  font-size:   1rem;
+  font-weight: 600;
+  color:       #fff;
+}
+
+/* Modal overlay */
+.ftv-trailer__overlay {
+  position:        fixed;
+  inset:           0;
+  z-index:         1100;
+  background:      rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(5px);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1rem;
+}
+
+.ftv-trailer__modal {
+  position:      relative;
+  width:         min(92vw, 960px);
+  aspect-ratio:  16 / 9;
+  background:    #000;
+  border-radius: 14px;
+  overflow:      hidden;
+  box-shadow:    0 40px 100px rgba(0,0,0,0.7);
+}
+
+.ftv-trailer__modal-video {
+  width:      100%;
+  height:     100%;
+  object-fit: contain;
+  display:    block;
+}
+
+.ftv-trailer__modal-close {
+  position:        absolute;
+  top:             10px;
+  right:           10px;
+  z-index:         10;
+  width:           36px;
+  height:          36px;
+  border:          none;
+  border-radius:   8px;
+  background:      rgba(0, 0, 0, 0.6);
+  color:           #fff;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  transition:      background 0.15s;
+}
+.ftv-trailer__modal-close:hover { background: rgba(0, 0, 0, 0.85); }
+.ftv-trailer__modal-close::before { content: ""; position: absolute; inset: -4px; }
+
+/* Fallback "ouvrir dans Drive" — coin opposé au bouton fermer. */
+.ftv-trailer__modal-external {
+  position:        absolute;
+  top:             10px;
+  left:            10px;
+  z-index:         10;
+  display:         flex;
+  align-items:     center;
+  gap:             6px;
+  padding:         8px 12px;
+  border-radius:   8px;
+  background:      rgba(0, 0, 0, 0.6);
+  color:           #fff;
+  font-size:       0.78rem;
+  font-weight:     600;
+  text-decoration: none;
+  transition:      background 0.15s;
+}
+.ftv-trailer__modal-external:hover,
+.ftv-trailer__modal-external:focus-visible { background: rgba(0, 0, 0, 0.85); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ftv-trailer { padding: 3.5rem 1.25rem; }
+  .ftv-trailer__frame {
+    margin-bottom: 2.5rem;
+    padding:       8px;
+    border-radius: 20px;
+  }
+  .ftv-trailer__card { border-radius: 12px; }
+  .ftv-trailer__preview { object-fit: contain; }
+  .ftv-trailer__caption-sub { font-size: 0.875rem; }
+}
