@@ -284,6 +284,34 @@
   display: block;
   background: #000;
 }
+/* ── Spinner de chargement (iframe Drive) — même pattern que
+   CoursePreviewModal (.cpm-loading/.cpm-spinner) : fondu 250ms au lieu
+   d'une coupe sèche, pour éviter la bascule brutale avec le bouton
+   "lecture" natif que l'iframe affiche déjà en dessous à ce moment-là. */
+.vtc-modal__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.vtc-modal__loading--fade-out { opacity: 0; }
+.vtc-modal__spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vtcSpin 0.8s linear infinite;
+}
+@keyframes vtcSpin {
+  to { transform: rotate(360deg); }
+}
 .vtc-modal__info {
   position: absolute;
   left: 14px;

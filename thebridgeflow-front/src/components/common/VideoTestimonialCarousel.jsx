@@ -134,6 +134,44 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
   );
 }
 
+/* ─── Iframe Drive + spinner de chargement (fondu 250ms) — même pattern que
+   CoursePreviewModal/VideoFrame (voir son commentaire pour le détail du
+   fondu). Isolée dans son propre composant, montée avec key={item.id} par
+   l'appelant : "loaded" repart à false à chaque changement de témoignage via
+   le remount React, sans effect de resynchronisation d'un state dérivé
+   d'une prop. Scope volontairement limité à l'iframe (source cross-origin,
+   seule concernée par le flash "deux ronds superposés") — la <video> native
+   de la branche non-Drive n'est pas touchée. */
+function TestimonialDriveFrame({ item, t }) {
+  const [loaded, setLoaded] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
+
+  useEffect(() => {
+    if (!loaded) return undefined;
+    const timer = setTimeout(() => setShowLoading(false), 250);
+    return () => clearTimeout(timer);
+  }, [loaded]);
+
+  return (
+    <>
+      <iframe
+        className="vtc-modal__video"
+        style={{ border: 0 }}
+        src={resolveDriveUrl(item.videoUrl, "video")}
+        allow="autoplay; encrypted-media; fullscreen"
+        allowFullScreen
+        title={t("testimonials.openAria")}
+        onLoad={() => setLoaded(true)}
+      />
+      {showLoading && (
+        <div className={`vtc-modal__loading${loaded ? " vtc-modal__loading--fade-out" : ""}`} aria-hidden="true">
+          <span className="vtc-modal__spinner" />
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ─── Modale plein écran — son activé, navigation précédent/suivant ────────── */
 function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
   const { t } = useTranslation();
@@ -186,15 +224,7 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
 
         <div className="vtc-modal__video-wrap">
           {isDrive ? (
-            <iframe
-              key={item.id}
-              className="vtc-modal__video"
-              style={{ border: 0 }}
-              src={resolveDriveUrl(item.videoUrl, "video")}
-              allow="autoplay; encrypted-media; fullscreen"
-              allowFullScreen
-              title={t("testimonials.openAria")}
-            />
+            <TestimonialDriveFrame key={item.id} item={item} t={t} />
           ) : (
             <video
               ref={videoRef}
