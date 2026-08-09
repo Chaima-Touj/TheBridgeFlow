@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
-  FiVolume2, FiVolumeX, FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight,
+  FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
 import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
@@ -11,93 +11,64 @@ import "./VideoTestimonialCarousel.css";
 const AUTO_ADVANCE_MS = 4500;
 const RESUME_DELAY_MS = 5000;
 
-/* ─── Une carte "story" (9:16) — lecture pilotée par le parent, pas par elle-même ──
-   Google Drive n'a pas d'API postMessage pour piloter play()/pause()/muted comme un
-   <video> natif (voir promoDriveEmbedSrc dans LandingPage.jsx pour la même limitation
-   sur la vidéo promo) — un item Drive est donc rendu en <iframe>, monté/démonté selon
-   isActive+canPlay plutôt que piloté par videoRef (que le coordinateur du parent laisse
-   simplement à `null` pour ces cartes, son `if (!v) return` existant l'gère déjà). */
-function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen }) {
+/* ─── Une carte "story" (9:16) — statique, jamais de lecture inline dans la
+   rangée (source de l'ancien bug "barre de contrôles Drive coupée" : un
+   iframe qui joue dans une carte trop petite). Chaque carte affiche
+   uniquement son poster + l'icône .vtc-card__play-hint ; le clic (onOpen)
+   ouvre la modale, seul endroit où une vidéo est réellement lue. ── */
+function TestimonialCard({ item, isActive, wrapRef, onOpen }) {
   const { t } = useTranslation();
-  const [muted, setMuted] = useState(true);
   const isDrive = isGoogleDriveUrl(item.videoUrl);
-  const showDriveFrame = isDrive && isActive && canPlay;
+  // item.posterUrl, quand renseigné, est lui aussi un lien de partage Drive
+  // (ex: généré par generate-testimonial-thumbnails.js) — jamais une image
+  // brute directement utilisable en <img src> : même restriction anti-
+  // hotlinking que pour les vidéos (voir resolveDriveThumbnailProxyUrl),
+  // donc même passage obligé par notre proxy. Sans ce passage, l'image reste
+  // noire (testé : la page Drive "view" renvoyée par un accès direct n'est
+  // pas une image, le <img> échoue silencieusement).
   // Vignette dérivée à la volée depuis l'URL vidéo elle-même quand aucune
   // n'est fournie — Drive génère aussi une image depuis un fichier vidéo, pas
   // seulement depuis une image (endpoint /thumbnail, même que pour les images).
-  // Contrairement à l'iframe (montée seulement pour la carte active), cette
-  // <img> est rendue pour TOUTES les cartes dès le montage du composant — plus
-  // de carte noire en attendant un clic/scroll individuel.
-  const posterSrc = item.posterUrl || (isDrive ? resolveDriveThumbnailProxyUrl(item.videoUrl) : undefined);
-
-  const toggleMute = (e) => {
-    e.stopPropagation();
-    setMuted((m) => !m);
-  };
+  const posterSrc =
+    (item.posterUrl && (isGoogleDriveUrl(item.posterUrl) ? resolveDriveThumbnailProxyUrl(item.posterUrl) : item.posterUrl)) ||
+    (isDrive ? resolveDriveThumbnailProxyUrl(item.videoUrl) : undefined);
 
   return (
     <div className="vtc-card-wrap" ref={wrapRef}>
       <div
-        className={`vtc-card ${isActive && canPlay ? "vtc-card--active" : ""}`}
+        className={`vtc-card ${isActive ? "vtc-card--active" : ""}`}
         onClick={onOpen}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
         aria-label={t("testimonials.openAria")}
       >
-        {isDrive ? (
-          showDriveFrame ? (
-            // Une fois active+jouable, l'iframe remplace le poster au lieu de
-            // se superposer à lui — un seul "rond de chargement" possible à
-            // la fois (voir .vtc-card__play-hint plus bas, masqué ici aussi).
-            <iframe
-              className="vtc-card__video"
-              style={{ border: 0, pointerEvents: "none" }}
-              src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1&mute=1`}
-              allow="autoplay; encrypted-media"
-              tabIndex={-1}
-              title=""
-            />
-          ) : posterSrc
-            ? (
-              <img
-                className="vtc-card__video"
-                src={posterSrc}
-                alt=""
-                loading={isActive ? "eager" : "lazy"}
-                // Filet de sécurité complémentaire à l'effet sectionInView du
-                // parent (.vtc-row) : quand la page charge ~28 vignettes
-                // simultanément (3 catégories confondues), certaines
-                // terminent leur chargement bien après le double rAF déclenché
-                // à l'entrée dans le viewport — observé en test réel : une
-                // vignette peut rester noire alors que ses données sont
-                // intégralement chargées (`complete: true`, dimensions
-                // correctes), preuve d'un défaut de peinture, pas de
-                // chargement. Un `offsetHeight` seul ne suffisait pas à la
-                // débloquer (testé) ; basculer légèrement l'opacité force un
-                // recompositing de CET élément précisément, sans lien avec
-                // l'ancêtre transformé — technique standard, imperceptible.
-                onLoad={(e) => {
-                  const el = e.currentTarget;
-                  el.style.opacity = "0.999";
-                  requestAnimationFrame(() => { el.style.opacity = ""; });
-                }}
-              />
-            )
-            : <div className="vtc-card__video" style={{ background: "#111" }} />
-        ) : (
-          <video
-            ref={videoRef}
+        {posterSrc ? (
+          <img
             className="vtc-card__video"
-            src={item.videoUrl}
-            poster={posterSrc || undefined}
-            muted={muted}
-            loop
-            playsInline
-            preload="metadata"
-          >
-            {item.vttUrl && <track kind="subtitles" src={item.vttUrl} default />}
-          </video>
+            src={posterSrc}
+            alt=""
+            loading={isActive ? "eager" : "lazy"}
+            // Filet de sécurité complémentaire à l'effet sectionInView du
+            // parent (.vtc-row) : quand la page charge ~28 vignettes
+            // simultanément (3 catégories confondues), certaines
+            // terminent leur chargement bien après le double rAF déclenché
+            // à l'entrée dans le viewport — observé en test réel : une
+            // vignette peut rester noire alors que ses données sont
+            // intégralement chargées (`complete: true`, dimensions
+            // correctes), preuve d'un défaut de peinture, pas de
+            // chargement. Un `offsetHeight` seul ne suffisait pas à la
+            // débloquer (testé) ; basculer légèrement l'opacité force un
+            // recompositing de CET élément précisément, sans lien avec
+            // l'ancêtre transformé — technique standard, imperceptible.
+            onLoad={(e) => {
+              const el = e.currentTarget;
+              el.style.opacity = "0.999";
+              requestAnimationFrame(() => { el.style.opacity = ""; });
+            }}
+          />
+        ) : (
+          <div className="vtc-card__video" style={{ background: "#111" }} />
         )}
 
         <div className="vtc-card__scrim" />
@@ -106,25 +77,9 @@ function TestimonialCard({ item, isActive, canPlay, wrapRef, videoRef, onOpen })
           {item.category === "pfe" && (
             <span className="vtc-card__badge">🎓 {t("testimonials.badgeCompany")}</span>
           )}
-          {/* Pas de contrôle mute pour Drive — aucune API pour agir sur le son de
-              l'iframe intégrée, contrairement au <video> natif. */}
-          {!isDrive && (
-            <button
-              type="button"
-              className="vtc-card__mute"
-              onClick={toggleMute}
-              aria-label={t(muted ? "testimonials.unmute" : "testimonials.mute")}
-            >
-              {muted ? <FiVolumeX size={15} /> : <FiVolume2 size={15} />}
-            </button>
-          )}
         </div>
 
-        {/* Masqué pendant la lecture Drive active : plus rien à "suggérer"
-            une fois l'iframe affichée, évite un rond superposé à la vidéo. */}
-        {!showDriveFrame && (
-          <div className="vtc-card__play-hint" aria-hidden="true"><FiPlay size={20} /></div>
-        )}
+        <div className="vtc-card__play-hint" aria-hidden="true"><FiPlay size={20} /></div>
       </div>
 
       {!item.vttUrl && item.captionText && (
@@ -291,7 +246,6 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
   const viewportRef = useRef(null);
   const trackRef    = useRef(null);
   const wrapRefs    = useRef([]);
-  const videoRefs   = useRef([]);
   const resumeTimerRef = useRef(null);
 
   const count = items?.length || 0;
@@ -384,16 +338,6 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
     return () => observer.disconnect();
   }, [isMobileLayout, count]);
 
-  /* ── Un seul <video> en lecture à la fois : items[activeIndex], et seulement
-     si la section est visible — pause tout le reste, sur les deux layouts. ── */
-  useEffect(() => {
-    videoRefs.current.forEach((v, i) => {
-      if (!v) return;
-      if (sectionInView && i === activeIndex) v.play().catch(() => {});
-      else v.pause();
-    });
-  }, [activeIndex, sectionInView]);
-
   /* ── Pause immédiate au survol/interaction, reprise après quelques secondes ── */
   const pauseAndScheduleResume = useCallback(() => {
     setIsPaused(true);
@@ -476,9 +420,7 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
                   key={item.id}
                   item={item}
                   isActive={i === activeIndex}
-                  canPlay={sectionInView}
                   wrapRef={(el) => { wrapRefs.current[i] = el; }}
-                  videoRef={(el) => { videoRefs.current[i] = el; }}
                   onOpen={() => openModal(i)}
                 />
               ))}

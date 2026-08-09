@@ -87,7 +87,9 @@
   gap: 0.5rem;
   min-width: 0;
   flex: 0 0 auto;
-  width: calc((100% - 3 * 1.25rem) / 4);
+  /* Cartes agrandies (redesign validé) : 3 visibles par défaut au lieu de 4
+     — voir @media (max-width:900px) pour le palier à 2, inchangé. */
+  width: calc((100% - 2 * 1.25rem) / 3);
 }
 
 /* ── Flèches de navigation — cliquables à tout moment, design cohérent
@@ -124,9 +126,11 @@
 }
 .vtc-card:hover { transform: translateY(-4px) scale(1.015); box-shadow: 0 20px 45px rgba(0,0,0,0.28); }
 .vtc-card:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
-/* Légère mise en avant de la carte actuellement "active" dans le carousel
-   desktop (celle dont la vidéo est en lecture) — repère visuel discret. */
-.vtc-card--active { box-shadow: 0 0 0 3px var(--primary), 0 20px 45px rgba(0,0,0,0.28); }
+/* Repère visuel discret sur la carte "en focus" (centrale/active) — plus de
+   lecture inline, cet accent ne signale plus qu'une vidéo joue, juste une
+   mise en avant. outline (pas box-shadow, cohérent avec .vtc-arrow:focus-visible
+   ci-dessus) : ne modifie pas la boîte de layout, contrairement à border. */
+.vtc-card--active { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .vtc-card__video {
   position: absolute;
@@ -171,23 +175,6 @@
   line-height: 1.2;
   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
-.vtc-card__mute {
-  flex-shrink: 0;
-  margin-left: auto; /* reste à droite même sans badge (témoignages "formation") */
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.55);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.vtc-card__mute:hover { background: rgba(0,0,0,0.8); }
-
 .vtc-card__play-hint {
   position: absolute;
   top: 50%;
@@ -205,10 +192,12 @@
   color: #fff;
   pointer-events: none;
   z-index: 2;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  /* Toujours visible (pas de fondu au hover) : seule affordance de lecture
+     désormais, cartes statiques — un hover-only laisserait le mobile sans
+     aucun indice cliquable (pas de hover tactile). */
+  transition: transform 0.2s ease;
 }
-.vtc-card:hover .vtc-card__play-hint { opacity: 1; }
+.vtc-card:hover .vtc-card__play-hint { transform: translate(-50%, -50%) scale(1.1); }
 
 .vtc-card-wrap__caption {
   font-size: 0.78rem;
@@ -368,10 +357,6 @@
    (JS ne fait QUE mesurer la largeur résultante de ces règles — le nombre de
    cartes visibles par palier n'est jamais dupliqué en dur côté JS.)
 ═══════════════════════════════════════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .vtc-card-wrap { width: calc((100% - 2 * 1.25rem) / 3); }
-}
-
 @media (max-width: 900px) {
   .vtc-card-wrap { width: calc((100% - 1 * 1.25rem) / 2); }
   .vtc-arrow { width: 38px; height: 38px; }

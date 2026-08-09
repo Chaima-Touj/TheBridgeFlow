@@ -18,7 +18,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SERVER_ROOT = path.resolve(__dirname, "../.."); // thebridgeflow-back/
 
 export const REDIRECT_URI = "http://localhost:53682/oauth2callback";
-export const SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
+// drive.file (en plus de readonly, pas à la place) : périmètre minimal pour
+// pouvoir CRÉER de nouveaux fichiers (upload des miniatures générées) sans
+// élargir à l'accès complet en écriture ("drive") sur tout le contenu
+// existant — readonly reste nécessaire pour toutes les lectures déjà
+// utilisées par les autres scripts (inventory.js, migrate.js...), drive.file
+// ne couvrirait pas seul la lecture de fichiers préexistants non créés par
+// cette appli. Nécessite une nouvelle exécution de authenticate.js pour que
+// le token existant (autorisé sous l'ancien scope) prenne en compte celui-ci.
+export const SCOPES = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/drive.file",
+];
 
 export const ACCOUNTS = {
   drive1: {
