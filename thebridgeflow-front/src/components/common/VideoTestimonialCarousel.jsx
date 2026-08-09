@@ -112,7 +112,13 @@ function TestimonialDriveFrame({ item, t }) {
       <iframe
         className="vtc-modal__video"
         style={{ border: 0 }}
-        src={resolveDriveUrl(item.videoUrl, "video")}
+        // autoplay=1 indispensable ici : le calque anti-flash ci-dessous
+        // absorbe TOUT tap, y compris celui qui servait jusqu'ici à lancer
+        // la lecture — sans autoplay, la vidéo ne démarrerait plus jamais
+        // (vérifié : reproduit, deux taps sans effet, toujours à l'état
+        // pause initial). Pas de mute : cette modale est la version "son
+        // activé" par design (contrairement à l'aperçu carte, muet).
+        src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1`}
         allow="autoplay; encrypted-media; fullscreen"
         allowFullScreen
         title={t("testimonials.openAria")}
@@ -123,6 +129,14 @@ function TestimonialDriveFrame({ item, t }) {
           <span className="vtc-modal__spinner" />
         </div>
       )}
+      {/* Bloque tout tap vers l'iframe Drive (investigation confirmée : un
+         calque au-dessus, sans pointer-events:none, absorbe le clic avant
+         qu'il atteigne l'iframe) — empêche le flash natif "icône dupliquée"
+         que Drive affiche à chaque bascule play/pause, au prix d'une vidéo
+         qu'on ne peut plus mettre en pause/reprendre soi-même une fois
+         lancée (compromis accepté, voir bouton fermer + flèches, non
+         couverts par ce calque). */}
+      <div className="vtc-modal__tap-blocker" aria-hidden="true" />
     </>
   );
 }

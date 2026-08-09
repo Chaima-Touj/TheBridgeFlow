@@ -301,6 +301,18 @@
 @keyframes vtcSpin {
   to { transform: rotate(360deg); }
 }
+/* Calque anti-flash (voir TestimonialDriveFrame) — z-index:1 : au-dessus de
+   l'iframe (pas de z-index propre, donc 0/auto), en dessous des flèches
+   mobiles .vtc-modal__nav (z-index:2, sibling de .vtc-modal__video-wrap qui
+   ne crée pas de nouveau contexte d'empilement — un z-index égal ou
+   supérieur ici les rendrait incliquables, vérifié en test). Pas de
+   pointer-events:none : c'est justement l'inverse de l'effet recherché. */
+.vtc-modal__tap-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: transparent;
+}
 .vtc-modal__info {
   position: absolute;
   left: 14px;
