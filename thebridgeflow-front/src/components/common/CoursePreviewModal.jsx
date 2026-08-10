@@ -10,13 +10,56 @@ function getYoutubeId(url = "") {
   return m ? m[1] : null;
 }
 
+// Option C (diagnostic vidéo Drive) — onLoad de l'iframe ne signifie que
+// "document Drive chargé", jamais "lecteur prêt" (cross-origin : aucun moyen
+// de vérifier davantage depuis ce code, pas de postMessage exposé par Drive).
+// STABILIZE_DELAY_MS retarde uniquement la disparition du spinner après
+// onLoad — ce n'est PAS une détection réelle de playback readiness, juste une
+// marge de sécurité conservatrice.
+//
+// Watchdog en 2 paliers (tests réels : le seuil unique à 7s était trop
+// agressif — plusieurs vidéos Drive légitimes dépassent 7s puis chargent
+// normalement) :
+//   0-7s  : chargement normal (spinner).
+//   7-15s : "slow-loading" — même spinner, PAS de fallback, l'iframe
+//           continue d'essayer.
+//   >15s  : toujours aucun onLoad depuis 15s -> fallback affiché.
+const STABILIZE_DELAY_MS = 1500;
+const SLOW_LOADING_AT_MS = 7000;
+const FALLBACK_AT_MS = 15000;
+
+// Logs temporaires de diagnostic — à retirer une fois la cause du "flash
+// noir" confirmée sur appareils réels (voir tests réels restants). Format
+// unique [VIDEO_DIAGNOSTIC] <event> pour pouvoir grep/filtrer facilement.
+function logVideoDiagnostic(event, { mountedAt, videoUrl, extra } = {}) {
+  const connection =
+    typeof navigator !== "undefined"
+      ? navigator.connection || navigator.mozConnection || navigator.webkitConnection
+      : null;
+  console.log(`[VIDEO_DIAGNOSTIC] ${event}`, {
+    elapsedMs: mountedAt != null ? Math.round(performance.now() - mountedAt) : null,
+    videoUrl,
+    onLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+    effectiveType: connection?.effectiveType ?? null,
+    ...extra,
+  });
+}
+
 /* Isolé dans son propre composant, monté avec key={videoUrl} par le parent :
-   le spinner "loaded" repart naturellement à false à chaque changement de
-   vidéo via le remount React, sans ref/effect pour resynchroniser un state
+   la phase repart naturellement à "loading" à chaque changement de vidéo via
+   le remount React, sans ref/effect pour resynchroniser un state
    dérivé d'une prop (pattern déconseillé par le linter react-hooks ici). */
 function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter, onIframeLeave, driveViewUrl }) {
-  const [loaded, setLoaded] = useState(false);
-  const [loadTimedOut, setLoadTimedOut] = useState(false);
+  // Progression loading -> stabilizing -> ready. "stabilizing" et "loading"
+  // s'affichent de façon strictement identique (spinner simple) : cette phase
+  // intermédiaire n'est qu'un délai de sécurité côté state, jamais une
+  // nouvelle UI visible (pas d'impression d'application bloquée).
+  const [phase, setPhase] = useState("loading");
+  // Indépendant de `phase`, et volontairement jamais remis à false : si
+  // onLoad arrive tardivement APRÈS le watchdog (cas rare), on veut que la
+  // boîte "timeout" déjà affichée s'estompe en fondu (comportement d'origine
+  // préservé), pas qu'elle bascule brutalement vers la boîte spinner simple.
+  const [hasTimedOut, setHasTimedOut] = useState(false);
   const isIframeSource = !!ytId || isDrive;
 
   // Instrumentation de diagnostic — mesure le délai réel entre le montage de
@@ -30,41 +73,81 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
   // par le linter de ce projet).
   const [mountedAt] = useState(() => performance.now());
 
-  // Watchdog de chargement — si l'iframe ne déclenche jamais onLoad (blocage
-  // CSP côté Google Drive, fichier mal partagé...), bascule loadTimedOut à
-  // true après 7s au lieu de laisser le spinner tourner indéfiniment sans
-  // feedback. Se réinitialise naturellement à chaque nouvelle vidéo car
-  // VideoFrame est remonté via key={videoUrl} par le parent (voir plus haut)
-  // — pas besoin de reset manuel. Le timer est nettoyé au démontage (cleanup
-  // de l'effect, ex: changement de vidéo avant l'expiration) et annulé
-  // explicitement dans handleLoad si le chargement finit par réussir après coup.
-  const timeoutIdRef = useRef(null);
+  // Miroirs en ref de `phase`/`hasTimedOut`, utilisés uniquement par le log
+  // "unmount" ci-dessous : la closure de cleanup d'un effect est figée au
+  // moment où l'effect s'exécute (montage), donc lire `phase`/`hasTimedOut`
+  // directement y afficherait toujours leur valeur initiale, pas la valeur
+  // réelle au moment du démontage.
+  const phaseRef = useRef("loading");
+  const hasTimedOutRef = useRef(false);
+
+  // Watchdog de chargement, en 2 paliers chaînés sur la MÊME ref — un seul
+  // timer actif à la fois, jamais deux en parallèle, jamais réarmé après
+  // onLoad. Palier 1 (7s) : simple log "slow-loading", aucun changement
+  // visible, on laisse l'iframe continuer. Palier 2 (15s au total) : bascule
+  // hasTimedOut à true, seul moment où le fallback apparaît. Si l'iframe ne
+  // déclenche jamais onLoad (blocage CSP côté Google Drive, fichier mal
+  // partagé...), c'est ce second palier qui évite de laisser le spinner
+  // tourner indéfiniment sans feedback. Se réinitialise naturellement à
+  // chaque nouvelle vidéo car VideoFrame est remonté via key={videoUrl} par
+  // le parent (voir plus haut) — pas besoin de reset manuel. Le timer courant
+  // (quel que soit le palier) est nettoyé au démontage et annulé
+  // explicitement dans handleLoad si le chargement finit par réussir, à
+  // n'importe quel palier.
+  const watchdogIdRef = useRef(null);
+  const stabilizeIdRef = useRef(null);
   useEffect(() => {
+    logVideoDiagnostic("mount", { mountedAt, videoUrl });
     if (!isIframeSource) return undefined;
-    timeoutIdRef.current = setTimeout(() => setLoadTimedOut(true), 7000);
-    return () => clearTimeout(timeoutIdRef.current);
-  }, [isIframeSource, videoUrl]);
+    watchdogIdRef.current = setTimeout(() => {
+      logVideoDiagnostic("slow-loading", { mountedAt, videoUrl });
+      watchdogIdRef.current = setTimeout(() => {
+        hasTimedOutRef.current = true;
+        setHasTimedOut(true);
+        logVideoDiagnostic("timeout", { mountedAt, videoUrl });
+      }, FALLBACK_AT_MS - SLOW_LOADING_AT_MS);
+    }, SLOW_LOADING_AT_MS);
+    return () => {
+      clearTimeout(watchdogIdRef.current);
+      clearTimeout(stabilizeIdRef.current);
+      logVideoDiagnostic("unmount", {
+        mountedAt,
+        videoUrl,
+        extra: { finalPhase: phaseRef.current, hasTimedOut: hasTimedOutRef.current },
+      });
+    };
+  }, [isIframeSource, videoUrl, mountedAt]);
 
   const handleLoad = () => {
-    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    const elapsed = Math.round(performance.now() - mountedAt);
-    console.log(`[CoursePreviewModal] iframe onLoad après ${elapsed}ms (videoUrl: ${videoUrl})`);
-    setLoaded(true);
+    clearTimeout(watchdogIdRef.current);
+    logVideoDiagnostic("iframe-load", { mountedAt, videoUrl });
+    phaseRef.current = "stabilizing";
+    setPhase("stabilizing");
+    logVideoDiagnostic("stabilizing-start", { mountedAt, videoUrl });
+    // Délai de stabilisation : onLoad prouve seulement que le document Drive
+    // a fini de charger, pas que le lecteur affiche réellement quelque chose
+    // de valide (voir commentaire en tête de fichier). On laisse une marge
+    // avant de considérer la vidéo "prête".
+    stabilizeIdRef.current = setTimeout(() => {
+      phaseRef.current = "ready";
+      setPhase("ready");
+      logVideoDiagnostic("stabilizing-end", { mountedAt, videoUrl });
+    }, STABILIZE_DELAY_MS);
   };
 
   // Retrait du spinner en fondu plutôt qu'en coupe sèche : au moment où
   // l'iframe Drive/YouTube a fini de charger, elle affiche déjà son propre
   // bouton "lecture" natif à la même position — démonter .cpm-loading
   // instantanément créait une bascule brutale entre les deux ronds, perçue
-  // comme "deux ronds qui se chargent l'un sur l'autre". `loaded` déclenche
-  // la classe --fade-out (transition CSS, voir .css) ; l'élément ne quitte
-  // le DOM qu'une fois le fondu terminé.
+  // comme "deux ronds qui se chargent l'un sur l'autre". `phase === "ready"`
+  // déclenche la classe --fade-out (transition CSS, voir .css) ; l'élément ne
+  // quitte le DOM qu'une fois le fondu terminé.
   const [showLoading, setShowLoading] = useState(true);
   useEffect(() => {
-    if (!loaded) return undefined;
+    if (phase !== "ready") return undefined;
     const t = setTimeout(() => setShowLoading(false), 250);
     return () => clearTimeout(t);
-  }, [loaded]);
+  }, [phase]);
 
   return (
     <>
@@ -110,8 +193,8 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
         </div>
       )}
       {isIframeSource && showLoading && (
-        loadTimedOut && !isTrailer ? (
-          <div className={`cpm-loading cpm-loading--timeout${loaded ? " cpm-loading--fade-out" : ""}`} role="status">
+        hasTimedOut && !isTrailer ? (
+          <div className={`cpm-loading cpm-loading--timeout${phase === "ready" ? " cpm-loading--fade-out" : ""}`} role="status">
             <p style={{ color: "#fff", textAlign: "center", padding: "0 1.5rem", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 320, margin: 0 }}>
               Le chargement prend plus de temps que prévu.
               {isDrive ? " Cela peut arriver si votre navigateur bloque les cookies tiers (ex : navigation privée)." : ""}
@@ -131,8 +214,8 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
         ) : (
           // En mode trailer, le lien permanent .cpm-external-link (toujours
           // affiché, indépendant de ce timeout) suffit déjà comme repli —
-          // pas besoin de dupliquer le message/lien ici après 7s.
-          <div className={`cpm-loading${loaded ? " cpm-loading--fade-out" : ""}`} aria-hidden="true">
+          // pas besoin de dupliquer le message/lien ici après 15s.
+          <div className={`cpm-loading${phase === "ready" ? " cpm-loading--fade-out" : ""}`} aria-hidden="true">
             <span className="cpm-spinner" />
           </div>
         )
