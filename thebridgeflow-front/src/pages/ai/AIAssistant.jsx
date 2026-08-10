@@ -265,9 +265,13 @@ export default function AIAssistant() {
       );
       setMessages([...next, { role: "assistant", content: data.result?.text || "..." }]);
     } catch (err) {
-      const errText = err.response?.data?.code === "AI_CONVERSATION_LIMIT_REACHED"
-        ? t("aiAssistant.limitReached", { max: MAX_USER_MESSAGES })
-        : t("aiAssistant.connectionError");
+      const code = err.response?.data?.code;
+      const errText =
+        code === "AI_CONVERSATION_LIMIT_REACHED"
+          ? t("aiAssistant.limitReached", { max: MAX_USER_MESSAGES })
+          : code === "AI_UNAVAILABLE"
+          ? t("aiAssistant.unavailable")
+          : t("aiAssistant.connectionError");
       setMessages([...next, { role: "assistant", content: errText }]);
     } finally {
       setLoading(false);

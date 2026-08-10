@@ -127,6 +127,12 @@ function AnimatedRobot({ size = 80 }) {
   );
 }
 
+// Doit rester synchronisé avec MAX_USER_MESSAGES_PER_CONVERSATION côté serveur
+// (thebridgeflow-back/controllers/ai.controller.js) — même constante que dans
+// AIAssistant.jsx, uniquement pour interpoler {{max}} dans le message
+// d'erreur ici (pas de blocage préventif du widget, comportement inchangé).
+const MAX_USER_MESSAGES = 40;
+
 /* ─── Chatbot IA ──────────────────────────────────────────────────────────── */
 function AIChatbot({ user }) {
   const { t } = useTranslation();
@@ -180,12 +186,19 @@ function AIChatbot({ user }) {
           content: data.result?.text || t("dashboard.student.aiWidget.chatFallback"),
         },
       ]);
-    } catch {
+    } catch (err) {
+      const code = err.response?.data?.code;
+      const errorText =
+        code === "AI_CONVERSATION_LIMIT_REACHED"
+          ? t("dashboard.student.aiWidget.limitReached", { max: MAX_USER_MESSAGES })
+          : code === "AI_UNAVAILABLE"
+          ? t("dashboard.student.aiWidget.unavailable")
+          : t("dashboard.student.aiWidget.connectionError");
       setMessages([
         ...newMessages,
         {
           role: "assistant",
-          content: t("dashboard.student.aiWidget.connectionError"),
+          content: errorText,
         },
       ]);
     } finally {

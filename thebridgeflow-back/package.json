@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@getbrevo/brevo": "^6.0.2",
+    "@google/genai": "^2.16.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -22,7 +23,7 @@
     "geoip-lite": "^2.0.3",
     "google-auth-library": "^10.9.0",
     "googleapis": "^173.0.0",
-    "groq-sdk": "^1.2.1",
+    "groq-sdk": "^1.5.0",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.2",

@@ -218,10 +218,12 @@
       "unknownCompany": "شركة",
       "interviewFallback": "مقابلة",
       "aiWidget": {
-        "greeting": "مرحباً {{name}}! 👋\nأنا TheBridgeFlow AI. يمكنني مساعدتك في:\n• 🎯 توصيات التدريب\n• ✉️ رسالة تحفيزية\n• 💼 نصائح مهنية\n• 🔍 تحليل ملفك الشخصي\n\nكيف يمكنني مساعدتك؟",
+        "greeting": "مرحباً {{name}}! 👋\nأنا SAGE، المساعد الذكي لـ TheBridgeFlow. يمكنني مساعدتك في:\n• 🎯 توصيات التدريب\n• 💼 نصائح حول ملفك الشخصي ومسيرتك المهنية\n\nكيف يمكنني مساعدتك؟",
         "recsFallback": "إليك توصياتي للتدريبات المناسبة لك!",
         "chatFallback": "لم أتمكن من معالجة طلبك.",
-        "connectionError": "❌ خطأ في الاتصال. تحقق من أن الخادم يعمل.",
+        "connectionError": "❌ خطأ في الاتصال. أعد المحاولة خلال لحظات.",
+        "unavailable": "سايج غير متاح مؤقتاً. أعد المحاولة لاحقاً.",
+        "limitReached": "لقد وصلت إلى الحد الأقصى ({{max}} رسالة) لهذه المحادثة. ابدأ محادثة جديدة (أعد تحميل الصفحة) لمتابعة الدردشة مع سايج.",
         "quickRecommendationsLabel": "🎯 التوصيات",
         "quickRecommendationsText": "اقترح عليّ تدريبات مناسبة لملفي الشخصي",
         "quickCvLabel": "💼 نصائح السيرة الذاتية",
@@ -230,8 +232,8 @@
         "quickLetterText": "كيف أكتب رسالة تحفيزية جيدة؟",
         "quickInterviewLabel": "🔍 المقابلة",
         "quickInterviewText": "كيف أستعد لمقابلة تدريب؟",
-        "fabTitle": "TheBridgeFlow AI",
-        "panelName": "TheBridgeFlow AI",
+        "fabTitle": "SAGE",
+        "panelName": "SAGE",
         "inputPlaceholder": "اطرح سؤالك...",
         "suggestionText": "تحضير اليوم هو سر نجاح الغد."
       }
@@ -1453,6 +1455,7 @@
     "favoritesTitle": "العروض المفضلة",
     "moreFavorites": "+{{count}} مفضلات أخرى",
     "connectionError": "❌ خطأ في الاتصال. أعد المحاولة خلال لحظات.",
+    "unavailable": "سايج غير متاح مؤقتاً. أعد المحاولة لاحقاً.",
     "limitReached": "لقد وصلت إلى الحد الأقصى ({{max}} رسالة) لهذه المحادثة. ابدأ محادثة جديدة (أعد تحميل الصفحة) لمتابعة الدردشة مع سايج.",
     "limitReachedBanner": "تم بلوغ الحد الأقصى ({{max}} رسالة) لهذه المحادثة — أعد تحميل الصفحة لبدء محادثة جديدة.",
     "defaultFirstName": "طالب",

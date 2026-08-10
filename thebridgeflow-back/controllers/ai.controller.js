@@ -1,3 +1,8 @@
+// Fournisseur actif : Groq (clé Gemini pas encore disponible — voir
+// gemini.service.js, prêt mais volontairement laissé inactif/non importé ici
+// en attendant. Pour rebasculer : remplacer cet import + les 2 appels
+// groqService.chat/.recommendInternships ci-dessous par geminiService, comme
+// fait lors du round de migration précédent).
 import groqService from "../services/groq.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import User from "../models/users.model.js";
@@ -304,26 +309,5 @@ export const getUserContext = asyncHandler(async (req, res) => {
 export const recommendations = asyncHandler(async (req, res) => {
   const limit = parseInt(req.body.limit, 10) || 5;
   const out   = await groqService.recommendInternships(req.user._id, limit);
-  res.json(out);
-});
-
-// POST /api/ai/analyze-cv
-export const analyzeCv = asyncHandler(async (req, res) => {
-  const { text } = req.body;
-  const out = await groqService.analyzeCV({ text });
-  res.json(out);
-});
-
-// POST /api/ai/generate-motivation
-export const generateMotivation = asyncHandler(async (req, res) => {
-  const { offerId, tone } = req.body;
-
-  if (!offerId) {
-    const err = new Error("offerId requis");
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const out = await groqService.generateMotivationLetter(req.user._id, offerId, { tone });
   res.json(out);
 });

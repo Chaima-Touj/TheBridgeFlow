@@ -218,10 +218,12 @@
       "unknownCompany": "Entreprise",
       "interviewFallback": "Entretien",
       "aiWidget": {
-        "greeting": "Bonjour {{name}} ! 👋\nJe suis TheBridgeFlow AI. Je peux vous aider avec :\n• 🎯 Recommandations de stages\n• ✉️ Lettre de motivation\n• 💼 Conseils carrière\n• 🔍 Analyse de votre profil\n\nQue puis-je faire pour vous ?",
+        "greeting": "Bonjour {{name}} ! 👋\nJe suis SAGE, l'assistant IA de TheBridgeFlow. Je peux vous aider avec :\n• 🎯 Recommandations de stages\n• 💼 Conseils sur votre profil et votre carrière\n\nQue puis-je faire pour vous ?",
         "recsFallback": "Voici mes recommandations de stages pour vous !",
         "chatFallback": "Je n'ai pas pu traiter votre demande.",
-        "connectionError": "❌ Erreur de connexion. Vérifiez que le serveur est actif.",
+        "connectionError": "❌ Erreur de connexion. Réessayez dans quelques instants.",
+        "unavailable": "SAGE est temporairement indisponible. Réessayez plus tard.",
+        "limitReached": "Limite de {{max}} messages atteinte pour cette conversation. Démarrez une nouvelle conversation (rechargez la page) pour continuer à discuter avec SAGE.",
         "quickRecommendationsLabel": "🎯 Recommandations",
         "quickRecommendationsText": "Recommande-moi des stages adaptés à mon profil",
         "quickCvLabel": "💼 Conseils CV",
@@ -230,8 +232,8 @@
         "quickLetterText": "Comment rédiger une bonne lettre de motivation ?",
         "quickInterviewLabel": "🔍 Entretien",
         "quickInterviewText": "Comment me préparer pour un entretien de stage ?",
-        "fabTitle": "TheBridgeFlow AI",
-        "panelName": "TheBridgeFlow AI",
+        "fabTitle": "SAGE",
+        "panelName": "SAGE",
         "inputPlaceholder": "Posez votre question...",
         "suggestionText": "La préparation d'aujourd'hui fait le succès de demain."
       }
@@ -1453,6 +1455,7 @@
     "favoritesTitle": "Offres en favoris",
     "moreFavorites": "+{{count}} autres favoris",
     "connectionError": "❌ Erreur de connexion. Réessayez dans quelques instants.",
+    "unavailable": "SAGE est temporairement indisponible. Réessayez plus tard.",
     "limitReached": "Limite de {{max}} messages atteinte pour cette conversation. Démarrez une nouvelle conversation (rechargez la page) pour continuer à discuter avec SAGE.",
     "limitReachedBanner": "Limite de {{max}} messages atteinte pour cette conversation — rechargez la page pour en démarrer une nouvelle.",
     "defaultFirstName": "Étudiant",

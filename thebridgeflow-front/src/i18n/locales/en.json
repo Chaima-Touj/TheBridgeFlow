@@ -218,10 +218,12 @@
       "unknownCompany": "Company",
       "interviewFallback": "Interview",
       "aiWidget": {
-        "greeting": "Hello {{name}}! 👋\nI'm TheBridgeFlow AI. I can help you with:\n• 🎯 Internship recommendations\n• ✉️ Cover letter\n• 💼 Career advice\n• 🔍 Profile analysis\n\nWhat can I do for you?",
+        "greeting": "Hello {{name}}! 👋\nI'm SAGE, TheBridgeFlow's AI assistant. I can help you with:\n• 🎯 Internship recommendations\n• 💼 Advice on your profile and career\n\nWhat can I do for you?",
         "recsFallback": "Here are my internship recommendations for you!",
         "chatFallback": "I couldn't process your request.",
-        "connectionError": "❌ Connection error. Check that the server is running.",
+        "connectionError": "❌ Connection error. Please try again in a moment.",
+        "unavailable": "SAGE is temporarily unavailable. Please try again later.",
+        "limitReached": "You've reached the {{max}}-message limit for this conversation. Start a new conversation (reload the page) to keep chatting with SAGE.",
         "quickRecommendationsLabel": "🎯 Recommendations",
         "quickRecommendationsText": "Recommend internships suited to my profile",
         "quickCvLabel": "💼 CV tips",
@@ -230,8 +232,8 @@
         "quickLetterText": "How do I write a good cover letter?",
         "quickInterviewLabel": "🔍 Interview",
         "quickInterviewText": "How can I prepare for an internship interview?",
-        "fabTitle": "TheBridgeFlow AI",
-        "panelName": "TheBridgeFlow AI",
+        "fabTitle": "SAGE",
+        "panelName": "SAGE",
         "inputPlaceholder": "Ask your question...",
         "suggestionText": "Today's preparation is tomorrow's success."
       }
@@ -1453,6 +1455,7 @@
     "favoritesTitle": "Favorite offers",
     "moreFavorites": "+{{count}} more favorites",
     "connectionError": "❌ Connection error. Please try again in a moment.",
+    "unavailable": "SAGE is temporarily unavailable. Please try again later.",
     "limitReached": "You've reached the {{max}}-message limit for this conversation. Start a new conversation (reload the page) to keep chatting with SAGE.",
     "limitReachedBanner": "{{max}}-message limit reached for this conversation — reload the page to start a new one.",
     "defaultFirstName": "Student",
