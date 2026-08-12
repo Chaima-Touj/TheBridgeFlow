@@ -99,6 +99,7 @@ const EMPTY_FORM = {
   duration: "",
   onsite: "",
   online: "",
+  recordings: "",
   level: "",
   description: "",
   mode: "Hybride",
@@ -114,6 +115,7 @@ function formationToForm(formation) {
     duration:    formation.duration || "",
     onsite:      formation.price?.onsite || "",
     online:      formation.price?.online || "",
+    recordings:  formation.price?.recordings || "",
     level:       formation.level || "",
     description: formation.description || "",
     mode:        formation.mode || "Hybride",
@@ -401,7 +403,7 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
     onSubmit({
       title:       form.title.trim(),
       duration:    form.duration.trim(),
-      price:       { onsite: form.onsite.trim(), online: form.online.trim() },
+      price:       { onsite: form.onsite.trim(), online: form.online.trim(), recordings: form.recordings.trim() },
       level:       form.level.trim(),
       description: form.description.trim(),
       mode:        form.mode,
@@ -450,6 +452,10 @@ function FormationForm({ initial, isEdit, submitting, formError, onSubmit, onCan
           <label className="label" htmlFor="af-online">{t("adminFormations.onlineLabel")}</label>
           <input id="af-online" className="input" placeholder={t("adminFormations.onlinePlaceholder")} value={form.online} onChange={set("online")} />
           {fieldErrors.online && <span className="af-field-error">{fieldErrors.online}</span>}
+        </div>
+        <div className="af-form-row">
+          <label className="label" htmlFor="af-recordings">{t("adminFormations.recordingsLabel")}</label>
+          <input id="af-recordings" className="input" placeholder={t("adminFormations.recordingsPlaceholder")} value={form.recordings} onChange={set("recordings")} />
         </div>
       </div>
 

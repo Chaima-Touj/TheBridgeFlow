@@ -40,8 +40,9 @@ const formationSchema = new mongoose.Schema({
   slug:        { type: String, required: true, unique: true },
   duration:    { type: String, required: true },
   price: {
-    onsite: { type: String, required: true },
-    online: { type: String, required: true },
+    onsite:     { type: String, required: true },
+    online:     { type: String, required: true },
+    recordings: { type: String, required: false, default: "" },
   },
   level:       { type: String, default: "Intermédiaire" },
   description: { type: String, default: "" },

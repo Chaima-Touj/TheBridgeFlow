@@ -363,6 +363,14 @@ const FormationDetail = () => {
                           </span>
                           <span className="fd-price-row__value">{formation.price?.online}</span>
                         </div>
+                        {formation.price?.recordings && (
+                          <div className="fd-price-row">
+                            <span className="fd-price-row__label">
+                              <FiVideo size={14} /> {t("formationDetail.priceRecordings")}
+                            </span>
+                            <span className="fd-price-row__value">{formation.price.recordings}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* CTA — connecté : flux d'inscription réel (handleEnroll
@@ -706,6 +714,12 @@ const FormationDetail = () => {
                       <span className="fd-sidebar-price__mode">{t("formationDetail.priceOnline")}</span>
                       <span className="fd-sidebar-price__val">{formation.price?.online}</span>
                     </div>
+                    {formation.price?.recordings && (
+                      <div className="fd-sidebar-price">
+                        <span className="fd-sidebar-price__mode">{t("formationDetail.priceRecordings")}</span>
+                        <span className="fd-sidebar-price__val">{formation.price.recordings}</span>
+                      </div>
+                    )}
                   </div>
 
                   <button className="fd-sidebar-enroll" onClick={handleEnroll}>

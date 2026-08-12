@@ -103,7 +103,7 @@ export const createFormation = asyncHandler(async (req, res) => {
     title,
     slug: finalSlug,
     duration,
-    price: { onsite: price.onsite, online: price.online },
+    price: { onsite: price.onsite, online: price.online, recordings: price.recordings },
     level,
     description,
     mode,
@@ -157,6 +157,7 @@ export const updateFormationInfo = asyncHandler(async (req, res) => {
   if (duration !== undefined)             formation.duration = duration;
   if (price?.onsite !== undefined)        formation.price.onsite = price.onsite;
   if (price?.online !== undefined)        formation.price.online = price.online;
+  if (price?.recordings !== undefined)    formation.price.recordings = price.recordings;
   if (level !== undefined)                formation.level = level;
   if (description !== undefined)          formation.description = description;
   if (mode !== undefined)                 formation.mode = mode;
