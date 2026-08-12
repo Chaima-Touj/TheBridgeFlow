@@ -1616,6 +1616,7 @@
     "popularBadge": "Most popular",
     "cta": "Choose this plan",
     "currency": "DT",
+    "perMonth": "/Month",
     "online": {
       "name": "Online",
       "desc": "Follow your training remotely, at your own pace, with full support.",

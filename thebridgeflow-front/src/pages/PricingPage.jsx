@@ -39,7 +39,7 @@ export default function PricingPage() {
                 <p className="pr-card__name">{t(`tarifs.${plan.key}.name`)}</p>
                 <div className="pr-card__price">
                   {/* dir="ltr" isolé : évite que le bidi arabe inverse "490 د.ت" en "د.ت 490" */}
-                  <span className="pr-card__price-value" dir="ltr">{plan.price} {t("tarifs.currency")}</span>
+                  <span className="pr-card__price-value" dir="ltr">{plan.price} {t("tarifs.currency")}{t("tarifs.perMonth")}</span>
                 </div>
                 <p className="pr-card__desc">{t(`tarifs.${plan.key}.desc`)}</p>
                 <ul className="pr-card__features">
