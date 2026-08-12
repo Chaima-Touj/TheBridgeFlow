@@ -273,6 +273,29 @@
   display: block;
   background: #000;
 }
+/* Masque la bande de contrôles Google Drive (volume/CC/x1/roue crantée),
+   rendue non-fonctionnelle par .vtc-modal__tap-blocker (voir plus bas) — le
+   tap est absorbé avant d'atteindre l'iframe, donc ces boutons restent
+   visibles mais ne répondent à aucun clic. Mesuré sur capture réelle
+   Android : cette bande occupe exactement les derniers ~13% du cadre
+   (87%→100%), sans contenu vidéo réel dans cette zone (le contenu réel
+   s'arrête à ~86%). Agrandit l'iframe Drive à 100/0.87 ≈ 114.9% de la
+   hauteur du conteneur, ancrée en haut (top:0) — l'excédent en bas (la
+   bande de contrôles) sort du cadre visible, coupé par
+   .vtc-modal__video-wrap{overflow:hidden} ci-dessus. Largeur et transform
+   horizontal inchangés. Scope volontaire à iframe.vtc-modal__video (plus
+   spécifique que .vtc-modal__video seul) : ne s'applique pas à la balise
+   <video> native (source non-Drive), dont les contrôles natifs sont
+   pleinement fonctionnels et ne doivent pas être rognés. La bande
+   pause/skip/progression de Drive (~47%-66% du cadre d'origine) reste hors
+   de cette zone agrandie/coupée, donc toujours visible telle quelle. */
+.vtc-modal__video-wrap iframe.vtc-modal__video {
+  position: absolute;
+  top:      0;
+  left:     0;
+  width:    100%;
+  height:   114.9%;
+}
 /* ── Spinner de chargement (iframe Drive) — même pattern que
    CoursePreviewModal (.cpm-loading/.cpm-spinner) : fondu 250ms au lieu
    d'une coupe sèche, pour éviter la bascule brutale avec le bouton
