@@ -511,16 +511,22 @@
   /* Format vidéo 16:9 dérivé de la largeur, pas de 52% d'une hauteur elle-même
      dérivée de vh (base .cpm-player-wrap plus haut) — sur un écran étroit et
      haut, ce 52%-de-vh donnait une boîte quasi carrée (mesuré : ratio ~1.0 à
-     1.2 au lieu de 1.778 attendu) dans laquelle Google Drive n'affiche pas
-     correctement sa barre de contrôles (bouton lecture coupé en bas, confirmé
-     sur appareil réel — fonctionne normalement en plein écran, où Drive
-     retrouve un espace correctement proportionné). N'affecte pas
-     .cpm-modal--trailer .cpm-player-wrap ci-dessus (sélecteur plus
-     spécifique, conserve son propre format 9:16). .cpm-list (flex:1,
-     inchangé) absorbe l'espace libéré par cette hauteur plus faible. */
+     1.2 au lieu de 1.778 attendu).
+     min-height: 300px — confirmé par test isolé (page HTML autonome, hors de
+     toute modale/flex/backdrop-filter/transform) : le lecteur Drive/YouTube
+     imbriqué réclame en interne ~300px de hauteur quelle que soit la boîte
+     reçue ; sous ce seuil, sa barre de contrôles (ancrée en bas de son propre
+     calque interne) tombe hors de la zone visible, indépendamment du ratio
+     16:9 par ailleurs correct. À largeur d'écran étroite, le 16:9 seul donnait
+     ~220px (< 300px) — d'où le clip. Au-delà d'environ 534px de large, le
+     16:9 dépasse déjà 300px de lui-même et min-height n'a plus d'effet.
+     N'affecte pas .cpm-modal--trailer .cpm-player-wrap ci-dessus (sélecteur
+     plus spécifique, conserve son propre format 9:16). .cpm-list (flex:1,
+     min-height:0, défilement interne inchangé) absorbe l'espace restant. */
   .cpm-player-wrap {
     flex:         0 0 auto;
     aspect-ratio: 16 / 9;
+    min-height:   300px;
   }
   /* Espace réduit : icône seule, le texte complet reste dans le title="" */
   .cpm-external-link span { display: none; }
