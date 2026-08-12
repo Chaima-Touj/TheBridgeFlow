@@ -149,10 +149,34 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
     return () => clearTimeout(t);
   }, [phase]);
 
+  // Filet de sécurité Android — le state "ready" ne garantit pas que le
+  // calque de composition de l'iframe cross-origin (Google Drive/YouTube,
+  // rendue hors-processus) a réellement été repeint : sur certains mobiles,
+  // il reste figé sur son dernier frame tant qu'aucune interaction externe
+  // (scroll/tap) ne force le compositeur à le recomposer (voir le double rAF
+  // déjà présent plus bas dans CoursePreviewModal, qui ne couvre que
+  // l'ouverture de la modale — pas ce moment précis, souvent plusieurs
+  // secondes après). Même technique que TestimonialCard dans
+  // VideoTestimonialCarousel.jsx : une bascule d'opacité imperceptible force
+  // le navigateur à recomposer CET élément précisément dès que "ready" est
+  // atteint, quel que soit le délai réel de chargement.
+  const iframeRef = useRef(null);
+  useEffect(() => {
+    if (phase !== "ready") return undefined;
+    const el = iframeRef.current;
+    if (!el) return undefined;
+    el.style.opacity = "0.999";
+    const rafId = requestAnimationFrame(() => {
+      el.style.opacity = "";
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [phase]);
+
   return (
     <>
       {ytId ? (
         <iframe
+          ref={iframeRef}
           className="cpm-iframe"
           src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
           title={isTrailer ? t("coursePreview.trailer") : week.content}
@@ -164,6 +188,7 @@ function VideoFrame({ ytId, isDrive, videoUrl, isTrailer, week, t, onIframeEnter
         />
       ) : isDrive ? (
         <iframe
+          ref={iframeRef}
           className="cpm-iframe"
           src={resolveDriveUrl(videoUrl, "video")}
           title={isTrailer ? t("coursePreview.trailer") : week.content}
