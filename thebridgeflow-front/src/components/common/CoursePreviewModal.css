@@ -40,7 +40,16 @@
   flex-direction: column;
   overflow:       hidden;
 
-  animation: cpmSlideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  /* Pas de "forwards" : sans fill-mode, le transform de la keyframe finale
+     (translateY(0) scale(1), visuellement identique à "aucun transform")
+     n'est appliqué QUE pendant les 0.28s de l'animation, puis l'élément
+     retombe sur son style de base (pas de transform défini ici) — aucun
+     transform ne persiste comme ancêtre de l'iframe Drive une fois
+     l'animation terminée (voir hypothèse testée : transform persistant sur
+     un ancêtre + OOPIF imbriqué Drive/YouTube = piste de blocage du
+     hit-testing tactile sur Android). Aucun saut visuel : la valeur de repli
+     et la valeur finale de la keyframe sont rendues à l'identique. */
+  animation: cpmSlideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes cpmSlideUp {
@@ -121,13 +130,14 @@
   width:     100%;
   background: #000;
   overflow:  hidden;
-  /* Isole ce conteneur sur son propre calque de composition dès sa création,
-     indépendamment de .cpm-overlay (backdrop-filter) et .cpm-modal (transform
-     persistant via animation ... forwards) qui l'englobent. Sans ça, l'iframe
-     qu'il contient peut rester "figé" sans repaint tant qu'un événement
-     externe (scroll) ne force pas le compositeur à le recomposer — cause la
-     plus probable du chargement qui semble bloqué avant tout scroll. */
-  transform: translateZ(0);
+  /* Pas de transform ici (ex: translateZ(0), retiré) — test de l'hypothèse
+     "un ancêtre transformé de l'iframe Drive perturbe le hit-testing tactile
+     Android à travers la chaîne d'iframes imbriquées Drive/YouTube". Le
+     translateZ(0) servait à forcer un calque de composition dédié pour un
+     bug de paint figé (iframe qui restait noire jusqu'au premier scroll) —
+     ce cas est désormais couvert autrement, par la bascule d'opacité au
+     passage de phase à "ready" dans VideoFrame (CoursePreviewModal.jsx),
+     qui ne dépend pas d'un transform persistant sur ce conteneur. */
 }
 
 .cpm-iframe,
@@ -497,6 +507,20 @@
   .cpm-modal--trailer {
     width:     min(100%, calc((92vh - 75px) * 9 / 16));
     max-width: min(100%, calc((92vh - 75px) * 9 / 16));
+  }
+  /* Format vidéo 16:9 dérivé de la largeur, pas de 52% d'une hauteur elle-même
+     dérivée de vh (base .cpm-player-wrap plus haut) — sur un écran étroit et
+     haut, ce 52%-de-vh donnait une boîte quasi carrée (mesuré : ratio ~1.0 à
+     1.2 au lieu de 1.778 attendu) dans laquelle Google Drive n'affiche pas
+     correctement sa barre de contrôles (bouton lecture coupé en bas, confirmé
+     sur appareil réel — fonctionne normalement en plein écran, où Drive
+     retrouve un espace correctement proportionné). N'affecte pas
+     .cpm-modal--trailer .cpm-player-wrap ci-dessus (sélecteur plus
+     spécifique, conserve son propre format 9:16). .cpm-list (flex:1,
+     inchangé) absorbe l'espace libéré par cette hauteur plus faible. */
+  .cpm-player-wrap {
+    flex:         0 0 auto;
+    aspect-ratio: 16 / 9;
   }
   /* Espace réduit : icône seule, le texte complet reste dans le title="" */
   .cpm-external-link span { display: none; }
