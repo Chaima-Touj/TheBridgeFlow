@@ -324,6 +324,43 @@
 @keyframes vtcSpin {
   to { transform: rotate(360deg); }
 }
+/* État "timeout" du watchdog (15s, voir TestimonialDriveFrame) — même
+   pattern que CoursePreviewModal (.cpm-loading--timeout/.cpm-timeout-link),
+   porté ici avec le préfixe vtc-. Texte + lien empilés au lieu du simple
+   spinner centré. */
+.vtc-modal__loading--timeout {
+  flex-direction: column;
+  gap: 14px;
+}
+.vtc-modal__loading--timeout p {
+  color: #fff;
+  text-align: center;
+  padding: 0 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0;
+}
+/* Seul ce lien doit être cliquable — le reste de .vtc-modal__loading garde
+   pointer-events:none pour ne jamais intercepter le tap vers l'iframe. */
+.vtc-timeout-link {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.vtc-timeout-link:hover,
+.vtc-timeout-link:focus-visible {
+  background: rgba(255, 255, 255, 0.85);
+}
 /* Calque anti-flash (voir TestimonialDriveFrame) — z-index:1 : au-dessus de
    l'iframe (pas de z-index propre, donc 0/auto), en dessous des flèches
    mobiles .vtc-modal__nav (z-index:2, sibling de .vtc-modal__video-wrap qui

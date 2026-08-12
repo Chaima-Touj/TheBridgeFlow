@@ -2,14 +2,38 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
-  FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight,
+  FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight, FiExternalLink,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
-import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
+import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl, extractDriveFileId } from "../../constants/videoUrls.js";
 import "./VideoTestimonialCarousel.css";
 
 const AUTO_ADVANCE_MS = 4500;
 const RESUME_DELAY_MS = 5000;
+
+// Watchdog 2 paliers, porté depuis CoursePreviewModal/VideoFrame (même
+// logique exacte) — TestimonialDriveFrame n'avait jusqu'ici aucun filet de
+// sécurité : si onLoad ne se déclenche jamais, le spinner tournait pour
+// toujours (bug préexistant, sans rapport avec le crop 114.9% ajouté
+// séparément). 0-7s : chargement normal. 7-15s : "slow-loading", log
+// silencieux uniquement, aucun changement visible. >15s : toujours aucun
+// onLoad -> fallback "Ouvrir dans Drive" affiché.
+const SLOW_LOADING_AT_MS = 7000;
+const FALLBACK_AT_MS = 15000;
+
+function logVideoDiagnostic(event, { mountedAt, videoUrl, extra } = {}) {
+  const connection =
+    typeof navigator !== "undefined"
+      ? navigator.connection || navigator.mozConnection || navigator.webkitConnection
+      : null;
+  console.log(`[VIDEO_DIAGNOSTIC] ${event}`, {
+    elapsedMs: mountedAt != null ? Math.round(performance.now() - mountedAt) : null,
+    videoUrl,
+    onLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+    effectiveType: connection?.effectiveType ?? null,
+    ...extra,
+  });
+}
 
 /* ─── Une carte "story" (9:16) — statique, jamais de lecture inline dans la
    rangée (source de l'ancien bug "barre de contrôles Drive coupée" : un
@@ -100,12 +124,46 @@ function TestimonialCard({ item, isActive, wrapRef, onOpen }) {
 function TestimonialDriveFrame({ item, t }) {
   const [loaded, setLoaded] = useState(false);
   const [showLoading, setShowLoading] = useState(true);
+  // Indépendant de `loaded`, jamais remis à false : si onLoad arrive
+  // tardivement après le watchdog (cas rare), la boîte "timeout" déjà
+  // affichée s'estompe en fondu au lieu de basculer brutalement vers le
+  // spinner simple — même comportement que CoursePreviewModal.
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  const [mountedAt] = useState(() => performance.now());
+  const watchdogIdRef = useRef(null);
+
+  // Watchdog 2 paliers sur une seule ref, un seul timer actif à la fois —
+  // voir commentaire en tête de fichier pour le détail des paliers.
+  useEffect(() => {
+    logVideoDiagnostic("mount", { mountedAt, videoUrl: item.videoUrl });
+    watchdogIdRef.current = setTimeout(() => {
+      logVideoDiagnostic("slow-loading", { mountedAt, videoUrl: item.videoUrl });
+      watchdogIdRef.current = setTimeout(() => {
+        setHasTimedOut(true);
+        logVideoDiagnostic("timeout", { mountedAt, videoUrl: item.videoUrl });
+      }, FALLBACK_AT_MS - SLOW_LOADING_AT_MS);
+    }, SLOW_LOADING_AT_MS);
+    return () => {
+      clearTimeout(watchdogIdRef.current);
+      logVideoDiagnostic("unmount", { mountedAt, videoUrl: item.videoUrl });
+    };
+  }, [mountedAt, item.videoUrl]);
+
+  const handleLoad = () => {
+    clearTimeout(watchdogIdRef.current);
+    logVideoDiagnostic("iframe-load", { mountedAt, videoUrl: item.videoUrl });
+    setLoaded(true);
+  };
 
   useEffect(() => {
     if (!loaded) return undefined;
     const timer = setTimeout(() => setShowLoading(false), 250);
     return () => clearTimeout(timer);
   }, [loaded]);
+
+  const driveFileId = extractDriveFileId(item.videoUrl);
+  const driveViewUrl = driveFileId ? `https://drive.google.com/file/d/${driveFileId}/view` : null;
 
   return (
     <>
@@ -122,12 +180,27 @@ function TestimonialDriveFrame({ item, t }) {
         allow="autoplay; encrypted-media; fullscreen"
         allowFullScreen
         title={t("testimonials.openAria")}
-        onLoad={() => setLoaded(true)}
+        onLoad={handleLoad}
       />
       {showLoading && (
-        <div className={`vtc-modal__loading${loaded ? " vtc-modal__loading--fade-out" : ""}`} aria-hidden="true">
-          <span className="vtc-modal__spinner" />
-        </div>
+        hasTimedOut ? (
+          <div className="vtc-modal__loading vtc-modal__loading--timeout" role="status">
+            <p>
+              Le chargement prend plus de temps que prévu.
+              Cela peut arriver si votre navigateur bloque les cookies tiers (ex : navigation privée).
+            </p>
+            {driveViewUrl && (
+              <a className="vtc-timeout-link" href={driveViewUrl} target="_blank" rel="noopener noreferrer">
+                <FiExternalLink size={14} />
+                <span>{t("coursePreview.openExternal")}</span>
+              </a>
+            )}
+          </div>
+        ) : (
+          <div className={`vtc-modal__loading${loaded ? " vtc-modal__loading--fade-out" : ""}`} aria-hidden="true">
+            <span className="vtc-modal__spinner" />
+          </div>
+        )
       )}
       {/* Bloque tout tap vers l'iframe Drive (investigation confirmée : un
          calque au-dessus, sans pointer-events:none, absorbe le clic avant
