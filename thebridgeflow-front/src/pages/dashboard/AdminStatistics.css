@@ -177,6 +177,31 @@
   gap: 1.25rem;
 }
 
+/* ── 3-column variant — listes "top X" + trio de graphiques ──────────────── */
+.sd-split-grid--3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ── Pied de carte — lien "voir tout" en bas des listes "top X" ──────────── */
+.sd-card-footer {
+  display:       flex;
+  justify-content: flex-end;
+  margin-top:    1rem;
+  padding-top:   0.875rem;
+  border-top:    1px solid var(--border);
+}
+
+/* .sd-link-more (StudentDashboard.css) réutilisé pour le lien "voir tout" —
+   variante <button> pour le cas local (pages, pas de route dédiée) : reset
+   des styles natifs pour hériter exactement du même rendu que le <Link>. */
+.sd-link-more--btn {
+  background: none;
+  border:     none;
+  padding:    0;
+  cursor:     pointer;
+  font:       inherit;
+}
+
 /* ── Custom tooltip (recharts uses divs inside svg, styled via CSS) ──────── */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background:       var(--bg-card) !important;
@@ -383,7 +408,13 @@
 }
 
 @media (max-width: 960px) {
-  .sd-split-grid {
+  .sd-split-grid,
+  /* Sélecteur composé (specificité 0,0,2,0) — l'ordre de bundling Vite entre
+     fichiers CSS distincts n'est pas garanti selon l'ordre des imports JS ;
+     StudentDashboard.css définit aussi .sd-split-grid seul à ce même
+     breakpoint, ce qui rendait le résultat imprévisible pour la variante
+     --3col avec une spécificité égale (0,0,1,0). */
+  .sd-split-grid.sd-split-grid--3col {
     grid-template-columns: minmax(0, 1fr);
   }
 }

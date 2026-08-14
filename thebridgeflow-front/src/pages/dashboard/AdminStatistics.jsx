@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiTrendingUp, FiBookOpen, FiPercent, FiClipboard, FiDownload } from "react-icons/fi";
+import { FiTrendingUp, FiBookOpen, FiPercent, FiClipboard, FiDownload, FiArrowRight } from "react-icons/fi";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area,
@@ -109,6 +110,10 @@ export default function AdminStatistics() {
   const [topFormations, setTopFormations] = useState([]);
   const [topPages,        setTopPages]        = useState([]);
   const [visitsByDay,     setVisitsByDay]     = useState([]);
+  // Pas de page admin dédiée pour parcourir PageVisit (contrairement aux
+  // offres/formations) — "voir toutes les pages" bascule donc en local sur
+  // les 15 lignes déjà récupérées par getTopPages, sans nouvel appel API.
+  const [showAllPages,    setShowAllPages]    = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -240,115 +245,148 @@ export default function AdminStatistics() {
           ))}
         </div>
 
-        {/* ── Offres les plus consultées ──────────────────────────────── */}
-        <div className="sd-card">
-          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
-            {t("adminStats.topOffersTitle")}
-          </h2>
-          {topOffers.length === 0 ? (
-            <div className="sd-empty-box">
-              <FiTrendingUp size={28} style={{ opacity: .3 }} />
-              <p>{t("adminStats.topOffersEmpty")}</p>
-            </div>
-          ) : (
-            <div className="sd-req-list">
-              {topOffers.map((offer, i) => (
-                <div key={i} className="sd-req-item">
-                  <div className="sd-req-icon" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
-                    <FiTrendingUp size={16} />
-                  </div>
-                  <div className="sd-req-info">
-                    <div className="sd-req-title">{offer.title}</div>
-                    <div className="sd-req-meta">{t("adminStats.topOffersViews", { count: offer.views })}</div>
-                  </div>
-                  <span className="sd-req-badge" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
-                    {offer.views} {t("adminStats.views")}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* ── Listes "top X" — Offres / Formations / Pages, 3 colonnes ──── */}
+        <div className="sd-split-grid sd-split-grid--3col">
 
-        {/* ── Formations les plus consultées ──────────────────────────── */}
-        <div className="sd-card">
-          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
-            {t("adminStats.topFormationsTitle")}
-          </h2>
-          {topFormations.length === 0 ? (
-            <div className="sd-empty-box">
-              <FiBookOpen size={28} style={{ opacity: .3 }} />
-              <p>{t("adminStats.topFormationsEmpty")}</p>
-            </div>
-          ) : (
-            <div className="sd-req-list">
-              {topFormations.map((formation, i) => (
-                <div key={i} className="sd-req-item">
-                  <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB" }}>
-                    <FiBookOpen size={16} />
-                  </div>
-                  <div className="sd-req-info">
-                    <div className="sd-req-title">{formation.title}</div>
-                    <div className="sd-req-meta">{t("adminStats.topFormationsViews", { count: formation.views })}</div>
-                  </div>
-                  <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB" }}>
-                    {formation.views} {t("adminStats.views")}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* ── Pages les plus visitées ──────────────────────────────────── */}
-        <div className="sd-card">
-          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
-            {t("adminStats.topPagesTitle")}
-          </h2>
-          {topPages.length === 0 ? (
-            <div className="sd-empty-box">
-              <FiTrendingUp size={28} style={{ opacity: .3 }} />
-              <p>{t("adminStats.topPagesEmpty")}</p>
-            </div>
-          ) : (
-            <div className="sd-req-list">
-              {(() => {
-                const maxCount = Math.max(...topPages.map((p) => p.count));
-                return topPages.map((page, i) => (
-                  <div key={i} className="sd-req-item" style={{ position: "relative", overflow: "hidden" }}>
-                    {/* Barre de progression proportionnelle au nb de vues */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        width: `${(page.count / maxCount) * 100}%`,
-                        background: "linear-gradient(90deg, rgba(37,99,235,0.10) 0%, rgba(37,99,235,0.04) 100%)",
-                        borderRadius: "inherit",
-                        transition: "width 0.4s ease",
-                        pointerEvents: "none",
-                      }}
-                    />
-                    <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
-                      <FiTrendingUp size={16} />
+          {/* Offres les plus consultées */}
+          <div className="sd-card">
+            <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+              {t("adminStats.topOffersTitle")}
+            </h2>
+            {topOffers.length === 0 ? (
+              <div className="sd-empty-box">
+                <FiTrendingUp size={28} style={{ opacity: .3 }} />
+                <p>{t("adminStats.topOffersEmpty")}</p>
+              </div>
+            ) : (
+              <>
+                <div className="sd-req-list">
+                  {topOffers.slice(0, 5).map((offer, i) => (
+                    <div key={i} className="sd-req-item">
+                      <div className="sd-req-icon" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
+                        <FiTrendingUp size={16} />
+                      </div>
+                      <div className="sd-req-info">
+                        <div className="sd-req-title">{offer.title}</div>
+                        <div className="sd-req-meta">{t("adminStats.topOffersViews", { count: offer.views })}</div>
+                      </div>
+                      <span className="sd-req-badge" style={{ background: "#F59E0B18", color: "#F59E0B" }}>
+                        {offer.views} {t("adminStats.views")}
+                      </span>
                     </div>
-                    <div className="sd-req-info" style={{ position: "relative", zIndex: 1 }}>
-                      <div className="sd-req-title" style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>{page.path}</div>
-                      <div className="sd-req-meta">{page.count} {t("adminStats.views")}</div>
-                    </div>
-                    <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
-                      {page.count}
-                    </span>
+                  ))}
+                </div>
+                {topOffers.length > 5 && (
+                  <div className="sd-card-footer">
+                    <Link to="/dashboard/admin/offers" className="sd-link-more">
+                      {t("adminStats.topOffersViewAll")} <FiArrowRight size={13} />
+                    </Link>
                   </div>
-                ));
-              })()}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Formations les plus consultées */}
+          <div className="sd-card">
+            <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+              {t("adminStats.topFormationsTitle")}
+            </h2>
+            {topFormations.length === 0 ? (
+              <div className="sd-empty-box">
+                <FiBookOpen size={28} style={{ opacity: .3 }} />
+                <p>{t("adminStats.topFormationsEmpty")}</p>
+              </div>
+            ) : (
+              <>
+                <div className="sd-req-list">
+                  {topFormations.slice(0, 5).map((formation, i) => (
+                    <div key={i} className="sd-req-item">
+                      <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB" }}>
+                        <FiBookOpen size={16} />
+                      </div>
+                      <div className="sd-req-info">
+                        <div className="sd-req-title">{formation.title}</div>
+                        <div className="sd-req-meta">{t("adminStats.topFormationsViews", { count: formation.views })}</div>
+                      </div>
+                      <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB" }}>
+                        {formation.views} {t("adminStats.views")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {topFormations.length > 5 && (
+                  <div className="sd-card-footer">
+                    <Link to="/dashboard/admin/formations" className="sd-link-more">
+                      {t("adminStats.topFormationsViewAll")} <FiArrowRight size={13} />
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Pages les plus visitées — pas de page admin dédiée, "voir tout"
+              bascule localement sur les 15 lignes déjà chargées */}
+          <div className="sd-card">
+            <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+              {t("adminStats.topPagesTitle")}
+            </h2>
+            {topPages.length === 0 ? (
+              <div className="sd-empty-box">
+                <FiTrendingUp size={28} style={{ opacity: .3 }} />
+                <p>{t("adminStats.topPagesEmpty")}</p>
+              </div>
+            ) : (
+              <>
+                <div className="sd-req-list">
+                  {(() => {
+                    const maxCount = Math.max(...topPages.map((p) => p.count));
+                    return topPages.slice(0, showAllPages ? topPages.length : 5).map((page, i) => (
+                      <div key={i} className="sd-req-item" style={{ position: "relative", overflow: "hidden" }}>
+                        {/* Barre de progression proportionnelle au nb de vues */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            width: `${(page.count / maxCount) * 100}%`,
+                            background: "linear-gradient(90deg, rgba(37,99,235,0.10) 0%, rgba(37,99,235,0.04) 100%)",
+                            borderRadius: "inherit",
+                            transition: "width 0.4s ease",
+                            pointerEvents: "none",
+                          }}
+                        />
+                        <div className="sd-req-icon" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
+                          <FiTrendingUp size={16} />
+                        </div>
+                        <div className="sd-req-info" style={{ position: "relative", zIndex: 1 }}>
+                          <div className="sd-req-title" style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>{page.path}</div>
+                          <div className="sd-req-meta">{page.count} {t("adminStats.views")}</div>
+                        </div>
+                        <span className="sd-req-badge" style={{ background: "#2563EB18", color: "#2563EB", position: "relative", zIndex: 1 }}>
+                          {page.count}
+                        </span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+                {topPages.length > 5 && (
+                  <div className="sd-card-footer">
+                    <button type="button" className="sd-link-more sd-link-more--btn" onClick={() => setShowAllPages((v) => !v)}>
+                      {showAllPages ? t("adminStats.topPagesViewLess") : t("adminStats.topPagesViewAll")} <FiArrowRight size={13} />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
         </div>
 
-        {/* ── Graphiques ───────────────────────────────────────────────── */}
-        <div className="sd-split-grid">
+        {/* ── Graphiques — LineChart / Donut / BarChart, 3 colonnes ───────── */}
+        <div className="sd-split-grid sd-split-grid--3col">
 
           {/* Demandes vs Inscriptions dans le temps */}
           <div className="sd-card">
@@ -428,22 +466,20 @@ export default function AdminStatistics() {
             )}
           </div>
 
-        </div>
-
-        {/* ── Répartition des inscriptions par formation ──────────────────── */}
-        <div className="sd-card" style={{ marginTop: "1.5rem" }}>
-          <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
-            {t("adminStats.byFormationChartTitle")}
-          </h2>
-          {loading ? (
-            <div className="sd-skeleton" style={{ height: 260 }} />
-          ) : error ? (
-            <div className="sd-empty-box"><p>{t("adminStats.errorStats")}</p></div>
-          ) : enrollmentsByFormation.length === 0 ? (
-            <div className="sd-empty-box">
-              <FiBookOpen size={28} style={{ opacity: .3 }} />
-              <p>{t("adminStats.noData")}</p>
-            </div>
+          {/* Répartition des inscriptions par formation */}
+          <div className="sd-card">
+            <h2 className="sd-card-title" style={{ marginBottom: "1.25rem" }}>
+              {t("adminStats.byFormationChartTitle")}
+            </h2>
+            {loading ? (
+              <div className="sd-skeleton" style={{ height: 260 }} />
+            ) : error ? (
+              <div className="sd-empty-box"><p>{t("adminStats.errorStats")}</p></div>
+            ) : enrollmentsByFormation.length === 0 ? (
+              <div className="sd-empty-box">
+                <FiBookOpen size={28} style={{ opacity: .3 }} />
+                <p>{t("adminStats.noData")}</p>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(200, enrollmentsByFormation.length * 42)}>
                 <BarChart data={enrollmentsByFormation} layout="vertical" margin={{ left: 24 }}>
@@ -455,7 +491,18 @@ export default function AdminStatistics() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" strokeOpacity={0.8} />
                   <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} axisLine={{ stroke: "#e5e7eb" }} />
-                  <YAxis type="category" dataKey="title" tick={{ fontSize: 11, fill: "var(--text-muted)" }} width={220} axisLine={{ stroke: "#e5e7eb" }} />
+                  {/* width réduit (220→130) : dans la grille 3 colonnes, la
+                      colonne fait ~1/3 de la largeur d'avant (ex-grille 2
+                      colonnes) — 220px de libellés y écrasait les barres.
+                      tickFormatter tronque au lieu d'agrandir le composant. */}
+                  <YAxis
+                    type="category"
+                    dataKey="title"
+                    tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                    width={130}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickFormatter={(value) => (value.length > 18 ? `${value.slice(0, 18)}…` : value)}
+                  />
                   <Tooltip
                     contentStyle={{
                       background: "#fff",
@@ -465,9 +512,11 @@ export default function AdminStatistics() {
                     }}
                   />
                   <Bar dataKey="count" name={t("sidebar.admin.inscriptions")} fill="url(#barGradient)" radius={[0, 8, 8, 0]} barSize={18} isAnimationActive />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
         </div>
 
         {/* ── Évolution des visites par jour ───────────────────────────────── */}
