@@ -1,6 +1,7 @@
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import { useLang } from "../context/LangContext.jsx";
+import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
 
 // Page dédiée "Actualités" — réutilise NewsSection (branché sur GET
@@ -9,6 +10,11 @@ import "./FormationsPage.css";
 // sous-titre), donc pas de fp-hero ici pour éviter un titre dupliqué.
 export default function BlogPage() {
   const { lang } = useLang();
+
+  useDocumentMeta({
+    title: "Actualités — TheBridgeFlow",
+    description: "Toute l'actualité de TheBridgeFlow : nouvelles formations, offres de stage et annonces de la plateforme.",
+  });
 
   return (
     <div className="fp-page">

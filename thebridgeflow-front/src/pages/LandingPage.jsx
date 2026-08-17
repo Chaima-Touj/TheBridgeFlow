@@ -34,6 +34,7 @@ import FormationCategories from "../components/common/FormationCategories.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
+import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import "./LandingPage.css";
@@ -94,6 +95,11 @@ export default function LandingPage() {
   const [newsletter,  setNewsletter]  = useState("");
   const [allFormations, setAllFormations] = useState([]);
   const [promoOpen,   setPromoOpen]   = useState(false);
+
+  useDocumentMeta({
+    title: "TheBridgeFlow — Plateforme de gestion des stages, PFE et formations",
+    description: "Trouvez un stage ou un PFE, suivez vos candidatures et accédez à des formations encadrées : tout TheBridgeFlow en un seul endroit.",
+  });
 
   // Sync html lang attribute
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);

@@ -17,6 +17,7 @@ import CoursePreviewModal from "../components/common/CoursePreviewModal.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
 import { formationsService } from "../services/formations.service.js";
+import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../utils/thumbUtils.js";
 import { getAllFormationTestimonials } from "../constants/testimonials.js";
 import { getTechLogo } from "../constants/techLogos.js";
@@ -194,6 +195,13 @@ const FormationDetail = () => {
     fetchFormation();
     return () => { active = false; };
   }, [slug, t]);
+
+  // SEO — uniquement une fois la formation chargée (pas pendant loading,
+  // pour ne pas écraser le titre générique par un état vide/transitoire).
+  useDocumentMeta({
+    title:       formation ? `${formation.title} — TheBridgeFlow` : undefined,
+    description: formation?.description ? truncateForSEO(formation.description) : undefined,
+  });
 
   const handleEnroll = useCallback(() => {
     if (!user) {

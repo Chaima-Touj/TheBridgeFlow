@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /dashboard/
+
+Sitemap: https://stage-flow-api.onrender.com/sitemap.xml

@@ -10,6 +10,7 @@ import { useLang } from "../context/LangContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useFormationsTechMap } from "../hooks/useFormationsTechMap.js";
+import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { buildSkillFormationMatcher } from "../utils/techMatch.js";
 import { offersService } from "../services/offers.service.js";
 import "./PublicOfferDetail.css";
@@ -98,6 +99,12 @@ const PublicOfferDetail = () => {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id, t]);
+
+  // SEO — uniquement une fois l'offre chargée.
+  useDocumentMeta({
+    title:       offer ? `${offer.title} — ${offer.companyName} | TheBridgeFlow` : undefined,
+    description: offer?.description ? truncateForSEO(offer.description) : undefined,
+  });
 
   const handleApply = () => {
     if (!user) {

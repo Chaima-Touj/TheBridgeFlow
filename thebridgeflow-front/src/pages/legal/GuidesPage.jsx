@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { FiUserPlus, FiSend, FiClipboard, FiCalendar, FiBookOpen } from "react-icons/fi";
 import SiteNavbar from "../../components/common/SiteNavbar.jsx";
+import { useDocumentMeta } from "../../hooks/useDocumentMeta.js";
 import "../FormationsPage.css";
 import "./LegalPage.css";
 
@@ -14,6 +15,11 @@ const GUIDE_KEYS = [
 
 export default function GuidesPage() {
   const { t } = useTranslation();
+
+  useDocumentMeta({
+    title: "Guides & tutoriels — TheBridgeFlow",
+    description: "Des guides pratiques pour bien démarrer sur TheBridgeFlow : créer son compte, postuler à une offre, suivre une formation.",
+  });
 
   return (
     <div className="fp-page">

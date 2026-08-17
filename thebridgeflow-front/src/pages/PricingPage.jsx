@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiCheck } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
+import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
 import "./PricingPage.css";
 
@@ -16,6 +17,11 @@ const PLAN_KEYS = [
 
 export default function PricingPage() {
   const { t } = useTranslation();
+
+  useDocumentMeta({
+    title: "Tarifs — TheBridgeFlow",
+    description: "Découvrez nos formules de formation : présentiel, en ligne ou accès aux enregistrements. Choisissez celle qui vous correspond.",
+  });
 
   return (
     <div className="fp-page">

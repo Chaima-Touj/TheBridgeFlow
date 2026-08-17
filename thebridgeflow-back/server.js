@@ -10,6 +10,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import connectDB from "./config/db.js";
+import Formation from "./models/formation.model.js";
+import Offer from "./models/offers.model.js";
+import asyncHandler from "./utils/asyncHandler.js";
 import { verifyEmailConfig } from "./services/email.service.js";
 import { mongoSanitize } from "./middleware/sanitize.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -120,6 +123,40 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
 app.get("/", (req, res) => {
   res.json({ message: "🚀 TheBridgeFlow API is running!" });
 });
+
+// ─── Sitemap XML — public, sans middleware protect, régénéré à chaque
+// requête (query live Formation/Offer) pour rester à jour automatiquement,
+// sans fichier statique à maintenir. Les <loc> pointent vers le FRONTEND
+// (CLIENT_URL), pas vers cette API — même convention que les liens email
+// existants (voir email.service.js, auth.controller.js).
+const STATIC_SITEMAP_PATHS = [
+  "/", "/formations", "/offers", "/tarifs", "/blog", "/guides", "/aide",
+  "/mentions-legales", "/confidentialite", "/cgu",
+];
+
+app.get("/sitemap.xml", asyncHandler(async (req, res) => {
+  const siteUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+  const [formations, offers] = await Promise.all([
+    Formation.find().select("slug").lean(),
+    Offer.find({ isActive: true }).select("_id").lean(),
+  ]);
+
+  const urls = [
+    ...STATIC_SITEMAP_PATHS.map((p) => `${siteUrl}${p}`),
+    ...formations.map((f) => `${siteUrl}/formations/${f.slug}`),
+    ...offers.map((o) => `${siteUrl}/offers/${o._id}`),
+  ];
+
+  const xml =
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    urls.map((loc) => `  <url><loc>${loc}</loc></url>`).join("\n") +
+    `\n</urlset>\n`;
+
+  res.set("Content-Type", "application/xml");
+  res.send(xml);
+}));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth",          authLimiter, authRoutes);
