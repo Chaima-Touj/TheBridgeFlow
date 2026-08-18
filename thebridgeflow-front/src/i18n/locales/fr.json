@@ -1822,7 +1822,12 @@
     "backToList": "Retour aux projets",
     "projectNotFound": "Projet introuvable.",
     "openApp": "Ouvrir le projet",
-    "watchDemo": "Voir la démo"
+    "watchDemo": "Voir la démo",
+    "voteAdd": "Voter pour ce projet",
+    "voteRemove": "Retirer mon vote",
+    "voteMaxReached": "Vous avez déjà sélectionné 3 projets — retirez-en un pour voter pour celui-ci.",
+    "voteProgress": "{{count}}/{{max}} projets sélectionnés",
+    "finishVote": "Finaliser mon vote"
   },
   "myCeremonyProjects": {
     "pageTitle": "Mes projets — Cérémonie",

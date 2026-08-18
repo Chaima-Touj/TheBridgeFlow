@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, FiUser } from "react-icons/fi";
+import { FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, FiUser, FiCheckCircle, FiPlusCircle } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
+import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "./FormationsPage.css";
 import "./CeremonyProjectDetail.css";
@@ -11,6 +12,7 @@ import "./CeremonyProjectDetail.css";
 export default function CeremonyProjectDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
+  const { selected, toggleSelect } = useCeremonySelection();
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,9 @@ export default function CeremonyProjectDetail() {
     title:       project ? `${project.title} — Cérémonie | TheBridgeFlow` : undefined,
     description: project?.description ? truncateForSEO(project.description) : undefined,
   });
+
+  const isSelected = project ? selected.includes(project._id) : false;
+  const atMax = !isSelected && selected.length >= MAX_SELECTION;
 
   return (
     <div className="fp-page">
@@ -65,6 +70,23 @@ export default function CeremonyProjectDetail() {
                   ? <img src={project.studentId.avatarUrl} alt="" className="cpd-author__avatar" />
                   : <span className="cpd-author__avatar cpd-author__avatar--initial"><FiUser size={14} /></span>}
                 <span>{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
+              </div>
+
+              <div className="cpd-vote-block">
+                <button
+                  type="button"
+                  className={`cpd-vote-btn${isSelected ? " cpd-vote-btn--active" : ""}`}
+                  disabled={atMax}
+                  onClick={() => toggleSelect(project._id)}
+                >
+                  {isSelected ? <FiCheckCircle size={18} /> : <FiPlusCircle size={18} />}
+                  {isSelected ? t("ceremony.voteRemove") : t("ceremony.voteAdd")}
+                </button>
+                <p className="cpd-vote-status">
+                  {atMax ? t("ceremony.voteMaxReached") : t("ceremony.voteProgress", { count: selected.length, max: MAX_SELECTION })}
+                  {" "}
+                  <Link to="/ceremonie" className="cpd-vote-status__link">{t("ceremony.finishVote")}</Link>
+                </p>
               </div>
 
               {project.description && <p className="cpd-desc">{project.description}</p>}

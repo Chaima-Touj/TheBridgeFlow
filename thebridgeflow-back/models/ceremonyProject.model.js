@@ -18,6 +18,11 @@ const ceremonyProjectSchema = new mongoose.Schema(
     // à chaque requête — incrémenté via $inc au moment du vote (voir
     // ceremony.controller.js:vote).
     voteCount:     { type: Number, default: 0 },
+    // Marqueur des projets de démo créés par scripts/seedCeremonyProjects.js
+    // (--clean s'appuie dessus pour ne retirer QUE ces documents) — jamais
+    // mis à true par le flux normal de création (ceremony.controller.js
+    // n'écrit jamais ce champ), donc aucun vrai projet ne peut le porter.
+    isSeedData:    { type: Boolean, default: false },
   },
   { timestamps: true }
 );

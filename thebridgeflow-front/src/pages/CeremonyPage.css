@@ -54,20 +54,40 @@
   padding: 3rem 0;
 }
 
-/* ── Cartes de sélection — .news-card de base + état sélectionné/verrouillé */
+/* ── Cartes de sélection — .news-card de base + état sélectionné/verrouillé
+   Effet "premium" : tilt 3D suivant le curseur (transform posé en JS, voir
+   handleCardTilt dans CeremonyPage.jsx) + ombre en 2 couches (large/douce +
+   resserrée/plus sombre) au lieu du box-shadow plat hérité de .news-card. */
 .cp-grid { cursor: pointer; }
 
 .cp-card {
   border: 2px solid var(--border);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+.cp-card:hover {
+  box-shadow: 0 20px 40px -14px rgba(15, 23, 42, 0.22), 0 8px 18px -6px rgba(15, 23, 42, 0.14);
+}
+[data-theme="dark"] .cp-card:hover {
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.55), 0 8px 18px -6px rgba(0, 0, 0, 0.4);
 }
 .cp-card--selected {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-light), 0 20px 40px -14px rgba(37, 99, 235, 0.28);
+  transition: border-color 0.25s ease, box-shadow 0.3s ease;
 }
 .cp-card--locked {
   cursor: default;
   opacity: 0.75;
+}
+
+.cp-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+.cp-card__title-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
 }
 
 .cp-card__placeholder {
@@ -76,10 +96,23 @@
   background: linear-gradient(135deg, var(--bg), var(--border));
 }
 
+/* Relief sur le bandeau de couverture — un voile diagonal clair→sombre
+   par-dessus l'image/couleur (fonctionne aussi bien sur un aplat que sur une
+   vraie photo), pour éviter l'effet "carte plate" même quand l'image de
+   couverture est un simple fond uni côté données. */
+.cp-card .news-card__img-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.22) 100%);
+  pointer-events: none;
+}
+
 .cp-card__check {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  z-index: 1;
   width: 28px;
   height: 28px;
   border-radius: 50%;

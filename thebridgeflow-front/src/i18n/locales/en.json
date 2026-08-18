@@ -1822,7 +1822,12 @@
     "backToList": "Back to projects",
     "projectNotFound": "Project not found.",
     "openApp": "Open project",
-    "watchDemo": "Watch demo"
+    "watchDemo": "Watch demo",
+    "voteAdd": "Vote for this project",
+    "voteRemove": "Remove my vote",
+    "voteMaxReached": "You've already selected 3 projects — remove one to vote for this one.",
+    "voteProgress": "{{count}}/{{max}} projects selected",
+    "finishVote": "Finish voting"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",

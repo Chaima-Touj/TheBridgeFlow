@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiCheck, FiUser } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CeremonyLeaderboard from "../components/ceremony/CeremonyLeaderboard.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "../components/common/NewsSection.css";
 import "./FormationsPage.css";
 import "./CeremonyPage.css";
-
-const MAX_SELECTION = 3;
-// Sélection sauvegardée le temps d'un aller-retour par /login (le flux de
-// connexion existant ne redirige pas vers la page d'origine — voir
-// Login.jsx — donc restaurée seulement si l'étudiant revient sur cette page
-// après connexion, pas automatiquement redirigé ici).
-const PENDING_VOTE_KEY = "ceremony_pending_vote";
 
 export default function CeremonyPage() {
   const { t } = useTranslation();
@@ -30,7 +24,7 @@ export default function CeremonyPage() {
 
   const [projects,   setProjects]   = useState([]);
   const [loading,    setLoading]    = useState(true);
-  const [selected,   setSelected]   = useState([]);
+  const { selected, toggleSelect: toggleSelection, clearSelection } = useCeremonySelection();
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState("");
   const [success,    setSuccess]    = useState(false);
@@ -42,38 +36,34 @@ export default function CeremonyPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Restaure une sélection en attente si l'étudiant revient ici après
-  // connexion (voir handleConfirmVote).
-  useEffect(() => {
-    if (!user) return;
-    const pending = sessionStorage.getItem(PENDING_VOTE_KEY);
-    if (!pending) return;
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelected(JSON.parse(pending));
-    } catch {
-      // Valeur corrompue — ignorée silencieusement, pas de sélection perdue
-      // à récupérer de toute façon.
-    }
-    sessionStorage.removeItem(PENDING_VOTE_KEY);
-  }, [user]);
-
   const toggleSelect = (id) => {
     if (success) return;
     setError("");
-    setSelected((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= MAX_SELECTION) return prev;
-      return [...prev, id];
-    });
+    toggleSelection(id);
+  };
+
+  // Tilt 3D au survol, suivant la position du curseur — appliqué directement
+  // au DOM (pas de setState) pour rester fluide même avec de nombreuses
+  // cartes ; la transition CSS sur .cp-card gère le lissage/retour à plat.
+  const TILT_MAX_DEG = 6;
+  const handleCardTilt = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top) / rect.height;
+    const rotateY = (px - 0.5) * TILT_MAX_DEG * 2;
+    const rotateX = (0.5 - py) * TILT_MAX_DEG * 2;
+    card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-6px)`;
+  };
+  const resetCardTilt = (e) => {
+    e.currentTarget.style.transform = "";
   };
 
   const handleConfirmVote = async () => {
     if (selected.length !== MAX_SELECTION) return;
 
     if (!user) {
-      sessionStorage.setItem(PENDING_VOTE_KEY, JSON.stringify(selected));
-      navigate("/login", { state: { from: "/ceremonie" } });
+      navigate("/login");
       return;
     }
 
@@ -82,7 +72,7 @@ export default function CeremonyPage() {
     try {
       await ceremonyService.vote(selected);
       setSuccess(true);
-      setSelected([]);
+      clearSelection();
     } catch (err) {
       setError(err.response?.data?.message || t("ceremony.voteError"));
     } finally {
@@ -135,6 +125,8 @@ export default function CeremonyPage() {
                     key={p._id}
                     className={`news-card cp-card${isSelected ? " cp-card--selected" : ""}${success ? " cp-card--locked" : ""}`}
                     onClick={() => toggleSelect(p._id)}
+                    onMouseMove={success ? undefined : handleCardTilt}
+                    onMouseLeave={resetCardTilt}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => e.key === "Enter" && toggleSelect(p._id)}
@@ -153,7 +145,15 @@ export default function CeremonyPage() {
                           <FiUser size={13} /> {p.studentId?.name || t("ceremony.unknownAuthor")}
                         </span>
                       </div>
-                      <h3 className="news-card__title">{p.title}</h3>
+                      <h3 className="news-card__title">
+                        <Link
+                          to={`/ceremonie/${p._id}`}
+                          className="cp-card__title-link"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {p.title}
+                        </Link>
+                      </h3>
                       {p.description && <p className="news-card__excerpt">{p.description}</p>}
                     </div>
                   </article>

@@ -1822,7 +1822,12 @@
     "backToList": "العودة إلى المشاريع",
     "projectNotFound": "المشروع غير موجود.",
     "openApp": "فتح المشروع",
-    "watchDemo": "مشاهدة العرض التوضيحي"
+    "watchDemo": "مشاهدة العرض التوضيحي",
+    "voteAdd": "صوّت لهذا المشروع",
+    "voteRemove": "إلغاء تصويتي",
+    "voteMaxReached": "لقد اخترت بالفعل 3 مشاريع — قم بإزالة واحد للتصويت لهذا المشروع.",
+    "voteProgress": "{{count}}/{{max}} مشاريع محددة",
+    "finishVote": "إنهاء التصويت"
   },
   "myCeremonyProjects": {
     "pageTitle": "مشاريعي — الحفل",
