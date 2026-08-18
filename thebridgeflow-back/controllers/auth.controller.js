@@ -266,9 +266,20 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   // compte existe réellement.
   if (user) {
     const rawToken = crypto.randomBytes(32).toString("hex");
-    user.resetPasswordToken   = hashResetToken(rawToken);
-    user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_EXPIRES_MS);
-    await user.save();
+    // updateOne ciblé (pas user.save()) : .save() revalide le document
+    // entier, y compris des champs sans rapport (ex: languages[].level) —
+    // des comptes avec des données antérieures à l'enum actuel faisaient
+    // échouer TOUT le flux de réinitialisation en 500, avant même
+    // d'atteindre l'envoi d'email. Seuls les 2 champs modifiés ici.
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          resetPasswordToken:   hashResetToken(rawToken),
+          resetPasswordExpires: new Date(Date.now() + RESET_TOKEN_EXPIRES_MS),
+        },
+      }
+    );
 
     const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${rawToken}`;
     const result = await emailService.sendResetPassword(user.email, { name: user.name, resetUrl });

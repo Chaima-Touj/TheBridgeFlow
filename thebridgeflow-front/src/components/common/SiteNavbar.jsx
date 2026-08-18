@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMoon, FiSun } from "react-icons/fi";
-import { Home, Briefcase, GraduationCap, Info, MessageSquare, Mail } from "lucide-react";
+import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/LangContext.jsx";
 import LangFlags from "./LangFlags.jsx";
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { key: "home",         icon: Home,          to: "/",           anchorId: "hero" },
   { key: "offers",       icon: Briefcase,     to: "/offers" },
   { key: "formations",   icon: GraduationCap, to: "/formations" },
+  { key: "ceremony",     icon: Trophy,        to: "/ceremonie" },
   { key: "about",        icon: Info,          to: "/",           anchorId: "about" },
   { key: "testimonials", icon: MessageSquare, to: "/",           anchorId: "testimonials" },
   { key: "contact",      icon: Mail,          to: "/",           anchorId: "contact" },
