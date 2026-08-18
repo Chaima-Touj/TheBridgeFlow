@@ -14,6 +14,11 @@
   backdrop-filter: blur(8px);
 }
 .lp-nav__inner {
+  /* Revenu à 1280px (valeur d'origine) : avec le 7e lien ("Cérémonie"), le
+     contenu tient maintenant dans cette largeur grâce à l'espacement/police
+     resserrés ci-dessous (logo, .anb-item, LangFlags, boutons) — plus besoin
+     d'agrandir le conteneur. Objectif : plus aucun hamburger ≥1024px, voir
+     mesures dans le rapport. */
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 1.5rem;
@@ -21,21 +26,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.6rem;
 }
 .lp-nav__logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   color: var(--text);
   text-decoration: none;
   flex-shrink: 0;
 }
 .lp-nav__logo-icon {
-  width: 52px;
-  height: 52px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -53,12 +58,12 @@
 .lp-nav__actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   flex-shrink: 0;
 }
 
 .lp-theme-btn {
-  padding: 0.45rem;
+  padding: 0.3rem;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--bg);
@@ -72,7 +77,13 @@
 /* Expand the tap target to ~44px (WCAG 2.5.5) without growing the visible button. */
 .lp-theme-btn::before { content: ""; position: absolute; inset: -6px; }
 .lp-theme-btn:hover { background: var(--border); }
-.lp-btn-sm { padding: 0.4rem 1rem; font-size: 0.875rem; }
+/* Sélecteur composé (.btn.lp-btn-sm, specificité 0,0,2,0) — nécessaire pour
+   prévaloir sur .btn (index.css, même specificité 0,0,1,0 en tant que classe
+   seule) : l'ordre de bundling CSS de Vite entre fichiers distincts n'est
+   pas garanti par l'ordre des imports JS, .btn gagnait silencieusement ici
+   (padding/font-size de .lp-btn-sm jamais appliqués, y compris avant ce
+   correctif de resserrement — bug préexistant découvert en mesurant). */
+.btn.lp-btn-sm { padding: 0.3rem 0.4rem; font-size: 0.72rem; gap: 0.25rem; }
 
 /* ─── Hamburger (mobile) ────────────────────────────────────────────────── */
 .fp-hamburger {
