@@ -124,6 +124,7 @@
       "notifications": "Notifications",
       "formations": "My formations",
       "demandes": "My requests",
+      "ceremony": "My projects",
       "profile": "My profile"
     },
     "admin": {
@@ -1799,5 +1800,51 @@
     ],
     "protectTitle": "How We Protect Your Information",
     "protectText": "We adopt appropriate data collection, storage, and processing practices, as well as security measures, to protect against unauthorized access, alteration, disclosure, or destruction of your personal information, username, password, transaction information, and data stored on our site."
+  },
+  "ceremony": {
+    "badge": "Ceremony",
+    "title": "Vote for your favorite projects",
+    "subtitle": "Discover the projects submitted by students and vote for your top 3.",
+    "leaderboardTitle": "Live leaderboard",
+    "leaderboardEmpty": "No project has received a vote yet.",
+    "projectsTitle": "All projects",
+    "projectsEmpty": "No project submitted yet.",
+    "voteHint": "Select exactly 3 projects ({{count}}/3 selected)",
+    "voteSuccess": "Thank you! Your vote has been recorded.",
+    "voteError": "An error occurred while sending your vote.",
+    "confirmVote": "Confirm my vote ({{count}}/3)",
+    "submitting": "Sending...",
+    "unknownAuthor": "TheBridgeFlow student",
+    "voteCount_one": "{{count}} vote",
+    "voteCount_other": "{{count}} votes",
+    "backToList": "Back to projects",
+    "projectNotFound": "Project not found.",
+    "openApp": "Open project",
+    "watchDemo": "Watch demo"
+  },
+  "myCeremonyProjects": {
+    "pageTitle": "My projects — Ceremony",
+    "pageSubtitle": "Manage the projects you submitted to the Ceremony.",
+    "newProject": "New project",
+    "loading": "Loading...",
+    "empty": "You haven't submitted any project yet.",
+    "titleLabel": "Project title",
+    "descriptionLabel": "Description",
+    "coverLabel": "Cover image",
+    "coverUpload": "Choose an image",
+    "compressing": "Compressing...",
+    "technologiesLabel": "Technologies (comma-separated)",
+    "driveAppLabel": "Google Drive link — application",
+    "driveVideoLabel": "Google Drive link — demo video",
+    "githubLabel": "GitHub link",
+    "teamLabel": "Team members (optional)",
+    "teamPlaceholder": "Name 1, Name 2...",
+    "submitting": "Sending...",
+    "submit": "Create project",
+    "errors": {
+      "titleRequired": "Title is required.",
+      "imageInvalid": "Unable to process this image.",
+      "createFailed": "Unable to create the project."
+    }
   }
 }

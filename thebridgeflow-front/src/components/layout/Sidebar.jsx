@@ -6,7 +6,7 @@ import {
   FiCalendar, FiMessageSquare, FiBell, FiUser,
   FiSettings, FiLogOut, FiPlus, FiUpload,
   FiUsers, FiPieChart, FiCheckSquare, FiChevronLeft, FiMenu, FiX,
-  FiClipboard, FiRss, FiStar,
+  FiClipboard, FiRss, FiStar, FiAward,
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./Sidebar.css";
@@ -20,6 +20,7 @@ const MENUS = {
     { to: "/dashboard/student/interviews",    Icon: FiCalendar,      labelKey: "sidebar.student.interviews" },
     { to: "/dashboard/student/formations",     Icon: FiBookOpen,      labelKey: "sidebar.student.formations" },
     { to: "/dashboard/student/demandes",      Icon: FiClipboard,     labelKey: "sidebar.student.demandes" },
+    { to: "/dashboard/student/ceremonie",     Icon: FiAward,         labelKey: "sidebar.student.ceremony" },
     { to: "/dashboard/student/ai-assistant",  Icon: FiCpu,           labelKey: "sidebar.student.aiAssistant", badge: "NEW" },
     { to: "/dashboard/student/messages",      Icon: FiMessageSquare, labelKey: "sidebar.student.messages" },
     { to: "/dashboard/student/notifications", Icon: FiBell,          labelKey: "sidebar.student.notifications", badgeKey: "notif" },

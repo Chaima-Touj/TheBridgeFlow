@@ -34,6 +34,9 @@ import LegalNotice              from "./pages/legal/LegalNotice.jsx";
 import GuidesPage                from "./pages/legal/GuidesPage.jsx";
 import HelpPage                 from "./pages/legal/HelpPage.jsx";
 import NotFound                 from "./pages/NotFound.jsx";
+import CeremonyPage             from "./pages/CeremonyPage.jsx";
+import CeremonyProjectDetail    from "./pages/CeremonyProjectDetail.jsx";
+import MyCeremonyProjects       from "./pages/dashboard/MyCeremonyProjects.jsx";
 import DashboardFormations      from "./pages/dashboard/DashboardFormations.jsx";
 import DashboardFormationDetail from "./pages/dashboard/DashboardFormationDetail.jsx";
 import MesDemandes              from "./pages/dashboard/MesDemandes.jsx";
@@ -129,6 +132,9 @@ export default function App() {
       <Route path="/dashboard/student/demandes" element={
         <ProtectedRoute><MesDemandes/></ProtectedRoute>
       }/>
+      <Route path="/dashboard/student/ceremonie" element={
+        <ProtectedRoute><MyCeremonyProjects/></ProtectedRoute>
+      }/>
 
       <Route path="/dashboard/admin" element={
         <ProtectedRoute role="admin"><AdminDashboard/></ProtectedRoute>
@@ -177,6 +183,9 @@ export default function App() {
       <Route path="/formations/:slug"  element={<FormationDetail />} />
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
+
+      <Route path="/ceremonie"         element={<CeremonyPage />} />
+      <Route path="/ceremonie/:id"     element={<CeremonyProjectDetail />} />
 
       <Route path="/blog"                 element={<BlogPage />} />
       <Route path="/tarifs"               element={<PricingPage />} />

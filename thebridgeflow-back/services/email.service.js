@@ -495,6 +495,33 @@ const resetPasswordTemplate = ({ name, resetUrl }) => ({
   `),
 });
 
+// 12. Confirmation de vote — Cérémonie
+const voteConfirmationTemplate = ({ studentName, projectTitles }) => ({
+  subject: "🏆 Votre vote a bien été enregistré — Cérémonie TheBridgeFlow",
+  html: layout("Vote enregistré", `
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:16px;">🏆</div>
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">Merci pour votre vote !</h1>
+      <p style="margin:0;color:#64748B;font-size:15px;">Bonjour <strong>${studentName}</strong>, votre vote pour la Cérémonie a bien été pris en compte.</p>
+    </div>
+
+    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
+      <p style="margin:0 0 12px;font-size:13px;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Vos 3 projets sélectionnés</p>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${projectTitles.map((title) => infoRow("🎬", title)).join("")}
+      </table>
+    </div>
+
+    <p style="font-size:13px;color:#94A3B8;text-align:center;margin:0;">
+      Un seul vote par étudiant est autorisé — celui-ci est désormais définitif.
+    </p>
+
+    <div style="text-align:center;margin-top:28px;">
+      ${button("Voir le classement", `${process.env.CLIENT_URL || "http://localhost:5173"}/ceremonie`)}
+    </div>
+  `),
+});
+
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
   try {
@@ -532,6 +559,7 @@ const emailService = {
   sendAccountCreatedByAdmin: (to, data) => sendEmail({ to, ...accountCreatedByAdminTemplate(data) }),
   sendVerifyCode:          (to, data) => sendEmail({ to, ...verifyCodeTemplate(data) }),
   sendResetPassword:       (to, data) => sendEmail({ to, ...resetPasswordTemplate(data) }),
+  sendVoteConfirmation:    (to, data) => sendEmail({ to, ...voteConfirmationTemplate(data) }),
 };
 
 export default emailService;

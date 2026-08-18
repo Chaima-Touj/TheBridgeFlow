@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CEREMONY LEADERBOARD — podium top 3 + classement (pattern .news-card)
+   Variables réutilisées telles quelles depuis index.css (pas de nouvelles
+   couleurs inventées) : --primary, --bg, --bg-card, --border, --text,
+   --text-secondary, --text-muted, --radius-lg, --radius-sm. Le thème
+   clair/sombre est donc géré automatiquement, sans règle dupliquée ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.cl-root {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Podium top 3 ─────────────────────────────────────────────────────────
+   1er au centre, surélevé et plus grand ; 2e à gauche, 3e à droite, tous
+   deux plus bas — hiérarchie visuelle immédiate via align-items:flex-end
+   + une hauteur/marge différente par rang (pas de position absolue, pour
+   garder le flow naturel et laisser Framer Motion mesurer les positions
+   réelles au FLIP). ────────────────────────────────────────────────────── */
+.cl-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.cl-podium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 1.25rem 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  flex: 1;
+  max-width: 260px;
+  min-width: 0;
+}
+
+.cl-podium-card--rank1 {
+  order: 2;
+  margin-bottom: 0;
+  padding-top: 2.75rem;
+  border-color: #FBBF24;
+  box-shadow: 0 8px 28px rgba(251, 191, 36, 0.22);
+  z-index: 1;
+}
+.cl-podium-card--rank2 {
+  order: 1;
+  margin-bottom: 1.75rem;
+}
+.cl-podium-card--rank3 {
+  order: 3;
+  margin-bottom: 2.75rem;
+}
+
+/* ── Badge de rang — relief via dégradé radial + ombre portée, pas de flat
+   design (consigne explicite : rendu "pro", hiérarchie visuelle nette). ── */
+.cl-podium-badge {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.cl-podium-badge--rank1 {
+  width: 56px;
+  height: 56px;
+  font-size: 1.9rem;
+  top: -26px;
+  background: radial-gradient(circle at 35% 30%, #FDE68A, #F59E0B 70%);
+}
+.cl-podium-badge--rank2 {
+  background: radial-gradient(circle at 35% 30%, #F1F5F9, #94A3B8 70%);
+}
+.cl-podium-badge--rank3 {
+  background: radial-gradient(circle at 35% 30%, #FBCFE8, #D97706 70%);
+}
+[data-theme="dark"] .cl-podium-badge {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.cl-podium-cover {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 0 0 1px var(--border);
+  margin-bottom: 0.9rem;
+  flex-shrink: 0;
+}
+.cl-podium-card--rank1 .cl-podium-cover {
+  width: 104px;
+  height: 104px;
+}
+.cl-podium-cover__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cl-podium-cover__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bg), var(--border));
+}
+
+.cl-podium-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.cl-podium-card--rank1 .cl-podium-title { font-size: 1.05rem; }
+.cl-podium-title:hover { color: var(--primary); }
+
+.cl-podium-author {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.cl-podium-votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+}
+
+.cl-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cl-avatar--initial {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+/* ── Skeleton (chargement initial) ────────────────────────────────────── */
+.cl-podium-card--skeleton {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg) 50%, var(--bg-card) 70%);
+  background-size: 200% 100%;
+  animation: cl-skeleton-pulse 1.4s ease-in-out infinite;
+  box-shadow: none;
+  border-style: dashed;
+}
+.cl-row--skeleton {
+  height: 88px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg) 50%, var(--bg-card) 70%);
+  background-size: 200% 100%;
+  animation: cl-skeleton-pulse 1.4s ease-in-out infinite;
+  border: 1px solid var(--border);
+}
+@keyframes cl-skeleton-pulse {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}
+
+/* ── Classement (4e place et plus) — réutilise .news-card, adapté en ligne
+   horizontale (le style de base .news-card est une carte verticale
+   image-en-haut ; sélecteur composé .cl-row.news-card pour prévaloir sur la
+   règle d'origine quel que soit l'ordre de bundling CSS entre fichiers). ── */
+.cl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cl-row.news-card {
+  flex-direction: row;
+  align-items: center;
+  padding: 0.75rem 1.25rem 0.75rem 0.75rem;
+  gap: 1rem;
+}
+.cl-row.news-card:hover {
+  transform: translateY(-2px);
+}
+
+.cl-row-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  flex-shrink: 0;
+}
+.cl-row-rank__number {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.cl-row-rank__votes {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.cl-row-img-wrap.news-card__img-wrap {
+  width: 64px;
+  height: 64px;
+  aspect-ratio: unset;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.cl-row-img-wrap__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bg), var(--border));
+}
+
+.cl-row-body.news-card__body {
+  padding: 0;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.cl-row-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cl-row-title:hover { color: var(--primary); }
+
+.cl-row-author {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* ── État vide ────────────────────────────────────────────────────────── */
+.cl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .cl-podium {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .cl-podium-card {
+    max-width: 45%;
+  }
+  .cl-podium-card--rank1 {
+    order: 1;
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  .cl-podium-card--rank2 { order: 2; margin-bottom: 0; }
+  .cl-podium-card--rank3 { order: 3; margin-bottom: 0; }
+
+  .cl-row.news-card {
+    padding: 0.625rem 0.875rem 0.625rem 0.625rem;
+  }
+  .cl-row-img-wrap.news-card__img-wrap {
+    width: 52px;
+    height: 52px;
+  }
+}
