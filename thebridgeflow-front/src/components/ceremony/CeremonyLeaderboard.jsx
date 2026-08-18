@@ -58,14 +58,16 @@ function AuthorAvatar({ author, size = 28 }) {
   );
 }
 
-/* ─── Carte podium (top 3) ────────────────────────────────────────────────
+/* ─── Colonne podium (top 3) ──────────────────────────────────────────────
    layoutId (partagé avec ListRow) : permet à Framer Motion d'animer en
    douceur le passage d'un projet entre le podium et la liste classique
    (deux arbres JSX différents), pas seulement le réordonnancement DANS
    le podium (couvert par `layout`). L'avatar de l'auteur (photo ou
    initiale) est le visuel principal de chaque colonne — pas la couverture
-   du projet, pour rester proche du modèle "Weekly Leaderboard" (colonnes
-   centrées sur la personne, pas un bandeau couleur). */
+   du projet. Pas d'apparence "carte" (bordure/ombre/padding uniforme) :
+   la hiérarchie visuelle vient uniquement de la barre colorée en bas de
+   colonne, dont la hauteur varie par rang (voir .cl-podium-bar--rank{n}),
+   les 3 colonnes restant alignées sur une base commune. */
 function PodiumCard({ project, rank, t }) {
   return (
     <motion.div
@@ -75,17 +77,20 @@ function PodiumCard({ project, rank, t }) {
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.85 }}
-      className={`cl-podium-card cl-podium-card--rank${rank}`}
+      className={`cl-podium-col cl-podium-col--rank${rank}`}
     >
       <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>{RANK_ICON}</span>
       <div className="cl-podium-avatar-ring">
-        <AuthorAvatar author={project.studentId} size={rank === 1 ? 108 : 84} />
+        <AuthorAvatar author={project.studentId} size={rank === 1 ? 92 : 72} />
       </div>
       <Link to={`/ceremonie/${project._id}`} className="cl-podium-title">{project.title}</Link>
       <span className="cl-podium-author-name">{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
       <div className="cl-podium-votes">
         <FiTrendingUp size={13} />
         {formatVoteLabel(project.voteCount, t)}
+      </div>
+      <div className={`cl-podium-bar cl-podium-bar--rank${rank}`}>
+        <span className="cl-podium-bar__rank">{rank}</span>
       </div>
     </motion.div>
   );
@@ -132,7 +137,7 @@ function LeaderboardSkeleton() {
     <div className="cl-root" aria-hidden="true">
       <div className="cl-podium">
         {[2, 1, 3].map((rank) => (
-          <div key={rank} className={`cl-podium-card cl-podium-card--rank${rank} cl-podium-card--skeleton`} />
+          <div key={rank} className={`cl-podium-col cl-podium-col--rank${rank} cl-podium-col--skeleton`} />
         ))}
       </div>
       <div className="cl-list">

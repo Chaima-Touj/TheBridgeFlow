@@ -13,11 +13,12 @@
 }
 
 /* ── Podium top 3 ─────────────────────────────────────────────────────────
-   1er au centre, surélevé et plus grand ; 2e à gauche, 3e à droite, tous
-   deux plus bas — hiérarchie visuelle immédiate via align-items:flex-end
-   + une hauteur/marge différente par rang (pas de position absolue, pour
-   garder le flow naturel et laisser Framer Motion mesurer les positions
-   réelles au FLIP). ────────────────────────────────────────────────────── */
+   1er au centre, 2e à gauche, 3e à droite — pas d'apparence "carte" sur les
+   colonnes elles-mêmes : la hiérarchie visuelle vient uniquement de la
+   hauteur de .cl-podium-bar (voir plus bas), les 3 colonnes restant
+   alignées sur une base commune via align-items:flex-end (pas de position
+   absolue, pour garder le flow naturel et laisser Framer Motion mesurer
+   les positions réelles au FLIP). ──────────────────────────────────────── */
 .cl-podium {
   display: flex;
   align-items: flex-end;
@@ -25,50 +26,23 @@
   gap: 1.25rem;
 }
 
-.cl-podium-card {
+.cl-podium-col {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 2.25rem 1.25rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   flex: 1;
-  max-width: 260px;
+  max-width: 220px;
   min-width: 0;
 }
-
-.cl-podium-card--rank1 {
-  order: 2;
-  margin-bottom: 0;
-  padding-top: 2.75rem;
-  border-color: #FBBF24;
-  box-shadow: 0 8px 28px rgba(251, 191, 36, 0.22);
-  z-index: 1;
-}
-.cl-podium-card--rank2 {
-  order: 1;
-  margin-bottom: 1.75rem;
-  border-color: #CBD5E1;
-  box-shadow: 0 6px 20px rgba(148, 163, 184, 0.2);
-}
-.cl-podium-card--rank3 {
-  order: 3;
-  margin-bottom: 2.75rem;
-  border-color: #D9A066;
-  box-shadow: 0 6px 20px rgba(184, 115, 51, 0.18);
-}
+.cl-podium-col--rank1 { order: 2; z-index: 1; }
+.cl-podium-col--rank2 { order: 1; }
+.cl-podium-col--rank3 { order: 3; }
 
 /* ── Badge de rang — relief via dégradé radial + ombre portée, pas de flat
    design (consigne explicite : rendu "pro", hiérarchie visuelle nette). ── */
 .cl-podium-badge {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 44px;
   height: 44px;
   display: flex;
@@ -77,13 +51,13 @@
   border-radius: 50%;
   font-size: 1.4rem;
   line-height: 1;
+  margin-bottom: 0.6rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .cl-podium-badge--rank1 {
   width: 56px;
   height: 56px;
   font-size: 1.9rem;
-  top: -26px;
   background: radial-gradient(circle at 35% 30%, #FDE68A, #F59E0B 70%);
 }
 .cl-podium-badge--rank2 {
@@ -94,6 +68,54 @@
 }
 [data-theme="dark"] .cl-podium-badge {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ── Barre de podium — hauteur différente par rang, seul porteur de la
+   hiérarchie "marches de podium" (les colonnes elles-mêmes n'ont plus de
+   bordure/ombre/padding de carte). Couleurs = mêmes teintes or/argent/
+   bronze que .cl-podium-badge, en dégradé vertical. ────────────────────── */
+.cl-podium-bar {
+  width: 100%;
+  max-width: 130px;
+  margin-top: 1rem;
+  border-radius: 10px 10px 4px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cl-podium-bar__rank {
+  font-weight: 800;
+  line-height: 1;
+}
+.cl-podium-bar--rank1 {
+  height: 120px;
+  background: linear-gradient(180deg, #FDE68A, #F59E0B);
+  box-shadow: 0 10px 24px -8px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.cl-podium-bar--rank1 .cl-podium-bar__rank {
+  font-size: 2.2rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.cl-podium-bar--rank2 {
+  height: 78px;
+  background: linear-gradient(180deg, #F1F5F9, #94A3B8);
+  box-shadow: 0 8px 20px -8px rgba(148, 163, 184, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.cl-podium-bar--rank2 .cl-podium-bar__rank {
+  font-size: 1.7rem;
+  color: #334155;
+}
+.cl-podium-bar--rank3 {
+  height: 56px;
+  background: linear-gradient(180deg, #E8C4A0, #B87333);
+  box-shadow: 0 8px 20px -8px rgba(184, 115, 51, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.cl-podium-bar--rank3 .cl-podium-bar__rank {
+  font-size: 1.6rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* Anneau autour de l'avatar auteur — visuel principal de chaque colonne
@@ -121,7 +143,7 @@
   overflow: hidden;
   margin-bottom: 0.5rem;
 }
-.cl-podium-card--rank1 .cl-podium-title { font-size: 1.05rem; }
+.cl-podium-col--rank1 .cl-podium-title { font-size: 1.05rem; }
 .cl-podium-title:hover { color: var(--primary); }
 
 .cl-podium-author-name {
@@ -158,13 +180,13 @@
 }
 
 /* ── Skeleton (chargement initial) ────────────────────────────────────── */
-.cl-podium-card--skeleton {
+.cl-podium-col--skeleton {
   aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
   background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg) 50%, var(--bg-card) 70%);
   background-size: 200% 100%;
   animation: cl-skeleton-pulse 1.4s ease-in-out infinite;
-  box-shadow: none;
-  border-style: dashed;
+  border: 1px dashed var(--border);
 }
 .cl-row--skeleton {
   height: 88px;
@@ -280,20 +302,39 @@
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  /* Les 3 colonnes restent côte à côte (pas d'empilement) pour garder la
+     hiérarchie "marches de podium" lisible — seules les proportions
+     (avatar, barre) sont réduites. */
   .cl-podium {
-    align-items: center;
-    flex-wrap: wrap;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+    gap: 0.6rem;
   }
-  .cl-podium-card {
-    max-width: 45%;
+  .cl-podium-col {
+    max-width: 33%;
   }
-  .cl-podium-card--rank1 {
-    order: 1;
+  .cl-podium-title {
+    font-size: 0.78rem;
+  }
+  .cl-podium-col--rank1 .cl-podium-title {
+    font-size: 0.85rem;
+  }
+  .cl-podium-author-name {
+    font-size: 0.7rem;
+  }
+  .cl-podium-votes {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.55rem;
+  }
+  .cl-podium-bar {
     max-width: 100%;
-    margin-bottom: 1rem;
   }
-  .cl-podium-card--rank2 { order: 2; margin-bottom: 0; }
-  .cl-podium-card--rank3 { order: 3; margin-bottom: 0; }
+  .cl-podium-bar--rank1 { height: 84px; }
+  .cl-podium-bar--rank1 .cl-podium-bar__rank { font-size: 1.6rem; }
+  .cl-podium-bar--rank2 { height: 58px; }
+  .cl-podium-bar--rank2 .cl-podium-bar__rank { font-size: 1.3rem; }
+  .cl-podium-bar--rank3 { height: 42px; }
+  .cl-podium-bar--rank3 .cl-podium-bar__rank { font-size: 1.2rem; }
 
   .cl-row.news-card {
     padding: 0.625rem 0.875rem 0.625rem 0.625rem;
