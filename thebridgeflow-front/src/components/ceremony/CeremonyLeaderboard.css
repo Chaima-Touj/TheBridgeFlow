@@ -52,10 +52,14 @@
 .cl-podium-card--rank2 {
   order: 1;
   margin-bottom: 1.75rem;
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 20px rgba(148, 163, 184, 0.2);
 }
 .cl-podium-card--rank3 {
   order: 3;
   margin-bottom: 2.75rem;
+  border-color: #D9A066;
+  box-shadow: 0 6px 20px rgba(184, 115, 51, 0.18);
 }
 
 /* ── Badge de rang — relief via dégradé radial + ombre portée, pas de flat
@@ -86,36 +90,23 @@
   background: radial-gradient(circle at 35% 30%, #F1F5F9, #94A3B8 70%);
 }
 .cl-podium-badge--rank3 {
-  background: radial-gradient(circle at 35% 30%, #FBCFE8, #D97706 70%);
+  background: radial-gradient(circle at 35% 30%, #E8C4A0, #B87333 70%);
 }
 [data-theme="dark"] .cl-podium-badge {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.cl-podium-cover {
-  width: 84px;
-  height: 84px;
+/* Anneau autour de l'avatar auteur — visuel principal de chaque colonne
+   (remplace l'ancienne couverture projet en grand cercle coloré). */
+.cl-podium-avatar-ring {
   border-radius: 50%;
-  overflow: hidden;
-  background: var(--bg);
   border: 3px solid var(--bg-card);
-  box-shadow: 0 0 0 1px var(--border);
+  box-shadow: 0 0 0 1px var(--border), 0 4px 14px rgba(0, 0, 0, 0.12);
   margin-bottom: 0.9rem;
   flex-shrink: 0;
 }
-.cl-podium-card--rank1 .cl-podium-cover {
-  width: 104px;
-  height: 104px;
-}
-.cl-podium-cover__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.cl-podium-cover__placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--bg), var(--border));
+[data-theme="dark"] .cl-podium-avatar-ring {
+  box-shadow: 0 0 0 1px var(--border), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .cl-podium-title {
@@ -133,10 +124,8 @@
 .cl-podium-card--rank1 .cl-podium-title { font-size: 1.05rem; }
 .cl-podium-title:hover { color: var(--primary); }
 
-.cl-podium-author {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.cl-podium-author-name {
+  display: block;
   font-size: 0.78rem;
   color: var(--text-secondary);
   margin-bottom: 0.75rem;
@@ -218,16 +207,15 @@
   min-width: 56px;
   flex-shrink: 0;
 }
+.cl-row-rank__crown {
+  font-size: 0.85rem;
+  line-height: 1;
+  margin-bottom: 0.15rem;
+}
 .cl-row-rank__number {
   font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-muted);
-}
-.cl-row-rank__votes {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--primary);
-  white-space: nowrap;
 }
 
 .cl-row-img-wrap.news-card__img-wrap {
@@ -266,6 +254,16 @@
   gap: 0.4rem;
   font-size: 0.78rem;
   color: var(--text-secondary);
+}
+
+/* Votes alignés à droite de la ligne — .cl-row-body est en flex:1 (hérité de
+   .news-card__body), donc ce bloc se retrouve naturellement plaqué à droite. */
+.cl-row-votes {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── État vide ────────────────────────────────────────────────────────── */

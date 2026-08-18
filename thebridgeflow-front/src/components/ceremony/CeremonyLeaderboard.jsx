@@ -11,11 +11,29 @@ import "./CeremonyLeaderboard.css";
 // existante.
 const REFRESH_INTERVAL_MS = 30000;
 
-const RANK_BADGE = { 1: "🥇", 2: "🥈", 3: "🥉" };
+// Icône couronne — un seul glyphe pour les 3 rangs, la distinction
+// or/argent/bronze vient de la couleur du badge (.cl-podium-badge--rank{n}),
+// pas de l'icône elle-même. Même emoji que .fp-hero__badge (CeremonyPage.jsx)
+// pour rester cohérent avec le reste de la page.
+const RANK_ICON = "🏆";
 
 // Transition "premium" — ni trop raide (sec, mécanique) ni trop molle (lent,
 // gluant) : valeurs modérées pour un effet FLIP fluide sur le réordonnancement.
 const CARD_TRANSITION = { type: "spring", stiffness: 300, damping: 30 };
+
+// Au-delà de quelques centaines de votes un compteur en clair devient
+// difficile à lire d'un coup d'œil — bascule en notation courte (1.5k).
+// Les volumes réels actuels restent à 2 chiffres, donc cette branche est
+// prête mais inactive tant que le nombre de votes ne le justifie pas.
+function formatVoteLabel(count, t) {
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1).replace(/\.0$/, "")}M ${t("ceremony.votes")}`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}k ${t("ceremony.votes")}`;
+  }
+  return t("ceremony.voteCount", { count });
+}
 
 /* ─── Avatar auteur — même pattern que Sidebar.jsx (avatarUrl ou initiale
    sur fond coloré déterministe à partir du nom) ────────────────────────── */
@@ -31,7 +49,10 @@ function AuthorAvatar({ author, size = 28 }) {
   return author?.avatarUrl ? (
     <img src={author.avatarUrl} alt="" className="cl-avatar" style={{ width: size, height: size }} />
   ) : (
-    <span className="cl-avatar cl-avatar--initial" style={{ width: size, height: size, background: avatarColor(name) }}>
+    <span
+      className="cl-avatar cl-avatar--initial"
+      style={{ width: size, height: size, background: avatarColor(name), fontSize: size * 0.42 }}
+    >
       {name[0]?.toUpperCase() || <FiUser size={size * 0.5} />}
     </span>
   );
@@ -41,7 +62,10 @@ function AuthorAvatar({ author, size = 28 }) {
    layoutId (partagé avec ListRow) : permet à Framer Motion d'animer en
    douceur le passage d'un projet entre le podium et la liste classique
    (deux arbres JSX différents), pas seulement le réordonnancement DANS
-   le podium (couvert par `layout`). */
+   le podium (couvert par `layout`). L'avatar de l'auteur (photo ou
+   initiale) est le visuel principal de chaque colonne — pas la couverture
+   du projet, pour rester proche du modèle "Weekly Leaderboard" (colonnes
+   centrées sur la personne, pas un bandeau couleur). */
 function PodiumCard({ project, rank, t }) {
   return (
     <motion.div
@@ -53,20 +77,15 @@ function PodiumCard({ project, rank, t }) {
       exit={{ opacity: 0, scale: 0.85 }}
       className={`cl-podium-card cl-podium-card--rank${rank}`}
     >
-      <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>{RANK_BADGE[rank]}</span>
-      <div className="cl-podium-cover">
-        {project.coverImage
-          ? <img src={project.coverImage} alt="" className="cl-podium-cover__img" />
-          : <div className="cl-podium-cover__placeholder" />}
+      <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>{RANK_ICON}</span>
+      <div className="cl-podium-avatar-ring">
+        <AuthorAvatar author={project.studentId} size={rank === 1 ? 108 : 84} />
       </div>
       <Link to={`/ceremonie/${project._id}`} className="cl-podium-title">{project.title}</Link>
-      <div className="cl-podium-author">
-        <AuthorAvatar author={project.studentId} size={22} />
-        <span>{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
-      </div>
+      <span className="cl-podium-author-name">{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
       <div className="cl-podium-votes">
         <FiTrendingUp size={13} />
-        {t("ceremony.voteCount", { count: project.voteCount })}
+        {formatVoteLabel(project.voteCount, t)}
       </div>
     </motion.div>
   );
@@ -74,7 +93,8 @@ function PodiumCard({ project, rank, t }) {
 
 /* ─── Ligne de classement (4e place et plus) — pattern .news-card repris
    pour la cohérence visuelle (photo/titre/auteur), adapté en ligne
-   horizontale avec rang + votes bien visibles à gauche. ────────────────── */
+   horizontale : rang (+ couronne si jamais rank <= 3) à gauche, votes
+   alignés à droite. ──────────────────────────────────────────────────── */
 function ListRow({ project, rank, t }) {
   return (
     <motion.div
@@ -87,8 +107,8 @@ function ListRow({ project, rank, t }) {
       className="cl-row news-card"
     >
       <div className="cl-row-rank">
+        {rank <= 3 && <span className="cl-row-rank__crown" aria-hidden="true">{RANK_ICON}</span>}
         <span className="cl-row-rank__number">#{rank}</span>
-        <span className="cl-row-rank__votes">{t("ceremony.voteCount", { count: project.voteCount })}</span>
       </div>
       <div className="news-card__img-wrap cl-row-img-wrap">
         {project.coverImage
@@ -102,6 +122,7 @@ function ListRow({ project, rank, t }) {
           <span>{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
         </div>
       </div>
+      <div className="cl-row-votes">{formatVoteLabel(project.voteCount, t)}</div>
     </motion.div>
   );
 }

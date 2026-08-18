@@ -120,16 +120,13 @@ export default function CeremonyPage() {
             <div className="news-grid cp-grid">
               {projects.map((p) => {
                 const isSelected = selected.includes(p._id);
+                const atMax = !isSelected && selected.length >= MAX_SELECTION;
                 return (
                   <article
                     key={p._id}
                     className={`news-card cp-card${isSelected ? " cp-card--selected" : ""}${success ? " cp-card--locked" : ""}`}
-                    onClick={() => toggleSelect(p._id)}
                     onMouseMove={success ? undefined : handleCardTilt}
                     onMouseLeave={resetCardTilt}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === "Enter" && toggleSelect(p._id)}
                   >
                     <div className="news-card__img-wrap">
                       {p.coverImage
@@ -145,16 +142,26 @@ export default function CeremonyPage() {
                           <FiUser size={13} /> {p.studentId?.name || t("ceremony.unknownAuthor")}
                         </span>
                       </div>
-                      <h3 className="news-card__title">
+                      <h3 className="news-card__title">{p.title}</h3>
+                      {p.description && <p className="news-card__excerpt">{p.description}</p>}
+                      <div className="cp-card__actions">
                         <Link
                           to={`/ceremonie/${p._id}`}
-                          className="cp-card__title-link"
+                          className="cp-card__btn cp-card__btn--view"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {p.title}
+                          {t("ceremony.viewDetail")}
                         </Link>
-                      </h3>
-                      {p.description && <p className="news-card__excerpt">{p.description}</p>}
+                        <button
+                          type="button"
+                          className={`cp-card__btn cp-card__btn--vote${isSelected ? " cp-card__btn--active" : ""}`}
+                          disabled={success || atMax}
+                          onClick={(e) => { e.stopPropagation(); toggleSelect(p._id); }}
+                        >
+                          {isSelected && <FiCheck size={14} />}
+                          {isSelected ? t("ceremony.voteCancel") : t("ceremony.vote")}
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );

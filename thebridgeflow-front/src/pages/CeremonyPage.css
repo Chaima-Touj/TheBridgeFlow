@@ -57,8 +57,9 @@
 /* ── Cartes de sélection — .news-card de base + état sélectionné/verrouillé
    Effet "premium" : tilt 3D suivant le curseur (transform posé en JS, voir
    handleCardTilt dans CeremonyPage.jsx) + ombre en 2 couches (large/douce +
-   resserrée/plus sombre) au lieu du box-shadow plat hérité de .news-card. */
-.cp-grid { cursor: pointer; }
+   resserrée/plus sombre) au lieu du box-shadow plat hérité de .news-card.
+   Le clic est géré par les 2 boutons (.cp-card__actions), pas par la carte
+   elle-même — la carte reste survolable pour le tilt uniquement. */
 
 .cp-card {
   border: 2px solid var(--border);
@@ -77,17 +78,59 @@
   transition: border-color 0.25s ease, box-shadow 0.3s ease;
 }
 .cp-card--locked {
-  cursor: default;
   opacity: 0.75;
 }
 
-.cp-card__title-link {
-  color: inherit;
-  text-decoration: none;
+/* ── Boutons d'action — "Voir détail" (navigation) + "Voter"/"Retirer"
+   (toggle sélection), côte à côte en bas de carte. ─────────────────────── */
+.cp-card__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 0.2rem;
 }
-.cp-card__title-link:hover {
+.cp-card__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.55rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.cp-card__btn--view {
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.cp-card__btn--view:hover {
   color: var(--primary);
-  text-decoration: underline;
+  border-color: var(--primary);
+}
+.cp-card__btn--vote {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(37, 99, 235, 0.5);
+}
+.cp-card__btn--vote:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.cp-card__btn--vote.cp-card__btn--active {
+  background: var(--secondary);
+  box-shadow: 0 6px 16px -6px rgba(16, 185, 129, 0.5);
+}
+.cp-card__btn--vote:disabled {
+  background: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .cp-card__placeholder {

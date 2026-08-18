@@ -1819,6 +1819,7 @@
     "unknownAuthor": "طالب TheBridgeFlow",
     "voteCount_one": "{{count}} صوت",
     "voteCount_other": "{{count}} أصوات",
+    "votes": "أصوات",
     "backToList": "العودة إلى المشاريع",
     "projectNotFound": "المشروع غير موجود.",
     "openApp": "فتح المشروع",
@@ -1827,7 +1828,10 @@
     "voteRemove": "إلغاء تصويتي",
     "voteMaxReached": "لقد اخترت بالفعل 3 مشاريع — قم بإزالة واحد للتصويت لهذا المشروع.",
     "voteProgress": "{{count}}/{{max}} مشاريع محددة",
-    "finishVote": "إنهاء التصويت"
+    "finishVote": "إنهاء التصويت",
+    "viewDetail": "عرض التفاصيل",
+    "vote": "تصويت",
+    "voteCancel": "إلغاء"
   },
   "myCeremonyProjects": {
     "pageTitle": "مشاريعي — الحفل",

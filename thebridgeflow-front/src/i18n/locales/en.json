@@ -1819,6 +1819,7 @@
     "unknownAuthor": "TheBridgeFlow student",
     "voteCount_one": "{{count}} vote",
     "voteCount_other": "{{count}} votes",
+    "votes": "votes",
     "backToList": "Back to projects",
     "projectNotFound": "Project not found.",
     "openApp": "Open project",
@@ -1827,7 +1828,10 @@
     "voteRemove": "Remove my vote",
     "voteMaxReached": "You've already selected 3 projects — remove one to vote for this one.",
     "voteProgress": "{{count}}/{{max}} projects selected",
-    "finishVote": "Finish voting"
+    "finishVote": "Finish voting",
+    "viewDetail": "View detail",
+    "vote": "Vote",
+    "voteCancel": "Remove"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",
