@@ -1,21 +1,30 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiCheck, FiUser } from "react-icons/fi";
+import { FiCheck, FiUser, FiAward } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CeremonyLeaderboard from "../components/ceremony/CeremonyLeaderboard.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
+import { useCeremonyVoteGate } from "../hooks/useCeremonyVoteGate.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "../components/common/NewsSection.css";
 import "./FormationsPage.css";
 import "./CeremonyPage.css";
 
+const VOTE_GATE_MESSAGE_KEY = {
+  closed:     "ceremony.voteClosed",
+  notStarted: "ceremony.voteNotStarted",
+  ended:      "ceremony.voteEnded",
+};
+
 export default function CeremonyPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const voteGateReason = useCeremonyVoteGate();
+  const voteDisabled = voteGateReason !== null;
 
   useDocumentMeta({
     title: "Cérémonie — Votez pour vos projets préférés | TheBridgeFlow",
@@ -37,7 +46,7 @@ export default function CeremonyPage() {
   }, []);
 
   const toggleSelect = (id) => {
-    if (success) return;
+    if (success || voteDisabled) return;
     setError("");
     toggleSelection(id);
   };
@@ -86,7 +95,7 @@ export default function CeremonyPage() {
 
       <section className="fp-hero">
         <div className="fp-hero__inner">
-          <span className="fp-hero__badge">🏆 {t("ceremony.badge")}</span>
+          <span className="fp-hero__badge"><FiAward size={13} /> {t("ceremony.badge")}</span>
           <h1 className="fp-hero__title">{t("ceremony.title")}</h1>
           <p className="fp-hero__subtitle">{t("ceremony.subtitle")}</p>
         </div>
@@ -103,6 +112,8 @@ export default function CeremonyPage() {
 
           {success ? (
             <div className="cp-success">{t("ceremony.voteSuccess")}</div>
+          ) : voteDisabled ? (
+            <div className="cp-error">{t(VOTE_GATE_MESSAGE_KEY[voteGateReason])}</div>
           ) : (
             <p className="cp-vote-hint">{t("ceremony.voteHint", { count: selected.length })}</p>
           )}
@@ -155,7 +166,7 @@ export default function CeremonyPage() {
                         <button
                           type="button"
                           className={`cp-card__btn cp-card__btn--vote${isSelected ? " cp-card__btn--active" : ""}`}
-                          disabled={success || atMax}
+                          disabled={success || atMax || voteDisabled}
                           onClick={(e) => { e.stopPropagation(); toggleSelect(p._id); }}
                         >
                           {isSelected && <FiCheck size={14} />}
@@ -174,7 +185,7 @@ export default function CeremonyPage() {
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={selected.length !== MAX_SELECTION || submitting}
+                disabled={selected.length !== MAX_SELECTION || submitting || voteDisabled}
                 onClick={handleConfirmVote}
               >
                 {submitting ? t("ceremony.submitting") : t("ceremony.confirmVote", { count: selected.length })}

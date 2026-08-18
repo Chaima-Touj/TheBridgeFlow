@@ -23,6 +23,18 @@ const ceremonyProjectSchema = new mongoose.Schema(
     // mis à true par le flux normal de création (ceremony.controller.js
     // n'écrit jamais ce champ), donc aucun vrai projet ne peut le porter.
     isSeedData:    { type: Boolean, default: false },
+    // Modération admin — default "approuvé" pour que tout document déjà en
+    // base avant l'ajout de ce champ reste visible publiquement sans action
+    // manuelle (Mongoose applique ce default à l'hydratation d'un Document,
+    // hors requêtes .lean() — voir la migration one-off qui a physiquement
+    // backfillé ce champ sur les documents pré-existants). Les nouvelles
+    // soumissions étudiant (createProject) écrasent explicitement ce default
+    // avec "en_attente" : c'est le vrai portail de modération.
+    status: {
+      type: String,
+      enum: ["en_attente", "approuvé", "refusé"],
+      default: "approuvé",
+    },
   },
   { timestamps: true }
 );

@@ -5,14 +5,23 @@ import { FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, F
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
+import { useCeremonyVoteGate } from "../hooks/useCeremonyVoteGate.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "./FormationsPage.css";
 import "./CeremonyProjectDetail.css";
+
+const VOTE_GATE_MESSAGE_KEY = {
+  closed:     "ceremony.voteClosed",
+  notStarted: "ceremony.voteNotStarted",
+  ended:      "ceremony.voteEnded",
+};
 
 export default function CeremonyProjectDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
   const { selected, toggleSelect } = useCeremonySelection();
+  const voteGateReason = useCeremonyVoteGate();
+  const voteDisabled = voteGateReason !== null;
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,14 +85,16 @@ export default function CeremonyProjectDetail() {
                 <button
                   type="button"
                   className={`cpd-vote-btn${isSelected ? " cpd-vote-btn--active" : ""}`}
-                  disabled={atMax}
+                  disabled={atMax || voteDisabled}
                   onClick={() => toggleSelect(project._id)}
                 >
                   {isSelected ? <FiCheckCircle size={18} /> : <FiPlusCircle size={18} />}
                   {isSelected ? t("ceremony.voteRemove") : t("ceremony.voteAdd")}
                 </button>
                 <p className="cpd-vote-status">
-                  {atMax ? t("ceremony.voteMaxReached") : t("ceremony.voteProgress", { count: selected.length, max: MAX_SELECTION })}
+                  {voteDisabled
+                    ? t(VOTE_GATE_MESSAGE_KEY[voteGateReason])
+                    : atMax ? t("ceremony.voteMaxReached") : t("ceremony.voteProgress", { count: selected.length, max: MAX_SELECTION })}
                   {" "}
                   <Link to="/ceremonie" className="cpd-vote-status__link">{t("ceremony.finishVote")}</Link>
                 </p>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FiUser, FiTrendingUp } from "react-icons/fi";
+import { FiUser, FiTrendingUp, FiAward } from "react-icons/fi";
 import { ceremonyService } from "../../services/ceremony.service.js";
 import "./CeremonyLeaderboard.css";
 
@@ -11,11 +11,11 @@ import "./CeremonyLeaderboard.css";
 // existante.
 const REFRESH_INTERVAL_MS = 30000;
 
-// Icône couronne — un seul glyphe pour les 3 rangs, la distinction
-// or/argent/bronze vient de la couleur du badge (.cl-podium-badge--rank{n}),
-// pas de l'icône elle-même. Même emoji que .fp-hero__badge (CeremonyPage.jsx)
-// pour rester cohérent avec le reste de la page.
-const RANK_ICON = "🏆";
+// Icône couronne — FiAward (déjà utilisé pour "Cérémonie" dans Sidebar.jsx),
+// pas d'émoji : la distinction or/argent/bronze vient entièrement de CSS
+// (couleur du badge podium, couleur du texte en liste), pas d'un glyphe à
+// couleurs fixes. Même icône que .fp-hero__badge (CeremonyPage.jsx) pour
+// rester cohérent avec le reste de la page.
 
 // Transition "premium" — ni trop raide (sec, mécanique) ni trop molle (lent,
 // gluant) : valeurs modérées pour un effet FLIP fluide sur le réordonnancement.
@@ -79,7 +79,9 @@ function PodiumCard({ project, rank, t }) {
       exit={{ opacity: 0, scale: 0.85 }}
       className={`cl-podium-col cl-podium-col--rank${rank}`}
     >
-      <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>{RANK_ICON}</span>
+      <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>
+        <FiAward size={rank === 1 ? 26 : 20} />
+      </span>
       <div className="cl-podium-avatar-ring">
         <AuthorAvatar author={project.studentId} size={rank === 1 ? 92 : 72} />
       </div>
@@ -112,7 +114,11 @@ function ListRow({ project, rank, t }) {
       className="cl-row news-card"
     >
       <div className="cl-row-rank">
-        {rank <= 3 && <span className="cl-row-rank__crown" aria-hidden="true">{RANK_ICON}</span>}
+        {rank <= 3 && (
+          <span className={`cl-row-rank__crown cl-row-rank__crown--rank${rank}`} aria-hidden="true">
+            <FiAward size={13} />
+          </span>
+        )}
         <span className="cl-row-rank__number">#{rank}</span>
       </div>
       <div className="news-card__img-wrap cl-row-img-wrap">

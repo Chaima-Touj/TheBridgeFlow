@@ -178,6 +178,10 @@ async function runSeed() {
       teamMembers:   p.teamMembers,
       voteCount:     p.voteCount,
       isSeedData:    true,
+      // Explicite plutôt que de compter sur le default du schéma — des
+      // projets de démo doivent être visibles immédiatement, sans passer
+      // par la modération admin.
+      status:        "approuvé",
     };
 
     console.log(`  📁 ${doc.title}  (${doc.voteCount} votes)`);
