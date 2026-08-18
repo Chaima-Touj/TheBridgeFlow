@@ -1458,6 +1458,7 @@
     "moreFavorites": "+{{count}} autres favoris",
     "connectionError": "❌ Erreur de connexion. Réessayez dans quelques instants.",
     "unavailable": "SAGE est temporairement indisponible. Réessayez plus tard.",
+    "modelError": "⚠️ Le modèle IA rencontre un problème technique côté fournisseur. L'équipe a été notifiée, réessayez dans quelques instants.",
     "limitReached": "Limite de {{max}} messages atteinte pour cette conversation. Démarrez une nouvelle conversation (rechargez la page) pour continuer à discuter avec SAGE.",
     "limitReachedBanner": "Limite de {{max}} messages atteinte pour cette conversation — rechargez la page pour en démarrer une nouvelle.",
     "defaultFirstName": "Étudiant",

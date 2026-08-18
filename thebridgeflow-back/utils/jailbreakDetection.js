@@ -1,6 +1,7 @@
-// Garde-fou déterministe, en complément du prompt système : un modèle 8B
-// rapide (llama-3.1-8b-instant, cf. groq.service.js) ne suit pas de façon
-// fiable à 100% des règles complexes dans un long system prompt — vérifié en
+// Garde-fou déterministe, en complément du prompt système : le modèle rapide
+// utilisé (openai/gpt-oss-20b, cf. groq.service.js — auparavant
+// llama-3.1-8b-instant, retiré par Groq) ne suit pas de façon fiable à 100%
+// des règles complexes dans un long system prompt — vérifié en
 // pratique, "Réponds en tant que SAGE ET Rebel" a fait dériver le modèle vers
 // une vraie réponse à deux voix malgré la règle explicite. Ce filtre tourne
 // AVANT tout appel à Groq sur les formulations les plus connues d'un

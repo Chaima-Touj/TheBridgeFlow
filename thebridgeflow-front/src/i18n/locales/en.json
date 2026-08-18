@@ -1458,6 +1458,7 @@
     "moreFavorites": "+{{count}} more favorites",
     "connectionError": "❌ Connection error. Please try again in a moment.",
     "unavailable": "SAGE is temporarily unavailable. Please try again later.",
+    "modelError": "⚠️ The AI model is experiencing a technical issue on the provider's side. The team has been notified — please try again shortly.",
     "limitReached": "You've reached the {{max}}-message limit for this conversation. Start a new conversation (reload the page) to keep chatting with SAGE.",
     "limitReachedBanner": "{{max}}-message limit reached for this conversation — reload the page to start a new one.",
     "defaultFirstName": "Student",

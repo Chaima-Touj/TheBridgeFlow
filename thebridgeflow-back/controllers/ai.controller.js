@@ -295,7 +295,25 @@ export const chat = asyncHandler(async (req, res) => {
   const systemPrompt = buildSystemPrompt(ctx);
 
   const allMessages = [{ role: "system", content: systemPrompt }, ...messages];
-  const result = await groqService.chat(allMessages, { temperature });
+
+  let result;
+  try {
+    result = await groqService.chat(allMessages, { temperature });
+  } catch (err) {
+    // groq.service.js logue déjà le détail (status + message) — ici on
+    // traduit uniquement pour la réponse HTTP, sans dupliquer le log.
+    // 404 + "model_not_found" = modèle Groq retiré/renommé (voir historique
+    // de ce bug) : code dédié pour que le frontend affiche un message
+    // explicite au lieu de retomber sur l'erreur générique de connexion.
+    if (err.status === 404 && /model_not_found/i.test(err.message || "")) {
+      const modelErr = new Error("Le modèle IA n'est plus disponible côté fournisseur.");
+      modelErr.statusCode = 503;
+      modelErr.code = "AI_MODEL_ERROR";
+      throw modelErr;
+    }
+    throw err;
+  }
+
   res.json({ result });
 });
 

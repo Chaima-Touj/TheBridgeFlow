@@ -14,17 +14,28 @@ const getClient = () => {
 
 async function chat(messages = [], options = {}) {
   const client = getClient();
-  const completion = await client.chat.completions.create({
-    model:       "llama-3.1-8b-instant",
-    messages:    messages.map((m) => ({
-      // Passer les 3 rôles supportés par Groq : system, assistant, user
-      role:    ["system", "assistant", "user"].includes(m.role) ? m.role : "user",
-      content: m.content,
-    })),
-    temperature: options.temperature ?? 0.7,
-    max_tokens:  options.maxTokens  ?? 1024,
-  });
-  return { text: completion.choices[0]?.message?.content || "" };
+  try {
+    const completion = await client.chat.completions.create({
+      // llama-3.1-8b-instant retiré définitivement par Groq le 17/06/2026 —
+      // openai/gpt-oss-20b est le remplacement direct recommandé par Groq.
+      model:       "openai/gpt-oss-20b",
+      messages:    messages.map((m) => ({
+        // Passer les 3 rôles supportés par Groq : system, assistant, user
+        role:    ["system", "assistant", "user"].includes(m.role) ? m.role : "user",
+        content: m.content,
+      })),
+      temperature: options.temperature ?? 0.7,
+      max_tokens:  options.maxTokens  ?? 1024,
+    });
+    return { text: completion.choices[0]?.message?.content || "" };
+  } catch (err) {
+    // Aucune visibilité avant ce log : une panne/dépréciation Groq (ex.
+    // modèle retiré, cf. commentaire ci-dessus) était jusqu'ici invisible
+    // dans les logs serveur — err.message contient déjà le corps d'erreur
+    // Groq complet (voir groq-sdk), donc pas besoin de JSON.stringify ici.
+    console.error(`❌ [groq] Échec de l'appel chat — status=${err.status} message=${err.message}`);
+    throw err;
+  }
 }
 
 async function recommendInternships(studentId, limit = 5) {

@@ -271,6 +271,8 @@ export default function AIAssistant() {
           ? t("aiAssistant.limitReached", { max: MAX_USER_MESSAGES })
           : code === "AI_UNAVAILABLE"
           ? t("aiAssistant.unavailable")
+          : code === "AI_MODEL_ERROR"
+          ? t("aiAssistant.modelError")
           : t("aiAssistant.connectionError");
       setMessages([...next, { role: "assistant", content: errText }]);
     } finally {
