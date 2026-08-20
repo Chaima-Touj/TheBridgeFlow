@@ -338,7 +338,24 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email }).select("+password");
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user) {
+    console.log(`⚠️  Tentative de connexion échouée pour : ${email}`);
+    const err = new Error("Identifiants invalides");
+    err.statusCode = 401;
+    throw err;
+  }
+
+  // Compte créé via OAuth (Google/Facebook) : jamais de password défini.
+  // Sans cette vérification, bcrypt.compare(candidat, undefined) lève
+  // "Illegal arguments: string, undefined" — une erreur 500 opaque au lieu
+  // d'un message actionnable pour l'utilisateur.
+  if (!user.password) {
+    const err = new Error("Ce compte utilise une connexion Google/Facebook. Connectez-vous avec ce mode.");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!(await user.comparePassword(password))) {
     console.log(`⚠️  Tentative de connexion échouée pour : ${email}`);
     const err = new Error("Identifiants invalides");
     err.statusCode = 401;
