@@ -206,3 +206,22 @@
   gap: 0.4rem;
   box-shadow: var(--shadow);
 }
+
+/* Accès rapide au projet via QR code — fond blanc fixe (pas var(--bg-card))
+   pour rester un vrai contraste noir/blanc scannable en thème sombre aussi. */
+.cpd-qr {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem;
+  margin-top: 1.75rem;
+}
+.cpd-qr__caption {
+  color: #0F172A;
+  font-size: 0.78rem;
+  font-weight: 700;
+}

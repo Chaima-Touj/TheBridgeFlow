@@ -31,6 +31,7 @@ import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarou
 import TestimonialsScreenshotCarousel from "../components/common/TestimonialsScreenshotCarousel.jsx";
 import TechMarquee from "../components/common/TechMarquee.jsx";
 import FormationCategories from "../components/common/FormationCategories.jsx";
+import CeremonySection from "../components/common/CeremonySection.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
@@ -376,6 +377,12 @@ export default function LandingPage() {
           </div>
         </section>
       )}
+
+      {/* ── CÉRÉMONIE — après les formations (ce qu'on apprend), avant les
+          témoignages (ce qu'on en dit) : montre ce que les étudiants
+          construisent concrètement (projets de stage/PFE votés par la
+          communauté), en pont narratif entre les deux. ──────────────────── */}
+      <CeremonySection />
 
       {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Summer Camp, PFE, puis Formation.
           Summer Camp/PFE viennent de l'API (SiteSettings.testimonialVideos) ; Formation

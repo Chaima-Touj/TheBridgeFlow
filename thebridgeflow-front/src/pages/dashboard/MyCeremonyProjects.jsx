@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { FiPlus, FiTrendingUp, FiExternalLink, FiGithub, FiPlay, FiUpload, FiX } from "react-icons/fi";
+import { QRCodeSVG } from "qrcode.react";
+import { FiPlus, FiTrendingUp, FiExternalLink, FiGithub, FiPlay, FiUpload, FiX, FiGrid } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
@@ -135,6 +136,7 @@ export default function MyCeremonyProjects() {
   const [showForm,   setShowForm]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError,  setFormError]  = useState("");
+  const [qrProject,  setQrProject]  = useState(null);
 
   const loadProjects = () => {
     setLoading(true);
@@ -193,6 +195,15 @@ export default function MyCeremonyProjects() {
                   {p.driveAppUrl && <a href={p.driveAppUrl} target="_blank" rel="noopener noreferrer"><FiExternalLink size={14} /></a>}
                   {p.driveVideoUrl && <a href={p.driveVideoUrl} target="_blank" rel="noopener noreferrer"><FiPlay size={14} /></a>}
                   {p.githubUrl && <a href={p.githubUrl} target="_blank" rel="noopener noreferrer"><FiGithub size={14} /></a>}
+                  <button
+                    type="button"
+                    className="mcp-card__qr-btn"
+                    onClick={() => setQrProject(p)}
+                    title={t("myCeremonyProjects.showQr")}
+                    aria-label={t("myCeremonyProjects.showQr")}
+                  >
+                    <FiGrid size={14} />
+                  </button>
                 </div>
               </div>
             </article>
@@ -208,6 +219,23 @@ export default function MyCeremonyProjects() {
             onSubmit={handleCreate}
             onCancel={() => setShowForm(false)}
           />
+        </Modal>
+      )}
+
+      {qrProject && (
+        <Modal title={qrProject.title} onClose={() => setQrProject(null)} maxWidth={340}>
+          <div className="mcp-qr-modal">
+            <QRCodeSVG
+              value={`${window.location.origin}/ceremonie/${qrProject._id}`}
+              size={220}
+              level="M"
+              marginSize={2}
+              fgColor="#000000"
+              bgColor="#FFFFFF"
+              title={t("myCeremonyProjects.showQr")}
+            />
+            <p className="mcp-qr-modal__hint">{t("myCeremonyProjects.qrHint")}</p>
+          </div>
         </Modal>
       )}
     </DashboardLayout>

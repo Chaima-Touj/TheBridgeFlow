@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { QRCodeSVG } from "qrcode.react";
 import { FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, FiUser, FiCheckCircle, FiPlusCircle } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
@@ -133,6 +134,19 @@ export default function CeremonyProjectDetail() {
                     <FiGithub size={15} /> GitHub
                   </a>
                 )}
+              </div>
+
+              <div className="cpd-qr">
+                <QRCodeSVG
+                  value={`${window.location.origin}/ceremonie/${project._id}`}
+                  size={104}
+                  level="M"
+                  marginSize={2}
+                  fgColor="#000000"
+                  bgColor="#FFFFFF"
+                  title={t("ceremony.qrCaption")}
+                />
+                <span className="cpd-qr__caption">{t("ceremony.qrCaption")}</span>
               </div>
             </div>
           </article>

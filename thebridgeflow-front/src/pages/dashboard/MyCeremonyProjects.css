@@ -30,6 +30,36 @@
 }
 .mcp-card__links a:hover { color: var(--primary); }
 
+.mcp-card__qr-btn {
+  color: var(--text-muted);
+  display: inline-flex;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.mcp-card__qr-btn:hover { color: var(--primary); }
+
+/* ── Modale QR code — carte blanche fixe (pas var(--bg-card)) pour rester
+   scannable/imprimable quel que soit le thème actif. ────────────────────── */
+.mcp-qr-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+.mcp-qr-modal__hint {
+  /* Couleur fixe (pas var(--text-secondary), qui devient clair en thème
+     sombre) — le fond de cette carte reste blanc quel que soit le thème. */
+  color: #475569;
+  font-size: 0.82rem;
+  text-align: center;
+  margin: 0;
+}
+
 /* ── Upload de couverture (formulaire "Nouveau projet") ──────────────────── */
 .mcp-cover-upload {
   display: flex;

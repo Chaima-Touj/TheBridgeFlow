@@ -632,6 +632,14 @@
     "popularSub": "Découvrez nos formations les plus demandées et lancez votre carrière.",
     "viewDetails": "Voir les détails",
     "viewAllFormations": "Voir toutes les formations →",
+    "ceremonyBadge": "Cérémonie",
+    "ceremonyTitle": "Vos projets ont une scène",
+    "ceremonySub": "Chaque session, nos étudiants soumettent leurs meilleurs projets de stage et de PFE. La communauté vote pour ses favoris, avec un classement en direct jusqu'à la clôture.",
+    "ceremonyStep1": "Les étudiants soumettent leurs projets de stage/PFE",
+    "ceremonyStep2": "La communauté vote pour ses projets favoris",
+    "ceremonyStep3": "Un classement en direct, jusqu'à l'annonce du gagnant",
+    "ceremonyCta": "Découvrir les projets",
+    "ceremonyQrCaption": "Scannez pour voter",
     "aboutBadge": "À propos de nous",
     "aboutTitle": "Votre partenaire pour une carrière réussie",
     "aboutSub": "Nous accompagnons chaque étudiant vers l'excellence avec des formations de qualité et un suivi personnalisé.",
@@ -1887,7 +1895,8 @@
     "voteCancel": "Retirer",
     "voteClosed": "Le vote de la Cérémonie est clôturé. Merci à tous les participants !",
     "voteNotStarted": "Le vote n'a pas encore commencé.",
-    "voteEnded": "La période de vote est terminée."
+    "voteEnded": "La période de vote est terminée.",
+    "qrCaption": "Scannez pour accéder à ce projet"
   },
   "myCeremonyProjects": {
     "pageTitle": "Mes projets — Cérémonie",
@@ -1908,6 +1917,8 @@
     "teamPlaceholder": "Nom 1, Nom 2...",
     "submitting": "Envoi en cours...",
     "submit": "Créer le projet",
+    "showQr": "Afficher le QR code",
+    "qrHint": "Scannez ou imprimez ce QR code pour donner un accès direct à votre projet.",
     "errors": {
       "titleRequired": "Le titre est requis.",
       "imageInvalid": "Impossible de traiter cette image.",

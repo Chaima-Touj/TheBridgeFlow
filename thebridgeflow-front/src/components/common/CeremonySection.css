@@ -1,0 +1,85 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CEREMONY SECTION — Landing Page, présentation + QR code d'accès rapide.
+   .lp-section-badge/.lp-section-title/.lp-section-sub réutilisées telles
+   quelles depuis LandingPage.css (déjà génériques) — uniquement les classes
+   propres à cette section sont définies ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ceremony-section {
+  background: var(--bg);
+  padding: 4rem 2rem;
+}
+
+.ceremony-section__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.ceremony-section__steps {
+  list-style: none;
+  margin: 1.5rem 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.ceremony-section__step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.ceremony-section__step-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.ceremony-section__right {
+  display: flex;
+  justify-content: center;
+}
+
+.ceremony-section__qr-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  box-shadow: var(--shadow-lg);
+}
+.ceremony-section__qr-caption {
+  color: #0F172A;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .ceremony-section__inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+  .ceremony-section__step {
+    text-align: start;
+  }
+  .ceremony-section__right {
+    order: -1;
+  }
+}

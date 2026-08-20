@@ -632,6 +632,14 @@
     "popularSub": "Discover our most in-demand training programs and launch your career.",
     "viewDetails": "View details",
     "viewAllFormations": "View all trainings →",
+    "ceremonyBadge": "Ceremony",
+    "ceremonyTitle": "Your projects deserve a stage",
+    "ceremonySub": "Every session, our students submit their best internship and capstone projects. The community votes for its favorites, with a live leaderboard until voting closes.",
+    "ceremonyStep1": "Students submit their internship/capstone projects",
+    "ceremonyStep2": "The community votes for its favorite projects",
+    "ceremonyStep3": "A live leaderboard, until the winner is announced",
+    "ceremonyCta": "Discover the projects",
+    "ceremonyQrCaption": "Scan to vote",
     "aboutBadge": "About us",
     "aboutTitle": "Your partner for a successful career",
     "aboutSub": "We guide every student toward excellence with quality training and personalized support.",
@@ -1887,7 +1895,8 @@
     "voteCancel": "Remove",
     "voteClosed": "Ceremony voting is closed. Thank you to everyone who took part!",
     "voteNotStarted": "Voting hasn't started yet.",
-    "voteEnded": "The voting period has ended."
+    "voteEnded": "The voting period has ended.",
+    "qrCaption": "Scan to access this project"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",
@@ -1908,6 +1917,8 @@
     "teamPlaceholder": "Name 1, Name 2...",
     "submitting": "Sending...",
     "submit": "Create project",
+    "showQr": "Show QR code",
+    "qrHint": "Scan or print this QR code to give direct access to your project.",
     "errors": {
       "titleRequired": "Title is required.",
       "imageInvalid": "Unable to process this image.",
