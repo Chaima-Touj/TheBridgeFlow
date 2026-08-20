@@ -63,24 +63,31 @@ export default function CeremonySection() {
   const containerVariants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: reduceMotion ? 0 : 0.14, delayChildren: reduceMotion ? 0 : 0.05 },
+      transition: { staggerChildren: reduceMotion ? 0 : 0.08, delayChildren: reduceMotion ? 0 : 0.02 },
     },
   };
   const itemVariants = {
     hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_LAND } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_LAND } },
   };
   const qrCardVariants = {
     hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36, scale: 0.94 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: EASE_LAND } },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: EASE_LAND } },
   };
   const titleContainerVariants = {
     hidden: {},
-    visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.07 } },
+    visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.045 } },
   };
+  // Deux réglages testés et mesurés à budget de temps égal (~610ms de bout
+  // en bout) : easeOut 0.3s "sûr" vs. spring léger (retenu) — décélération
+  // plus organique, cohérent avec les springs déjà utilisés ailleurs dans
+  // Cérémonie (CeremonyLeaderboard.jsx CARD_TRANSITION), sans surcoût.
   const titleWordVariants = {
-    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 22, rotateX: -55 },
-    visible: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.5, ease: EASE_LAND } },
+    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14, rotateX: -18 },
+    visible: {
+      opacity: 1, y: 0, rotateX: 0,
+      transition: reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 320, damping: 24, mass: 0.6 },
+    },
   };
 
   return (
