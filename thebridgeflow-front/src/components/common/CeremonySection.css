@@ -21,42 +21,74 @@
   inset: -10%;
   z-index: 0;
   background:
-    radial-gradient(ellipse 480px 380px at 82% 20%, rgba(37, 99, 235, 0.14), transparent 70%),
-    radial-gradient(ellipse 420px 340px at 8% 85%, rgba(37, 99, 235, 0.08), transparent 70%);
+    radial-gradient(ellipse 620px 320px at 50% 0%, rgba(37, 99, 235, 0.13), transparent 70%),
+    radial-gradient(ellipse 480px 360px at 50% 100%, rgba(37, 99, 235, 0.09), transparent 70%);
   filter: blur(20px);
   pointer-events: none;
 }
 [data-theme="dark"] .ceremony-section__glow {
   background:
-    radial-gradient(ellipse 480px 380px at 82% 20%, rgba(37, 99, 235, 0.22), transparent 70%),
-    radial-gradient(ellipse 420px 340px at 8% 85%, rgba(37, 99, 235, 0.12), transparent 70%);
+    radial-gradient(ellipse 620px 320px at 50% 0%, rgba(37, 99, 235, 0.22), transparent 70%),
+    radial-gradient(ellipse 480px 360px at 50% 100%, rgba(37, 99, 235, 0.13), transparent 70%);
 }
 
+/* Colonne unique centrée : badge → titre → sous-titre → étapes → CTA →
+   carte QR, tout centré (text-align + margin:0 auto sur les blocs qui en
+   ont besoin). max-width resserré (820px, vs 1280px en 2 colonnes) — une
+   colonne centrée trop large donnerait des lignes de texte illisibles. */
 .ceremony-section__inner {
   position: relative;
   z-index: 1;
-  max-width: 1280px;
+  max-width: 820px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 3rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: 1.1rem;
+}
+
+/* ── Titre — traitement "hero", pas un h2 plat : dégradé texte identique à
+   .fp-hero__title/.op-hero__title/.msb__logo-accent (même formule reprise
+   partout ailleurs dans le projet — var(--primary) → #7C3AED, pas une
+   nouvelle couleur inventée), taille généreuse, mots animés individuellement
+   (voir titleWordVariants dans le JSX). perspective sur le <motion.h2> pour
+   que le rotateX de chaque mot rende un vrai effet 3D. ────────────────────── */
+.ceremony-section__title {
+  font-size: clamp(1.9rem, 4.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0.25rem 0 0.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ceremony-section__title-word {
+  display: inline-block;
+}
+
+.ceremony-section__sub {
+  max-width: 620px;
 }
 
 .ceremony-section__steps {
   list-style: none;
-  margin: 1.5rem 0 2rem;
+  margin: 0.75rem 0 0.5rem;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem 2rem;
 }
 .ceremony-section__step {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 .ceremony-section__step-icon {
   width: 34px;
@@ -73,6 +105,7 @@
 .ceremony-section__right {
   display: flex;
   justify-content: center;
+  margin-top: 1rem;
 }
 
 /* Carte "flottante" premium : ombre en 2 couches (large/teintée primary +
@@ -111,17 +144,12 @@
   margin: 0;
 }
 
-@media (max-width: 1024px) {
-  .ceremony-section__inner {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: center;
-  }
-  .ceremony-section__step {
-    text-align: start;
-  }
-  .ceremony-section__right {
-    order: -1;
+@media (max-width: 560px) {
+  .ceremony-section { padding: 3rem 1.25rem; }
+  .ceremony-section__steps {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
   }
 }
 

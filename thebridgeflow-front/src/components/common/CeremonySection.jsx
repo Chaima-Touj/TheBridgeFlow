@@ -24,6 +24,8 @@ function resetCardTilt(e) {
   e.currentTarget.style.transform = "";
 }
 
+const EASE_LAND = [0.16, 1, 0.3, 1];
+
 /**
  * Section promo "Cérémonie" sur la Landing Page — même pattern que les
  * autres sections dédiées (NewsSection.jsx, TechMarquee.jsx) : composant
@@ -31,13 +33,13 @@ function resetCardTilt(e) {
  * Pas de fetch ici (contrairement à NewsSection) : texte + CTA statiques,
  * seul le QR code est généré dynamiquement (voir ceremonyUrl).
  *
- * Animation d'entrée : le texte glisse depuis la gauche avec une légère
- * rotation qui se stabilise ("planeur qui se pose"), la carte QR suit
- * juste après depuis la droite avec un rotateY prononcé qui se redresse
- * ("objet qui atterrit en pivotant") — décalage volontaire (delay) pour un
- * effet de composition, pas un mouvement simultané plat. Springs plutôt que
- * des easings simples, comme CeremonyLeaderboard.jsx (CARD_TRANSITION) pour
- * un rendu physique/premium cohérent avec le reste de Cérémonie.
+ * Layout : colonne unique centrée (badge → titre → sous-titre → étapes →
+ * CTA → carte QR). Animation d'entrée en cascade top→bottom (fade +
+ * translateY vers le haut) plutôt qu'un glissement latéral, qui n'a plus de
+ * sens dans un layout à une colonne — orchestrée via des variants Framer
+ * Motion (staggerChildren sur le conteneur), pas un whileInView par élément.
+ * Le titre a son propre sous-stagger mot par mot (variants imbriqués,
+ * propagation Framer Motion standard).
  */
 export default function CeremonySection() {
   const { t } = useTranslation();
@@ -52,52 +54,81 @@ export default function CeremonySection() {
     { Icon: FiUsers,      textKey: "landing.ceremonyStep2" },
     { Icon: FiTrendingUp, textKey: "landing.ceremonyStep3" },
   ];
+  const titleWords = t("landing.ceremonyTitle").split(" ");
 
-  // prefers-reduced-motion : un simple fondu remplace le glissement/pivot
-  // (pas de translation ni de rotation 3D), le tilt au survol est neutralisé
-  // plus bas (onMouseMove non attaché).
-  const textInitial   = reduceMotion ? { opacity: 0 }                        : { opacity: 0, x: -70, rotate: -5 };
-  const textTransition = reduceMotion ? { duration: 0.4 }                     : { type: "spring", stiffness: 45, damping: 12, mass: 1 };
-  const qrInitial      = reduceMotion ? { opacity: 0 }                        : { opacity: 0, x: 70, rotateY: 50 };
-  const qrTransition    = reduceMotion ? { duration: 0.4, delay: 0.15 }        : { type: "spring", stiffness: 48, damping: 11, mass: 1.1, delay: 0.18 };
+  // ── Orchestration de la cascade ──────────────────────────────────────────
+  // prefers-reduced-motion : les blocs restent en fondu simple (pas de
+  // translateY) et le stagger est neutralisé (délais à 0) — cascade quasi
+  // instantanée plutôt que supprimée, pour éviter un flash de contenu.
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: reduceMotion ? 0 : 0.14, delayChildren: reduceMotion ? 0 : 0.05 },
+    },
+  };
+  const itemVariants = {
+    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_LAND } },
+  };
+  const qrCardVariants = {
+    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36, scale: 0.94 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: EASE_LAND } },
+  };
+  const titleContainerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.07 } },
+  };
+  const titleWordVariants = {
+    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 22, rotateX: -55 },
+    visible: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.5, ease: EASE_LAND } },
+  };
 
   return (
     <section id="ceremonie" className="ceremony-section">
       <div className="ceremony-section__glow" aria-hidden="true" />
-      <div className="ceremony-section__inner">
-        <motion.div
-          className="ceremony-section__left"
-          initial={textInitial}
-          whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={textTransition}
+      <motion.div
+        className="ceremony-section__inner"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <motion.span className="lp-section-badge" variants={itemVariants}>
+          <FiAward size={13} /> {t("landing.ceremonyBadge")}
+        </motion.span>
+
+        <motion.h2
+          className="ceremony-section__title"
+          variants={titleContainerVariants}
+          style={{ perspective: 600 }}
         >
-          <span className="lp-section-badge"><FiAward size={13} /> {t("landing.ceremonyBadge")}</span>
-          <h2 className="lp-section-title">{t("landing.ceremonyTitle")}</h2>
-          <p className="lp-section-sub">{t("landing.ceremonySub")}</p>
+          {titleWords.map((word, i) => (
+            <motion.span key={i} className="ceremony-section__title-word" variants={titleWordVariants}>
+              {word}{i < titleWords.length - 1 ? " " : ""}
+            </motion.span>
+          ))}
+        </motion.h2>
 
-          <ul className="ceremony-section__steps">
-            {steps.map(({ Icon, textKey }) => (
-              <li key={textKey} className="ceremony-section__step">
-                <span className="ceremony-section__step-icon"><Icon size={17} /></span>
-                {t(textKey)}
-              </li>
-            ))}
-          </ul>
+        <motion.p className="lp-section-sub ceremony-section__sub" variants={itemVariants}>
+          {t("landing.ceremonySub")}
+        </motion.p>
 
+        <motion.ul className="ceremony-section__steps" variants={itemVariants}>
+          {steps.map(({ Icon, textKey }) => (
+            <li key={textKey} className="ceremony-section__step">
+              <span className="ceremony-section__step-icon"><Icon size={17} /></span>
+              {t(textKey)}
+            </li>
+          ))}
+        </motion.ul>
+
+        <motion.div variants={itemVariants}>
           <Link to="/ceremonie" className="btn btn-primary btn-lg">
             {t("landing.ceremonyCta")} <FiArrowRight />
           </Link>
         </motion.div>
 
-        <motion.div
-          className="ceremony-section__right"
-          style={{ perspective: 1000 }}
-          initial={qrInitial}
-          whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={qrTransition}
-        >
+        <motion.div className="ceremony-section__right" variants={qrCardVariants}>
           <div
             className="ceremony-section__qr-card"
             onMouseMove={reduceMotion ? undefined : handleCardTilt}
@@ -119,7 +150,7 @@ export default function CeremonySection() {
             <p className="ceremony-section__qr-caption">{t("landing.ceremonyQrCaption")}</p>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
