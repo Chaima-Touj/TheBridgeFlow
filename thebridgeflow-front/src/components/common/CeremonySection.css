@@ -6,11 +6,35 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ceremony-section {
+  position: relative;
   background: var(--bg);
   padding: 4rem 2rem;
+  overflow: hidden;
+}
+
+/* Profondeur de fond légère — même technique que .lp-hero__overlay (dégradé
+   doux en rgba plutôt qu'un aplat), teinte var(--primary) au lieu d'inventer
+   une nouvelle couleur. Flou + faible opacité : perceptible sans distraire
+   du contenu. */
+.ceremony-section__glow {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 480px 380px at 82% 20%, rgba(37, 99, 235, 0.14), transparent 70%),
+    radial-gradient(ellipse 420px 340px at 8% 85%, rgba(37, 99, 235, 0.08), transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+[data-theme="dark"] .ceremony-section__glow {
+  background:
+    radial-gradient(ellipse 480px 380px at 82% 20%, rgba(37, 99, 235, 0.22), transparent 70%),
+    radial-gradient(ellipse 420px 340px at 8% 85%, rgba(37, 99, 235, 0.12), transparent 70%);
 }
 
 .ceremony-section__inner {
+  position: relative;
+  z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
@@ -51,16 +75,33 @@
   justify-content: center;
 }
 
+/* Carte "flottante" premium : ombre en 2 couches (large/teintée primary +
+   resserrée/neutre, pour la profondeur) + bordure en dégradé (double
+   background + background-clip, pas de wrapper supplémentaire) + tilt 3D au
+   survol (voir handleCardTilt, transform posé en JS). QR modules restent
+   noir/blanc purs (voir JSX) — seule la carte autour reçoit le traitement. */
 .ceremony-section__qr-card {
-  background: #fff;
-  border: 1px solid var(--border);
+  position: relative;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(135deg, var(--primary), var(--primary-light)) border-box;
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.9rem;
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    0 30px 60px -20px rgba(37, 99, 235, 0.35),
+    0 14px 28px -12px rgba(15, 23, 42, 0.28);
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+  will-change: transform;
+}
+.ceremony-section__qr-card:hover {
+  box-shadow:
+    0 34px 64px -18px rgba(37, 99, 235, 0.42),
+    0 16px 32px -12px rgba(15, 23, 42, 0.32);
 }
 .ceremony-section__qr-caption {
   color: #0F172A;
@@ -82,4 +123,12 @@
   .ceremony-section__right {
     order: -1;
   }
+}
+
+/* Le JS (voir CeremonySection.jsx) n'attache déjà plus le tilt au survol
+   quand prefers-reduced-motion est actif — cette règle est une sécurité
+   supplémentaire côté CSS, même traitement que .tm-marquee__track
+   (TechMarquee.css). */
+@media (prefers-reduced-motion: reduce) {
+  .ceremony-section__qr-card { transition: none; }
 }
