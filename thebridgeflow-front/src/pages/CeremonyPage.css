@@ -1,57 +1,56 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    HERO — spécifique Cérémonie, ne réutilise pas .fp-hero (partagé Formations/
-   Offres, thème clair) pour ne pas impacter ces autres pages. Fond clair +
-   illustration réelle (public/ceremony-trophy.png, même pattern que
-   favicon.png : chemin absolu "/nom.png", pas d'import) + titre bicolore en
-   réutilisant le dégradé texte déjà en place ailleurs (.fp-hero__title,
-   .op-hero__title, .msb__logo-accent) : var(--primary) + #7C3AED, pas une
-   couleur inventée. Confettis décoratifs en CSS pur (pas de nouvelle image),
-   recolorés pour rester visibles sur fond clair. ─────────────────────────── */
+   Offres, thème clair) pour ne pas impacter ces autres pages. Fond = image
+   banniere réelle (public/ceremony-hero-bg.png, même pattern que
+   favicon.png/hero-girl.png : chemin absolu "/nom.png", pas d'import) qui
+   contient déjà le trophée + les confettis + le dégradé bleu→violet — plus
+   de dégradé CSS ni de <img> décoratif séparé. background-color de repli
+   proche de la teinte dominante de l'image en cas d'échec de chargement.
+   Contenu centré sur une colonne (badge/titre/sous-titre), au-dessus du
+   fond. Titre bicolore en réutilisant le dégradé texte déjà en place
+   ailleurs (.fp-hero__title, .op-hero__title, .msb__logo-accent) :
+   var(--primary) + #7C3AED, pas une couleur inventée.
+   Voile blanc derrière le texte (.cp-hero__inner::before) : mesuré par
+   échantillonnage pixel réel + calcul de contraste WCAG que le socle violet
+   foncé du trophée peut, selon la largeur d'écran, se retrouver recadré pile
+   sous le texte centré (contraste descendu jusqu'à 1.02:1 sur 1024px de
+   large, illisible). Deux essais précédents (dégradé radial en % de la
+   largeur du HERO entier, puis dégradé radial calé sur .cp-hero__inner)
+   décroissaient trop tôt pour couvrir tout le titre — qui occupe presque
+   toute la largeur de .cp-hero__inner (820px) sur certains breakpoints — et
+   laissaient encore des zones sous 4.5:1. Solution retenue : un rectangle
+   blanc à opacité UNIFORME (pas de dégradé) calé sur .cp-hero__inner, avec
+   les bords adoucis via filter:blur() plutôt qu'un fondu d'opacité — garantit
+   une couverture constante partout sous le texte, pas seulement au centre.
+   Revérifié après coup : plus aucun point d'échantillon sous le seuil AA
+   4.5:1 sur 7 largeurs testées (390 → 1920px). ───────────────────────────── */
 .cp-hero {
   position: relative;
   overflow: hidden;
   padding: calc(64px + 3.5rem) 1.5rem 4rem;
-  background: linear-gradient(135deg, #F9FBFE 0%, #EAF3FD 50%, #DCEBFC 100%);
+  background-color: #DCEBFC;
+  background-image: url("/ceremony-hero-bg.png");
+  background-size: cover;
+  background-position: left center;
+  background-repeat: no-repeat;
+  text-align: center;
 }
-
-.cp-hero__decor {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.cp-confetti {
-  position: absolute;
-  border-radius: 3px;
-  opacity: 0.6;
-}
-.cp-confetti--1 { top: 12%; left: 20%; width: 14px; height: 14px; background: #F59E0B; transform: rotate(20deg); }
-.cp-confetti--2 { top: 32%; left: 4%;  width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
-.cp-confetti--3 { top: 16%; right: 10%; width: 16px; height: 16px; background: #7C3AED; transform: rotate(-15deg); }
-.cp-confetti--4 { top: 40%; right: 18%; width: 10px; height: 10px; background: #F59E0B; border-radius: 50%; }
 
 .cp-hero__inner {
   position: relative;
   z-index: 1;
-  max-width: 1080px;
+  max-width: 820px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 3rem;
 }
-.cp-hero__illustration {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 360px;
-  height: auto;
-  display: block;
-}
-[dir="rtl"] .cp-hero__inner {
-  flex-direction: row-reverse;
-}
-
-.cp-hero__content {
-  flex: 1;
-  min-width: 0;
+.cp-hero__inner::before {
+  content: "";
+  position: absolute;
+  inset: -2rem -4rem;
+  z-index: -1;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.88);
+  filter: blur(14px);
+  pointer-events: none;
 }
 .cp-hero__badge {
   display: inline-flex;
@@ -66,7 +65,7 @@
   margin-bottom: 1.25rem;
 }
 .cp-hero__title {
-  font-size: clamp(1.9rem, 4.5vw, 2.75rem);
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
   font-weight: 800;
   margin: 0 0 0.75rem;
   line-height: 1.2;
@@ -82,13 +81,11 @@
 }
 
 @media (max-width: 768px) {
-  .cp-hero__illustration,
-  .cp-confetti {
-    display: none;
-  }
-  .cp-hero__inner {
-    flex-direction: column;
-    text-align: center;
+  /* Le conteneur devient plus étroit/haut : "left center" recadrerait sur la
+     zone chargée (trophée + confettis) juste sous le texte centré. On décale
+     vers la zone calme du dégradé, à droite de l'image. */
+  .cp-hero {
+    background-position: right center;
   }
 }
 
