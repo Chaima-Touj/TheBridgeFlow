@@ -131,13 +131,13 @@ export const vote = asyncHandler(async (req, res) => {
 
   const { projectIds } = req.body;
 
-  if (!Array.isArray(projectIds) || projectIds.length !== 3) {
-    const err = new Error("Le vote doit contenir exactement 3 projets.");
+  if (!Array.isArray(projectIds) || projectIds.length < 1 || projectIds.length > 3) {
+    const err = new Error("Le vote doit contenir entre 1 et 3 projets.");
     err.statusCode = 400;
     throw err;
   }
-  if (new Set(projectIds.map(String)).size !== 3) {
-    const err = new Error("Les 3 projets doivent être distincts.");
+  if (new Set(projectIds.map(String)).size !== projectIds.length) {
+    const err = new Error("Les projets sélectionnés doivent être distincts.");
     err.statusCode = 400;
     throw err;
   }
@@ -155,7 +155,7 @@ export const vote = asyncHandler(async (req, res) => {
   }
 
   const projects = await CeremonyProject.find({ _id: { $in: projectIds }, status: "approuvé" }).select("title").lean();
-  if (projects.length !== 3) {
+  if (projects.length !== projectIds.length) {
     const err = new Error("Un ou plusieurs projets sont introuvables.");
     err.statusCode = 404;
     throw err;

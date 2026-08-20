@@ -6,8 +6,8 @@ const ceremonyVoteSchema = new mongoose.Schema(
     projectIds: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "CeremonyProject" }],
       validate: {
-        validator: (arr) => Array.isArray(arr) && arr.length === 3,
-        message: "Un vote doit contenir exactement 3 projets.",
+        validator: (arr) => Array.isArray(arr) && arr.length >= 1 && arr.length <= 3,
+        message: "Un vote doit contenir entre 1 et 3 projets.",
       },
     },
   },

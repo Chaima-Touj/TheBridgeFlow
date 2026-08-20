@@ -69,7 +69,7 @@ export default function CeremonyPage() {
   };
 
   const handleConfirmVote = async () => {
-    if (selected.length !== MAX_SELECTION) return;
+    if (selected.length < 1) return;
 
     if (!user) {
       navigate("/login");
@@ -185,7 +185,7 @@ export default function CeremonyPage() {
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={selected.length !== MAX_SELECTION || submitting || voteDisabled}
+                disabled={selected.length < 1 || submitting || voteDisabled}
                 onClick={handleConfirmVote}
               >
                 {submitting ? t("ceremony.submitting") : t("ceremony.confirmVote", { count: selected.length })}

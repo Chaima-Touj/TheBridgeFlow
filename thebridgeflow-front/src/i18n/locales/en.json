@@ -1872,7 +1872,7 @@
     "leaderboardEmpty": "No project has received a vote yet.",
     "projectsTitle": "All projects",
     "projectsEmpty": "No project submitted yet.",
-    "voteHint": "Select exactly 3 projects ({{count}}/3 selected)",
+    "voteHint": "Select up to 3 projects ({{count}}/3 selected)",
     "voteSuccess": "Thank you! Your vote has been recorded.",
     "voteError": "An error occurred while sending your vote.",
     "confirmVote": "Confirm my vote ({{count}}/3)",
