@@ -1896,7 +1896,19 @@
     "voteClosed": "تم إغلاق تصويت الحفل. شكرًا لجميع المشاركين!",
     "voteNotStarted": "لم يبدأ التصويت بعد.",
     "voteEnded": "انتهت فترة التصويت.",
-    "qrCaption": "امسح للوصول إلى هذا المشروع"
+    "qrCaption": "امسح للوصول إلى هذا المشروع",
+    "liveVotes": "تصويت مباشر",
+    "topProjectsTitle": "أفضل المشاريع",
+    "viewAllProjects": "عرض جميع المشاريع",
+    "statsProjects": "مشاريع مقدَّمة",
+    "statsParticipants": "طلاب مشاركون",
+    "statsVotes": "أصوات معبَّر عنها",
+    "statsRewarded": "مشاريع للمكافأة",
+    "allProjectsSub": "اكتشف جميع المشاريع الإبداعية التي قدّمها طلابنا",
+    "searchPlaceholder": "ابحث عن مشروع...",
+    "allCategories": "جميع الفئات",
+    "noResults": "لا يوجد مشروع يطابق بحثك.",
+    "footerTagline": "ابتكار • تعاون • تأثير"
   },
   "myCeremonyProjects": {
     "pageTitle": "مشاريعي — الحفل",

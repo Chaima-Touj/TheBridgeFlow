@@ -1896,7 +1896,19 @@
     "voteClosed": "Le vote de la Cérémonie est clôturé. Merci à tous les participants !",
     "voteNotStarted": "Le vote n'a pas encore commencé.",
     "voteEnded": "La période de vote est terminée.",
-    "qrCaption": "Scannez pour accéder à ce projet"
+    "qrCaption": "Scannez pour accéder à ce projet",
+    "liveVotes": "Votes en temps réel",
+    "topProjectsTitle": "Top projets",
+    "viewAllProjects": "Voir tous les projets",
+    "statsProjects": "Projets soumis",
+    "statsParticipants": "Étudiants participants",
+    "statsVotes": "Votes exprimés",
+    "statsRewarded": "Projets à récompenser",
+    "allProjectsSub": "Découvrez tous les projets créatifs soumis par nos étudiants",
+    "searchPlaceholder": "Rechercher un projet...",
+    "allCategories": "Toutes catégories",
+    "noResults": "Aucun projet ne correspond à votre recherche.",
+    "footerTagline": "Innovation • Collaboration • Impact"
   },
   "myCeremonyProjects": {
     "pageTitle": "Mes projets — Cérémonie",

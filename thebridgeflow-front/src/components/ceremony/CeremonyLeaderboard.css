@@ -6,11 +6,73 @@
    clair/sombre est donc géré automatiquement, sans règle dupliquée ici.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.cl-root {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+/* ── Carte conteneur — "Classement en direct" et "Top projets" sont deux
+   cartes distinctes (référence design), pas un seul bloc — CeremonyPage.jsx
+   les empile avec un gap via .cp-leaderboard-section. ────────────────────── */
+.cl-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
 }
+
+.cl-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.cl-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+}
+
+.cl-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+}
+.cl-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+  animation: cl-live-pulse 1.8s ease-in-out infinite;
+}
+@keyframes cl-live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50%      { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+}
+
+.cl-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+.cl-view-all:hover { text-decoration: underline; }
+[dir="rtl"] .cl-view-all svg { transform: scaleX(-1); }
 
 /* ── Podium top 3 ─────────────────────────────────────────────────────────
    1er au centre, 2e à gauche, 3e à droite — pas d'apparence "carte" sur les
@@ -49,9 +111,12 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  /* Icône FiAward (SVG, currentColor) plutôt qu'un émoji à couleurs fixes —
-     blanc pour rester lisible sur les dégradés or/argent/bronze saturés. */
+  /* rank1 = icône FiAward (SVG, currentColor) ; rank2/rank3 = numéro de rang
+     en texte (référence design) — blanc pour rester lisible sur les
+     dégradés or/argent/bronze saturés. */
   color: #fff;
+  font-size: 1.2rem;
+  font-weight: 800;
   margin-bottom: 0.6rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -188,10 +253,10 @@
   animation: cl-skeleton-pulse 1.4s ease-in-out infinite;
   border: 1px dashed var(--border);
 }
-.cl-row--skeleton {
+.cl-toprow--skeleton {
   height: 88px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg) 50%, var(--bg-card) 70%);
+  border-radius: var(--radius);
+  background: linear-gradient(100deg, var(--bg) 30%, var(--bg-card) 50%, var(--bg) 70%);
   background-size: 200% 100%;
   animation: cl-skeleton-pulse 1.4s ease-in-out infinite;
   border: 1px solid var(--border);
@@ -201,70 +266,47 @@
   to   { background-position: -50% 0; }
 }
 
-/* ── Classement (4e place et plus) — réutilise .news-card, adapté en ligne
-   horizontale (le style de base .news-card est une carte verticale
-   image-en-haut ; sélecteur composé .cl-row.news-card pour prévaloir sur la
-   règle d'origine quel que soit l'ordre de bundling CSS entre fichiers). ── */
-.cl-list {
+/* ── "Top projets" — aperçu des rangs 4 à 6, carte distincte du podium
+   (référence design) : rang, avatar, titre/auteur, description, badge de
+   votes façon pilule avec pouce levé, alignés sur une seule ligne desktop. ── */
+.cl-toplist {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.cl-row.news-card {
-  flex-direction: row;
+.cl-toprow {
+  display: flex;
   align-items: center;
-  padding: 0.75rem 1.25rem 0.75rem 0.75rem;
   gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.cl-row.news-card:hover {
+.cl-toprow:hover {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.cl-row-rank {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 56px;
-  flex-shrink: 0;
-}
-.cl-row-rank__crown {
-  display: flex;
-  margin-bottom: 0.15rem;
-}
-/* Distinction or/argent/bronze réellement pilotée en CSS (couleur du SVG via
-   currentColor) — absente auparavant, l'émoji restait figé à sa propre
-   couleur quel que soit le rang. Mêmes teintes que .cl-podium-badge/.cl-podium-bar. */
-.cl-row-rank__crown--rank1 { color: #F59E0B; }
-.cl-row-rank__crown--rank2 { color: #94A3B8; }
-.cl-row-rank__crown--rank3 { color: #B87333; }
-.cl-row-rank__number {
-  font-size: 1.05rem;
+.cl-toprow-rank {
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-muted);
-}
-
-.cl-row-img-wrap.news-card__img-wrap {
-  width: 64px;
-  height: 64px;
-  aspect-ratio: unset;
-  border-radius: var(--radius-sm);
   flex-shrink: 0;
-}
-.cl-row-img-wrap__placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--bg), var(--border));
+  min-width: 28px;
 }
 
-.cl-row-body.news-card__body {
-  padding: 0;
-  gap: 0.3rem;
+.cl-toprow-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   min-width: 0;
+  flex-shrink: 0;
+  width: 150px;
 }
-
-.cl-row-title {
+.cl-toprow-title {
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
@@ -273,22 +315,35 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.cl-row-title:hover { color: var(--primary); }
-
-.cl-row-author {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
+.cl-toprow-title:hover { color: var(--primary); }
+.cl-toprow-author {
+  font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
-/* Votes alignés à droite de la ligne — .cl-row-body est en flex:1 (hérité de
-   .news-card__body), donc ce bloc se retrouve naturellement plaqué à droite. */
-.cl-row-votes {
-  font-size: 0.8rem;
-  font-weight: 700;
+.cl-toprow-desc {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.cl-toprow-votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--primary-light);
   color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -341,11 +396,16 @@
   .cl-podium-bar--rank3 { height: 42px; }
   .cl-podium-bar--rank3 .cl-podium-bar__rank { font-size: 1.2rem; }
 
-  .cl-row.news-card {
-    padding: 0.625rem 0.875rem 0.625rem 0.625rem;
+  .cl-toprow {
+    flex-wrap: wrap;
+    padding: 0.75rem 0.9rem;
   }
-  .cl-row-img-wrap.news-card__img-wrap {
-    width: 52px;
-    height: 52px;
+  .cl-toprow-body {
+    width: auto;
+    flex: 1;
+  }
+  .cl-toprow-desc {
+    flex-basis: 100%;
+    -webkit-line-clamp: 2;
   }
 }

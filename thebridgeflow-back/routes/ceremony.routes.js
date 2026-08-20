@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createProject, getProjects, getProject, getMyProjects, vote, getLeaderboard,
-  getCeremonySettings, getAdminProjects, acceptProject, rejectProject,
+  getCeremonySettings, getCeremonyStats, getAdminProjects, acceptProject, rejectProject,
   updateCeremonySettings, closeAndAnnounce, resetVotes,
 } from "../controllers/ceremony.controller.js";
 import { protect, authorize, validateObjectId } from "../middleware/auth.middleware.js";
@@ -11,6 +11,7 @@ const router = express.Router();
 // ─── Public ─────────────────────────────────────────────────────────────────
 router.get("/leaderboard",  getLeaderboard);
 router.get("/settings",     getCeremonySettings);
+router.get("/stats",        getCeremonyStats);
 router.get("/projects",     getProjects);
 router.get("/projects/:id", validateObjectId(), getProject);
 
