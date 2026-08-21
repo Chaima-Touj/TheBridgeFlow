@@ -8,7 +8,6 @@ export const ceremonyService = {
   vote:           (projectIds)  => api.post("/ceremony/vote", { projectIds }),
   getLeaderboard: ()            => api.get("/ceremony/leaderboard"),
   getSettings:    ()            => api.get("/ceremony/settings"),
-  getStats:       ()            => api.get("/ceremony/stats"),
 
   // ── Admin ─────────────────────────────────────────────────────────────────
   getAdminProjects:    ()          => api.get("/ceremony/admin/projects"),

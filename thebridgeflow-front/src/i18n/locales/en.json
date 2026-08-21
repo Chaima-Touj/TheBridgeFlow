@@ -1923,19 +1923,7 @@
     "voteClosed": "Ceremony voting is closed. Thank you to everyone who took part!",
     "voteNotStarted": "Voting hasn't started yet.",
     "voteEnded": "The voting period has ended.",
-    "qrCaption": "Scan to access this project",
-    "liveVotes": "Live votes",
-    "topProjectsTitle": "Top projects",
-    "viewAllProjects": "View all projects",
-    "statsProjects": "Submitted projects",
-    "statsParticipants": "Participating students",
-    "statsVotes": "Votes cast",
-    "statsRewarded": "Projects to reward",
-    "allProjectsSub": "Discover all the creative projects submitted by our students",
-    "searchPlaceholder": "Search a project...",
-    "allCategories": "All categories",
-    "noResults": "No project matches your search.",
-    "footerTagline": "Innovation • Collaboration • Impact"
+    "qrCaption": "Scan to access this project"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",

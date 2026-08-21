@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FiUser, FiTrendingUp, FiAward, FiList, FiArrowRight, FiThumbsUp } from "react-icons/fi";
+import { FiUser, FiTrendingUp, FiAward } from "react-icons/fi";
 import { ceremonyService } from "../../services/ceremony.service.js";
-import { scrollToSection } from "../../utils/scrollToSection.js";
 import "./CeremonyLeaderboard.css";
 
 // Même cadence que le polling déjà établi dans l'app (notifications,
@@ -60,16 +59,15 @@ function AuthorAvatar({ author, size = 28 }) {
 }
 
 /* ─── Colonne podium (top 3) ──────────────────────────────────────────────
-   layoutId (partagé avec TopProjectRow) : permet à Framer Motion d'animer en
-   douceur le passage d'un projet entre le podium et la liste "Top projets"
+   layoutId (partagé avec ListRow) : permet à Framer Motion d'animer en
+   douceur le passage d'un projet entre le podium et la liste classique
    (deux arbres JSX différents), pas seulement le réordonnancement DANS
    le podium (couvert par `layout`). L'avatar de l'auteur (photo ou
    initiale) est le visuel principal de chaque colonne — pas la couverture
    du projet. Pas d'apparence "carte" (bordure/ombre/padding uniforme) :
    la hiérarchie visuelle vient uniquement de la barre colorée en bas de
    colonne, dont la hauteur varie par rang (voir .cl-podium-bar--rank{n}),
-   les 3 colonnes restant alignées sur une base commune. Badge : trophée
-   pour le 1er, numéro de rang pour le 2e/3e (référence design). */
+   les 3 colonnes restant alignées sur une base commune. */
 function PodiumCard({ project, rank, t }) {
   return (
     <motion.div
@@ -82,7 +80,7 @@ function PodiumCard({ project, rank, t }) {
       className={`cl-podium-col cl-podium-col--rank${rank}`}
     >
       <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>
-        {rank === 1 ? <FiAward size={26} /> : rank}
+        <FiAward size={rank === 1 ? 26 : 20} />
       </span>
       <div className="cl-podium-avatar-ring">
         <AuthorAvatar author={project.studentId} size={rank === 1 ? 92 : 72} />
@@ -100,10 +98,11 @@ function PodiumCard({ project, rank, t }) {
   );
 }
 
-/* ─── Ligne "Top projets" (4e place et plus, aperçu des 3 suivantes) ──────
-   Carte distincte du podium, avec description + badge de votes façon pilule
-   (pouce levé), conforme à la référence visuelle. ─────────────────────── */
-function TopProjectRow({ project, rank, t }) {
+/* ─── Ligne de classement (4e place et plus) — pattern .news-card repris
+   pour la cohérence visuelle (photo/titre/auteur), adapté en ligne
+   horizontale : rang (+ couronne si jamais rank <= 3) à gauche, votes
+   alignés à droite. ──────────────────────────────────────────────────── */
+function ListRow({ project, rank, t }) {
   return (
     <motion.div
       layoutId={`ceremony-project-${project._id}`}
@@ -112,38 +111,45 @@ function TopProjectRow({ project, rank, t }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="cl-toprow"
+      className="cl-row news-card"
     >
-      <span className="cl-toprow-rank">#{rank}</span>
-      <AuthorAvatar author={project.studentId} size={40} />
-      <div className="cl-toprow-body">
-        <Link to={`/ceremonie/${project._id}`} className="cl-toprow-title">{project.title}</Link>
-        <span className="cl-toprow-author">{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
+      <div className="cl-row-rank">
+        {rank <= 3 && (
+          <span className={`cl-row-rank__crown cl-row-rank__crown--rank${rank}`} aria-hidden="true">
+            <FiAward size={13} />
+          </span>
+        )}
+        <span className="cl-row-rank__number">#{rank}</span>
       </div>
-      {project.description && <p className="cl-toprow-desc">{project.description}</p>}
-      <span className="cl-toprow-votes">
-        <FiThumbsUp size={13} /> {formatVoteLabel(project.voteCount, t)}
-      </span>
+      <div className="news-card__img-wrap cl-row-img-wrap">
+        {project.coverImage
+          ? <img src={project.coverImage} alt="" className="news-card__img" loading="lazy" />
+          : <div className="cl-row-img-wrap__placeholder" />}
+      </div>
+      <div className="news-card__body cl-row-body">
+        <Link to={`/ceremonie/${project._id}`} className="cl-row-title">{project.title}</Link>
+        <div className="cl-row-author">
+          <AuthorAvatar author={project.studentId} size={20} />
+          <span>{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
+        </div>
+      </div>
+      <div className="cl-row-votes">{formatVoteLabel(project.voteCount, t)}</div>
     </motion.div>
   );
 }
 
 function LeaderboardSkeleton() {
   return (
-    <>
-      <div className="cl-card" aria-hidden="true">
-        <div className="cl-podium">
-          {[2, 1, 3].map((rank) => (
-            <div key={rank} className={`cl-podium-col cl-podium-col--rank${rank} cl-podium-col--skeleton`} />
-          ))}
-        </div>
+    <div className="cl-root" aria-hidden="true">
+      <div className="cl-podium">
+        {[2, 1, 3].map((rank) => (
+          <div key={rank} className={`cl-podium-col cl-podium-col--rank${rank} cl-podium-col--skeleton`} />
+        ))}
       </div>
-      <div className="cl-card" aria-hidden="true">
-        <div className="cl-toplist">
-          {[4, 5, 6].map((i) => <div key={i} className="cl-toprow cl-toprow--skeleton" />)}
-        </div>
+      <div className="cl-list">
+        {[4, 5, 6].map((i) => <div key={i} className="cl-row cl-row--skeleton" />)}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -167,20 +173,15 @@ export default function CeremonyLeaderboard() {
 
   if (projects.length === 0) {
     return (
-      <div className="cl-card">
-        <div className="cl-empty">
-          <FiTrendingUp size={28} style={{ opacity: 0.3 }} />
-          <p>{t("ceremony.leaderboardEmpty")}</p>
-        </div>
+      <div className="cl-empty">
+        <FiTrendingUp size={28} style={{ opacity: 0.3 }} />
+        <p>{t("ceremony.leaderboardEmpty")}</p>
       </div>
     );
   }
 
   const podium = projects.slice(0, 3);
-  // Aperçu "Top projets" : les 3 suivantes (rang 4 à 6) — le classement
-  // complet reste consultable dans la grille "Tous les projets" plus bas
-  // sur la même page (lien "Voir tous les projets").
-  const topList = projects.slice(3, 6);
+  const rest = projects.slice(3);
   // Ordre visuel du podium : 2e à gauche, 1er au centre, 3e à droite.
   const podiumSlots = [
     { project: podium[1], rank: 2 },
@@ -189,38 +190,24 @@ export default function CeremonyLeaderboard() {
   ].filter((slot) => slot.project);
 
   return (
-    <>
-      <div className="cl-card">
-        <div className="cl-card__header">
-          <h3 className="cl-card__title"><FiAward size={18} /> {t("ceremony.leaderboardTitle")}</h3>
-          <span className="cl-live-badge"><span className="cl-live-dot" /> {t("ceremony.liveVotes")}</span>
-        </div>
-        <div className="cl-podium">
+    <div className="cl-root">
+      <div className="cl-podium">
+        <AnimatePresence>
+          {podiumSlots.map(({ project, rank }) => (
+            <PodiumCard key={project._id} project={project} rank={rank} t={t} />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {rest.length > 0 && (
+        <div className="cl-list">
           <AnimatePresence>
-            {podiumSlots.map(({ project, rank }) => (
-              <PodiumCard key={project._id} project={project} rank={rank} t={t} />
+            {rest.map((project, i) => (
+              <ListRow key={project._id} project={project} rank={i + 4} t={t} />
             ))}
           </AnimatePresence>
         </div>
-      </div>
-
-      {topList.length > 0 && (
-        <div className="cl-card">
-          <div className="cl-card__header">
-            <h3 className="cl-card__title"><FiList size={18} /> {t("ceremony.topProjectsTitle")}</h3>
-            <button type="button" className="cl-view-all" onClick={() => scrollToSection("ceremonie-grille")}>
-              {t("ceremony.viewAllProjects")} <FiArrowRight size={14} />
-            </button>
-          </div>
-          <div className="cl-toplist">
-            <AnimatePresence>
-              {topList.map((project, i) => (
-                <TopProjectRow key={project._id} project={project} rank={i + 4} t={t} />
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
       )}
-    </>
+    </div>
   );
 }

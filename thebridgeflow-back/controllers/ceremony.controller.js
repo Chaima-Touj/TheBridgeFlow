@@ -103,39 +103,6 @@ export const getCeremonySettings = asyncHandler(async (req, res) => {
   res.json(settings);
 });
 
-/* ── GET /api/ceremony/stats ───────────────────────────────────────────────
-   Public — chiffres affichés sur la page Cérémonie (cartes statistiques).
-   4 requêtes légères en parallèle plutôt qu'un pipeline d'agrégation
-   composite : le volume de données (projets/votes Cérémonie) reste modeste,
-   pas besoin d'optimiser prématurément.
-   - projectsCount     : projets approuvés (= ce que voit le public)
-   - participantsCount : étudiants distincts ayant soumis OU voté
-   - votesCount        : somme des voteCount des projets approuvés
-   - rewardedCount      : taille du podium (top 3), constante fonctionnelle */
-export const getCeremonyStats = asyncHandler(async (req, res) => {
-  const [projectsCount, votesAgg, submitterIds, voterIds] = await Promise.all([
-    CeremonyProject.countDocuments({ status: "approuvé" }),
-    CeremonyProject.aggregate([
-      { $match: { status: "approuvé" } },
-      { $group: { _id: null, total: { $sum: "$voteCount" } } },
-    ]),
-    CeremonyProject.distinct("studentId", { status: "approuvé" }),
-    CeremonyVote.distinct("studentId"),
-  ]);
-
-  const participants = new Set([
-    ...submitterIds.map(String),
-    ...voterIds.map(String),
-  ]);
-
-  res.json({
-    projectsCount,
-    participantsCount: participants.size,
-    votesCount: votesAgg[0]?.total || 0,
-    rewardedCount: Math.min(3, projectsCount),
-  });
-});
-
 // POST /api/ceremony/vote — { projectIds: [id1, id2, id3] }, réservé aux étudiants
 export const vote = asyncHandler(async (req, res) => {
   if (req.user.role !== "étudiant") {
