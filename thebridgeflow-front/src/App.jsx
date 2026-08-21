@@ -4,6 +4,7 @@ import { initGA, trackPageView, trackPageVisit } from "./utils/analytics.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import CustomCursor from "./components/common/CustomCursor.jsx";
 import ScrollToTop from "./components/common/ScrollToTop.jsx";
+import CookieBanner from "./components/common/CookieBanner.jsx";
 import Loader from "./components/common/Loader.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import Login    from "./pages/auth/Login.jsx";
@@ -84,6 +85,7 @@ export default function App() {
     <>
     <ScrollToTop />
     <CustomCursor />
+    <CookieBanner />
     <Routes>
       <Route path="/"         element={<LandingPage />} />
       <Route path="/login"    element={<Login />} />

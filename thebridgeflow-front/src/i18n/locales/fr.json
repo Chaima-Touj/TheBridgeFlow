@@ -1838,7 +1838,7 @@
     "nonPersonalTitle": "Informations non personnelles",
     "nonPersonalText": "Nous pouvons collecter des informations non personnelles sur les visiteurs lorsqu'ils interagissent avec notre site. Cela peut inclure le nom du navigateur, le type d'ordinateur et des informations techniques sur les moyens de connexion utilisés pour accéder à notre site, comme le système d'exploitation et les fournisseurs d'accès Internet.",
     "cookiesTitle": "Cookies et technologies de suivi",
-    "cookiesText": "Notre site peut utiliser des « cookies » pour améliorer l'expérience utilisateur. Les navigateurs web des utilisateurs placent des cookies sur leur disque dur pour des besoins d'enregistrement et parfois pour suivre des informations les concernant. Les utilisateurs peuvent choisir de configurer leur navigateur pour refuser les cookies ou les alerter lorsqu'un cookie est envoyé. Notez que certaines parties du site peuvent ne pas fonctionner correctement en cas de désactivation des cookies.",
+    "cookiesText": "Notre site utilise des cookies et des technologies de stockage local pour plusieurs finalités : mesure d'audience via Google Analytics (statistiques de visite anonymisées), connexion via un compte Google ou Facebook (« Se connecter avec... »), ainsi que la mémorisation de vos préférences (thème, langue, session de connexion). Vous pouvez configurer votre navigateur pour refuser les cookies, mais certaines fonctionnalités du site (connexion sociale, statistiques) pourraient alors ne plus fonctionner correctement.",
     "useTitle": "Comment nous utilisons les informations collectées",
     "useIntro": "TheBridgeFlow peut collecter et utiliser les informations personnelles des utilisateurs aux fins suivantes :",
     "useItems": [
@@ -1865,6 +1865,12 @@
     ],
     "protectTitle": "Comment nous protégeons vos informations",
     "protectText": "Nous adoptons des pratiques de collecte, de stockage et de traitement des données appropriées, ainsi que des mesures de sécurité pour protéger contre tout accès non autorisé, altération, divulgation ou destruction de vos informations personnelles, nom d'utilisateur, mot de passe, informations de transaction et données stockées sur notre site."
+  },
+  "cookieBanner": {
+    "message": "Nous utilisons des cookies et un stockage local pour la connexion, vos préférences (thème, langue), des statistiques de visite (Google Analytics) et la connexion via Google ou Facebook.",
+    "accept": "Accepter",
+    "refuse": "Refuser",
+    "privacyLink": "En savoir plus"
   },
   "ceremony": {
     "badge": "Cérémonie",

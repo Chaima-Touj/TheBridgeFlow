@@ -1838,7 +1838,7 @@
     "nonPersonalTitle": "Non-Personal Information",
     "nonPersonalText": "We may collect non-personal information about visitors whenever they interact with our site. This may include the browser name, the type of computer, and technical information about the means of connection used to access our site, such as the operating system and Internet service providers.",
     "cookiesTitle": "Cookies and Tracking Technologies",
-    "cookiesText": "Our site may use \"cookies\" to enhance the user experience. Users' web browsers place cookies on their hard drive for record-keeping purposes and sometimes to track information about them. Users may choose to set their browser to refuse cookies or to alert them when a cookie is being sent. Note that some parts of the site may not function properly if cookies are disabled.",
+    "cookiesText": "Our site uses cookies and local storage technologies for several purposes: audience measurement via Google Analytics (anonymized visit statistics), sign-in via a Google or Facebook account (\"Sign in with...\"), and remembering your preferences (theme, language, login session). You can configure your browser to refuse cookies, but some site features (social sign-in, statistics) may then stop working correctly.",
     "useTitle": "How We Use the Information We Collect",
     "useIntro": "TheBridgeFlow may collect and use users' personal information for the following purposes:",
     "useItems": [
@@ -1865,6 +1865,12 @@
     ],
     "protectTitle": "How We Protect Your Information",
     "protectText": "We adopt appropriate data collection, storage, and processing practices, as well as security measures, to protect against unauthorized access, alteration, disclosure, or destruction of your personal information, username, password, transaction information, and data stored on our site."
+  },
+  "cookieBanner": {
+    "message": "We use cookies and local storage for sign-in, your preferences (theme, language), visit statistics (Google Analytics), and sign-in via Google or Facebook.",
+    "accept": "Accept",
+    "refuse": "Decline",
+    "privacyLink": "Learn more"
   },
   "ceremony": {
     "badge": "Ceremony",
