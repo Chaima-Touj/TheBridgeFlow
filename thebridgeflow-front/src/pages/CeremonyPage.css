@@ -22,28 +22,15 @@
    blanc à opacité UNIFORME (pas de dégradé) calé sur .cp-hero__inner, avec
    les bords adoucis via filter:blur() plutôt qu'un fondu d'opacité — garantit
    une couverture constante partout sous le texte, pas seulement au centre.
-
-   background-size — PAS "cover" en desktop : avec cover, le facteur de zoom
-   = max(largeur_conteneur/largeur_image, hauteur_conteneur/hauteur_image).
-   La hauteur du Hero est quasi fixe (padding + 1 ligne de texte), donc quand
-   la largeur d'écran rétrécit, le ratio du conteneur se rapproche puis passe
-   sous le ratio natif de l'image (2172×724, ratio 3.0) : cover bascule alors
-   sur la hauteur et zoome énormément — mesuré/capturé : le trophée devient
-   ~2x plus gros et empiète sur le texte entre environ 850px et 1250px de
-   large (zone invisible aux breakpoints ronds 768/1024/1280/1440 testés
-   avant). Fix : "100% auto" cale le zoom uniquement sur la largeur — stricte-
-   ment identique à cover aux ratios larges (≥1300px environ, où cover est
-   déjà piloté par la largeur), mais empêche tout emballement en dessous.
-   Revérifié après coup : balayage continu 320→1920px tous les 40px, plus
-   aucun point d'échantillon sous le seuil AA 4.5:1, et zoom du trophée
-   stable (pas d'agrandissement anormal) sur toute la plage desktop. ─────── */
+   Revérifié après coup : plus aucun point d'échantillon sous le seuil AA
+   4.5:1 sur 7 largeurs testées (390 → 1920px). ───────────────────────────── */
 .cp-hero {
   position: relative;
   overflow: hidden;
   padding: calc(64px + 3.5rem) 1.5rem 4rem;
   background-color: #DCEBFC;
   background-image: url("/ceremony-hero-bg.png");
-  background-size: 100% auto;
+  background-size: cover;
   background-position: left center;
   background-repeat: no-repeat;
   text-align: center;
@@ -94,15 +81,10 @@
 }
 
 @media (max-width: 768px) {
-  /* Sous 768px, "100% auto" laisserait un grand bandeau de background-color
-     visible (l'image mise à l'échelle de la largeur devient bien plus basse
-     que le Hero, qui reste haut à cause du titre/sous-titre sur plusieurs
-     lignes) — on revient donc à "cover" ici pour un remplissage plein bord,
-     et "right center" pour cadrer sur la zone calme du dégradé plutôt que le
-     trophée + confettis, qui se retrouverait chargé juste sous le texte
-     centré à cette largeur. */
+  /* Le conteneur devient plus étroit/haut : "left center" recadrerait sur la
+     zone chargée (trophée + confettis) juste sous le texte centré. On décale
+     vers la zone calme du dégradé, à droite de l'image. */
   .cp-hero {
-    background-size: cover;
     background-position: right center;
   }
 }
