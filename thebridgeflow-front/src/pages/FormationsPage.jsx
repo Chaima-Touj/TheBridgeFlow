@@ -171,11 +171,17 @@ const FormationsPage = () => {
 
       {/* ── HERO — spécifique à cette page redesignée (.frp-hero), ne touche
           pas .fp-hero (partagé par 7 autres pages : Aide, Guides, Tarifs,
-          mentions légales, CGU, confidentialité, 404). Image de fond réelle
-          en mode clair (public/formation-hero-bg.png, même traitement que
-          .cp-hero sur /ceremonie), dégradé sombre inchangé en dark mode.
-          ────────────────────────────────────────────────────────────────── */}
+          mentions légales, CGU, confidentialité, 404). Dégradé clair
+          bleu→violet (contraste volontaire avec le hero sombre de
+          Cérémonie — même identité, contexte différent : apprentissage vs
+          compétition). ────────────────────────────────────────────────── */}
       <section className="frp-hero">
+        <div className="frp-hero__decor" aria-hidden="true">
+          <span className="frp-hero__illustration"><FiBookOpen size={40} /></span>
+          <span className="frp-dot frp-dot--1" />
+          <span className="frp-dot frp-dot--2" />
+          <span className="frp-dot frp-dot--3" />
+        </div>
         <div className="frp-hero__inner">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
