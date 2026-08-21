@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
@@ -33,7 +33,9 @@ export default function CeremonyProjectDetail() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
-  const [shareCopied, setShareCopied] = useState(false);
+  const [qrDownloaded, setQrDownloaded] = useState(false);
+  const [sharingQr, setSharingQr] = useState(false);
+  const qrWrapRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -55,18 +57,70 @@ export default function CeremonyProjectDetail() {
   const isSelected = project ? selected.includes(project._id) : false;
   const atMax = !isSelected && selected.length >= MAX_SELECTION;
 
-  // Même pattern que OfferDetail.jsx (handleShare) : Web Share API native si
-  // disponible, sinon repli copie presse-papiers avec confirmation visuelle.
-  const handleShare = async () => {
-    const url = `${window.location.origin}/ceremonie/${project._id}`;
-    if (navigator.share) {
-      await navigator.share({ title: project.title, url });
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        setShareCopied(true);
-        setTimeout(() => setShareCopied(false), 2500);
-      } catch { /* clipboard indisponible */ }
+  // Convertit le <svg> du QR (rendu par QRCodeSVG) en PNG — le SVG étant
+  // vectoriel, on peut le redessiner à une résolution bien plus grande
+  // (QR_EXPORT_SIZE) que sa taille d'affichage (104px) sans perte de netteté,
+  // pour un fichier partageable/imprimable de meilleure qualité.
+  const QR_EXPORT_SIZE = 512;
+  async function renderQrToPngBlob() {
+    const svgEl = qrWrapRef.current?.querySelector("svg");
+    if (!svgEl) return null;
+
+    const svgString = new XMLSerializer().serializeToString(svgEl);
+    const svgUrl = URL.createObjectURL(new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }));
+    try {
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = svgUrl;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = QR_EXPORT_SIZE;
+      canvas.height = QR_EXPORT_SIZE;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, QR_EXPORT_SIZE, QR_EXPORT_SIZE);
+      ctx.drawImage(img, 0, 0, QR_EXPORT_SIZE, QR_EXPORT_SIZE);
+      return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    } finally {
+      URL.revokeObjectURL(svgUrl);
+    }
+  }
+
+  // Partage l'IMAGE du QR (pas un lien texte) : Web Share API avec fichier si
+  // le navigateur le supporte (navigator.canShare({ files })), sinon repli
+  // téléchargement du PNG — même mécanisme que downloadCSV (utils/exportTable.js) :
+  // Blob -> URL.createObjectURL -> <a download> -> click.
+  const handleShareQr = async () => {
+    setSharingQr(true);
+    try {
+      const blob = await renderQrToPngBlob();
+      if (!blob) return;
+      const filename = `qr-ceremonie-${project._id}.png`;
+      const file = new File([blob], filename, { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: project.title });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setQrDownloaded(true);
+        setTimeout(() => setQrDownloaded(false), 2500);
+      }
+    } catch (err) {
+      // AbortError = l'utilisateur a fermé la feuille de partage native, pas
+      // une erreur à signaler. Le reste échoue silencieusement (même niveau
+      // de gestion d'erreur que l'ancien repli presse-papiers).
+      if (err?.name !== "AbortError") { /* ignoré */ }
+    } finally {
+      setSharingQr(false);
     }
   };
 
@@ -178,7 +232,7 @@ export default function CeremonyProjectDetail() {
               </div>
 
               <div className="cpd-qr-row">
-                <div className="cpd-qr">
+                <div className="cpd-qr" ref={qrWrapRef}>
                   <QRCodeSVG
                     value={`${window.location.origin}/ceremonie/${project._id}`}
                     size={104}
@@ -191,9 +245,9 @@ export default function CeremonyProjectDetail() {
                   <span className="cpd-qr__caption">{t("ceremony.qrCaption")}</span>
                 </div>
 
-                <button type="button" className="btn btn-outline" onClick={handleShare}>
-                  {shareCopied ? <FiCheck size={15} /> : <FiShare2 size={15} />}
-                  {shareCopied ? t("ceremony.shareCopied") : t("ceremony.share")}
+                <button type="button" className="btn btn-outline" disabled={sharingQr} onClick={handleShareQr}>
+                  {qrDownloaded ? <FiCheck size={15} /> : <FiShare2 size={15} />}
+                  {qrDownloaded ? t("ceremony.qrDownloaded") : t("ceremony.share")}
                 </button>
               </div>
             </div>

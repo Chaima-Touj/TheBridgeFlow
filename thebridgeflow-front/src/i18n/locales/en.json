@@ -1897,8 +1897,8 @@
     "voteNotStarted": "Voting hasn't started yet.",
     "voteEnded": "The voting period has ended.",
     "qrCaption": "Scan to access this project",
-    "share": "Share this project",
-    "shareCopied": "Link copied!"
+    "share": "Share QR code",
+    "qrDownloaded": "Downloaded!"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",

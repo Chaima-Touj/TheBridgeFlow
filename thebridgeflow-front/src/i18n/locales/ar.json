@@ -1897,8 +1897,8 @@
     "voteNotStarted": "لم يبدأ التصويت بعد.",
     "voteEnded": "انتهت فترة التصويت.",
     "qrCaption": "امسح للوصول إلى هذا المشروع",
-    "share": "مشاركة المشروع",
-    "shareCopied": "تم نسخ الرابط!"
+    "share": "مشاركة رمز QR",
+    "qrDownloaded": "تم التنزيل!"
   },
   "myCeremonyProjects": {
     "pageTitle": "مشاريعي — الحفل",
