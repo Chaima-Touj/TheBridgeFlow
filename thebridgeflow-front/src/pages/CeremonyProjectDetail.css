@@ -159,6 +159,18 @@
 }
 .cpd-vote-status__link:hover { text-decoration: underline; }
 
+/* Confirmation réelle du vote (même logique que .cp-vote-bar sur
+   CeremonyPage.jsx, voir useCeremonyVoteSubmit.js) — bouton global .btn,
+   juste la place dans le flux qui est propre à cette page. */
+.cpd-confirm-btn {
+  display: block;
+  margin-top: 0.9rem;
+}
+.cpd-vote-block .cp-success,
+.cpd-vote-block .cp-error {
+  margin-top: 0.9rem;
+}
+
 .cpd-desc {
   color: var(--text-secondary);
   line-height: 1.7;
@@ -207,6 +219,15 @@
   box-shadow: var(--shadow);
 }
 
+/* QR code + bouton de partage, côte à côte. ─────────────────────────────── */
+.cpd-qr-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
 /* Accès rapide au projet via QR code — fond blanc fixe (pas var(--bg-card))
    pour rester un vrai contraste noir/blanc scannable en thème sombre aussi. */
 .cpd-qr {
@@ -218,7 +239,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem;
-  margin-top: 1.75rem;
 }
 .cpd-qr__caption {
   color: #0F172A;

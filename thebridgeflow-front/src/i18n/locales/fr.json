@@ -1896,7 +1896,9 @@
     "voteClosed": "Le vote de la Cérémonie est clôturé. Merci à tous les participants !",
     "voteNotStarted": "Le vote n'a pas encore commencé.",
     "voteEnded": "La période de vote est terminée.",
-    "qrCaption": "Scannez pour accéder à ce projet"
+    "qrCaption": "Scannez pour accéder à ce projet",
+    "share": "Partager le projet",
+    "shareCopied": "Lien copié !"
   },
   "myCeremonyProjects": {
     "pageTitle": "Mes projets — Cérémonie",

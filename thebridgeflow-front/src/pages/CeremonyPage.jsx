@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiCheck, FiUser, FiAward } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CeremonyLeaderboard from "../components/ceremony/CeremonyLeaderboard.jsx";
-import { useAuth } from "../context/AuthContext.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
 import { useCeremonyVoteGate } from "../hooks/useCeremonyVoteGate.js";
+import { useCeremonyVoteSubmit } from "../hooks/useCeremonyVoteSubmit.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "../components/common/NewsSection.css";
 import "./FormationsPage.css";
@@ -21,8 +21,6 @@ const VOTE_GATE_MESSAGE_KEY = {
 
 export default function CeremonyPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const voteGateReason = useCeremonyVoteGate();
   const voteDisabled = voteGateReason !== null;
 
@@ -34,9 +32,7 @@ export default function CeremonyPage() {
   const [projects,   setProjects]   = useState([]);
   const [loading,    setLoading]    = useState(true);
   const { selected, toggleSelect: toggleSelection, clearSelection } = useCeremonySelection();
-  const [submitting, setSubmitting] = useState(false);
-  const [error,      setError]      = useState("");
-  const [success,    setSuccess]    = useState(false);
+  const { submitting, error, success, confirmVote, clearError } = useCeremonyVoteSubmit(clearSelection);
 
   useEffect(() => {
     ceremonyService.getProjects()
@@ -47,7 +43,7 @@ export default function CeremonyPage() {
 
   const toggleSelect = (id) => {
     if (success || voteDisabled) return;
-    setError("");
+    clearError();
     toggleSelection(id);
   };
 
@@ -66,27 +62,6 @@ export default function CeremonyPage() {
   };
   const resetCardTilt = (e) => {
     e.currentTarget.style.transform = "";
-  };
-
-  const handleConfirmVote = async () => {
-    if (selected.length < 1) return;
-
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
-    try {
-      await ceremonyService.vote(selected);
-      setSuccess(true);
-      clearSelection();
-    } catch (err) {
-      setError(err.response?.data?.message || t("ceremony.voteError"));
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   return (
@@ -186,7 +161,7 @@ export default function CeremonyPage() {
                 type="button"
                 className="btn btn-primary"
                 disabled={selected.length < 1 || submitting || voteDisabled}
-                onClick={handleConfirmVote}
+                onClick={() => confirmVote(selected)}
               >
                 {submitting ? t("ceremony.submitting") : t("ceremony.confirmVote", { count: selected.length })}
               </button>

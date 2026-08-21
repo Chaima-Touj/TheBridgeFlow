@@ -2,13 +2,18 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
-import { FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, FiUser, FiCheckCircle, FiPlusCircle } from "react-icons/fi";
+import {
+  FiArrowLeft, FiExternalLink, FiGithub, FiPlay, FiUsers, FiTrendingUp, FiUser,
+  FiCheckCircle, FiPlusCircle, FiShare2, FiCheck,
+} from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
 import { useCeremonyVoteGate } from "../hooks/useCeremonyVoteGate.js";
+import { useCeremonyVoteSubmit } from "../hooks/useCeremonyVoteSubmit.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "./FormationsPage.css";
+import "./CeremonyPage.css";
 import "./CeremonyProjectDetail.css";
 
 const VOTE_GATE_MESSAGE_KEY = {
@@ -20,13 +25,15 @@ const VOTE_GATE_MESSAGE_KEY = {
 export default function CeremonyProjectDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
-  const { selected, toggleSelect } = useCeremonySelection();
+  const { selected, toggleSelect, clearSelection } = useCeremonySelection();
   const voteGateReason = useCeremonyVoteGate();
   const voteDisabled = voteGateReason !== null;
+  const { submitting, error: voteError, success, confirmVote } = useCeremonyVoteSubmit(clearSelection);
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -47,6 +54,21 @@ export default function CeremonyProjectDetail() {
 
   const isSelected = project ? selected.includes(project._id) : false;
   const atMax = !isSelected && selected.length >= MAX_SELECTION;
+
+  // Même pattern que OfferDetail.jsx (handleShare) : Web Share API native si
+  // disponible, sinon repli copie presse-papiers avec confirmation visuelle.
+  const handleShare = async () => {
+    const url = `${window.location.origin}/ceremonie/${project._id}`;
+    if (navigator.share) {
+      await navigator.share({ title: project.title, url });
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2500);
+      } catch { /* clipboard indisponible */ }
+    }
+  };
 
   return (
     <div className="fp-page">
@@ -86,19 +108,38 @@ export default function CeremonyProjectDetail() {
                 <button
                   type="button"
                   className={`cpd-vote-btn${isSelected ? " cpd-vote-btn--active" : ""}`}
-                  disabled={atMax || voteDisabled}
+                  disabled={success || atMax || voteDisabled}
                   onClick={() => toggleSelect(project._id)}
                 >
                   {isSelected ? <FiCheckCircle size={18} /> : <FiPlusCircle size={18} />}
                   {isSelected ? t("ceremony.voteRemove") : t("ceremony.voteAdd")}
                 </button>
-                <p className="cpd-vote-status">
-                  {voteDisabled
-                    ? t(VOTE_GATE_MESSAGE_KEY[voteGateReason])
-                    : atMax ? t("ceremony.voteMaxReached") : t("ceremony.voteProgress", { count: selected.length, max: MAX_SELECTION })}
-                  {" "}
-                  <Link to="/ceremonie" className="cpd-vote-status__link">{t("ceremony.finishVote")}</Link>
-                </p>
+
+                {success ? (
+                  <div className="cp-success">{t("ceremony.voteSuccess")}</div>
+                ) : (
+                  <>
+                    <p className="cpd-vote-status">
+                      {voteDisabled
+                        ? t(VOTE_GATE_MESSAGE_KEY[voteGateReason])
+                        : atMax ? t("ceremony.voteMaxReached") : t("ceremony.voteProgress", { count: selected.length, max: MAX_SELECTION })}
+                      {" "}
+                      <Link to="/ceremonie" className="cpd-vote-status__link">{t("ceremony.finishVote")}</Link>
+                    </p>
+                    {/* Confirmation réelle du vote — même logique d'appel que
+                        .cp-vote-bar sur CeremonyPage.jsx (useCeremonyVoteSubmit,
+                        partagé, pas réimplémenté). */}
+                    <button
+                      type="button"
+                      className="cpd-confirm-btn btn btn-primary"
+                      disabled={selected.length < 1 || submitting || voteDisabled}
+                      onClick={() => confirmVote(selected)}
+                    >
+                      {submitting ? t("ceremony.submitting") : t("ceremony.confirmVote", { count: selected.length })}
+                    </button>
+                    {voteError && <div className="cp-error">{voteError}</div>}
+                  </>
+                )}
               </div>
 
               {project.description && <p className="cpd-desc">{project.description}</p>}
@@ -136,17 +177,24 @@ export default function CeremonyProjectDetail() {
                 )}
               </div>
 
-              <div className="cpd-qr">
-                <QRCodeSVG
-                  value={`${window.location.origin}/ceremonie/${project._id}`}
-                  size={104}
-                  level="M"
-                  marginSize={2}
-                  fgColor="#000000"
-                  bgColor="#FFFFFF"
-                  title={t("ceremony.qrCaption")}
-                />
-                <span className="cpd-qr__caption">{t("ceremony.qrCaption")}</span>
+              <div className="cpd-qr-row">
+                <div className="cpd-qr">
+                  <QRCodeSVG
+                    value={`${window.location.origin}/ceremonie/${project._id}`}
+                    size={104}
+                    level="M"
+                    marginSize={2}
+                    fgColor="#000000"
+                    bgColor="#FFFFFF"
+                    title={t("ceremony.qrCaption")}
+                  />
+                  <span className="cpd-qr__caption">{t("ceremony.qrCaption")}</span>
+                </div>
+
+                <button type="button" className="btn btn-outline" onClick={handleShare}>
+                  {shareCopied ? <FiCheck size={15} /> : <FiShare2 size={15} />}
+                  {shareCopied ? t("ceremony.shareCopied") : t("ceremony.share")}
+                </button>
               </div>
             </div>
           </article>
