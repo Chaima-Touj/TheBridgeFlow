@@ -1,53 +1,59 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    HERO — spécifique Cérémonie, ne réutilise pas .fp-hero (partagé Formations/
-   Offres, thème clair) pour ne pas impacter ces autres pages. Fond = image
-   banniere réelle (public/ceremony-hero-bg.png, même pattern que
-   favicon.png/hero-girl.png : chemin absolu "/nom.png", pas d'import) qui
-   contient déjà le trophée + les confettis + le dégradé bleu→violet — plus
-   de dégradé CSS ni de <img> décoratif séparé. background-color de repli
-   proche de la teinte dominante de l'image en cas d'échec de chargement.
-   Contenu centré sur une colonne (badge/titre/sous-titre), au-dessus du
-   fond. Titre bicolore en réutilisant le dégradé texte déjà en place
-   ailleurs (.fp-hero__title, .op-hero__title, .msb__logo-accent) :
-   var(--primary) + #7C3AED, pas une couleur inventée.
-   Voile blanc derrière le texte (.cp-hero__inner::before) : mesuré par
-   échantillonnage pixel réel + calcul de contraste WCAG que le socle violet
-   foncé du trophée peut, selon la largeur d'écran, se retrouver recadré pile
-   sous le texte centré (contraste descendu jusqu'à 1.02:1 sur 1024px de
-   large, illisible). Deux essais précédents (dégradé radial en % de la
-   largeur du HERO entier, puis dégradé radial calé sur .cp-hero__inner)
-   décroissaient trop tôt pour couvrir tout le titre — qui occupe presque
-   toute la largeur de .cp-hero__inner (820px) sur certains breakpoints — et
-   laissaient encore des zones sous 4.5:1. Solution retenue : un rectangle
-   blanc à opacité UNIFORME (pas de dégradé) calé sur .cp-hero__inner, avec
-   les bords adoucis via filter:blur() plutôt qu'un fondu d'opacité — garantit
-   une couverture constante partout sous le texte, pas seulement au centre.
-
-   background-size — PAS "cover" en desktop : avec cover, le facteur de zoom
-   = max(largeur_conteneur/largeur_image, hauteur_conteneur/hauteur_image).
-   La hauteur du Hero est quasi fixe (padding + 1 ligne de texte), donc quand
-   la largeur d'écran rétrécit, le ratio du conteneur se rapproche puis passe
-   sous le ratio natif de l'image (2172×724, ratio 3.0) : cover bascule alors
-   sur la hauteur et zoome énormément — mesuré/capturé : le trophée devient
-   ~2x plus gros et empiète sur le texte entre environ 850px et 1250px de
-   large (zone invisible aux breakpoints ronds 768/1024/1280/1440 testés
-   avant). Fix : "100% auto" cale le zoom uniquement sur la largeur — stricte-
-   ment identique à cover aux ratios larges (≥1300px environ, où cover est
-   déjà piloté par la largeur), mais empêche tout emballement en dessous.
-   Revérifié après coup : balayage continu 320→1920px tous les 40px, plus
-   aucun point d'échantillon sous le seuil AA 4.5:1, et zoom du trophée
-   stable (pas d'agrandissement anormal) sur toute la plage desktop. ─────── */
+   Offres, thème clair) pour ne pas impacter ces autres pages. Version repar-
+   tie de zéro (les tentatives précédentes — dégradé sombre + trophée CSS,
+   puis layout 2 colonnes, puis image de fond ceremony-hero-bg.png pleine
+   largeur — sont abandonnées) :
+   - Fond : simple dégradé CSS clair (blanc → bleu très clair), pas d'image.
+     Plus de risque de contraste lié à une photo (zones sombres recadrées
+     sous le texte) : la couleur de fond est uniforme/claire partout, donc
+     pas de voile de secours nécessaire cette fois.
+   - Illustration : public/ceremony-trophy.png (même pattern que favicon.png :
+     chemin absolu, pas d'import), décorative, en absolu dans le coin haut-
+     gauche, taille fluide via clamp() (pas de saut à un breakpoint), bords
+     adoucis en mask-image radial pour se fondre avec le dégradé (l'image a
+     son propre fond bleu clair intégré, pas transparent).
+   - Texte centré sur .cp-hero__inner (max-width + margin:auto), toujours
+     visuellement centré sur la largeur totale du Hero puisque l'illustration
+     est en position absolute (hors du flux), donc ne pousse jamais le texte.
+   - Titre bicolore : même dégradé texte que .fp-hero__title/.op-hero__title
+     (var(--primary) + #7C3AED), pas une couleur inventée. ─────────────────── */
 .cp-hero {
   position: relative;
   overflow: hidden;
   padding: calc(64px + 3.5rem) 1.5rem 4rem;
-  background-color: #DCEBFC;
-  background-image: url("/ceremony-hero-bg.png");
-  background-size: 100% auto;
-  background-position: left center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, #FFFFFF 0%, #EAF3FD 55%, #DCEBFC 100%);
   text-align: center;
 }
+
+.cp-hero__decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cp-hero__illustration {
+  /* top en positif, pas négatif : la navbar est en position:fixed (65px de
+     haut, fond blanc opaque, z-index:1000) et .cp-hero commence dès y=0 sous
+     elle (son padding-top sert uniquement à dégager le texte) — un débord
+     négatif remontait l'illustration sous la navbar et la coupait aux 2/3
+     (vérifié en capture). 5rem (80px) laisse ~15px de marge sous la navbar. */
+  position: absolute;
+  top: 5rem;
+  left: -2.5rem;
+  width: clamp(180px, 164px + 5vw, 260px);
+  height: auto;
+  mask-image: radial-gradient(ellipse 62% 62% at 55% 55%, #000 55%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 62% 62% at 55% 55%, #000 55%, transparent 88%);
+}
+.cp-confetti {
+  position: absolute;
+  border-radius: 3px;
+  opacity: 0.65;
+}
+.cp-confetti--1 { top: 8%;  left: clamp(150px, 12vw + 100px, 230px); width: 14px; height: 14px; background: #F59E0B; transform: rotate(20deg); }
+.cp-confetti--2 { top: 24%; left: 5%;   width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+.cp-confetti--3 { top: 10%; right: 12%; width: 16px; height: 16px; background: #7C3AED; transform: rotate(-15deg); }
+.cp-confetti--4 { top: 30%; right: 20%; width: 10px; height: 10px; background: #F59E0B; border-radius: 50%; }
 
 .cp-hero__inner {
   position: relative;
@@ -56,12 +62,18 @@
   margin: 0 auto;
 }
 .cp-hero__inner::before {
+  /* Sans ce voile : mesuré que le socle violet foncé de l'illustration passe
+     derrière le titre à plusieurs largeurs (320-560px, 920-960px), faisant
+     chuter le contraste jusqu'à 1.04:1. Même technique que la précédente
+     itération (opacité uniforme + bords adoucis en blur, pas un dégradé qui
+     décroît trop tôt) : garantit une couverture constante sous tout le texte,
+     quelle que soit la couleur de ce qu'il y a derrière. */
   content: "";
   position: absolute;
-  inset: -2rem -4rem;
+  inset: -1.5rem -3rem;
   z-index: -1;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.85);
   filter: blur(14px);
   pointer-events: none;
 }
@@ -91,20 +103,6 @@
   color: #4B5563;
   font-size: 1rem;
   margin: 0;
-}
-
-@media (max-width: 768px) {
-  /* Sous 768px, "100% auto" laisserait un grand bandeau de background-color
-     visible (l'image mise à l'échelle de la largeur devient bien plus basse
-     que le Hero, qui reste haut à cause du titre/sous-titre sur plusieurs
-     lignes) — on revient donc à "cover" ici pour un remplissage plein bord,
-     et "right center" pour cadrer sur la zone calme du dégradé plutôt que le
-     trophée + confettis, qui se retrouverait chargé juste sous le texte
-     centré à cette largeur. */
-  .cp-hero {
-    background-size: cover;
-    background-position: right center;
-  }
 }
 
 .cp-main {
