@@ -1,17 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    HERO — spécifique Cérémonie, ne réutilise pas .fp-hero (partagé Formations/
-   Offres, thème clair) pour ne pas impacter ces autres pages. Fond clair +
-   illustration réelle (public/ceremony-trophy.png, même pattern que
-   favicon.png : chemin absolu "/nom.png", pas d'import) + titre bicolore en
-   réutilisant le dégradé texte déjà en place ailleurs (.fp-hero__title,
-   .op-hero__title, .msb__logo-accent) : var(--primary) + #7C3AED, pas une
-   couleur inventée. Confettis décoratifs en CSS pur (pas de nouvelle image),
-   recolorés pour rester visibles sur fond clair. ─────────────────────────── */
+   Offres, thème clair) pour ne pas impacter ces autres pages. Dégradé
+   indigo→violet→primary : var(--primary) + #7C3AED, cette combinaison est
+   déjà la teinte "accent" du projet (.fp-hero__title, .msb__logo-accent,
+   .op-hero__title l'utilisent toutes), pas une couleur inventée. Trophée +
+   confettis décoratifs en CSS pur (pas de nouvelle image). ────────────────── */
 .cp-hero {
   position: relative;
   overflow: hidden;
   padding: calc(64px + 3.5rem) 1.5rem 4rem;
-  background: linear-gradient(135deg, #F9FBFE 0%, #EAF3FD 50%, #DCEBFC 100%);
+  background: linear-gradient(135deg, #1E1B4B 0%, #4C1D95 45%, var(--primary) 100%);
+  text-align: center;
 }
 
 .cp-hero__decor {
@@ -19,46 +18,44 @@
   inset: 0;
   pointer-events: none;
 }
+.cp-hero__trophy {
+  position: absolute;
+  top: 18%;
+  left: 8%;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  background: radial-gradient(circle at 35% 30%, #FDE68A, #F59E0B 75%);
+  box-shadow: 0 16px 32px -10px rgba(245, 158, 11, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: rotate(-8deg);
+}
 .cp-confetti {
   position: absolute;
   border-radius: 3px;
-  opacity: 0.6;
+  opacity: 0.55;
 }
-.cp-confetti--1 { top: 12%; left: 20%; width: 14px; height: 14px; background: #F59E0B; transform: rotate(20deg); }
-.cp-confetti--2 { top: 32%; left: 4%;  width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
-.cp-confetti--3 { top: 16%; right: 10%; width: 16px; height: 16px; background: #7C3AED; transform: rotate(-15deg); }
-.cp-confetti--4 { top: 40%; right: 18%; width: 10px; height: 10px; background: #F59E0B; border-radius: 50%; }
+.cp-confetti--1 { top: 12%; left: 20%; width: 14px; height: 14px; background: #FDE68A; transform: rotate(20deg); }
+.cp-confetti--2 { top: 32%; left: 4%;  width: 10px; height: 10px; background: #fff; border-radius: 50%; transform: rotate(0); }
+.cp-confetti--3 { top: 16%; right: 10%; width: 16px; height: 16px; background: var(--secondary); transform: rotate(-15deg); }
+.cp-confetti--4 { top: 40%; right: 18%; width: 10px; height: 10px; background: #FDE68A; border-radius: 50%; }
 
 .cp-hero__inner {
   position: relative;
   z-index: 1;
-  max-width: 1080px;
+  max-width: 640px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 3rem;
-}
-.cp-hero__illustration {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 360px;
-  height: auto;
-  display: block;
-}
-[dir="rtl"] .cp-hero__inner {
-  flex-direction: row-reverse;
-}
-
-.cp-hero__content {
-  flex: 1;
-  min-width: 0;
 }
 .cp-hero__badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: #EDE9FE;
-  color: #5B21B6;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  color: #fff;
   padding: 0.35rem 1rem;
   border-radius: 999px;
   font-size: 0.8rem;
@@ -68,27 +65,20 @@
 .cp-hero__title {
   font-size: clamp(1.9rem, 4.5vw, 2.75rem);
   font-weight: 800;
+  color: #fff;
   margin: 0 0 0.75rem;
   line-height: 1.2;
-  background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 .cp-hero__subtitle {
-  color: #4B5563;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 1rem;
   margin: 0;
 }
 
 @media (max-width: 768px) {
-  .cp-hero__illustration,
+  .cp-hero__trophy,
   .cp-confetti {
     display: none;
-  }
-  .cp-hero__inner {
-    flex-direction: column;
-    text-align: center;
   }
 }
 
