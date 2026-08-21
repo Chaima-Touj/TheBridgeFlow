@@ -154,10 +154,19 @@ export default function CeremonyPage() {
           ne réutilise pas .fp-hero (partagé Formations/Offres, thème clair)
           pour ne pas impacter ces autres pages. ─────────────────────────── */}
       <section className="cp-hero">
+        <div className="cp-hero__decor" aria-hidden="true">
+          <span className="cp-confetti cp-confetti--1" />
+          <span className="cp-confetti cp-confetti--2" />
+          <span className="cp-confetti cp-confetti--3" />
+          <span className="cp-confetti cp-confetti--4" />
+        </div>
         <div className="cp-hero__inner">
-          <span className="cp-hero__badge"><FiAward size={13} /> {t("ceremony.badge")}</span>
-          <h1 className="cp-hero__title">{t("ceremony.title")}</h1>
-          <p className="cp-hero__subtitle">{t("ceremony.subtitle")}</p>
+          <img src="/ceremony-trophy.png" alt="" className="cp-hero__illustration" />
+          <div className="cp-hero__content">
+            <span className="cp-hero__badge"><FiAward size={13} /> {t("ceremony.badge")}</span>
+            <h1 className="cp-hero__title">{t("ceremony.title")}</h1>
+            <p className="cp-hero__subtitle">{t("ceremony.subtitle")}</p>
+          </div>
         </div>
       </section>
 
