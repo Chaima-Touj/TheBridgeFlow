@@ -612,6 +612,24 @@
 }
 
 @media (max-width: 768px) {
+  /* Mesuré sur device réel (~375-414px), même défaut que sur /ceremonie :
+     "100% auto" réduisait l'image à ~120-138px de haut dans un Hero de
+     ~349px (34-40% de couverture), centrée verticalement — même bande que
+     le texte, quasi masquée par le voile de contraste. Même correctif :
+     taille fixe (850px, indépendante de la largeur mobile) + image ancrée
+     en haut sous la navbar fixe (top 4.5rem) + texte repoussé sous elle via
+     padding-top, pour que les deux zones ne se chevauchent plus. */
+  .frp-hero {
+    background-size: 850px auto;
+    background-position: left top 4.5rem;
+    padding-top: 380px;
+  }
+  [data-theme="dark"] .frp-hero {
+    /* Pas d'image en dark mode (voir plus haut) : le padding-top agrandi
+       n'a pas lieu d'être, il laisserait un grand bandeau vide au-dessus
+       du texte sur le dégradé sombre. */
+    padding-top: calc(64px + 3.5rem);
+  }
   .frp-hero__inner { padding: 0 1.25rem; }
   .frp-hero__title { font-size: 2rem; }
 

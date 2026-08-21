@@ -76,6 +76,27 @@
   margin: 0;
 }
 
+@media (max-width: 768px) {
+  /* Mesuré sur device réel (~375-414px) : "100% auto" réduit l'image à
+     ~120-138px de haut dans un Hero de ~366px (34-38% de couverture),
+     centrée verticalement — elle finit dans la même bande que le texte, et
+     le voile de contraste (nécessaire pour ce même texte) la masque presque
+     entièrement en plus. Deux ajustements combinés :
+     1) background-size fixe (850px auto, indépendant de la largeur mobile
+        360-480px) : donne un trophée net et bien cadré (vérifié en test de
+        recadrage isolé), pas la miniature délavée d'avant.
+     2) L'image est ancrée en haut ("top 4.5rem", sous la navbar fixe — même
+        contrainte que le bug de débordement déjà rencontré) et le texte est
+        repoussé sous elle via padding-top, au lieu d'être superposé au
+        centre : les deux zones ne se chevauchent plus, donc le voile n'a
+        plus besoin de couvrir l'image pour protéger le texte. */
+  .cp-hero {
+    background-size: 850px auto;
+    background-position: left top 4.5rem;
+    padding-top: 380px;
+  }
+}
+
 .cp-main {
   max-width: 1200px;
   margin: 0 auto;
