@@ -1308,6 +1308,7 @@
     "settingsTitle": "Voting period",
     "voteStartLabel": "Start date",
     "voteEndLabel": "End date",
+    "editionLabel": "Edition",
     "saveSettings": "Save",
     "saving": "Saving...",
     "settingsSaved": "Saved.",
@@ -1352,7 +1353,8 @@
       "decisionFailed": "Unable to process this project.",
       "settingsFailed": "Unable to save the voting period.",
       "closeFailed": "Unable to close the vote.",
-      "resetFailed": "Unable to reset votes."
+      "resetFailed": "Unable to reset votes.",
+      "editionInvalid": "Invalid edition."
     }
   },
   "adminInscriptions": {
@@ -1898,7 +1900,20 @@
     "voteEnded": "The voting period has ended.",
     "qrCaption": "Scan to access this project",
     "share": "Share QR code",
-    "qrDownloaded": "Downloaded!"
+    "qrDownloaded": "Downloaded!",
+    "viewArchives": "View past editions",
+    "archivesBadge": "Archives",
+    "archivesTitle": "Ceremony Archives",
+    "archivesSubtitle": "Relive past editions and their award-winning projects.",
+    "archivesEmpty": "No past edition yet.",
+    "archiveDetailSubtitle": "All projects submitted for this edition, read-only.",
+    "backToCeremony": "← Back to the Ceremony",
+    "backToArchives": "← Back to archives",
+    "editionLabel": "Ceremony {{edition}}",
+    "archiveProjectCount_one": "{{count}} project",
+    "archiveProjectCount_other": "{{count}} projects",
+    "archiveTotalVotes_one": "{{count}} vote in total",
+    "archiveTotalVotes_other": "{{count}} votes in total"
   },
   "myCeremonyProjects": {
     "pageTitle": "My projects — Ceremony",

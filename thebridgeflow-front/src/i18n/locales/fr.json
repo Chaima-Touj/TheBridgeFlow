@@ -1308,6 +1308,7 @@
     "settingsTitle": "Période de vote",
     "voteStartLabel": "Date de début",
     "voteEndLabel": "Date de fin",
+    "editionLabel": "Édition",
     "saveSettings": "Enregistrer",
     "saving": "Enregistrement...",
     "settingsSaved": "Enregistré.",
@@ -1352,7 +1353,8 @@
       "decisionFailed": "Impossible de traiter ce projet.",
       "settingsFailed": "Impossible d'enregistrer la période de vote.",
       "closeFailed": "Impossible de clôturer le vote.",
-      "resetFailed": "Impossible de réinitialiser les votes."
+      "resetFailed": "Impossible de réinitialiser les votes.",
+      "editionInvalid": "Édition invalide."
     }
   },
   "adminInscriptions": {
@@ -1898,7 +1900,20 @@
     "voteEnded": "La période de vote est terminée.",
     "qrCaption": "Scannez pour accéder à ce projet",
     "share": "Partager le QR code",
-    "qrDownloaded": "Téléchargé !"
+    "qrDownloaded": "Téléchargé !",
+    "viewArchives": "Voir les projets précédents",
+    "archivesBadge": "Archives",
+    "archivesTitle": "Archives de la Cérémonie",
+    "archivesSubtitle": "Revivez les éditions précédentes et leurs projets primés.",
+    "archivesEmpty": "Aucune édition passée pour le moment.",
+    "archiveDetailSubtitle": "Tous les projets soumis lors de cette édition, en lecture seule.",
+    "backToCeremony": "← Retour à la Cérémonie",
+    "backToArchives": "← Retour aux archives",
+    "editionLabel": "Cérémonie {{edition}}",
+    "archiveProjectCount_one": "{{count}} projet",
+    "archiveProjectCount_other": "{{count}} projets",
+    "archiveTotalVotes_one": "{{count}} vote au total",
+    "archiveTotalVotes_other": "{{count}} votes au total"
   },
   "myCeremonyProjects": {
     "pageTitle": "Mes projets — Cérémonie",

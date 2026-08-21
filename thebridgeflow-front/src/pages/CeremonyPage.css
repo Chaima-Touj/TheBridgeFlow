@@ -14,6 +14,32 @@
   margin: 0 0 1.5rem;
 }
 
+.cp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.cp-section-header .cp-section-title { margin-bottom: 0; }
+
+.cp-archives-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.cp-archives-link:hover { color: var(--primary); border-color: var(--primary); }
+
 .cp-vote-hint {
   color: var(--text-secondary);
   font-size: 0.9rem;

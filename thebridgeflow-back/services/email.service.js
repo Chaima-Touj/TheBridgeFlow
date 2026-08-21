@@ -522,6 +522,63 @@ const voteConfirmationTemplate = ({ studentName, projectTitles }) => ({
   `),
 });
 
+// 13. Félicitations au gagnant — clôture de la Cérémonie
+const winnerCongratsTemplate = ({ studentName, projectTitle, edition }) => ({
+  subject: `🏆 Félicitations, vous avez gagné la Cérémonie ${edition} !`,
+  html: layout("Vous avez gagné !", `
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:16px;">🏆</div>
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">Félicitations, ${studentName} !</h1>
+      <p style="margin:0;color:#64748B;font-size:15px;">Votre projet a remporté la Cérémonie ${edition} de TheBridgeFlow.</p>
+    </div>
+
+    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("Projet gagnant", projectTitle)}
+        ${infoRow("Édition", edition)}
+      </table>
+    </div>
+
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 28px;">
+      Un grand bravo pour ce travail — la communauté TheBridgeFlow a voté, et votre projet s'est
+      démarqué. Merci pour votre engagement !
+    </p>
+
+    <div style="text-align:center;">
+      ${button("Voir le classement final", `${process.env.CLIENT_URL || "http://localhost:5173"}/ceremonie`)}
+    </div>
+  `),
+});
+
+// 14. Résultats de la Cérémonie — envoyé aux autres participants (votants et/ou
+// soumetteurs) à la clôture, annonce le nom du projet/étudiant gagnant.
+const ceremonyResultsTemplate = ({ studentName, winnerTitle, winnerStudentName, edition }) => ({
+  subject: `Résultats de la Cérémonie ${edition} — TheBridgeFlow`,
+  html: layout("Résultats de la Cérémonie", `
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">La Cérémonie ${edition} est terminée !</h1>
+      <p style="margin:0;color:#64748B;font-size:15px;">Bonjour <strong>${studentName}</strong>, voici le résultat du vote.</p>
+    </div>
+
+    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("🏆 Projet gagnant", winnerTitle)}
+        ${infoRow("Étudiant", winnerStudentName)}
+      </table>
+    </div>
+
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 28px;">
+      Merci d'avoir participé à cette édition — que ce soit en soumettant un projet ou en votant.
+      Retrouvez le classement complet et tous les projets sur la page Cérémonie.
+    </p>
+
+    <div style="text-align:center;">
+      ${button("Voir le classement", `${process.env.CLIENT_URL || "http://localhost:5173"}/ceremonie`)}
+    </div>
+  `),
+});
+
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
   try {
@@ -560,6 +617,8 @@ const emailService = {
   sendVerifyCode:          (to, data) => sendEmail({ to, ...verifyCodeTemplate(data) }),
   sendResetPassword:       (to, data) => sendEmail({ to, ...resetPasswordTemplate(data) }),
   sendVoteConfirmation:    (to, data) => sendEmail({ to, ...voteConfirmationTemplate(data) }),
+  sendWinnerCongrats:      (to, data) => sendEmail({ to, ...winnerCongratsTemplate(data) }),
+  sendCeremonyResults:     (to, data) => sendEmail({ to, ...ceremonyResultsTemplate(data) }),
 };
 
 export default emailService;

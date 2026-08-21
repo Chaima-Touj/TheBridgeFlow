@@ -77,7 +77,7 @@ export default function AdminCeremony() {
   const [rowActionError, setRowActionError] = useState("");
 
   const [settings,      setSettings]      = useState(null);
-  const [settingsForm,  setSettingsForm]  = useState({ voteStartDate: "", voteEndDate: "" });
+  const [settingsForm,  setSettingsForm]  = useState({ voteStartDate: "", voteEndDate: "", edition: "" });
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsError,  setSettingsError]  = useState("");
   const [settingsSaved,  setSettingsSaved]  = useState(false);
@@ -107,6 +107,7 @@ export default function AdminCeremony() {
         setSettingsForm({
           voteStartDate: toDateInputValue(data.voteStartDate),
           voteEndDate:   toDateInputValue(data.voteEndDate),
+          edition:       String(data.edition ?? ""),
         });
       })
       .catch(() => {});
@@ -141,6 +142,12 @@ export default function AdminCeremony() {
   };
 
   const handleSaveSettings = async () => {
+    const parsedEdition = Number(settingsForm.edition);
+    if (!Number.isFinite(parsedEdition)) {
+      setSettingsError(t("adminCeremony.errors.editionInvalid"));
+      return;
+    }
+
     setSavingSettings(true);
     setSettingsError("");
     setSettingsSaved(false);
@@ -148,6 +155,7 @@ export default function AdminCeremony() {
       const { data } = await ceremonyService.updateSettings({
         voteStartDate: settingsForm.voteStartDate || null,
         voteEndDate:   settingsForm.voteEndDate   || null,
+        edition:       parsedEdition,
       });
       setSettings(data);
       setSettingsSaved(true);
@@ -241,6 +249,16 @@ export default function AdminCeremony() {
                 className="input"
                 value={settingsForm.voteEndDate}
                 onChange={(e) => { setSettingsForm((f) => ({ ...f, voteEndDate: e.target.value })); setSettingsSaved(false); }}
+              />
+            </div>
+            <div className="af-form-row">
+              <label className="label" htmlFor="ac-edition">{t("adminCeremony.editionLabel")}</label>
+              <input
+                id="ac-edition"
+                type="number"
+                className="input"
+                value={settingsForm.edition}
+                onChange={(e) => { setSettingsForm((f) => ({ ...f, edition: e.target.value })); setSettingsSaved(false); }}
               />
             </div>
           </div>

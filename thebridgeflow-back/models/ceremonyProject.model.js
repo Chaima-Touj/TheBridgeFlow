@@ -35,12 +35,23 @@ const ceremonyProjectSchema = new mongoose.Schema(
       enum: ["en_attente", "approuvé", "refusé"],
       default: "approuvé",
     },
+    // Édition à laquelle ce projet appartient (ex. 2026) — renseignée à la
+    // création depuis CeremonySettings.edition (voir createProject). Toutes
+    // les requêtes publiques/admin filtrent désormais sur l'édition
+    // courante ; edition < courante = projet archivé, visible uniquement via
+    // getCeremonyArchives/getCeremonyArchiveEdition. default ici ne couvre
+    // que les nouveaux documents — les documents existants ont été
+    // backfillés par scripts/backfillCeremonyEdition.js (même piège .lean()
+    // documenté sur le champ status ci-dessus).
+    edition: { type: Number, required: true, default: 2026 },
   },
   { timestamps: true }
 );
 
-// Tri principal du leaderboard
-ceremonyProjectSchema.index({ voteCount: -1 });
+// Tri principal du leaderboard (par édition, voir getLeaderboard)
+ceremonyProjectSchema.index({ edition: 1, voteCount: -1 });
+// Modération admin + grille publique, toutes deux filtrées par édition
+ceremonyProjectSchema.index({ edition: 1, status: 1 });
 // Page "Mes projets" (dashboard étudiant)
 ceremonyProjectSchema.index({ studentId: 1 });
 

@@ -3,6 +3,7 @@ import {
   createProject, getProjects, getProject, getMyProjects, vote, getLeaderboard,
   getCeremonySettings, getAdminProjects, acceptProject, rejectProject,
   updateCeremonySettings, closeAndAnnounce, resetVotes,
+  getCeremonyArchives, getCeremonyArchiveEdition,
 } from "../controllers/ceremony.controller.js";
 import { protect, authorize, validateObjectId } from "../middleware/auth.middleware.js";
 
@@ -13,6 +14,8 @@ router.get("/leaderboard",  getLeaderboard);
 router.get("/settings",     getCeremonySettings);
 router.get("/projects",     getProjects);
 router.get("/projects/:id", validateObjectId(), getProject);
+router.get("/archives",          getCeremonyArchives);
+router.get("/archives/:edition", getCeremonyArchiveEdition);
 
 // ─── Étudiant connecté ──────────────────────────────────────────────────────
 router.get("/my-projects",  protect, getMyProjects);

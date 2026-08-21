@@ -1308,6 +1308,7 @@
     "settingsTitle": "فترة التصويت",
     "voteStartLabel": "تاريخ البدء",
     "voteEndLabel": "تاريخ الانتهاء",
+    "editionLabel": "الدورة",
     "saveSettings": "حفظ",
     "saving": "جارٍ الحفظ...",
     "settingsSaved": "تم الحفظ.",
@@ -1352,7 +1353,8 @@
       "decisionFailed": "تعذّرت معالجة هذا المشروع.",
       "settingsFailed": "تعذّر حفظ فترة التصويت.",
       "closeFailed": "تعذّر إغلاق التصويت.",
-      "resetFailed": "تعذّر إعادة تعيين الأصوات."
+      "resetFailed": "تعذّر إعادة تعيين الأصوات.",
+      "editionInvalid": "دورة غير صالحة."
     }
   },
   "adminInscriptions": {
@@ -1898,7 +1900,20 @@
     "voteEnded": "انتهت فترة التصويت.",
     "qrCaption": "امسح للوصول إلى هذا المشروع",
     "share": "مشاركة رمز QR",
-    "qrDownloaded": "تم التنزيل!"
+    "qrDownloaded": "تم التنزيل!",
+    "viewArchives": "عرض الدورات السابقة",
+    "archivesBadge": "الأرشيف",
+    "archivesTitle": "أرشيف الحفل",
+    "archivesSubtitle": "اكتشف الدورات السابقة والمشاريع الفائزة فيها.",
+    "archivesEmpty": "لا توجد دورة سابقة حتى الآن.",
+    "archiveDetailSubtitle": "جميع المشاريع المقدَّمة في هذه الدورة، للاطلاع فقط.",
+    "backToCeremony": "→ العودة إلى الحفل",
+    "backToArchives": "→ العودة إلى الأرشيف",
+    "editionLabel": "حفل {{edition}}",
+    "archiveProjectCount_one": "{{count}} مشروع",
+    "archiveProjectCount_other": "{{count}} مشاريع",
+    "archiveTotalVotes_one": "{{count}} صوت إجمالًا",
+    "archiveTotalVotes_other": "{{count}} أصوات إجمالًا"
   },
   "myCeremonyProjects": {
     "pageTitle": "مشاريعي — الحفل",

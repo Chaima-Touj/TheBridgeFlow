@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARCHIVES CÉRÉMONIE — réutilise .fp-hero (partagé, non modifié) et
+   .news-card/.news-grid (déjà utilisées par CeremonyPage.jsx) comme base ;
+   seules les classes ci-dessous sont propres à cette page. ─────────────────
+   Dégradé bleu→violet = même accent déjà établi ailleurs dans le projet
+   (.fp-hero__title, .cp-hero__title, .frp-hero__title), pas une couleur
+   inventée. ═══════════════════════════════════════════════════════════════ */
+
+.ca-back {
+  display: inline-block;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+.ca-back:hover { text-decoration: underline; }
+
+.ca-card {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ca-card__year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 118px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), #7C3AED);
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.ca-card__winner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ca-card__stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+.ca-card__stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}

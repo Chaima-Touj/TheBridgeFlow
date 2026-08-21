@@ -36,6 +36,8 @@ import HelpPage                 from "./pages/legal/HelpPage.jsx";
 import NotFound                 from "./pages/NotFound.jsx";
 import CeremonyPage             from "./pages/CeremonyPage.jsx";
 import CeremonyProjectDetail    from "./pages/CeremonyProjectDetail.jsx";
+import CeremonyArchives         from "./pages/CeremonyArchives.jsx";
+import CeremonyArchiveDetail    from "./pages/CeremonyArchiveDetail.jsx";
 import MyCeremonyProjects       from "./pages/dashboard/MyCeremonyProjects.jsx";
 import DashboardFormations      from "./pages/dashboard/DashboardFormations.jsx";
 import DashboardFormationDetail from "./pages/dashboard/DashboardFormationDetail.jsx";
@@ -188,7 +190,9 @@ export default function App() {
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
 
-      <Route path="/ceremonie"         element={<CeremonyPage />} />
+      <Route path="/ceremonie"                    element={<CeremonyPage />} />
+      <Route path="/ceremonie/archives"           element={<CeremonyArchives />} />
+      <Route path="/ceremonie/archives/:edition"  element={<CeremonyArchiveDetail />} />
       <Route path="/ceremonie/:id"     element={<CeremonyProjectDetail />} />
 
       <Route path="/blog"                 element={<BlogPage />} />

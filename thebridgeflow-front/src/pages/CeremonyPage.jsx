@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiCheck, FiUser, FiAward } from "react-icons/fi";
+import { Archive } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CeremonyLeaderboard from "../components/ceremony/CeremonyLeaderboard.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
@@ -29,8 +30,9 @@ export default function CeremonyPage() {
     description: "Découvrez les projets soumis par les étudiants TheBridgeFlow et votez pour vos 3 préférés. Classement en temps réel.",
   });
 
-  const [projects,   setProjects]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
+  const [projects,    setProjects]    = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [hasArchives, setHasArchives] = useState(false);
   const { selected, toggleSelect: toggleSelection, clearSelection } = useCeremonySelection();
   const { submitting, error, success, confirmVote, clearError } = useCeremonyVoteSubmit(clearSelection);
 
@@ -39,6 +41,11 @@ export default function CeremonyPage() {
       .then(({ data }) => setProjects(data.projects || []))
       .catch(() => {})
       .finally(() => setLoading(false));
+    // Bouton "Voir les projets précédents" — visible seulement si au moins
+    // une édition passée existe (voir getCeremonyArchives côté backend).
+    ceremonyService.getArchives()
+      .then(({ data }) => setHasArchives((data.editions || []).length > 0))
+      .catch(() => {});
   }, []);
 
   const toggleSelect = (id) => {
@@ -83,7 +90,14 @@ export default function CeremonyPage() {
         </section>
 
         <section className="cp-section">
-          <h2 className="cp-section-title">{t("ceremony.projectsTitle")}</h2>
+          <div className="cp-section-header">
+            <h2 className="cp-section-title">{t("ceremony.projectsTitle")}</h2>
+            {hasArchives && (
+              <Link to="/ceremonie/archives" className="cp-archives-link">
+                <Archive size={14} /> {t("ceremony.viewArchives")}
+              </Link>
+            )}
+          </div>
 
           {success ? (
             <div className="cp-success">{t("ceremony.voteSuccess")}</div>
