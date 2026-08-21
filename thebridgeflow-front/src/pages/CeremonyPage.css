@@ -115,19 +115,13 @@
 /* ── Statistiques ─────────────────────────────────────────────────────── */
 .cp-stats {
   display: grid;
-  /* minmax(0, 1fr), pas 1fr seul : 1fr implique minmax(auto, 1fr) par
-     défaut — un libellé long (ex. "Étudiants participants") qui ne casse
-     pas forçait une colonne à s'élargir au-delà de sa part égale, causant
-     un dépassement horizontal réel mesuré à 375px (colonnes 156px/181px
-     au lieu de 2x 163.5px égales, +5px de débordement de page). */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
 }
 .cp-stat-card {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  min-width: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -220,7 +214,7 @@
 }
 
 @media (max-width: 640px) {
-  .cp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cp-stats { grid-template-columns: repeat(2, 1fr); }
   .cp-toolbar { flex-direction: column; }
   .cp-category-select { min-width: 0; }
   .cp-projects-heading::before,
@@ -413,14 +407,10 @@
   left: 0.75rem;
 }
 
-/* ── Barre de confirmation ─────────────────────────────────────────────────
-   Bug réel trouvé (pas un artefact de capture) : "position: sticky; bottom"
-   plaçait cet élément près du HAUT de la section #ceremonie-grille (juste
-   sous le titre, chevauchant le sous-titre) au lieu de rester après la
-   grille ou de coller en bas du viewport — confirmé par mesure directe
-   (getBoundingClientRect) sur toute une plage de scroll, pas seulement en
-   capture. Retiré : simple élément en flux normal après la grille. ──────── */
+/* ── Barre de confirmation, fixée en bas de viewport ─────────────────────── */
 .cp-vote-bar {
+  position: sticky;
+  bottom: 1.5rem;
   display: flex;
   justify-content: center;
   margin-top: 2rem;
