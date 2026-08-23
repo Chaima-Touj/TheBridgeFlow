@@ -19,6 +19,10 @@ const getTransporter = () => {
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
+    family: 4, // le réseau sortant de Render ne supporte pas l'IPv6 (ENETUNREACH sur l'IP AAAA de Gmail)
+    connectionTimeout: 10000,
+    greetingTimeout:   10000,
+    socketTimeout:     15000,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
