@@ -1,59 +1,52 @@
-import { BrevoClient } from "@getbrevo/brevo";
+import nodemailer from "nodemailer";
 
-// ─── Configuration Brevo — API HTTP officielle ─────────────────────────────────
-// Toute la communication passe par https://api.brevo.com (HTTPS/443), via le SDK
-// officiel @getbrevo/brevo — une simple requête HTTPS, comme n'importe quel appel API.
-const REQUEST_TIMEOUT_SECONDS = 10; // l'envoi ne doit jamais bloquer la réponse HTTP au-delà de ça
-
-const REQUIRED_ENV = ["BREVO_API_KEY", "EMAIL_FROM"];
+// ─── Configuration Gmail SMTP ──────────────────────────────────────────────────
+// Toute la communication passe par smtp.gmail.com:465 (SMTPS), via Nodemailer,
+// avec un compte Gmail + mot de passe d'application (App Password).
+const REQUIRED_ENV = ["SMTP_USER", "SMTP_PASS", "EMAIL_FROM"];
 
 const getMissingEnv = () => REQUIRED_ENV.filter((key) => !process.env[key]);
 
-// ─── Client Brevo singleton ────────────────────────────────────────────────────
-let _client = null;
+// ─── Transporter Nodemailer singleton ──────────────────────────────────────────
+let _transporter = null;
 
-const getClient = () => {
-  if (_client) return _client;
+const getTransporter = () => {
+  if (_transporter) return _transporter;
 
-  console.log(`📨 [email] Initialisation du client Brevo (API HTTP) — timeout=${REQUEST_TIMEOUT_SECONDS}s`);
+  console.log(`📨 [email] Initialisation du transporter Nodemailer (Gmail SMTP)`);
 
-  _client = new BrevoClient({
-    apiKey: process.env.BREVO_API_KEY,
-    timeoutInSeconds: REQUEST_TIMEOUT_SECONDS,
+  _transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
   });
 
-  return _client;
+  return _transporter;
 };
 
-// "TheBridgeFlow <chimatouj@gmail.com>" → { name: "TheBridgeFlow", email: "chimatouj@gmail.com" }
-const parseSender = (raw) => {
-  const match = /^(.*?)\s*<(.+)>$/.exec((raw || "").trim());
-  if (match) {
-    return { name: match[1].trim() || undefined, email: match[2].trim() };
-  }
-  return { email: (raw || "").trim() };
-};
-
-// Vérifie que la clé API Brevo est valide — à appeler au démarrage du serveur
-// pour un diagnostic immédiat (n'empêche pas le serveur de démarrer si ça échoue).
+// Vérifie que la connexion SMTP Gmail est valide — à appeler au démarrage du
+// serveur pour un diagnostic immédiat (n'empêche pas le serveur de démarrer si ça échoue).
 export const verifyEmailConfig = async () => {
   const missing = getMissingEnv();
   if (missing.length) {
-    console.error(`❌ [email] Vérification API Brevo ignorée — variable(s) manquante(s) : ${missing.join(", ")}`);
+    console.error(`❌ [email] Vérification SMTP Gmail ignorée — variable(s) manquante(s) : ${missing.join(", ")}`);
     return false;
   }
 
   try {
-    const client = getClient();
-    const account = await client.account.getAccount();
-    console.log(`✅ [email] API Brevo vérifiée — compte=${account?.email || "inconnu"}`);
+    const transporter = getTransporter();
+    await transporter.verify();
+    console.log(`✅ [email] Connexion SMTP Gmail vérifiée — compte=${process.env.SMTP_USER}`);
     return true;
   } catch (err) {
-    console.error(`❌ [email] Échec de la vérification de l'API Brevo :`, {
-      message:    err.message,
-      statusCode: err.statusCode,
-      body:       err.body,
-      stack:      err.stack,
+    console.error(`❌ [email] Échec de la vérification SMTP Gmail :`, {
+      message: err.message,
+      code:    err.code,
+      stack:   err.stack,
     });
     return false;
   }
@@ -582,24 +575,23 @@ const ceremonyResultsTemplate = ({ studentName, winnerTitle, winnerStudentName, 
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
   try {
-    const client = getClient();
-    const response = await client.transactionalEmails.sendTransacEmail({
-      sender: parseSender(process.env.EMAIL_FROM),
-      to: [{ email: to }],
+    const transporter = getTransporter();
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to,
       subject,
-      htmlContent: html,
+      html,
     });
-    console.log(`✅ [email] Envoi réussi — destinataire=${to} sujet="${subject}" messageId=${response.messageId} (${Date.now() - startedAt}ms)`);
-    return { success: true, messageId: response.messageId };
+    console.log(`✅ [email] Envoi réussi — destinataire=${to} sujet="${subject}" messageId=${info.messageId} (${Date.now() - startedAt}ms)`);
+    return { success: true, messageId: info.messageId };
   } catch (err) {
     console.error(`❌ [email] Échec d'envoi — destinataire=${to} sujet="${subject}" :`, {
-      statusCode: err.statusCode,
+      code:       err.code,
       message:    err.message,
-      body:       err.body,
       durationMs: Date.now() - startedAt,
       stack:      err.stack,
     });
-    return { success: false, error: err.message, code: err.statusCode };
+    return { success: false, error: err.message, code: err.code };
   }
 };
 
