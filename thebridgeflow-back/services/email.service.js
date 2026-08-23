@@ -132,7 +132,7 @@ const welcomeTemplate = ({ name, role }) => {
   const roleColor = { étudiant: "#2563EB", admin: "#8B5CF6" }[role] || "#2563EB";
 
   return {
-    subject: "🎉 Bienvenue sur TheBridgeFlow !",
+    subject: "Bienvenue sur TheBridgeFlow ! 🎉",
     html: layout("Bienvenue sur TheBridgeFlow", `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">🎉</div>
@@ -167,7 +167,7 @@ const welcomeTemplate = ({ name, role }) => {
 
 // 2. Candidature envoyée (à l'étudiant)
 const applicationSentTemplate = ({ studentName, offerTitle, companyName }) => ({
-  subject: `📩 Candidature envoyée — ${offerTitle}`,
+  subject: `Candidature envoyée — ${offerTitle} 📩`,
   html: layout("Candidature envoyée", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">📩</div>
@@ -202,7 +202,7 @@ const applicationSentTemplate = ({ studentName, offerTitle, companyName }) => ({
 
 // 3. Nouvelle candidature reçue (à l'entreprise)
 const applicationReceivedTemplate = ({ companyName, studentName, studentEmail, offerTitle }) => ({
-  subject: `👤 Nouvelle candidature — ${offerTitle}`,
+  subject: `Nouvelle candidature — ${offerTitle} 👤`,
   html: layout("Nouvelle candidature reçue", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">👤</div>
@@ -239,7 +239,7 @@ const applicationStatusTemplate = ({ studentName, offerTitle, companyName, statu
   const cfg = configs[status] || configs["en cours"];
 
   return {
-    subject: `${cfg.icon} Candidature ${status} — ${offerTitle}`,
+    subject: `Candidature ${status} — ${offerTitle} ${cfg.icon}`,
     html: layout(`Candidature ${status}`, `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">${cfg.icon}</div>
@@ -273,7 +273,7 @@ const interviewProposedTemplate = ({ studentName, companyName, offerTitle, sched
   const modeIcon = mode === "présentiel" ? "🏢" : "💻";
 
   return {
-    subject: `📅 Entretien proposé — ${offerTitle}`,
+    subject: `Entretien proposé — ${offerTitle} 📅`,
     html: layout("Entretien proposé", `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">📅</div>
@@ -321,7 +321,7 @@ const interviewStatusTemplate = ({ recipientName, status, offerTitle, scheduledA
   const date = new Date(scheduledAt).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return {
-    subject: `${cfg.icon} Entretien ${status} — ${offerTitle}`,
+    subject: `Entretien ${status} — ${offerTitle} ${cfg.icon}`,
     html: layout(`Entretien ${status}`, `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">${cfg.icon}</div>
@@ -349,7 +349,7 @@ const interviewStatusTemplate = ({ recipientName, status, offerTitle, scheduledA
 
 // 7. Nouveau message reçu
 const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
-  subject: `💬 Nouveau message de ${senderName}`,
+  subject: `Nouveau message de ${senderName} 💬`,
   html: layout("Nouveau message", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">💬</div>
@@ -378,7 +378,7 @@ const newUserAdminTemplate = ({ userName, userEmail, userRole }) => {
   const roleColor = { étudiant: "#2563EB", admin: "#8B5CF6" }[userRole] || "#2563EB";
 
   return {
-    subject: `👤 Nouvelle inscription — ${userName} (${roleLabel})`,
+    subject: `Nouvelle inscription — ${userName} (${roleLabel}) 👤`,
     html: layout("Nouvelle inscription", `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">👤</div>
@@ -408,7 +408,7 @@ const accountCreatedByAdminTemplate = ({ name, email, password, role }) => {
   const roleLabel = { étudiant: "Étudiant", admin: "Administrateur" }[role] || role;
 
   return {
-    subject: "🔑 Votre compte TheBridgeFlow a été créé",
+    subject: "Votre compte TheBridgeFlow a été créé 🔑",
     html: layout("Compte créé", `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">🔑</div>
@@ -438,7 +438,7 @@ const accountCreatedByAdminTemplate = ({ name, email, password, role }) => {
 
 // 10. Code de vérification email
 const verifyCodeTemplate = ({ name, code }) => ({
-  subject: `🔐 Votre code de vérification TheBridgeFlow — ${code}`,
+  subject: `Votre code de vérification TheBridgeFlow — ${code} 🔐`,
   html: layout("Code de vérification", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">🔐</div>
@@ -468,7 +468,7 @@ const verifyCodeTemplate = ({ name, code }) => ({
 
 // 11. Réinitialisation de mot de passe
 const resetPasswordTemplate = ({ name, resetUrl }) => ({
-  subject: "🔑 Réinitialisez votre mot de passe TheBridgeFlow",
+  subject: "Réinitialisez votre mot de passe TheBridgeFlow 🔑",
   html: layout("Réinitialisation du mot de passe", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">🔑</div>
@@ -494,7 +494,7 @@ const resetPasswordTemplate = ({ name, resetUrl }) => ({
 
 // 12. Confirmation de vote — Cérémonie
 const voteConfirmationTemplate = ({ studentName, projectTitles }) => ({
-  subject: "🏆 Votre vote a bien été enregistré — Cérémonie TheBridgeFlow",
+  subject: "Votre vote a bien été enregistré — Cérémonie TheBridgeFlow 🏆",
   html: layout("Vote enregistré", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">🏆</div>
@@ -521,7 +521,7 @@ const voteConfirmationTemplate = ({ studentName, projectTitles }) => ({
 
 // 13. Félicitations au gagnant — clôture de la Cérémonie
 const winnerCongratsTemplate = ({ studentName, projectTitle, edition }) => ({
-  subject: `🏆 Félicitations, vous avez gagné la Cérémonie ${edition} !`,
+  subject: `Félicitations, vous avez gagné la Cérémonie ${edition} ! 🏆`,
   html: layout("Vous avez gagné !", `
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">🏆</div>
@@ -576,15 +576,37 @@ const ceremonyResultsTemplate = ({ studentName, winnerTitle, winnerStudentName, 
   `),
 });
 
+// Génère une version texte brut à partir du HTML — un email HTML-only sans
+// alternative texte est un signal spam classique pour la plupart des filtres.
+const htmlToPlainText = (html) =>
+  html
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "")
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, "$2 ($1)")
+    .replace(/<\/(p|div|tr|table|h[1-6])>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/[ \t]+/g, " ")
+    .split("\n").map((line) => line.trim()).join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
   try {
     const transporter = getTransporter();
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+      from:    process.env.EMAIL_FROM,
+      replyTo: process.env.EMAIL_FROM,
       to,
       subject,
       html,
+      text: htmlToPlainText(html),
     });
     console.log(`✅ [email] Envoi réussi — destinataire=${to} sujet="${subject}" messageId=${info.messageId} (${Date.now() - startedAt}ms)`);
     return { success: true, messageId: info.messageId };
