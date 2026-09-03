@@ -33,7 +33,10 @@ export default function FacebookAuthButton({ onError }) {
       const FB = await loadFacebookSdk(FACEBOOK_APP_ID);
       FB.login((response) => {
         handleFbResponse(response).finally(() => setLoading(false));
-      }, { scope: "email,public_profile" });
+      }, {
+        scope: "email,public_profile",
+        auth_type: "reauthorize",
+      });
     } catch {
       onError?.("Connexion Facebook impossible pour le moment.");
       setLoading(false);
