@@ -5,6 +5,7 @@ import { FiMoon, FiSun } from "react-icons/fi";
 import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/LangContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "./LangFlags.jsx";
 import AnimatedNavBar, { AnimatedNavBarProbe } from "./AnimatedNavBar.jsx";
 import { useAdaptiveNav } from "../../hooks/useAdaptiveNav.js";
@@ -28,18 +29,31 @@ const NAV_ITEMS = [
   { key: "contact",      icon: Mail,          to: "/",           anchorId: "contact" },
 ];
 const ANCHOR_ITEMS = NAV_ITEMS.filter((i) => i.anchorId);
+const AVATAR_COLORS = [
+  "#4F46E5", "#10B981", "#F59E0B", "#EF4444",
+  "#8B5CF6", "#0EA5E9", "#EC4899",
+];
+
+function getAvatarColor(name = "") {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export default function SiteNavbar() {
   const { t }                  = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { lang }                = useLang();
+  const { user, logout }        = useAuth();
   const location                = useLocation();
   const navigate                = useNavigate();
 
   const [menuOpen,      setMenuOpen]      = useState(false);
+  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [scrollSpyKey,  setScrollSpyKey]  = useState("home");
 
   const navRef      = useRef(null);
+  const userMenuRef = useRef(null);
   const navInnerRef = useRef(null);
   const navProbeRef = useRef(null);
   const navCollapsed = useAdaptiveNav(navInnerRef, navProbeRef, [lang]);
@@ -98,6 +112,15 @@ export default function SiteNavbar() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!userMenuOpen) return undefined;
+    const onClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [userMenuOpen]);
+
   const handleAnchorClick = (item, e) => {
     e.preventDefault();
     if (onLanding) {
@@ -108,6 +131,46 @@ export default function SiteNavbar() {
     }
     setMenuOpen(false);
   };
+
+  const dashboardRoute = user?.role === "admin" ? "/dashboard/admin" : "/dashboard/student";
+  const avatarColor = getAvatarColor(user?.name || "");
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    setMenuOpen(false);
+    navigate("/");
+  };
+
+  const userMenu = user && (
+    <div className="lp-user-menu-wrapper" ref={userMenuRef}>
+      <button
+        type="button"
+        className="lp-user-avatar"
+        style={{ background: avatarColor }}
+        onClick={() => setUserMenuOpen((v) => !v)}
+        aria-label={user.name || "Utilisateur"}
+        aria-expanded={userMenuOpen}
+      >
+        {user.avatarUrl
+          ? <img src={user.avatarUrl} alt="" className="lp-user-avatar__img" />
+          : (user.name?.[0]?.toUpperCase() || "U")}
+      </button>
+      {userMenuOpen && (
+        <div className="lp-user-dropdown">
+          <div className="lp-user-dropdown__identity">
+            <strong>{user.name}</strong>
+            {user.email && <span>{user.email}</span>}
+          </div>
+          <Link to={dashboardRoute} onClick={() => setUserMenuOpen(false)}>
+            {t("nav.dashboard")}
+          </Link>
+          <button type="button" onClick={handleLogout}>
+            {t("sidebar.logout")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <nav className={`lp-nav${navCollapsed ? " lp-nav--collapsed" : ""}`} ref={navRef}>
@@ -128,8 +191,12 @@ export default function SiteNavbar() {
             {theme === "light" ? <FiMoon size={16} /> : <FiSun size={16} />}
           </button>
 
-          <Link to="/login"    className="btn btn-ghost   lp-btn-sm">{t("nav.signIn")}</Link>
-          <Link to="/register" className="btn btn-primary lp-btn-sm">{t("nav.signUp")}</Link>
+          {user ? userMenu : (
+            <>
+              <Link to="/login"    className="btn btn-ghost   lp-btn-sm">{t("nav.signIn")}</Link>
+              <Link to="/register" className="btn btn-primary lp-btn-sm">{t("nav.signUp")}</Link>
+            </>
+          )}
 
           <button
             className="fp-hamburger"
@@ -155,8 +222,12 @@ export default function SiteNavbar() {
         <div className="lp-nav__actions">
           <LangFlags/>
           <span className="lp-theme-btn">{theme === "light" ? <FiMoon size={16} /> : <FiSun size={16} />}</span>
-          <span className="btn btn-ghost   lp-btn-sm">{t("nav.signIn")}</span>
-          <span className="btn btn-primary lp-btn-sm">{t("nav.signUp")}</span>
+          {user
+            ? <span className="lp-user-avatar lp-user-avatar--probe" style={{ background: avatarColor }}>{user.name?.[0]?.toUpperCase() || "U"}</span>
+            : <>
+                <span className="btn btn-ghost   lp-btn-sm">{t("nav.signIn")}</span>
+                <span className="btn btn-primary lp-btn-sm">{t("nav.signUp")}</span>
+              </>}
         </div>
       </div>
 
@@ -173,8 +244,12 @@ export default function SiteNavbar() {
             </Link>
           ))}
           <div className="fp-mobile-actions">
-            <Link to="/login"    className="btn btn-ghost   lp-btn-sm" onClick={() => setMenuOpen(false)}>{t("nav.signIn")}</Link>
-            <Link to="/register" className="btn btn-primary lp-btn-sm" onClick={() => setMenuOpen(false)}>{t("nav.signUp")}</Link>
+            {user ? userMenu : (
+              <>
+                <Link to="/login"    className="btn btn-ghost   lp-btn-sm" onClick={() => setMenuOpen(false)}>{t("nav.signIn")}</Link>
+                <Link to="/register" className="btn btn-primary lp-btn-sm" onClick={() => setMenuOpen(false)}>{t("nav.signUp")}</Link>
+              </>
+            )}
           </div>
         </div>
       )}
