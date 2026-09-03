@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
+import FacebookAuthButton from "../../components/common/FacebookAuthButton.jsx";
 import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
 import BoxReveal from "../../components/auth/BoxReveal.jsx";
 import api from "../../services/api.js";
@@ -190,6 +191,7 @@ export default function Register() {
 
               <div className="auth-socials" style={{marginBottom:"1rem"}}>
                 <GoogleAuthButton onError={setError} />
+                <FacebookAuthButton onError={setError} />
               </div>
               <div className="auth-separator" style={{marginBottom:"1.25rem"}}>
                 <span/><em>{t("login.or")}</em><span/>
