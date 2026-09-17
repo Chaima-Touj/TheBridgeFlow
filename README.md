@@ -1,188 +1,109 @@
-<div align="center">
+# TheBridgeFlow
 
-# 🌉 TheBridgeFlow
+**Plateforme de gestion des stages, PFE et formations professionnelles**
 
-### Plateforme intelligente de gestion des stages, PFE et formations
+TheBridgeFlow est une plateforme web full-stack (MERN) qui centralise la gestion des offres de stage/PFE, le suivi des candidatures et des entretiens, un catalogue de formations avec suivi de progression, un assistant IA contextualisé, une messagerie interne et une cérémonie de vote de projets — le tout piloté depuis un tableau de bord administrateur avec des statistiques réelles.
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Render](https://img.shields.io/badge/Deployed_on-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
-![License](https://img.shields.io/badge/License-Academic_Project-lightgrey)
-
-[Démo Live](https://the-bridge-flow.onrender.com) · [Signaler un bug](https://github.com/Chaima-Touj/TheBridgeFlow/issues)
-
-</div>
+Projet réalisé par **Chaima Touj**, étudiante en BTS Informatique de Gestion à l'IMSET, dans le cadre de son PFE (Projet de Fin de Formation), au sein de **Bee Coders** (El Ghazela, Ariana).
 
 ---
 
-## 📖 À propos
+## ✨ Fonctionnalités principales
 
-**TheBridgeFlow** est une plateforme web centralisée conçue pour simplifier la gestion des **stages**, des **projets de fin d'études (PFE)** et des **formations complémentaires** au sein d'un institut de formation.
+- **Authentification sécurisée** — JWT, connexion Google et Facebook (OAuth), vérification par email, réinitialisation de mot de passe
+- **Offres & candidatures** — publication d'offres de stage/PFE, candidature avec CV, proposition et suivi d'entretiens
+- **Formations** — catalogue multi-semaines avec contenu vidéo, suivi de progression, demandes d'inscription
+- **Assistant IA SAGE** — assistant conversationnel contextualisé au profil de l'étudiant (candidatures, entretiens, formations), avec protection anti-jailbreak
+- **Cérémonie de projets** — soumission de projets, vote de la communauté (1 à 3 projets), classement en direct, clôture et annonce du gagnant
+- **Messagerie interne** — échanges directs entre étudiants et administrateurs
+- **Notifications** — suivi des événements clés de la plateforme
+- **Tableau de bord administrateur** — gestion des offres, formations, utilisateurs, actualités, et statistiques réelles d'utilisation
 
-Développée dans le cadre d'un **Projet de Fin de Formation (PFF)** — BTS Informatique de Gestion à l'IMSET, en partenariat avec **Bee Coders** — la plateforme remplace les processus manuels dispersés (emails, fichiers Excel) par un écosystème unique, réactif et intelligent.
+## 👥 Acteurs
 
-### 🎯 Le problème résolu
-
-Dans la majorité des instituts, le suivi des candidatures, la planification des entretiens et l'accompagnement pédagogique manquent cruellement de centralisation. TheBridgeFlow réunit l'ensemble de ce parcours au sein d'une seule interface, avec un assistant IA pour guider l'étudiant à chaque étape.
-
----
-
-## ✨ Fonctionnalités clés
-
-| Module | Description |
-|---|---|
-| 🔐 **Authentification** | Email/mot de passe, Google OAuth, Facebook, vérification par code, reset password sécurisé |
-| 💼 **Offres & Candidatures** | Publication d'offres (stage/PFE/alternance), candidature en un clic, suivi de statut en temps réel |
-| 🎤 **Entretiens** | Planification, confirmation et gestion complète du cycle d'entretien |
-| 🎓 **Formations** | Catalogue de formations organisées par semaines, avec vidéos et supervision |
-| 💬 **Messagerie & Notifications** | Communication interne fluide entre étudiants et administration |
-| 🤖 **Assistant IA — SAGE** | Assistant conversationnel contextuel (profil, candidatures, formations) propulsé par Groq/Llama 3.1 |
-| 📊 **Statistiques Admin** | Tableau de bord temps réel : utilisateurs connectés, taux de conversion, contenus les plus consultés |
-| 📱 **PWA** | Application installable sur mobile et desktop |
-| 🌍 **Multilingue** | Français / Anglais / Arabe (avec support RTL) |
-
----
-
-## 🏗️ Architecture
-
-```text
-┌─────────────────────┐          ┌──────────────────────┐          ┌─────────────────┐
-│  thebridgeflow-      │   REST   │  thebridgeflow-       │ Mongoose │                  │
-│  front               │◄────────►│  back                 │◄────────►│  MongoDB Atlas   │
-│  React 19 + Vite     │  Axios   │  Node.js + Express 5  │          │                  │
-└─────────────────────┘          └──────────────────────┘          └─────────────────┘
-                                              │
-                          ┌───────────────────┼───────────────────┐
-                          ▼                   ▼                   ▼
-                    Groq (SAGE)         Google Drive         Brevo (Emails)
-```
-
-Architecture **monorepo** à deux dépôts indépendants, déployés séparément sur **Render**.
-
----
+- **Visiteur** — consultation des offres et formations, création de compte
+- **Étudiant** — candidatures, formations, messagerie, assistant SAGE, Cérémonie de projets
+- **Administrateur** — gestion complète de la plateforme et statistiques
 
 ## 🛠️ Stack technique
 
-**Frontend** — `thebridgeflow-front/`
-- React 19 · Vite · React Router · Axios
-- Framer Motion · react-i18next · Recharts
-- PWA (vite-plugin-pwa)
+**Frontend**
+- React 19 + Vite
+- React Router, Axios
+- Framer Motion (animations)
+- react-i18next (interface multilingue FR/EN/AR)
+- CSS classique (un fichier par composant — pas de Tailwind)
 
-**Backend** — `thebridgeflow-back/`
-- Node.js · Express 5 · Mongoose
-- JWT · bcryptjs · Helmet · express-rate-limit
-- Google OAuth · Facebook Graph API
+**Backend**
+- Node.js + Express 5
+- MongoDB Atlas + Mongoose
+- JWT + bcryptjs
+- Helmet, CORS, rate-limiting
 
-**Base de données & Services externes**
-- MongoDB Atlas
-- Groq API (Llama 3.1 8B) — Assistant SAGE
-- Google Drive API — Hébergement vidéos
-- Brevo — Emails transactionnels
-- Google Analytics 4 · geoip-lite
+**Services externes**
+- Groq API (modèle `openai/gpt-oss-20b`) — assistant SAGE
+- Google OAuth & Facebook OAuth
+- Google Drive API (hébergement des vidéos de formation)
+- Brevo (envoi d'emails transactionnels en production)
 
 **Déploiement**
-- Render (Frontend + Backend)
+- Render (frontend + backend), intégration continue sur push vers `main`
 
----
+## 🏗️ Architecture
 
-## 🚀 Installation locale
+Architecture 3-tiers classique :
 
-### Prérequis
-- Node.js ≥ 18
-- Compte MongoDB Atlas
-- Clés API (Google OAuth, Facebook, Groq, Brevo, Cloudinary)
-
-### 1. Cloner le dépôt
-```bash
-git clone https://github.com/Chaima-Touj/TheBridgeFlow.git
-cd TheBridgeFlow
+```
+Client (React/Vite) ⇄ Serveur applicatif (Node/Express, API REST) ⇄ Base de données (MongoDB Atlas)
+                                    ⇅
+                        Services externes (Groq, OAuth, Google Drive, Brevo)
 ```
 
-### 2. Backend
+## 📁 Structure du dépôt
+
+```
+TheBridgeFlow/
+├── thebridgeflow-front/     # Application React (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── context/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── i18n/
+│   │   └── constants/
+│   └── public/
+├── thebridgeflow-back/      # API Express
+│   ├── config/
+│   ├── models/
+│   ├── controllers/
+│   ├── routes/
+│   ├── middleware/
+│   ├── services/
+│   └── scripts/
+└── push-all.sh              # Synchronisation vers les dépôts miroirs
+```
+
+## 🚀 Démarrage local
+
 ```bash
+# Backend
 cd thebridgeflow-back
 npm install
-npm start
-```
-Créez un fichier `.env` à la racine de `thebridgeflow-back/` avec les variables suivantes :
-```
-MONGO_URI=
-JWT_SECRET=
-JWT_EXPIRES_IN=
-PORT=
-CLIENT_URL=
-GROQ_API_KEY=
-BREVO_API_KEY=
-EMAIL_FROM=
-GOOGLE_CLIENT_ID=
-FACEBOOK_APP_ID=
-FACEBOOK_APP_SECRET=
-```
+cp .env.example .env   # renseigner les variables (MongoDB, JWT, OAuth, Groq, Brevo...)
+npm run dev
 
-### 3. Frontend
-```bash
+# Frontend (dans un autre terminal)
 cd thebridgeflow-front
 npm install
+cp .env.example .env
 npm run dev
 ```
-Créez un fichier `.env` à la racine de `thebridgeflow-front/` avec les variables suivantes :
-```
-VITE_API_URL=
-VITE_GOOGLE_CLIENT_ID=
-VITE_FACEBOOK_APP_ID=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
 
-L'application est accessible sur `http://localhost:5173`, l'API sur `http://localhost:5000`.
+## 📄 Documentation
+
+Le rapport de PFE complet (contexte, méthodologie Scrum, spécification des besoins, réalisation sprint par sprint, déploiement) est disponible séparément (LaTeX/PDF).
 
 ---
 
-## 📁 Structure du projet
-
-```text
-TheBridgeFlow/
-├── thebridgeflow-front/     # Application React (client)
-│   ├── src/
-│   │   ├── components/      # Composants réutilisables
-│   │   ├── pages/            # Pages par route
-│   │   ├── context/          # État global (Auth, Lang, Theme)
-│   │   └── services/         # Appels API
-│   └── ...
-├── thebridgeflow-back/       # API REST (serveur)
-│   ├── models/                # Schémas Mongoose
-│   ├── controllers/           # Logique métier
-│   ├── routes/                # Endpoints Express
-│   ├── middleware/            # Auth, sanitize, upload
-│   └── services/               # Groq, email...
-└── README.md
-```
-
----
-
-## 👥 Équipe & Encadrement
-
-| Rôle | Nom |
-|---|---|
-| 👩‍💻 Développeuse | **Chaima Touj** |
-| 🧭 Encadrant professionnel (Bee Coders) | M. Ahmed Naffeti |
-| 🎓 Encadrant académique (IMSET) | M. Faycel Bouslahi |
-
----
-
-## 📄 Contexte académique
-
-Projet réalisé dans le cadre du **Projet de Fin de Formation (PFF)** — BTS Informatique de Gestion, IMSET (Institut Maghrébin des Sciences Économiques et de Technologie), en partenariat avec **Bee Coders**.
-
-Méthodologie de développement : **Scrum agile**, 5 sprints itératifs.
-
----
-
-<div align="center">
-
-**⭐ N'hésitez pas à mettre une étoile si ce projet vous a plu !**
-
-</div>
+*Méthodologie Scrum — 6 sprints (Sprint 0 à Sprint 5) — Product Owner : M. Ahmed Naffeti · Scrum Master : M. Aziz Ben Ismail · Développement : Chaima Touj*
