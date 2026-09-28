@@ -3,6 +3,7 @@ import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import Formation         from "../models/formation.model.js";
 import Enrollment        from "../models/enrollment.model.js";
 import Notification      from "../models/notification.model.js";
+import User              from "../models/users.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
 import { buildInitialWeekProgress } from "../utils/enrollmentProgress.js";
 
@@ -36,6 +37,22 @@ export const createRequest = asyncHandler(async (req, res) => {
   });
 
   await request.populate("formation", "title slug");
+
+  // Notification (cloche) à tous les admins actifs — même pattern que les candidatures.
+  const admins = await User.find({ role: "admin", isActive: true }).select("_id").lean();
+
+  await Promise.all(
+    admins.map((admin) =>
+      Notification.create({
+        userId:  admin._id,
+        title:   "Nouvelle demande de formation",
+        message: `${req.user.name} a demandé l'inscription à la formation "${request.formation.title}".`,
+        type:    "info",
+        link:    "/dashboard/admin/demandes",
+      })
+    )
+  );
+
   res.status(201).json(request);
 });
 

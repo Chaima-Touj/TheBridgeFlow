@@ -114,6 +114,15 @@
   font-size: 0.87rem;
 }
 
+.dfd-modal__error {
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-sm);
+  color: #dc2626;
+  font-size: 0.87rem;
+}
+
 /* Form */
 .dfd-modal__form {
   display: flex;

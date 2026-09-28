@@ -151,6 +151,7 @@ function EnrollModal({ formation, onClose, onSuccess }) {
   const [message,     setMessage]    = useState("");
   const [submitting,  setSubmitting] = useState(false);
   const [alreadySent, setAlreadySent] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   const MODES = [
     { value: "Présentiel", label: t("dfd.modeOnsite") },
@@ -177,6 +178,7 @@ function EnrollModal({ formation, onClose, onSuccess }) {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
+    setRequestError("");
     try {
       await enrollmentRequestsService.create(formation._id, mode, message);
       onSuccess();
@@ -184,6 +186,10 @@ function EnrollModal({ formation, onClose, onSuccess }) {
     } catch (err) {
       if (err?.response?.status === 409) {
         setAlreadySent(true);
+      } else {
+        setRequestError(
+          err?.response?.data?.message || err?.message || t("dfd.submitError")
+        );
       }
     } finally {
       setSubmitting(false);
@@ -245,6 +251,12 @@ function EnrollModal({ formation, onClose, onSuccess }) {
                 maxLength={800}
               />
             </label>
+
+            {requestError && (
+              <div className="dfd-modal__error" role="alert">
+                {requestError}
+              </div>
+            )}
 
             <button
               type="submit"

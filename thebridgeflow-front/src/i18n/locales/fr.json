@@ -908,6 +908,7 @@
     "modalTitle": "Demande d'inscription",
     "modalClose": "Fermer",
     "alreadySent": "Vous avez déjà soumis une demande pour cette formation.",
+    "submitError": "Impossible d'envoyer la demande. Veuillez réessayer.",
     "modeLegend": "Mode souhaité",
     "modeOnsite": "Présentiel",
     "modeOnline": "En ligne",
