@@ -1,7 +1,7 @@
 import ReactGA from "react-ga4";
 import api from "../services/api.js";
 
-const MEASUREMENT_ID = "G-X91NN7VJVZ";
+const MEASUREMENT_ID = "G-DEZPD1JYWB";
 
 let initialized = false;
 
@@ -12,7 +12,9 @@ let initialized = false;
 export function initGA() {
   if (initialized) return;
   if (import.meta.env.PROD) {
-    ReactGA.initialize(MEASUREMENT_ID);
+    ReactGA.initialize(MEASUREMENT_ID, {
+      gtagOptions: { send_page_view: false },
+    });
     initialized = true;
     console.log("[GA4] Initialized with ID:", MEASUREMENT_ID);
   } else {
@@ -49,4 +51,3 @@ export function trackPageVisit(path) {
     .then(() => console.log(`[Track] Page visit saved: ${path}`))
     .catch(() => {}); // silencieux — ne doit jamais bloquer l'app
 }
-
