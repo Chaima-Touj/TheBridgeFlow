@@ -21,7 +21,7 @@ import { FaChartBar, FaRobot } from "react-icons/fa";
 // package).
 import { TbBrandWhatsapp } from "react-icons/tb";
 import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiKubernetes } from "react-icons/si";
-import { useLang } from "../context/LangContext.jsx";
+import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import SiteFooter from "../components/common/SiteFooter.jsx";

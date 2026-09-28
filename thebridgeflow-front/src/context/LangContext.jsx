@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-const LangContext = createContext(null);
+import { LangContext } from "./langContext.js";
 
 export function LangProvider({ children }) {
   const { i18n } = useTranslation();
@@ -25,5 +24,3 @@ export function LangProvider({ children }) {
     </LangContext.Provider>
   );
 }
-
-export const useLang = () => useContext(LangContext);

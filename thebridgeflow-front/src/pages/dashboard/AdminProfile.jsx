@@ -43,7 +43,7 @@ function PwdField({ label, value, onChange, show, onToggleShow }) {
 
 export default function AdminProfile() {
   const { t }              = useTranslation();
-  const { user, refreshUser } = useAuth();
+  const { refreshUser } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +55,12 @@ export default function AdminProfile() {
   const [pwdForm, setPwdForm]         = useState({ current: "", nouveau: "", confirm: "" });
   const [pwdShow, setPwdShow]         = useState({ current: false, nouveau: false, confirm: false });
 
+  const showToast = useCallback((type, message) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
+
   useEffect(() => {
     profileService.getMyProfile()
       .then(({ data }) => {
@@ -65,12 +71,6 @@ export default function AdminProfile() {
       .catch(() => showToast("error", t("adminProfile.errors.loadFailed")))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const showToast = useCallback((type, message) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast({ type, message });
-    toastTimer.current = setTimeout(() => setToast(null), 3500);
   }, []);
 
   const saveAccount = async () => {

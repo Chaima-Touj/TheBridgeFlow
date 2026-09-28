@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { FaChartBar, FaRobot } from "react-icons/fa";
 import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiKubernetes } from "react-icons/si";
-import { useLang } from "../context/LangContext.jsx";
+import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import CoursePreviewModal from "../components/common/CoursePreviewModal.jsx";

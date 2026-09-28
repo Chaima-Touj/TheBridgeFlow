@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useLang } from "../../context/LangContext.jsx";
+import { useLang } from "../../context/langContext.js";
 import {
   FiArrowLeft, FiChevronDown, FiAward, FiClock, FiMonitor, FiUsers,
   FiCheck, FiStar, FiChevronRight, FiPlay, FiMessageCircle, FiZap,
@@ -292,28 +292,35 @@ export default function DashboardFormationDetail() {
   const [formation,    setFormation]    = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
+  const [loadedSlug,   setLoadedSlug]   = useState(null);
+  const isLoading = loading || loadedSlug !== slug;
+  const currentError = loadedSlug === slug ? error : null;
   const [previewWeek,  setPreviewWeek]  = useState(null);
   const [showModal,    setShowModal]    = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(null);
     formationsService.getBySlug(slug)
       .then((res) => {
         if (!active) return;
         const f = res.data;
         if (!f?._id) throw new Error(t("formationDetail.notFound"));
+        setError(null);
         setFormation(f);
       })
       .catch((err) => {
         if (!active) return;
         setError(err?.response?.data?.message ?? err.message ?? t("formationDetail.error"));
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => {
+        if (active) {
+          setLoadedSlug(slug);
+          setLoading(false);
+        }
+      });
     return () => { active = false; };
-  }, [slug]);
+  }, [slug, t]);
 
   const handleSuccess = () => {
     setToastVisible(true);
@@ -337,19 +344,19 @@ export default function DashboardFormationDetail() {
       <div className="fd-page dfd-page-override">
 
         {/* ── Skeleton ─────────────────────────────────────────────────────── */}
-        {loading && <SkeletonHero />}
+        {isLoading && <SkeletonHero />}
 
         {/* ── Error ────────────────────────────────────────────────────────── */}
-        {!loading && error && (
+        {!isLoading && currentError && (
           <div className="fd-error">
-            <p className="fd-error__msg">{error}</p>
+            <p className="fd-error__msg">{currentError}</p>
             <Link to="/dashboard/student/formations" className="fd-btn fd-btn--ghost">
               {t("dfd.back")}
             </Link>
           </div>
         )}
 
-        {!loading && !error && formation && (
+        {!isLoading && !currentError && formation && (
           <>
             {/* ══════════════════════════════════════════════════════════════
                 1. HERO

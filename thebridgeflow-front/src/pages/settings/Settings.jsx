@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
-import { useLang } from "../../context/LangContext.jsx";
+import { useLang } from "../../context/langContext.js";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Loader from "../../components/common/Loader.jsx";
 import { profileService } from "../../services/profile.service.js";
 import {
   FiUser, FiMoon, FiSun, FiBell, FiShield, FiLock, FiCpu,
-  FiBriefcase, FiAlertTriangle, FiGlobe, FiCheck, FiX,
+  FiBriefcase, FiAlertTriangle, FiCheck, FiX,
   FiSave, FiTrash2, FiEye, FiEyeOff, FiChevronRight,
   FiSmartphone, FiMail, FiBook, FiMessageSquare, FiCalendar,
 } from "react-icons/fi";
@@ -188,6 +188,12 @@ export default function Settings() {
     localStorage.setItem("fontSize", fontSize);
   }, [fontSize]);
 
+  const showToast = useCallback((type, message) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
+
   // Load profile from MongoDB
   useEffect(() => {
     profileService.getMyProfile()
@@ -212,12 +218,6 @@ export default function Settings() {
       .catch(() => showToast("error", t("settings.toast.loadError")))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const showToast = useCallback((type, message) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast({ type, message });
-    toastTimer.current = setTimeout(() => setToast(null), 3500);
   }, []);
 
   // ── Save: Compte ─────────────────────────────────────────────────────────

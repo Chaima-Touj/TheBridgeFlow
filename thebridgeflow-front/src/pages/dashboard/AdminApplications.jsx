@@ -101,15 +101,14 @@ function ProposeInterviewForm({ application, onCancel, onSubmitted, t }) {
   const [scheduledAt,    setScheduledAt]    = useState("");
   const [mode,           setMode]           = useState("en ligne");
   const [location,       setLocation]       = useState("");
-  const [message,        setMessage]        = useState("");
+  const [customMessage,  setCustomMessage]  = useState("");
   const [messageTouched, setMessageTouched] = useState(false);
   const [submitting,     setSubmitting]     = useState(false);
   const [error,          setError]          = useState("");
 
-  useEffect(() => {
-    if (messageTouched) return;
-    setMessage(buildDefaultMessage(scheduledAt, mode));
-  }, [scheduledAt, mode, messageTouched]);
+  const message = messageTouched
+    ? customMessage
+    : buildDefaultMessage(scheduledAt, mode);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -176,7 +175,7 @@ function ProposeInterviewForm({ application, onCancel, onSubmitted, t }) {
           className="input"
           rows={4}
           value={message}
-          onChange={(e) => { setMessage(e.target.value); setMessageTouched(true); }}
+          onChange={(e) => { setCustomMessage(e.target.value); setMessageTouched(true); }}
         />
       </div>
 

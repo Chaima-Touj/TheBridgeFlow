@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
-import { useLang } from "../../context/LangContext.jsx";
+import { useLang } from "../../context/langContext.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "./LangFlags.jsx";
 import AnimatedNavBar, { AnimatedNavBarProbe } from "./AnimatedNavBar.jsx";

@@ -131,6 +131,8 @@ export default function ApplyOffer() {
   const [offer,          setOffer]         = useState(null);
   const [profile,        setProfile]       = useState(null);
   const [loading,        setLoading]       = useState(true);
+  const [loadedId,       setLoadedId]      = useState(null);
+  const isLoading = loading || loadedId !== id;
   const [submitting,     setSubmitting]    = useState(false);
   const [submitted,      setSubmitted]     = useState(false);
   const [alreadyApplied, setAlreadyApplied]= useState(false);
@@ -142,13 +144,14 @@ export default function ApplyOffer() {
 
   /* load ──────────────────────────────────────────────────────────────────── */
   useEffect(() => {
-    setLoading(true);
+    let active = true;
     Promise.all([
       offersService.getOne(id),
       profileService.getMyProfile(),
       applicationsService.getAll(),
     ])
       .then(([offRes, profRes, appRes]) => {
+        if (!active) return;
         const o = offRes.data.offer || offRes.data.offers?.[0] || offRes.data;
         setOffer(o);
 
@@ -162,7 +165,13 @@ export default function ApplyOffer() {
         if (found) setAlreadyApplied(true);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) {
+          setLoadedId(id);
+          setLoading(false);
+        }
+      });
+    return () => { active = false; };
   }, [id]);
 
   /* validation ────────────────────────────────────────────────────────────── */
@@ -232,7 +241,7 @@ export default function ApplyOffer() {
   const hasCvProfile = !!(profile?.cv?.fileUrl);
 
   /* ── Loading ─────────────────────────────────────────────────────────────── */
-  if (loading) {
+  if (isLoading) {
     return (
       <DashboardLayout title={t("apply.title")}>
         <div className="ao-page">

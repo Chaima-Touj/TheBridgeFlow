@@ -6,7 +6,7 @@ import {
   FiArrowLeft, FiMapPin, FiBriefcase, FiClock,
   FiCalendar, FiCode, FiSend, FiAlertCircle,
 } from "react-icons/fi";
-import { useLang } from "../context/LangContext.jsx";
+import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useFormationsTechMap } from "../hooks/useFormationsTechMap.js";
@@ -60,8 +60,8 @@ const SkeletonDetail = () => (
         </div>
       </div>
     </div>
-    {Array.from({ length: 6 }).map((_, i) => (
-      <div key={i} className="pod-sk pod-sk-line" style={{ width: `${75 + Math.random() * 25}%` }} />
+    {[84, 92, 78, 88, 96, 82].map((width, i) => (
+      <div key={i} className="pod-sk pod-sk-line" style={{ width: `${width}%` }} />
     ))}
   </div>
 );
@@ -78,25 +78,32 @@ const PublicOfferDetail = () => {
   const [offer,   setOffer]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
+  const [loadedId, setLoadedId] = useState(null);
+  const isLoading = loading || loadedId !== id;
+  const currentError = loadedId === id ? error : null;
   const formations    = useFormationsTechMap();
   const matchFormationForSkill = buildSkillFormationMatcher(formations);
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(null);
     offersService.getOne(id)
       .then(res => {
         if (!active) return;
         const o = res.data?.offer ?? res.data?.offers?.[0] ?? res.data;
         if (!o?._id) throw new Error(t("offers.offerNotFound"));
+        setError(null);
         setOffer(o);
       })
       .catch(err => {
         if (!active) return;
         setError(err?.response?.data?.message ?? err.message ?? t("offers.error"));
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => {
+        if (active) {
+          setLoadedId(id);
+          setLoading(false);
+        }
+      });
     return () => { active = false; };
   }, [id, t]);
 
@@ -132,19 +139,19 @@ const PublicOfferDetail = () => {
         </Link>
 
         {/* Loading */}
-        {loading && <SkeletonDetail />}
+        {isLoading && <SkeletonDetail />}
 
         {/* Error */}
-        {!loading && error && (
+        {!isLoading && currentError && (
           <div className="pod-error">
             <FiAlertCircle size={36} />
-            <p>{error}</p>
+            <p>{currentError}</p>
             <Link to="/offers" className="op-btn op-btn--outline">{t("offers.backToOffers")}</Link>
           </div>
         )}
 
         {/* Offer detail */}
-        {!loading && !error && offer && (
+        {!isLoading && !currentError && offer && (
           <motion.div
             className="pod-layout"
             initial={{ opacity: 0, y: 16 }}

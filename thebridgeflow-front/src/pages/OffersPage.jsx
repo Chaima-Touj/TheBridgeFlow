@@ -6,7 +6,7 @@ import {
   FiSearch, FiMapPin, FiBriefcase, FiClock,
   FiCalendar, FiX, FiAlertCircle,
 } from "react-icons/fi";
-import { useLang } from "../context/LangContext.jsx";
+import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { offersService } from "../services/offers.service.js";

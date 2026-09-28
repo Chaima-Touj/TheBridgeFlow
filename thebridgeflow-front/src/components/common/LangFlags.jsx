@@ -1,4 +1,4 @@
-import { useLang } from "../../context/LangContext.jsx";
+import { useLang } from "../../context/langContext.js";
 import "./LangFlags.css";
 
 const LANG_OPTIONS = [

@@ -1,6 +1,6 @@
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
-import { useLang } from "../context/LangContext.jsx";
+import { useLang } from "../context/langContext.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
 
