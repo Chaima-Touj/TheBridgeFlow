@@ -29,12 +29,22 @@ export const createRequest = asyncHandler(async (req, res) => {
     const err = new Error("Vous avez déjà soumis une demande pour cette formation."); err.statusCode = 409; throw err;
   }
 
-  const request = await EnrollmentRequest.create({
-    student:   req.user._id,
-    formation: formationId,
-    mode,
-    message:   message?.trim() || "",
-  });
+  let request;
+  try {
+    request = await EnrollmentRequest.create({
+      student:   req.user._id,
+      formation: formationId,
+      mode,
+      message:   message?.trim() || "",
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
+      const duplicateError = new Error("Vous avez déjà soumis une demande pour cette formation.");
+      duplicateError.statusCode = 409;
+      throw duplicateError;
+    }
+    throw error;
+  }
 
   await request.populate("formation", "title slug");
 
