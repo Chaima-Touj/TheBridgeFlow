@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Sidebar from "./Sidebar.jsx";
 import Topbar from "./Topbar.jsx";
-import SiteFooter from "../common/SiteFooter.jsx";
 import { notificationsService } from "../../services/notifications.service.js";
 import { DASHBOARD_MOBILE_BREAKPOINT } from "../../constants/breakpoints.js";
 import "./DashboardLayout.css";
@@ -119,7 +118,6 @@ export default function DashboardLayout({ children, title, subtitle }) {
         />
         <div className="dl-content">
           {children}
-          <SiteFooter />
         </div>
       </div>
     </div>
