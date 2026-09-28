@@ -18,9 +18,9 @@ import {
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { uploadCV } from "../middleware/upload.middleware.js";
-
+// Créer un routeur Express
 const router = express.Router();
-
+// Définir les routes pour l'authentification et la gestion du compte
 router.post("/register",     register);
 router.post("/login",        login);
 router.post("/google",       googleAuth);

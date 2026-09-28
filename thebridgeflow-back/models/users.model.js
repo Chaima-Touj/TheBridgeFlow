@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
+// Définition des sous-schémas pour l'expérience, les compétences et les langues
 const experienceSchema = new mongoose.Schema({
   company:      { type: String, default: "" },
   position:     { type: String, default: "" },
@@ -11,7 +11,7 @@ const experienceSchema = new mongoose.Schema({
   description:  { type: String, default: "" },
   technologies: [{ type: String }],
 }, { _id: false });
-
+// Définition du schéma principal pour l'utilisateur
 const skillSchema = new mongoose.Schema({
   name:     { type: String, default: "" },
   level:    { type: String, enum: ["Débutant", "Intermédiaire", "Avancé", "Expert"], default: "Débutant" },
@@ -140,7 +140,7 @@ userSchema.pre("save", async function () {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
-
+// Méthode pour exclure certains champs sensibles lors de la conversion en JSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;

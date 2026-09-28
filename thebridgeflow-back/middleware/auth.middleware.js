@@ -17,7 +17,7 @@ export const validateObjectId = (paramName = "id") => (req, res, next) => {
 // Protection JWT
 export const protect = asyncHandler(async (req, res, next) => {
   let token;
-
+// Vérifier l'en-tête Authorization pour le token Bearer
   const authHeader = req.headers.authorization || "";
   if (authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];

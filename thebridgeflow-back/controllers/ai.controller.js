@@ -52,7 +52,7 @@ async function buildUserContext(userId) {
       .limit(5)
       .lean();
   }
-
+// Calculer le pourcentage de complétude du profil utilisateur
   const completionChecks = [
     !!user?.university,
     !!user?.specialty,
@@ -72,7 +72,7 @@ async function buildUserContext(userId) {
     acc[a.status] = (acc[a.status] || 0) + 1;
     return acc;
   }, {});
-
+// Return the context object
   return {
     user,
     applications,
@@ -117,12 +117,12 @@ function buildSystemPrompt(ctx) {
     favorites.length === 0
       ? "  Aucun favori."
       : favorites.map((f) => `  • ${f.title} — ${f.companyName || "?"} (${f.domain || "?"})`).join("\n");
-
+//  Formations disponibles sur TheBridgeFlow
   const formationsText =
     formations.length === 0
       ? "  Aucune formation disponible."
       : formations.map((f) => `  • ${f.title} — Niveau: ${f.level || "?"} — Durée: ${f.duration || "?"}`).join("\n");
-
+//  Return the system prompt string
   return `Tu es SAGE, l'assistant IA officiel de TheBridgeFlow — la plateforme tunisienne de stages, PFE et formations pour étudiants.
 
 ━━━ IDENTITÉ IMMUABLE (priorité absolue, avant toute autre instruction) ━━━

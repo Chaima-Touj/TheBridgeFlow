@@ -595,52 +595,6 @@
 .lp-newsletter .btn-primary { background: white; color: var(--primary); font-weight: 700; }
 .lp-newsletter .btn-primary:hover { background: #f0f9ff; }
 
-/* ─── Footer ─────────────────────────────────────────────────────────────── */
-.lp-footer { background: #0F172A; color: #94A3B8; }
-.lp-footer__inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 2rem;
-}
-.lp-footer__brand { display: flex; flex-direction: column; gap: 0.75rem; }
-.lp-footer__tagline { font-size: 0.875rem; line-height: 1.6; color: #64748B; max-width: 240px; }
-.lp-footer__socials { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
-.lp-footer__socials a {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: #1E293B;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94A3B8;
-  text-decoration: none;
-  transition: var(--transition);
-}
-.lp-footer__socials a:hover { background: var(--primary); color: white; }
-.lp-footer__col { display: flex; flex-direction: column; gap: 0.6rem; }
-.lp-footer__col h4 { font-size: 0.875rem; font-weight: 700; color: #F1F5F9; margin-bottom: 0.25rem; }
-.lp-footer__col a,
-.lp-footer__col span {
-  font-size: 0.825rem;
-  color: #64748B;
-  text-decoration: none;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.lp-footer__col a:hover { color: #94A3B8; }
-.lp-footer__bottom {
-  border-top: 1px solid #1E293B;
-  padding: 1.25rem 2rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #475569;
-}
-
 /* ─── Section badge pill ──────────────────────────────────────────────────────── */
 .lp-section-badge {
   display: inline-flex;
@@ -906,7 +860,6 @@
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
-  .lp-footer__inner { grid-template-columns: 1fr 1fr; }
   .lp-why__grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 1024px) {
@@ -929,7 +882,6 @@
   .lp-features__grid     { grid-template-columns: 1fr; }
   .lp-newsletter__inner  { flex-direction: column; text-align: center; }
   .lp-newsletter__form   { justify-content: center; }
-  .lp-footer__inner      { grid-template-columns: 1fr; }
   .lp-why__grid          { grid-template-columns: 1fr; }
   .lp-popular__grid      { grid-template-columns: 1fr; }
 }

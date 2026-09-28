@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { initGA, trackPageView, trackPageVisit } from "./utils/analytics.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import CustomCursor from "./components/common/CustomCursor.jsx";
+import SiteFooter from "./components/common/SiteFooter.jsx";
 import ScrollToTop from "./components/common/ScrollToTop.jsx";
 import CookieBanner from "./components/common/CookieBanner.jsx";
 import Loader from "./components/common/Loader.jsx";
@@ -215,6 +216,9 @@ export default function App() {
       <Route path="*" element={<NotFound />} />
 
     </Routes>
+    {location.pathname !== "/" && !location.pathname.startsWith("/dashboard/") && (
+      <SiteFooter />
+    )}
     </>
   );
 }

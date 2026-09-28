@@ -1,0 +1,73 @@
+.lp-footer { background: #0F172A; color: #94A3B8; }
+.lp-footer__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 2rem;
+}
+.lp-footer__brand { display: flex; flex-direction: column; gap: 0.75rem; }
+.lp-footer .lp-nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #94A3B8;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.lp-footer .lp-nav__logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.lp-footer .lp-accent { color: var(--primary); }
+.lp-footer__tagline { font-size: 0.875rem; line-height: 1.6; color: #64748B; max-width: 240px; }
+.lp-footer__socials { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
+.lp-footer__socials a {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #1E293B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94A3B8;
+  text-decoration: none;
+  transition: var(--transition);
+}
+.lp-footer__socials a:hover { background: var(--primary); color: white; }
+.lp-footer__col { display: flex; flex-direction: column; gap: 0.6rem; }
+.lp-footer__col h4 { font-size: 0.875rem; font-weight: 700; color: #F1F5F9; margin-bottom: 0.25rem; }
+.lp-footer__col a,
+.lp-footer__col span {
+  font-size: 0.825rem;
+  color: #64748B;
+  text-decoration: none;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.lp-footer__col a:hover { color: #94A3B8; }
+.lp-footer__bottom {
+  border-top: 1px solid #1E293B;
+  padding: 1.25rem 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+@media (max-width: 1100px) {
+  .lp-footer__inner { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .lp-footer__inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+  .lp-footer .lp-nav__logo { gap: 0.35rem; font-size: 1.05rem; }
+  .lp-footer .lp-nav__logo-icon { width: 42px; height: 42px; }
+}
