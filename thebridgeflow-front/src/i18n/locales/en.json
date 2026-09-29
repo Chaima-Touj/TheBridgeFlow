@@ -7,6 +7,7 @@
   "nav": {
     "home": "Home",
     "offers": "Internships",
+    "events": "Events",
     "formations": "Trainings",
     "ceremony": "Ceremony",
     "pricing": "Pricing",
@@ -15,6 +16,13 @@
     "contact": "Contact",
     "signIn": "Sign in",
     "signUp": "Sign up"
+  },
+  "events": {
+    "badge": "TheBridgeFlow Events",
+    "title": "Events",
+    "description": "Find TheBridgeFlow community events here.",
+    "previewTitle": "Coming soon",
+    "previewDescription": "This page is ready for upcoming events."
   },
   "formationDetail": {
     "monthFallback": "Month {{n}}",

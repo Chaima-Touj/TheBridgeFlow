@@ -7,6 +7,7 @@
   "nav": {
     "home": "Accueil",
     "offers": "Stages",
+    "events": "Événements",
     "formations": "Formations",
     "ceremony": "Cérémonie",
     "pricing": "Tarifs",
@@ -15,6 +16,13 @@
     "contact": "Contact",
     "signIn": "Se connecter",
     "signUp": "S'inscrire"
+  },
+  "events": {
+    "badge": "Événements TheBridgeFlow",
+    "title": "Événements",
+    "description": "Retrouvez ici les événements de la communauté TheBridgeFlow.",
+    "previewTitle": "Bientôt ici",
+    "previewDescription": "Cette page est prête à accueillir les prochains événements."
   },
   "formationDetail": {
     "monthFallback": "Mois {{n}}",

@@ -7,6 +7,7 @@
   "nav": {
     "home": "الرئيسية",
     "offers": "التربصات",
+    "events": "الفعاليات",
     "formations": "التدريبات",
     "ceremony": "الحفل",
     "pricing": "الأسعار",
@@ -15,6 +16,13 @@
     "contact": "اتصل",
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب"
+  },
+  "events": {
+    "badge": "فعاليات TheBridgeFlow",
+    "title": "الفعاليات",
+    "description": "اكتشف هنا فعاليات مجتمع TheBridgeFlow.",
+    "previewTitle": "قريبًا",
+    "previewDescription": "هذه الصفحة جاهزة لاستضافة الفعاليات القادمة."
   },
   "formationDetail": {
     "monthFallback": "الشهر {{n}}",
