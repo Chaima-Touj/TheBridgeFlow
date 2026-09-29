@@ -1,0 +1,243 @@
+name: 9antra Frontend Release
+
+on:
+  workflow_run:
+    workflows:
+      - "9antra Frontend CI"
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: 9antra-frontend-production
+  cancel-in-progress: false
+
+jobs:
+
+  release:
+    name: Release Frontend
+
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      IMAGE_NAME: ghcr.io/ahmedneffati/thebridgeflowfront
+
+    steps:
+
+      - name: Checkout validated commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push immutable image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            VITE_API_URL=https://9antra.tn/api
+            VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
+            VITE_FACEBOOK_APP_ID=${{ vars.VITE_FACEBOOK_APP_ID }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.RELEASE_SHA }}
+
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/9antra_ci
+          chmod 600 ~/.ssh/9antra_ci
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Test VPS connection
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "echo SSH_OK && sudo -n docker ps >/dev/null && echo DOCKER_OK"
+
+      - name: Authenticate VPS to GHCR
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | \
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sudo docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
+
+      - name: Deploy validated image
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "bash -s -- '${RELEASE_SHA}' '${IMAGE_NAME}'" <<'REMOTE'
+
+          set -Eeuo pipefail
+
+          SHA="$1"
+          IMAGE_BASE="$2"
+
+          APP="/opt/apps/9antra"
+          ENV_FILE="$APP/.env"
+
+          NEW_IMAGE="${IMAGE_BASE}:${SHA}"
+
+          OLD_IMAGE="$(
+            grep '^NANTRA_FRONTEND_IMAGE=' "$ENV_FILE" |
+            cut -d= -f2- || true
+          )"
+
+          if [ -z "$OLD_IMAGE" ]; then
+            OLD_IMAGE="9antra-main-frontend:local"
+          fi
+
+          echo "New image: $NEW_IMAGE"
+          echo "Previous image: $OLD_IMAGE"
+
+          set_frontend_image() {
+            IMAGE="$1"
+
+            if grep -q '^NANTRA_FRONTEND_IMAGE=' "$ENV_FILE"; then
+              sed -i \
+                "s|^NANTRA_FRONTEND_IMAGE=.*|NANTRA_FRONTEND_IMAGE=$IMAGE|" \
+                "$ENV_FILE"
+            else
+              echo "NANTRA_FRONTEND_IMAGE=$IMAGE" >> "$ENV_FILE"
+            fi
+          }
+
+          rollback() {
+
+            echo "========================================"
+            echo "ROLLBACK 9ANTRA FRONTEND"
+            echo "========================================"
+
+            set_frontend_image "$OLD_IMAGE"
+
+            cd "$APP"
+
+            case "$OLD_IMAGE" in
+              ghcr.io/*)
+                sudo docker compose \
+                  --env-file .env \
+                  -f compose.yml \
+                  pull frontend || true
+                ;;
+            esac
+
+            if sudo docker image inspect "$OLD_IMAGE" >/dev/null 2>&1; then
+
+              sudo docker compose \
+                --env-file .env \
+                -f compose.yml \
+                up -d --no-deps --no-build frontend
+
+            else
+
+              echo "Previous frontend image is not available."
+
+              sudo docker compose \
+                --env-file .env \
+                -f compose.yml \
+                stop frontend || true
+
+            fi
+
+            echo "Frontend rollback finished"
+          }
+
+          trap 'rollback' ERR
+
+          set_frontend_image "$NEW_IMAGE"
+
+          cd "$APP"
+
+          echo "========================================"
+          echo "Pull frontend image"
+          echo "========================================"
+
+          sudo docker compose \
+            --env-file .env \
+            -f compose.yml \
+            pull frontend
+
+          echo "========================================"
+          echo "Start frontend"
+          echo "========================================"
+
+          sudo docker compose \
+            --env-file .env \
+            -f compose.yml \
+            up -d --no-deps --no-build frontend
+
+          echo "========================================"
+          echo "Internal frontend healthcheck"
+          echo "========================================"
+
+          HEALTHY=0
+
+          for i in $(seq 1 24); do
+
+            if curl \
+              --fail \
+              --silent \
+              --show-error \
+              http://127.0.0.1:5400/ \
+              >/dev/null
+            then
+              HEALTHY=1
+              break
+            fi
+
+            echo "Waiting for frontend... $i/24"
+            sleep 5
+          done
+
+          if [ "$HEALTHY" -ne 1 ]; then
+            echo "Frontend healthcheck failed"
+            false
+          fi
+
+          trap - ERR
+
+          echo "========================================"
+          echo "9ANTRA FRONTEND RELEASE SUCCESSFUL"
+          echo "Image: $NEW_IMAGE"
+          echo "========================================"
+
+          REMOTE

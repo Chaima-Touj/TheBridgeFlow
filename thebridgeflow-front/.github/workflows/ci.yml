@@ -1,0 +1,55 @@
+name: 9antra Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 9antra-frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production
+        env:
+          VITE_API_URL: https://9antra.tn/api
+        run: npm run build
+
+      - name: Verify frontend build
+        run: |
+          test -f dist/index.html
+          ls -lh dist/index.html
+
+      - name: Validate Docker image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL="https://9antra.tn/api" \
+            --build-arg VITE_GOOGLE_CLIENT_ID="" \
+            --build-arg VITE_FACEBOOK_APP_ID="" \
+            -t 9antra-frontend:ci .
