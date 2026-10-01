@@ -1,0 +1,229 @@
+name: 9antra Backend Release
+
+on:
+  workflow_run:
+    workflows:
+      - "9antra Backend CI"
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: 9antra-backend-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release Backend
+
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      IMAGE_NAME: ghcr.io/ahmedneffati/thebridgeflowback
+
+    steps:
+      - name: Checkout validated commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push immutable image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.RELEASE_SHA }}
+
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/9antra_ci
+          chmod 600 ~/.ssh/9antra_ci
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Test VPS connection
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "echo SSH_OK && sudo -n docker ps >/dev/null && echo DOCKER_OK"
+
+      - name: Authenticate VPS to GHCR
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | \
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sudo docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
+
+      - name: Deploy validated image
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/9antra_ci \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "bash -s -- '${RELEASE_SHA}' '${IMAGE_NAME}'" <<'REMOTE'
+
+          set -Eeuo pipefail
+
+          SHA="$1"
+          IMAGE_BASE="$2"
+
+          APP="/opt/apps/9antra"
+          ENV_FILE="$APP/.env"
+
+          NEW_IMAGE="${IMAGE_BASE}:${SHA}"
+
+          OLD_IMAGE="$(
+            grep '^NANTRA_IMAGE=' "$ENV_FILE" |
+            cut -d= -f2- || true
+          )"
+
+          if [ -z "$OLD_IMAGE" ]; then
+            OLD_IMAGE="thebridgeflow-back:local"
+          fi
+
+          echo "New image: $NEW_IMAGE"
+          echo "Previous image: $OLD_IMAGE"
+
+          set_backend_image() {
+            IMAGE="$1"
+
+            if grep -q '^NANTRA_IMAGE=' "$ENV_FILE"; then
+              sed -i \
+                "s|^NANTRA_IMAGE=.*|NANTRA_IMAGE=$IMAGE|" \
+                "$ENV_FILE"
+            else
+              echo "NANTRA_IMAGE=$IMAGE" >> "$ENV_FILE"
+            fi
+          }
+
+          rollback() {
+            echo "========================================"
+            echo "ROLLBACK 9ANTRA BACKEND"
+            echo "========================================"
+
+            set_backend_image "$OLD_IMAGE"
+
+            cd "$APP"
+
+            case "$OLD_IMAGE" in
+              ghcr.io/*)
+                sudo docker compose \
+                  --env-file .env \
+                  -f compose.yml \
+                  pull backend || true
+                ;;
+            esac
+
+            if sudo docker image inspect "$OLD_IMAGE" >/dev/null 2>&1; then
+              sudo docker compose \
+                --env-file .env \
+                -f compose.yml \
+                up -d --no-deps --no-build backend
+            else
+              echo "Previous image is not available."
+              sudo docker compose \
+                --env-file .env \
+                -f compose.yml \
+                stop backend || true
+            fi
+
+            echo "Rollback finished"
+          }
+
+          trap 'rollback' ERR
+
+          set_backend_image "$NEW_IMAGE"
+
+          cd "$APP"
+
+          echo "========================================"
+          echo "Pull new backend image"
+          echo "========================================"
+
+          sudo docker compose \
+            --env-file .env \
+            -f compose.yml \
+            pull backend
+
+          echo "========================================"
+          echo "Start backend"
+          echo "========================================"
+
+          sudo docker compose \
+            --env-file .env \
+            -f compose.yml \
+            up -d --no-deps --no-build backend
+
+          echo "========================================"
+          echo "Healthcheck"
+          echo "========================================"
+
+          HEALTHY=0
+
+          for i in $(seq 1 36); do
+
+            if sudo docker compose \
+              --env-file .env \
+              -f compose.yml \
+              exec -T backend node -e "fetch('http://127.0.0.1:5000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+            then
+              HEALTHY=1
+              break
+            fi
+
+            echo "Waiting for backend... $i/36"
+            sleep 5
+          done
+
+          if [ "$HEALTHY" -ne 1 ]; then
+            echo "Backend healthcheck failed"
+            false
+          fi
+
+          trap - ERR
+
+          echo "========================================"
+          echo "9ANTRA BACKEND RELEASE SUCCESSFUL"
+          echo "Image: $NEW_IMAGE"
+          echo "========================================"
+
+          REMOTE
