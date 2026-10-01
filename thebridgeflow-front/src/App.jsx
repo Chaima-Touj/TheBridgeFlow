@@ -41,6 +41,9 @@ import CeremonyProjectDetail    from "./pages/CeremonyProjectDetail.jsx";
 import CeremonyArchives         from "./pages/CeremonyArchives.jsx";
 import CeremonyArchiveDetail    from "./pages/CeremonyArchiveDetail.jsx";
 import EventsPage               from "./pages/EventsPage.jsx";
+import EventDetailPage          from "./pages/EventDetailPage.jsx";
+import AdminEvents              from "./pages/dashboard/AdminEvents.jsx";
+import MyEvents                 from "./pages/dashboard/MyEvents.jsx";
 import MyCeremonyProjects       from "./pages/dashboard/MyCeremonyProjects.jsx";
 import DashboardFormations      from "./pages/dashboard/DashboardFormations.jsx";
 import DashboardFormationDetail from "./pages/dashboard/DashboardFormationDetail.jsx";
@@ -142,6 +145,9 @@ export default function App() {
       <Route path="/dashboard/student/ceremonie" element={
         <ProtectedRoute><MyCeremonyProjects/></ProtectedRoute>
       }/>
+      <Route path="/dashboard/student/events" element={
+        <ProtectedRoute><MyEvents/></ProtectedRoute>
+      }/>
 
       <Route path="/dashboard/admin" element={
         <ProtectedRoute role="admin"><AdminDashboard/></ProtectedRoute>
@@ -157,6 +163,9 @@ export default function App() {
       }/>
       <Route path="/dashboard/admin/news" element={
         <ProtectedRoute role="admin"><AdminNews/></ProtectedRoute>
+      }/>
+      <Route path="/dashboard/admin/events" element={
+        <ProtectedRoute role="admin"><AdminEvents/></ProtectedRoute>
       }/>
       <Route path="/dashboard/admin/ceremonie" element={
         <ProtectedRoute role="admin"><AdminCeremony/></ProtectedRoute>
@@ -194,6 +203,7 @@ export default function App() {
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
       <Route path="/events"            element={<EventsPage />} />
+      <Route path="/events/:id"        element={<EventDetailPage />} />
 
       <Route path="/ceremonie"                    element={<CeremonyPage />} />
       <Route path="/ceremonie/archives"           element={<CeremonyArchives />} />

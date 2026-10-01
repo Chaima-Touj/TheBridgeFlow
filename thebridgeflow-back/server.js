@@ -36,6 +36,7 @@ import settingsRoutes          from "./routes/settings.routes.js";
 import testimonialScreenshotRoutes from "./routes/testimonialScreenshot.routes.js";
 import driveProxyRoutes            from "./routes/driveProxy.routes.js";
 import ceremonyRoutes              from "./routes/ceremony.routes.js";
+import eventsRoutes                from "./routes/events.routes.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -180,6 +181,7 @@ app.use("/api/settings",            apiLimiter, settingsRoutes);
 app.use("/api/testimonial-screenshots", apiLimiter, testimonialScreenshotRoutes);
 app.use("/api/drive-thumbnail",     thumbnailLimiter, driveProxyRoutes);
 app.use("/api/ceremony",            apiLimiter, ceremonyRoutes);
+app.use("/api/events",              apiLimiter, eventsRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────
