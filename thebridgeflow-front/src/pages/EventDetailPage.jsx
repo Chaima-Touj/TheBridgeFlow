@@ -7,6 +7,7 @@ import Loader from "../components/common/Loader.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
@@ -60,7 +61,7 @@ export default function EventDetailPage() {
           : error && !event ? <p className="ev-state ev-error">{error}</p>
             : event && (
               <article className="ev-detail">
-                {event.image && <img className="ev-detail__image" src={event.image} alt="" />}
+                {event.image && <img className="ev-detail__image" src={resolveDriveUrl(event.image, "image")} alt="" />}
                 <div className="ev-detail__content">
                   <Link to="/events" className="ev-back">{t("events.back")}</Link>
                   <span className="ev-category">{event.category}</span>

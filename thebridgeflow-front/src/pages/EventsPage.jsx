@@ -7,6 +7,7 @@ import Loader from "../components/common/Loader.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
@@ -77,7 +78,7 @@ export default function EventsPage() {
               : <div className="ev-grid">
                 {events.map((event) => (
                   <article className="ev-card" key={event._id}>
-                    {event.image && <img className="ev-card__image" src={event.image} alt="" loading="lazy" />}
+                    {event.image && <img className="ev-card__image" src={resolveDriveUrl(event.image, "image")} alt="" loading="lazy" />}
                     <div className="ev-card__body">
                       <span className="ev-category">{event.category}</span>
                       <h2 className="ev-card__title">{event.title}</h2>
