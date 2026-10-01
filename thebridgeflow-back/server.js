@@ -59,6 +59,7 @@ const allowedOrigins = [
   // n'en dépend côté prod.
   "https://the-bridge-flow-app.onrender.com",
   "https://stage-flow-app.onrender.com",
+  "https://9antra.tn",
 ];
 
 app.use(cors({
