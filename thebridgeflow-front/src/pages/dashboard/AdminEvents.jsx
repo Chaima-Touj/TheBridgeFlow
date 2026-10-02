@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FiCalendar, FiPlus, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
@@ -14,11 +14,41 @@ const emptyForm = {
   capacity: "", registrationRequired: true, status: "draft",
 };
 
+const categorySuggestions = [
+  "Artificial Intelligence",
+  "Cybersecurity",
+  "IoT & Systèmes Embarqués",
+  "Web Full Stack MERN",
+  "Business Intelligence",
+  "Digital Marketing",
+];
+
 function localDateValue(value) {
   if (!value) return "";
   const date = new Date(value);
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 16);
+}
+
+function isHttpUrl(value) {
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function EventImagePreview({ src, alt, t }) {
+  const [imageError, setImageError] = useState(false);
+  if (!isHttpUrl(src)) return null;
+
+  return (
+    <div className="ev-image-preview" aria-live="polite">
+      {!imageError
+        ? <img src={src} alt={alt} onError={() => setImageError(true)} />
+        : <p className="ev-form-error" role="status">{t("events.imageLoadError")}</p>}
+    </div>
+  );
 }
 
 function formatDate(value, language, timezone) {
@@ -33,7 +63,9 @@ export default function AdminEvents() {
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [dateError, setDateError] = useState("");
   const [participants, setParticipants] = useState(null);
+  const submitLock = useRef(false);
 
   const load = useCallback(() => {
     eventsService.getAdmin()
@@ -45,6 +77,7 @@ export default function AdminEvents() {
 
   const openForm = (event) => {
     setError("");
+    setDateError("");
     setForm(event ? {
       ...emptyForm,
       ...event,
@@ -57,6 +90,8 @@ export default function AdminEvents() {
 
   const updateField = (key) => (e) => {
     const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    if (key === "startsAt" || key === "endsAt") setDateError("");
+    setError("");
     setForm((previous) => ({
       ...previous,
       [key]: value,
@@ -67,6 +102,22 @@ export default function AdminEvents() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (submitLock.current) return;
+
+    const startTime = new Date(form.startsAt).getTime();
+    const endTime = form.endsAt ? new Date(form.endsAt).getTime() : null;
+    if (!Number.isFinite(startTime) || (form.endsAt && !Number.isFinite(endTime)) ||
+        (endTime !== null && endTime <= startTime)) {
+      setDateError(t("events.invalidDateRange"));
+      return;
+    }
+    if ((form.image && !isHttpUrl(form.image)) ||
+        (form.mode !== "onsite" && form.meetingUrl && !isHttpUrl(form.meetingUrl))) {
+      setError(t("events.invalidUrl"));
+      return;
+    }
+
+    submitLock.current = true;
     setSubmitting(true);
     setError("");
     const payload = {
@@ -83,6 +134,7 @@ export default function AdminEvents() {
     } catch (err) {
       setError(err.response?.data?.message || t("events.actionError"));
     } finally {
+      submitLock.current = false;
       setSubmitting(false);
     }
   };
@@ -139,29 +191,64 @@ export default function AdminEvents() {
         </div>
       </div>
 
-      {modal && <Modal title={modal === "create" ? t("events.create") : t("events.edit")} onClose={() => !submitting && setModal(null)} maxWidth={700}>
+      {modal && <Modal title={modal === "create" ? t("events.create") : t("events.edit")} onClose={() => !submitting && setModal(null)} maxWidth={820}>
         <form className="ev-form" onSubmit={submit}>
-          <label>{t("events.titleField")}<input required maxLength={160} value={form.title} onChange={updateField("title")} /></label>
-          <label>{t("events.descriptionField")}<textarea required maxLength={10000} rows={4} value={form.description} onChange={updateField("description")} /></label>
-          <label>{t("events.category")}<input required maxLength={80} value={form.category} onChange={updateField("category")} /></label>
-          <label>{t("events.imageUrl")}<input type="url" value={form.image} onChange={updateField("image")} placeholder="https://" /></label>
-          <div className="ev-form-grid">
-            <label>{t("events.startDate")}<input type="datetime-local" required value={form.startsAt} onChange={updateField("startsAt")} /></label>
-            <label>{t("events.endDate")}<input type="datetime-local" value={form.endsAt} onChange={updateField("endsAt")} /></label>
-          </div>
-          <div className="ev-form-grid">
-            <label>{t("events.mode")}<select value={form.mode} onChange={updateField("mode")}><option value="onsite">{t("events.modes.onsite")}</option><option value="online">{t("events.modes.online")}</option><option value="hybrid">{t("events.modes.hybrid")}</option></select></label>
-            <label>{t("events.timezone")}<input required readOnly value={form.timezone} onChange={updateField("timezone")} /></label>
-          </div>
-          {form.mode !== "online" && <label>{t("events.location")}<input required value={form.location} onChange={updateField("location")} /></label>}
-          {form.mode !== "onsite" && <label>{t("events.meetingUrl")}<input required type="url" value={form.meetingUrl} onChange={updateField("meetingUrl")} placeholder="https://" /></label>}
-          <div className="ev-form-grid">
-            <label>{t("events.capacity")}<input type="number" min="1" value={form.capacity} onChange={updateField("capacity")} placeholder={t("events.unlimited")} /></label>
+          <section className="ev-form-section">
+            <div className="ev-form-section__heading">
+              <h2>{t("events.generalSection")}</h2>
+              <p>{t("events.generalHint")}</p>
+            </div>
+            <label>{t("events.titleField")}<input required maxLength={160} value={form.title} onChange={updateField("title")} /></label>
+            <label>{t("events.descriptionField")}<textarea required maxLength={10000} rows={7} value={form.description} onChange={updateField("description")} /></label>
+            <label>
+              {t("events.category")}
+              <input required maxLength={80} list="event-category-suggestions" value={form.category} onChange={updateField("category")} />
+              <datalist id="event-category-suggestions">{categorySuggestions.map((category) => <option key={category} value={category} />)}</datalist>
+              <small>{t("events.categoryHint")}</small>
+            </label>
+            <label>{t("events.imageUrl")}<input type="url" value={form.image} onChange={updateField("image")} placeholder="https://" /></label>
+            <EventImagePreview key={form.image} src={form.image} alt={form.title || t("events.imagePreview")} t={t} />
+          </section>
+
+          <section className="ev-form-section">
+            <div className="ev-form-section__heading">
+              <h2>{t("events.dateLocationSection")}</h2>
+              <p>{t("events.dateLocationHint")}</p>
+            </div>
+            <div className="ev-form-grid">
+              <label>{t("events.startDate")}<input type="datetime-local" required value={form.startsAt} onChange={updateField("startsAt")} /></label>
+              <label>{t("events.endDate")}<input type="datetime-local" value={form.endsAt} onChange={updateField("endsAt")} /></label>
+            </div>
+            {dateError && <p className="ev-form-error" role="alert">{dateError}</p>}
+            <div className="ev-form-grid">
+              <label>{t("events.timezone")}<input required readOnly value={form.timezone} /></label>
+              <label>{t("events.mode")}<select value={form.mode} onChange={updateField("mode")}><option value="onsite">{t("events.modes.onsite")}</option><option value="online">{t("events.modes.online")}</option><option value="hybrid">{t("events.modes.hybrid")}</option></select></label>
+            </div>
+            {form.mode !== "online" && <label>{t("events.location")}<input required value={form.location} onChange={updateField("location")} /></label>}
+            {form.mode !== "onsite" && <label>{t("events.meetingUrl")}<input required type="url" value={form.meetingUrl} onChange={updateField("meetingUrl")} placeholder="https://" /></label>}
+          </section>
+
+          <section className="ev-form-section">
+            <div className="ev-form-section__heading">
+              <h2>{t("events.registrationSection")}</h2>
+              <p>{t("events.registrationHint")}</p>
+            </div>
+            <div className="ev-capacity-control">
+              <label className="ev-checkbox"><input type="checkbox" checked={form.capacity === ""} onChange={(e) => setForm((previous) => ({ ...previous, capacity: e.target.checked ? "" : "1" }))} />{t("events.unlimited")}</label>
+              {form.capacity !== "" && <label>{t("events.capacity")}<input type="number" min="1" step="1" required value={form.capacity} onChange={updateField("capacity")} /></label>}
+            </div>
+            <label className="ev-checkbox"><input type="checkbox" checked={form.registrationRequired} onChange={updateField("registrationRequired")} />{t("events.registrationRequiredForParticipation")}</label>
+          </section>
+
+          <section className="ev-form-section">
+            <div className="ev-form-section__heading">
+              <h2>{t("events.publicationSection")}</h2>
+              <p>{t("events.publicationHint")}</p>
+            </div>
             <label>{t("events.status")}<select value={form.status} onChange={updateField("status")}>{(modal === "create" || modal.status !== "published") && <option value="draft">{t("events.statuses.draft")}</option>}<option value="published">{t("events.statuses.published")}</option><option value="cancelled">{t("events.statuses.cancelled")}</option><option value="archived">{t("events.statuses.archived")}</option></select></label>
-          </div>
-          <label className="ev-checkbox"><input type="checkbox" checked={form.registrationRequired} onChange={updateField("registrationRequired")} />{t("events.registrationRequired")}</label>
+          </section>
           {error && <p className="ev-form-error" role="alert">{error}</p>}
-          <div className="modal-footer"><button type="button" className="btn btn-ghost" onClick={() => setModal(null)} disabled={submitting}>{t("common.cancel")}</button><button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t("events.working") : t("common.save")}</button></div>
+          <div className="modal-footer"><button type="button" className="btn btn-ghost" onClick={() => setModal(null)} disabled={submitting}>{t("common.cancel")}</button><button type="submit" className="btn btn-primary ev-form-submit" disabled={submitting}>{submitting ? t("events.saving") : t("common.save")}</button></div>
         </form>
       </Modal>}
 

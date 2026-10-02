@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true, maxlength: 160 },
-  description: { type: String, required: true, trim: true, maxlength: 10000 },
+  description: { type: String, required: true, maxlength: 10000 },
   image: { type: String, default: "", trim: true, maxlength: 2048 },
   category: { type: String, required: true, trim: true, maxlength: 80 },
   startsAt: { type: Date, required: true },

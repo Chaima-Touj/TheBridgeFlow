@@ -29,10 +29,9 @@ function validateEventPayload(data, { partial = false } = {}) {
     payload.title = payload.title.trim();
   }
   if (!partial || payload.description !== undefined) {
-    if (typeof payload.description !== "string" || !payload.description.trim() || payload.description.trim().length > 10000) {
+    if (typeof payload.description !== "string" || !payload.description.trim() || payload.description.length > 10000) {
       fail("La description est requise (10 000 caractères maximum).", 400);
     }
-    payload.description = payload.description.trim();
   }
   if (!partial || payload.category !== undefined) {
     if (typeof payload.category !== "string" || !payload.category.trim() || payload.category.trim().length > 80) {
