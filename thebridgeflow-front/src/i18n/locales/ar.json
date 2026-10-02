@@ -13,6 +13,7 @@
     "pricing": "الأسعار",
     "about": "حول",
     "testimonials": "آراء",
+    "news": "الأخبار",
     "contact": "اتصل",
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب"
@@ -170,6 +171,19 @@
     "ctaSubtitle": "انضم إلى آلاف الطلاب الذين حوّلوا مسارهم مع TheBridgeFlow.",
     "ctaBtn": "سجّل الآن",
     "ctaLogin": "سجّل الدخول للتسجيل"
+  },
+  "news": {
+    "badge": "الأخبار",
+    "title": "آخر أخبارنا",
+    "description": "تابع آخر أخبار وإعلانات وأبرز مستجدات TheBridgeFlow.",
+    "seoTitle": "أخبار TheBridgeFlow — آخر المستجدات",
+    "seoDescription": "اكتشف آخر أخبار وإعلانات ومبادرات TheBridgeFlow.",
+    "loading": "جارٍ تحميل الأخبار...",
+    "empty": "لا توجد أخبار متاحة حاليًا.",
+    "loadError": "تعذر تحميل الأخبار. يرجى المحاولة مرة أخرى لاحقًا.",
+    "notFound": "تعذر العثور على هذا الخبر أو لم يعد متاحًا.",
+    "back": "العودة إلى الأخبار",
+    "readArticle": "اقرأ الخبر"
   },
   "formations": {
     "pageTitle": "التكوينات في تونس",
@@ -824,7 +838,7 @@
     "footerPricing": "الأسعار",
     "footerTerms": "الشروط",
     "footerFAQ": "الأسئلة الشائعة",
-    "footerBlog": "المدونة",
+    "footerNews": "الأخبار",
     "footerGuides": "الأدلة",
     "footerHelp": "مساعدة",
     "footerMentions": "الإشعارات القانونية",

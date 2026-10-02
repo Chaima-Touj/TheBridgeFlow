@@ -13,6 +13,7 @@
     "pricing": "Pricing",
     "about": "About",
     "testimonials": "Testimonials",
+    "news": "News",
     "contact": "Contact",
     "signIn": "Sign in",
     "signUp": "Sign up"
@@ -166,6 +167,19 @@
     "ctaSubtitle": "Join thousands of students who transformed their path with TheBridgeFlow.",
     "ctaBtn": "Enroll now",
     "ctaLogin": "Sign in to enroll"
+  },
+  "news": {
+    "badge": "News",
+    "title": "Our Latest News",
+    "description": "Follow the latest news, announcements, and highlights from TheBridgeFlow.",
+    "seoTitle": "TheBridgeFlow News — Latest updates",
+    "seoDescription": "Discover the latest news, announcements, and initiatives from TheBridgeFlow.",
+    "loading": "Loading news...",
+    "empty": "There is no news available at the moment.",
+    "loadError": "Unable to load the news. Please try again later.",
+    "notFound": "This news article could not be found or is no longer available.",
+    "back": "Back to news",
+    "readArticle": "Read article"
   },
   "formations": {
     "pageTitle": "Training courses in Tunisia",
@@ -820,7 +834,7 @@
     "footerPricing": "Pricing",
     "footerTerms": "Terms",
     "footerFAQ": "FAQ",
-    "footerBlog": "Blog",
+    "footerNews": "News",
     "footerGuides": "Guides",
     "footerHelp": "Help",
     "footerMentions": "Legal notices",

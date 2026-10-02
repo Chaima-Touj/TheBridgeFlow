@@ -13,6 +13,7 @@
     "pricing": "Tarifs",
     "about": "À propos",
     "testimonials": "Témoignages",
+    "news": "Actualités",
     "contact": "Contact",
     "signIn": "Se connecter",
     "signUp": "S'inscrire"
@@ -166,6 +167,19 @@
     "ctaSubtitle": "Rejoignez des milliers d'étudiants qui ont transformé leur parcours avec TheBridgeFlow.",
     "ctaBtn": "S'inscrire maintenant",
     "ctaLogin": "Se connecter pour s'inscrire"
+  },
+  "news": {
+    "badge": "Actualités",
+    "title": "Nos Dernières Actualités",
+    "description": "Suivez les actualités, annonces et temps forts de TheBridgeFlow.",
+    "seoTitle": "Actualités TheBridgeFlow — Nos dernières nouvelles",
+    "seoDescription": "Découvrez les dernières actualités, annonces et initiatives de TheBridgeFlow.",
+    "loading": "Chargement des actualités...",
+    "empty": "Aucune actualité n'est disponible pour le moment.",
+    "loadError": "Impossible de charger les actualités. Veuillez réessayer plus tard.",
+    "notFound": "Cette actualité est introuvable ou n'est plus disponible.",
+    "back": "Retour aux actualités",
+    "readArticle": "Lire l’actualité"
   },
   "formations": {
     "pageTitle": "Formations en Tunisie",
@@ -820,7 +834,7 @@
     "footerPricing": "Tarifs",
     "footerTerms": "Conditions",
     "footerFAQ": "FAQ",
-    "footerBlog": "Blog",
+    "footerNews": "Actualités",
     "footerGuides": "Guides",
     "footerHelp": "Aide",
     "footerMentions": "Mentions légales",

@@ -1,19 +1,17 @@
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
+import { useTranslation } from "react-i18next";
 import { useLang } from "../context/langContext.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
 
-// Page dédiée "Actualités" — réutilise NewsSection (branché sur GET
-// /api/news, géré depuis le dashboard admin) au lieu de dupliquer la grille
-// de cards. NewsSection porte déjà son propre en-tête (badge/titre/
-// sous-titre), donc pas de fp-hero ici pour éviter un titre dupliqué.
 export default function BlogPage() {
   const { lang } = useLang();
+  const { t } = useTranslation();
 
   useDocumentMeta({
-    title: "Actualités — TheBridgeFlow",
-    description: "Toute l'actualité de TheBridgeFlow : nouvelles formations, offres de stage et annonces de la plateforme.",
+    title: t("news.seoTitle"),
+    description: t("news.seoDescription"),
   });
 
   return (

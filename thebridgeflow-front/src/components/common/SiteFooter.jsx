@@ -54,7 +54,7 @@ export default function SiteFooter() {
         <div className="lp-footer__col">
           <h4>{t("landing.footerResources")}</h4>
           <a href="https://www.instagram.com/p/DZZuwmXggHz/?img_index=1&igsh=MWs3Y3pxcnpsZ3IzOQ%3D%3D" target="_blank" rel="noopener noreferrer">{t("landing.footerFAQ")}</a>
-          <Link to="/blog">{t("landing.footerBlog")}</Link>
+          <Link to="/blog">{t("landing.footerNews")}</Link>
           <Link to="/guides">{t("landing.footerGuides")}</Link>
           <Link to="/aide">{t("landing.footerHelp")}</Link>
         </div>

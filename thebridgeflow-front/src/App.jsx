@@ -29,6 +29,7 @@ import FormationDetail          from "./pages/FormationDetail";
 import OffersPage               from "./pages/OffersPage";
 import PublicOfferDetail        from "./pages/PublicOfferDetail";
 import BlogPage                 from "./pages/BlogPage.jsx";
+import NewsDetailPage           from "./pages/NewsDetailPage.jsx";
 import PricingPage              from "./pages/PricingPage.jsx";
 import PrivacyPolicy            from "./pages/legal/PrivacyPolicy.jsx";
 import TermsOfUse               from "./pages/legal/TermsOfUse.jsx";
@@ -211,6 +212,7 @@ export default function App() {
       <Route path="/ceremonie/:id"     element={<CeremonyProjectDetail />} />
 
       <Route path="/blog"                 element={<BlogPage />} />
+      <Route path="/blog/:id"             element={<NewsDetailPage />} />
       <Route path="/tarifs"               element={<PricingPage />} />
       <Route path="/guides"               element={<GuidesPage />} />
       <Route path="/aide"                 element={<HelpPage />} />
