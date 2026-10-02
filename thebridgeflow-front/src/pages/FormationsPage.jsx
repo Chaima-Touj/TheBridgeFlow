@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import api from "../services/api.js";
+import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
 
 // ─── Icon map (keyed by slug for exact matching) ──────────────────────────────
@@ -60,6 +61,11 @@ const FormationsPage = () => {
   const { user }         = useAuth();
   const navigate         = useNavigate();
   const location         = useLocation();
+
+  useDocumentMeta({
+    title: t("formations.seoTitle"),
+    description: t("formations.seoDescription"),
+  });
 
   const [formations, setFormations] = useState([]);
   const [loading,    setLoading]    = useState(true);

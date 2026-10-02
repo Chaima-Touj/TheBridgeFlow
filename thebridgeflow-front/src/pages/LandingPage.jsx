@@ -99,8 +99,8 @@ export default function LandingPage() {
   const [promoOpen,   setPromoOpen]   = useState(false);
 
   useDocumentMeta({
-    title: "TheBridgeFlow — Plateforme de gestion des stages, PFE et formations",
-    description: "Trouvez un stage ou un PFE, suivez vos candidatures et accédez à des formations encadrées : tout TheBridgeFlow en un seul endroit.",
+    title: t("landing.seoTitle"),
+    description: t("landing.seoDescription"),
   });
 
   // Sync html lang attribute

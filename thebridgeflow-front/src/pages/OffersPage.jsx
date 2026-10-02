@@ -10,6 +10,7 @@ import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { offersService } from "../services/offers.service.js";
+import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./OffersPage.css";
 
 const OFFER_TYPES = ["stage", "PFE", "alternance", "formation", "vidéo"];
@@ -99,6 +100,11 @@ const OffersPage = () => {
   const { user }               = useAuth();
   const navigate               = useNavigate();
   const location               = useLocation();
+
+  useDocumentMeta({
+    title: t("offers.seoTitle"),
+    description: t("offers.seoDescription"),
+  });
 
   const [searchInput, setSearchInput] = useState("");
   const searchTimer = useRef(null);

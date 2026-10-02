@@ -26,8 +26,8 @@ export default function CeremonyPage() {
   const voteDisabled = voteGateReason !== null;
 
   useDocumentMeta({
-    title: "Cérémonie — Votez pour vos projets préférés | TheBridgeFlow",
-    description: "Découvrez les projets soumis par les étudiants TheBridgeFlow et votez pour vos 3 préférés. Classement en temps réel.",
+    title: t("ceremony.seoTitle"),
+    description: t("ceremony.seoDescription"),
   });
 
   const [projects,    setProjects]    = useState([]);
