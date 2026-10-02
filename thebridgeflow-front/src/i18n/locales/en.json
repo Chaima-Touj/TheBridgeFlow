@@ -1527,6 +1527,13 @@
     }
   },
   "adminSettings": {
+    "ceremony": {
+      "label": "Show Ceremony in public menu",
+      "description": "Control whether the Ceremony section appears in the public site menu.",
+      "loadFailed": "Unable to load the Ceremony visibility setting.",
+      "saved": "The Ceremony visibility setting was saved.",
+      "saveFailed": "Unable to save the Ceremony visibility setting."
+    },
     "appearance": {
       "title": "Appearance",
       "desc": "Customize the platform display",

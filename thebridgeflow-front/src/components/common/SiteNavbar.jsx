@@ -6,6 +6,7 @@ import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail, Cale
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/langContext.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { settingsService } from "../../services/settings.service.js";
 import LangFlags from "./LangFlags.jsx";
 import AnimatedNavBar, { AnimatedNavBarProbe } from "./AnimatedNavBar.jsx";
 import { useAdaptiveNav } from "../../hooks/useAdaptiveNav.js";
@@ -21,9 +22,9 @@ import "./SiteNavbar.css";
    existent que là). */
 const NAV_ITEMS = [
   { key: "home",         icon: Home,          to: "/",           anchorId: "hero" },
+  { key: "formations",   icon: GraduationCap, to: "/formations" },
   { key: "offers",       icon: Briefcase,     to: "/offers" },
   { key: "events",       icon: CalendarDays,  to: "/events" },
-  { key: "formations",   icon: GraduationCap, to: "/formations" },
   { key: "ceremony",     icon: Trophy,        to: "/ceremonie" },
   { key: "about",        icon: Info,          to: "/",           anchorId: "about" },
   { key: "testimonials", icon: MessageSquare, to: "/",           anchorId: "testimonials" },
@@ -52,19 +53,39 @@ export default function SiteNavbar() {
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [scrollSpyKey,  setScrollSpyKey]  = useState("home");
+  const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
+  const [settingsStatus, setSettingsStatus] = useState("loading");
 
   const navRef      = useRef(null);
   const userMenuRef = useRef(null);
   const navInnerRef = useRef(null);
   const navProbeRef = useRef(null);
-  const navCollapsed = useAdaptiveNav(navInnerRef, navProbeRef, [lang]);
+  const navCollapsed = useAdaptiveNav(navInnerRef, navProbeRef, [lang, ceremonyEnabled, settingsStatus]);
 
   const onLanding = location.pathname === "/";
 
   const navItems = useMemo(
-    () => NAV_ITEMS.map((item) => ({ ...item, label: t(`nav.${item.key}`) })),
-    [t]
+    () => NAV_ITEMS
+      .filter((item) => item.key !== "ceremony" || (settingsStatus === "loaded" && ceremonyEnabled))
+      .map((item) => ({ ...item, label: t(`nav.${item.key}`) })),
+    [t, ceremonyEnabled, settingsStatus]
   );
+
+  useEffect(() => {
+    let active = true;
+    settingsService.get()
+      .then(({ data }) => {
+        if (!active) return;
+        setCeremonyEnabled(data.ceremonyEnabled === true);
+        setSettingsStatus("loaded");
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load public site settings for navigation", error);
+        setSettingsStatus("error");
+      });
+    return () => { active = false; };
+  }, []);
 
   /* Scroll-spy : uniquement pertinent sur la Landing Page elle-même — les
      sections observées (hero/about/testimonials/contact) n'existent nulle

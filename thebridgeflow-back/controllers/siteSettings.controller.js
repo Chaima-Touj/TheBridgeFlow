@@ -13,7 +13,15 @@ async function getOrCreateSettings() {
 // GET /api/settings — public (lu par la landing page).
 export const getSettings = asyncHandler(async (req, res) => {
   const settings = await getOrCreateSettings();
-  res.json(settings);
+  res.json({
+    _id: settings._id,
+    actionVideo: settings.actionVideo,
+    testimonialVideos: settings.testimonialVideos,
+    communityAvatars: settings.communityAvatars,
+    ceremonyEnabled: settings.ceremonyEnabled,
+    createdAt: settings.createdAt,
+    updatedAt: settings.updatedAt,
+  });
 });
 
 /* ── PATCH /api/settings ──────────────────────────────────────────────────────
@@ -22,7 +30,13 @@ export const getSettings = asyncHandler(async (req, res) => {
    patchFormationTrailer pour Formation.                                     */
 export const updateSettings = asyncHandler(async (req, res) => {
   const settings = await getOrCreateSettings();
-  const { actionVideo } = req.body;
+  const { actionVideo, ceremonyEnabled } = req.body;
+
+  if (ceremonyEnabled !== undefined && typeof ceremonyEnabled !== "boolean") {
+    const err = new Error("Le champ ceremonyEnabled doit être un booléen.");
+    err.statusCode = 400;
+    throw err;
+  }
 
   if (actionVideo !== undefined) {
     const { driveUrl, provider, thumbnail } = actionVideo;
@@ -34,6 +48,8 @@ export const updateSettings = asyncHandler(async (req, res) => {
     if (provider !== undefined)  settings.actionVideo.provider = provider;
     if (thumbnail !== undefined) settings.actionVideo.thumbnail = normalizeDriveUrl(thumbnail, "image");
   }
+
+  if (ceremonyEnabled !== undefined) settings.ceremonyEnabled = ceremonyEnabled;
 
   await settings.save();
   res.json(settings);

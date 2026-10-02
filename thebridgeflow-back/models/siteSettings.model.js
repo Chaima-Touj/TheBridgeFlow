@@ -38,6 +38,7 @@ const siteSettingsSchema = new mongoose.Schema({
   actionVideo: { type: mediaSchema, default: () => ({}) },
   testimonialVideos: { type: [testimonialVideoSchema], default: [] },
   communityAvatars:  { type: [communityAvatarSchema], default: [] },
+  ceremonyEnabled: { type: Boolean, default: true },
 }, { timestamps: true });
 
 export default mongoose.model("SiteSettings", siteSettingsSchema);

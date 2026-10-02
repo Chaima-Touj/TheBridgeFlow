@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/langContext.js";
+import { settingsService } from "../../services/settings.service.js";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import { FiSun, FiMoon, FiCheck, FiX } from "react-icons/fi";
 import "../settings/Settings.css";
@@ -32,6 +33,10 @@ export default function AdminSettings() {
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
   const [fontSize, setFontSize] = useState(localStorage.getItem("fontSize") || "medium");
+  const [ceremonyEnabled, setCeremonyEnabled] = useState(null);
+  const [ceremonyLoading, setCeremonyLoading] = useState(true);
+  const [ceremonyLoadError, setCeremonyLoadError] = useState(false);
+  const [ceremonySaving, setCeremonySaving] = useState(false);
 
   useEffect(() => {
     const map = { small: "13px", medium: "15px", large: "17px" };
@@ -39,6 +44,21 @@ export default function AdminSettings() {
     document.documentElement.style.setProperty("font-size", map[fontSize]);
     localStorage.setItem("fontSize", fontSize);
   }, [fontSize]);
+
+  useEffect(() => {
+    let active = true;
+    settingsService.get()
+      .then(({ data }) => {
+        if (active) setCeremonyEnabled(data.ceremonyEnabled === true);
+      })
+      .catch(() => {
+        if (active) setCeremonyLoadError(true);
+      })
+      .finally(() => {
+        if (active) setCeremonyLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
 
   const showToast = useCallback((type, message) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -49,6 +69,23 @@ export default function AdminSettings() {
   const applyFontSize = (value) => {
     setFontSize(value);
     showToast("success", t("adminSettings.toast.saved"));
+  };
+
+  const updateCeremonyVisibility = async (event) => {
+    const nextValue = event.target.checked;
+    setCeremonySaving(true);
+    try {
+      const { data } = await settingsService.update({ ceremonyEnabled: nextValue });
+      if (typeof data.ceremonyEnabled !== "boolean") {
+        throw new Error("La réponse du serveur ne contient pas ceremonyEnabled.");
+      }
+      setCeremonyEnabled(data.ceremonyEnabled);
+      showToast("success", t("adminSettings.ceremony.saved"));
+    } catch {
+      showToast("error", t("adminSettings.ceremony.saveFailed"));
+    } finally {
+      setCeremonySaving(false);
+    }
   };
 
   return (
@@ -129,6 +166,28 @@ export default function AdminSettings() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="stg-divider"/>
+
+          <div className="stg-pref-row">
+            <div className="stg-pref-row__info">
+              <label className="stg-pref-row__label" htmlFor="admin-ceremony-enabled">
+                {t("adminSettings.ceremony.label")}
+              </label>
+              <span className="stg-pref-row__sub">
+                {ceremonyLoadError
+                  ? t("adminSettings.ceremony.loadFailed")
+                  : t("adminSettings.ceremony.description")}
+              </span>
+            </div>
+            <input
+              id="admin-ceremony-enabled"
+              type="checkbox"
+              checked={ceremonyEnabled === true}
+              disabled={ceremonyLoading || ceremonySaving || ceremonyEnabled === null}
+              onChange={updateCeremonyVisibility}
+            />
           </div>
         </div>
       </div>

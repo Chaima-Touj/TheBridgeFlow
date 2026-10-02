@@ -1527,6 +1527,13 @@
     }
   },
   "adminSettings": {
+    "ceremony": {
+      "label": "Afficher la Cérémonie dans le menu public",
+      "description": "Contrôlez la visibilité de la rubrique Cérémonie dans le menu du site.",
+      "loadFailed": "Impossible de charger le réglage de visibilité de la Cérémonie.",
+      "saved": "La visibilité de la Cérémonie a été enregistrée.",
+      "saveFailed": "Impossible d'enregistrer le réglage de visibilité de la Cérémonie."
+    },
     "appearance": {
       "title": "Apparence",
       "desc": "Personnalisez l'affichage de la plateforme",
