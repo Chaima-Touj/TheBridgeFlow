@@ -391,13 +391,20 @@ export default function OffersList() {
           <span className="offer-new-badge">{t("offers.newBadge")}</span>
         )}
 
-        <div className="offer-list-logo" style={logoStyle}>
+        <Link
+          to={`/dashboard/student/offers/${o._id}`}
+          className="offer-list-logo"
+          style={logoStyle}
+          aria-label={`${t("offers.viewOffer")}: ${o.title}`}
+        >
           {o.companyName?.[0]?.toUpperCase()}
-        </div>
+        </Link>
 
         <div className="offer-list-body">
           <div className="offer-list-main">
-            <h3 className="offer-list-title">{o.title}</h3>
+            <h3 className="offer-list-title">
+              <Link to={`/dashboard/student/offers/${o._id}`}>{o.title}</Link>
+            </h3>
             <span className="offer-list-company">{o.companyName}</span>
             <div className="offer-list-meta">
               {o.location && <span><FiMapPin size={11} /> {o.location}</span>}

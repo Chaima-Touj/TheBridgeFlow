@@ -332,7 +332,11 @@ export default function LandingPage() {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.07, duration: 0.4 }}
                   >
-                    <div className="lp-pop-card__icons">
+                    <Link
+                      to={`/formations/${f.slug}`}
+                      className="lp-pop-card__icons"
+                      aria-label={`${t("landing.viewDetails")}: ${f.title}`}
+                    >
                       {icons.map(({ Comp: Ic, color: c }, j) => (
                         <div
                           key={j}
@@ -346,8 +350,10 @@ export default function LandingPage() {
                           <Ic size={icons.length >= 3 ? 17 : 24} />
                         </div>
                       ))}
-                    </div>
-                    <h3 className="lp-pop-card__title">{f.title}</h3>
+                    </Link>
+                    <h3 className="lp-pop-card__title">
+                      <Link to={`/formations/${f.slug}`}>{f.title}</Link>
+                    </h3>
                     <p className="lp-pop-card__desc">
                       {f.description
                         ? f.description.slice(0, 100) + (f.description.length > 100 ? "…" : "")

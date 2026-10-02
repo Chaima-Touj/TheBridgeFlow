@@ -128,21 +128,28 @@ export default function CeremonyPage() {
                     onMouseMove={success ? undefined : handleCardTilt}
                     onMouseLeave={resetCardTilt}
                   >
-                    <div className="news-card__img-wrap">
+                    <Link
+                      to={`/ceremonie/${p._id}`}
+                      className="news-card__img-wrap"
+                      aria-label={`${t("ceremony.viewDetail")}: ${p.title}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {p.coverImage
                         ? <img src={p.coverImage} alt="" className="news-card__img" loading="lazy" />
                         : <div className="cp-card__placeholder" />}
                       {isSelected && (
                         <span className="cp-card__check"><FiCheck size={16} /></span>
                       )}
-                    </div>
+                    </Link>
                     <div className="news-card__body">
                       <div className="news-card__meta">
                         <span className="news-card__meta-item">
                           <FiUser size={13} /> {p.studentId?.name || t("ceremony.unknownAuthor")}
                         </span>
                       </div>
-                      <h3 className="news-card__title">{p.title}</h3>
+                      <h3 className="news-card__title">
+                        <Link to={`/ceremonie/${p._id}`} onClick={(e) => e.stopPropagation()}>{p.title}</Link>
+                      </h3>
                       {p.description && <p className="news-card__excerpt">{p.description}</p>}
                       <div className="cp-card__actions">
                         <Link

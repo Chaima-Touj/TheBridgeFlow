@@ -82,9 +82,13 @@ function PodiumCard({ project, rank, t }) {
       <span className={`cl-podium-badge cl-podium-badge--rank${rank}`}>
         <FiAward size={rank === 1 ? 26 : 20} />
       </span>
-      <div className="cl-podium-avatar-ring">
+      <Link
+        to={`/ceremonie/${project._id}`}
+        className="cl-podium-avatar-ring"
+        aria-label={project.title}
+      >
         <AuthorAvatar author={project.studentId} size={rank === 1 ? 92 : 72} />
-      </div>
+      </Link>
       <Link to={`/ceremonie/${project._id}`} className="cl-podium-title">{project.title}</Link>
       <span className="cl-podium-author-name">{project.studentId?.name || t("ceremony.unknownAuthor")}</span>
       <div className="cl-podium-votes">
@@ -121,11 +125,15 @@ function ListRow({ project, rank, t }) {
         )}
         <span className="cl-row-rank__number">#{rank}</span>
       </div>
-      <div className="news-card__img-wrap cl-row-img-wrap">
+      <Link
+        to={`/ceremonie/${project._id}`}
+        className="news-card__img-wrap cl-row-img-wrap"
+        aria-label={project.title}
+      >
         {project.coverImage
           ? <img src={project.coverImage} alt="" className="news-card__img" loading="lazy" />
           : <div className="cl-row-img-wrap__placeholder" />}
-      </div>
+      </Link>
       <div className="news-card__body cl-row-body">
         <Link to={`/ceremonie/${project._id}`} className="cl-row-title">{project.title}</Link>
         <div className="cl-row-author">

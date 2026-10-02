@@ -178,6 +178,8 @@
   font-weight: 800;
   font-size: 1.2rem;
   flex-shrink: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .offer-list-body {
@@ -204,6 +206,21 @@
   color: var(--text);
   margin: 0;
   line-height: 1.3;
+}
+
+.offer-list-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.offer-list-logo:focus-visible,
+.offer-list-title a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.offer-list-title a:hover {
+  color: var(--primary);
 }
 
 .offer-list-company {
@@ -997,4 +1014,3 @@
   border-color: rgba(99, 102, 241, 0.3);
   color: #818cf8;
 }
-

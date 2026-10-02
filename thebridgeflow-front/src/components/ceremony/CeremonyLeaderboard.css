@@ -121,11 +121,14 @@
 /* Anneau autour de l'avatar auteur — visuel principal de chaque colonne
    (remplace l'ancienne couverture projet en grand cercle coloré). */
 .cl-podium-avatar-ring {
+  display: block;
   border-radius: 50%;
   border: 3px solid var(--bg-card);
   box-shadow: 0 0 0 1px var(--border), 0 4px 14px rgba(0, 0, 0, 0.12);
   margin-bottom: 0.9rem;
   flex-shrink: 0;
+  color: inherit;
+  text-decoration: none;
 }
 [data-theme="dark"] .cl-podium-avatar-ring {
   box-shadow: 0 0 0 1px var(--border), 0 4px 14px rgba(0, 0, 0, 0.4);

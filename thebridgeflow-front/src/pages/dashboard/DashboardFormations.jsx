@@ -104,23 +104,31 @@ export default function DashboardFormations() {
               return (
                 <article key={f._id} className="df-card">
 
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    {icons.map(({ Comp: Ic, color: c }, i) => (
-                      <div
-                        key={i}
-                        className="df-card__icon"
-                        style={{
-                          background: `${c}18`,
-                          color: c,
-                          ...(icons.length >= 3 && { width: 40, height: 40 }),
-                        }}
-                      >
-                        <Ic size={icons.length >= 3 ? 18 : 24} />
-                      </div>
-                    ))}
-                  </div>
+                  <Link
+                    to={`/dashboard/student/formations/${f.slug}`}
+                    className="df-card__icon-link"
+                    aria-label={`${t("dashboardFormations.viewDetails")}: ${f.title}`}
+                  >
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      {icons.map(({ Comp: Ic, color: c }, i) => (
+                        <div
+                          key={i}
+                          className="df-card__icon"
+                          style={{
+                            background: `${c}18`,
+                            color: c,
+                            ...(icons.length >= 3 && { width: 40, height: 40 }),
+                          }}
+                        >
+                          <Ic size={icons.length >= 3 ? 18 : 24} />
+                        </div>
+                      ))}
+                    </div>
+                  </Link>
 
-                  <h2 className="df-card__title">{f.title}</h2>
+                  <h2 className="df-card__title">
+                    <Link to={`/dashboard/student/formations/${f.slug}`}>{f.title}</Link>
+                  </h2>
 
                   {f.description && (
                     <p className="df-card__desc">{f.description}</p>

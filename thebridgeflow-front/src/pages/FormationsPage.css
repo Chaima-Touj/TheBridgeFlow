@@ -155,6 +155,22 @@
   flex-shrink: 0;
 }
 
+.fp-card__icon-link,
+.fp-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fp-card__icon-link:focus-visible,
+.fp-card__title a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.fp-card__title a:hover {
+  color: var(--primary);
+}
+
 /* ─── Card title ─────────────────────────────────────────────────────────── */
 .fp-card__title {
   font-size: 1.15rem;

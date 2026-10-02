@@ -130,24 +130,32 @@ const FormationsPage = () => {
                   className="fp-card"
                 >
                   {/* Icons */}
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    {icons.map(({ Comp: Ic, color: c }, i) => (
-                      <div
-                        key={i}
-                        className="fp-card__icon"
-                        style={{
-                          background: `${c}18`,
-                          color: c,
-                          ...(icons.length >= 3 && { width: 38, height: 38 }),
-                        }}
-                      >
-                        <Ic size={icons.length >= 3 ? 17 : 22} />
-                      </div>
-                    ))}
-                  </div>
+                  <Link
+                    to={`/formations/${f.slug}`}
+                    className="fp-card__icon-link"
+                    aria-label={`${t("formations.viewDetails")}: ${f.title}`}
+                  >
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      {icons.map(({ Comp: Ic, color: c }, i) => (
+                        <div
+                          key={i}
+                          className="fp-card__icon"
+                          style={{
+                            background: `${c}18`,
+                            color: c,
+                            ...(icons.length >= 3 && { width: 38, height: 38 }),
+                          }}
+                        >
+                          <Ic size={icons.length >= 3 ? 17 : 22} />
+                        </div>
+                      ))}
+                    </div>
+                  </Link>
 
                   {/* Title */}
-                  <h2 className="fp-card__title">{f.title}</h2>
+                  <h2 className="fp-card__title">
+                    <Link to={`/formations/${f.slug}`}>{f.title}</Link>
+                  </h2>
 
                   {/* Description */}
                   <p className="fp-card__desc">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
 import { FiPlus, FiTrendingUp, FiExternalLink, FiGithub, FiPlay, FiUpload, FiX, FiGrid } from "react-icons/fi";
@@ -181,13 +182,25 @@ export default function MyCeremonyProjects() {
         <div className="news-grid">
           {projects.map((p) => (
             <article key={p._id} className="news-card mcp-card">
-              <div className="news-card__img-wrap">
-                {p.coverImage
-                  ? <img src={p.coverImage} alt="" className="news-card__img" />
-                  : <div className="mcp-card__placeholder" />}
-              </div>
+              {p.status === "approuvé" ? (
+                <Link to={`/ceremonie/${p._id}`} className="news-card__img-wrap" aria-label={p.title}>
+                  {p.coverImage
+                    ? <img src={p.coverImage} alt="" className="news-card__img" />
+                    : <div className="mcp-card__placeholder" />}
+                </Link>
+              ) : (
+                <div className="news-card__img-wrap">
+                  {p.coverImage
+                    ? <img src={p.coverImage} alt="" className="news-card__img" />
+                    : <div className="mcp-card__placeholder" />}
+                </div>
+              )}
               <div className="news-card__body">
-                <h3 className="news-card__title">{p.title}</h3>
+                <h3 className="news-card__title">
+                  {p.status === "approuvé"
+                    ? <Link to={`/ceremonie/${p._id}`}>{p.title}</Link>
+                    : p.title}
+                </h3>
                 <div className="mcp-card__votes">
                   <FiTrendingUp size={13} /> {t("ceremony.voteCount", { count: p.voteCount })}
                 </div>

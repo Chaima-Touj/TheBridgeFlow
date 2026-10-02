@@ -322,9 +322,14 @@ const OffersPage = () => {
                   className="op-card"
                 >
                   <div className="op-card__header">
-                    <div className="op-card__logo" style={{ background: ls.bg, color: ls.color }}>
+                    <Link
+                      to={`/offers/${offer._id}`}
+                      className="op-card__logo"
+                      style={{ background: ls.bg, color: ls.color }}
+                      aria-label={`${t("offers.viewDetails")}: ${offer.title}`}
+                    >
                       {(offer.companyName ?? "?")[0].toUpperCase()}
-                    </div>
+                    </Link>
                     <div className="op-card__company-block">
                       {offer.type && <span className="op-card__type">{offer.type}</span>}
                     </div>
@@ -334,7 +339,9 @@ const OffersPage = () => {
                     </span>
                   </div>
 
-                  <h2 className="op-card__title">{offer.title}</h2>
+                  <h2 className="op-card__title">
+                    <Link to={`/offers/${offer._id}`}>{offer.title}</Link>
+                  </h2>
 
                   <div className="op-card__meta">
                     {offer.location && (
