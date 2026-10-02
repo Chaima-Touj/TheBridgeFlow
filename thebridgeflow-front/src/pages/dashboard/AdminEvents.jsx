@@ -4,6 +4,7 @@ import { FiCalendar, FiPlus, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { eventsService } from "../../services/events.service.js";
+import { formationsService } from "../../services/formations.service.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -16,6 +17,17 @@ const emptyForm = {
 };
 
 const categorySuggestions = [
+  "Workshop",
+  "Conférence",
+  "Séminaire",
+  "Webinaire",
+  "Hackathon",
+  "Networking",
+  "Cérémonie",
+  "Journée portes ouvertes",
+  "Recrutement",
+  "Orientation",
+  "Autre",
   "Artificial Intelligence",
   "Cybersecurity",
   "IoT & Systèmes Embarqués",
@@ -65,8 +77,28 @@ export default function AdminEvents() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [dateError, setDateError] = useState("");
+  const [formationCategories, setFormationCategories] = useState([]);
+  const [categoryLoadError, setCategoryLoadError] = useState(false);
   const [participants, setParticipants] = useState(null);
   const submitLock = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    formationsService.getAll()
+      .then(({ data }) => {
+        if (active) setFormationCategories(data.map(({ title }) => title).filter(Boolean));
+      })
+      .catch((err) => {
+        console.error("Failed to load formation categories for events", err);
+        if (active) setCategoryLoadError(true);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const availableCategories = [...categorySuggestions, ...formationCategories]
+    .filter((category, index, categories) =>
+      categories.findIndex((item) => item.trim().toLocaleLowerCase() === category.trim().toLocaleLowerCase()) === index
+    );
 
   const load = useCallback(() => {
     eventsService.getAdmin()
@@ -204,8 +236,8 @@ export default function AdminEvents() {
             <label>
               {t("events.category")}
               <input required maxLength={80} list="event-category-suggestions" value={form.category} onChange={updateField("category")} />
-              <datalist id="event-category-suggestions">{categorySuggestions.map((category) => <option key={category} value={category} />)}</datalist>
-              <small>{t("events.categoryHint")}</small>
+              <datalist id="event-category-suggestions">{availableCategories.map((category) => <option key={category} value={category} />)}</datalist>
+              <small>{categoryLoadError ? t("events.categoryLoadError") : t("events.categoryHint")}</small>
             </label>
             <label>{t("events.imageUrl")}<input type="url" value={form.image} onChange={updateField("image")} placeholder="https://" /></label>
             <EventImagePreview key={form.image} src={form.image} alt={form.title || t("events.imagePreview")} t={t} />

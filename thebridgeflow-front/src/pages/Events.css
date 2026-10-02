@@ -84,6 +84,13 @@
   background: linear-gradient(135deg, var(--primary-light), var(--bg));
 }
 
+.ev-card__media-link {
+  display: block;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 .ev-card__image {
   display: block;
   width: 100%;
@@ -150,6 +157,16 @@
   line-height: 1.2;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.ev-card__title-link {
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ev-card__title-link:hover {
+  color: var(--primary);
 }
 
 .ev-card__date,

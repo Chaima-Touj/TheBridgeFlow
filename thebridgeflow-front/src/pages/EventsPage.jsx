@@ -92,9 +92,17 @@ export default function EventsPage() {
               : <div className="ev-grid">
                 {events.map((event) => (
                   <article className="ev-card" key={event._id}>
-                    <EventCardImage image={event.image} category={event.category} />
+                    <Link
+                      className="ev-card__media-link"
+                      to={`/events/${event._id}`}
+                      aria-label={`${t("events.details")}: ${event.title}`}
+                    >
+                      <EventCardImage image={event.image} category={event.category} />
+                    </Link>
                     <div className="ev-card__body">
-                      <h2 className="ev-card__title">{event.title}</h2>
+                      <h2 className="ev-card__title">
+                        <Link className="ev-card__title-link" to={`/events/${event._id}`}>{event.title}</Link>
+                      </h2>
                       <div className="ev-card__date">
                         <CalendarDays size={18} aria-hidden="true" />
                         <time dateTime={event.startsAt}>{formatDate(event.startsAt, i18n.language, event.timezone)}</time>

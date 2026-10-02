@@ -80,6 +80,7 @@
     "publicationSection": "النشر",
     "publicationHint": "اختر حالة الفعالية.",
     "categoryHint": "اختر اقتراحًا أو أدخل فئة أخرى.",
+    "categoryLoadError": "تعذر تحميل الدورات. لا يزال بإمكانك إدخال فئة مخصصة.",
     "imagePreview": "معاينة صورة الفعالية",
     "imageLoadError": "تعذّر تحميل الصورة. تحقّق من رابطها.",
     "invalidUrl": "أدخل رابطًا صالحًا يبدأ بـ http:// أو https://.",

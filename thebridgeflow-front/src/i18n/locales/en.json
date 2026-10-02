@@ -80,6 +80,7 @@
     "publicationSection": "Publication",
     "publicationHint": "Choose the event status.",
     "categoryHint": "Choose a suggestion or enter another category.",
+    "categoryLoadError": "Formations could not be loaded. You can still enter a custom category.",
     "imagePreview": "Event image preview",
     "imageLoadError": "The image could not be loaded. Check its URL.",
     "invalidUrl": "Enter a valid URL beginning with http:// or https://.",

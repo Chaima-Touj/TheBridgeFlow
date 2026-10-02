@@ -80,6 +80,7 @@
     "publicationSection": "Publication",
     "publicationHint": "Choisissez le statut de l'événement.",
     "categoryHint": "Choisissez une suggestion ou saisissez une autre catégorie.",
+    "categoryLoadError": "Les formations n’ont pas pu être chargées. Vous pouvez toujours saisir une catégorie personnalisée.",
     "imagePreview": "Aperçu de l'image de l'événement",
     "imageLoadError": "L'image n'a pas pu être chargée. Vérifiez son URL.",
     "invalidUrl": "Saisissez une URL valide commençant par http:// ou https://.",
