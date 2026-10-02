@@ -14,6 +14,8 @@ const eventSchema = new mongoose.Schema({
   capacity: { type: Number, default: null, min: 1 },
   registrationRequired: { type: Boolean, default: true },
   registrationCount: { type: Number, default: 0, min: 0 },
+  publishedAnnouncementSentAt: { type: Date, default: null },
+  publishedAnnouncementClaimedAt: { type: Date, default: null },
   status: {
     type: String,
     enum: ["draft", "published", "cancelled", "archived"],

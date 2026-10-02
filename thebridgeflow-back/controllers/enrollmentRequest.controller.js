@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import Formation         from "../models/formation.model.js";
 import Enrollment        from "../models/enrollment.model.js";
-import Notification      from "../models/notification.model.js";
 import User              from "../models/users.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
 import { buildInitialWeekProgress } from "../utils/enrollmentProgress.js";
+import { notifyAdmins, notifyUser } from "../services/notification.service.js";
 
 /* ── POST /api/enrollment-requests ────────────────────────────────────────────
    Soumettre une demande d'inscription à une formation                          */
@@ -49,19 +49,21 @@ export const createRequest = asyncHandler(async (req, res) => {
   await request.populate("formation", "title slug");
 
   // Notification (cloche) à tous les admins actifs — même pattern que les candidatures.
-  const admins = await User.find({ role: "admin", isActive: true }).select("_id").lean();
-
-  await Promise.all(
-    admins.map((admin) =>
-      Notification.create({
-        userId:  admin._id,
-        title:   "Nouvelle demande de formation",
-        message: `${req.user.name} a demandé l'inscription à la formation "${request.formation.title}".`,
-        type:    "info",
-        link:    "/dashboard/admin/demandes",
-      })
-    )
-  );
+  await notifyAdmins((admin) => ({
+    notification: {
+      title: "Nouvelle demande d'inscription",
+      message: `${req.user.name} a demandé l'inscription à la formation "${request.formation.title}".`,
+      type: "info",
+      link: "/dashboard/admin/demandes",
+    },
+    emailMethod: "sendEnrollmentRequestReceived",
+    emailData: {
+      adminName: admin.name,
+      studentName: req.user.name,
+      formationTitle: request.formation.title,
+      mode,
+    },
+  }));
 
   res.status(201).json(request);
 });
@@ -97,16 +99,18 @@ export const getAllRequests = asyncHandler(async (req, res) => {
    Accepter une demande — réservé à l'admin. Crée l'Enrollment correspondant
    s'il n'existe pas déjà.                                                     */
 export const acceptRequest = asyncHandler(async (req, res) => {
-  const request = await EnrollmentRequest.findById(req.params.id);
+  const request = await EnrollmentRequest.findOneAndUpdate(
+    { _id: req.params.id, status: "en_attente" },
+    { $set: { status: "acceptée" } },
+    { new: true }
+  );
   if (!request) {
-    const err = new Error("Demande introuvable."); err.statusCode = 404; throw err;
-  }
-  if (request.status !== "en_attente") {
+    const existingRequest = await EnrollmentRequest.findById(req.params.id).select("_id");
+    if (!existingRequest) {
+      const err = new Error("Demande introuvable."); err.statusCode = 404; throw err;
+    }
     const err = new Error("Cette demande a déjà été traitée."); err.statusCode = 409; throw err;
   }
-
-  request.status = "acceptée";
-  await request.save();
 
   const existingEnrollment = await Enrollment.findOne({
     student:   request.student,
@@ -123,13 +127,27 @@ export const acceptRequest = asyncHandler(async (req, res) => {
 
   await request.populate("formation", "title slug duration level");
 
-  // Notification in-app
-  await Notification.create({
-    userId:  request.student,
-    title:   "Demande d'inscription acceptée",
-    message: `Votre demande d'inscription à "${request.formation.title}" a été acceptée.`,
-    type:    "success",
-    link:    "/dashboard/student/demandes",
+  const student = await User.findById(request.student).select("name email").lean();
+  await notifyUser({
+    userId: request.student,
+    email: student?.email,
+    notification: {
+      title: "Demande d'inscription acceptée",
+      message: `Votre demande d'inscription à "${request.formation.title}" a été acceptée.`,
+      type: "success",
+      link: request.formation.slug
+        ? `/dashboard/student/formations/${request.formation.slug}`
+        : "/dashboard/student/demandes",
+    },
+    emailMethod: "sendEnrollmentRequestStatus",
+    emailData: {
+      studentName: student?.name || "Étudiant",
+      formationTitle: request.formation.title,
+      status: "acceptée",
+      link: request.formation.slug
+        ? `/dashboard/student/formations/${request.formation.slug}`
+        : "/dashboard/student/demandes",
+    },
   });
 
   res.json(request);
@@ -138,26 +156,38 @@ export const acceptRequest = asyncHandler(async (req, res) => {
 /* ── PATCH /api/enrollment-requests/:id/reject ────────────────────────────────
    Refuser une demande — réservé à l'admin.                                    */
 export const rejectRequest = asyncHandler(async (req, res) => {
-  const request = await EnrollmentRequest.findById(req.params.id);
+  const request = await EnrollmentRequest.findOneAndUpdate(
+    { _id: req.params.id, status: "en_attente" },
+    { $set: { status: "refusée" } },
+    { new: true }
+  );
   if (!request) {
-    const err = new Error("Demande introuvable."); err.statusCode = 404; throw err;
-  }
-  if (request.status !== "en_attente") {
+    const existingRequest = await EnrollmentRequest.findById(req.params.id).select("_id");
+    if (!existingRequest) {
+      const err = new Error("Demande introuvable."); err.statusCode = 404; throw err;
+    }
     const err = new Error("Cette demande a déjà été traitée."); err.statusCode = 409; throw err;
   }
 
-  request.status = "refusée";
-  await request.save();
-
   await request.populate("formation", "title slug duration level");
 
-  // Notification in-app
-  await Notification.create({
-    userId:  request.student,
-    title:   "Demande d'inscription refusée",
-    message: `Votre demande d'inscription à "${request.formation.title}" n'a pas été retenue.`,
-    type:    "warning",
-    link:    "/dashboard/student/demandes",
+  const student = await User.findById(request.student).select("name email").lean();
+  await notifyUser({
+    userId: request.student,
+    email: student?.email,
+    notification: {
+      title: "Demande d'inscription refusée",
+      message: `Votre demande d'inscription à "${request.formation.title}" n'a pas été retenue.`,
+      type: "warning",
+      link: "/dashboard/student/demandes",
+    },
+    emailMethod: "sendEnrollmentRequestStatus",
+    emailData: {
+      studentName: student?.name || "Étudiant",
+      formationTitle: request.formation.title,
+      status: "refusée",
+      link: "/dashboard/student/demandes",
+    },
   });
 
   res.json(request);

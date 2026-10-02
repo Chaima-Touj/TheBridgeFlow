@@ -125,7 +125,7 @@ export default function AdminEvents() {
                     <td className="af-cell-title">{event.title}<small className="ev-admin-category">{event.category}</small></td>
                     <td>{formatDate(event.startsAt, i18n.language, event.timezone)}</td>
                     <td><span className={`badge ${event.status === "published" ? "badge-success" : event.status === "cancelled" ? "badge-danger" : "badge-warning"}`}>{t(`events.statuses.${event.status}`)}</span></td>
-                    <td>{event.registrationCount}{event.capacity !== null ? ` / ${event.capacity}` : ""}</td>
+                    <td>{t("events.participantsCount", { count: event.registrationCount })}{event.capacity !== null ? ` / ${event.capacity}` : ""}</td>
                     <td><div className="ev-admin-actions">
                       <button className="btn btn-ghost" type="button" onClick={() => openForm(event)}>{t("events.edit")}</button>
                       <button className="btn btn-ghost" type="button" onClick={() => showParticipants(event)} aria-label={t("events.viewParticipants")}><FiUsers size={16} /></button>
@@ -165,8 +165,8 @@ export default function AdminEvents() {
         </form>
       </Modal>}
 
-      {participants && <Modal title={t("events.participantsFor", { title: participants.event.title })} onClose={() => setParticipants(null)} maxWidth={620}>
-        {participants.rows.length === 0 ? <p>{t("events.noParticipants")}</p> : <div className="ev-participants">{participants.rows.map(({ _id, student }) => <div key={_id}><strong>{student?.name}</strong><span>{student?.email}</span></div>)}</div>}
+      {participants && <Modal title={t("events.participantsFor", { title: participants.event.title, count: participants.rows.length })} onClose={() => setParticipants(null)} maxWidth={620}>
+        {participants.rows.length === 0 ? <p>{t("events.noParticipants")}</p> : <div className="ev-participants">{participants.rows.map(({ _id, student, createdAt, status }) => <div key={_id}><strong>{student?.name}</strong><span>{student?.email}</span><small>{t("events.participantDate")}: {formatDate(createdAt, i18n.language, participants.event.timezone)}</small><small>{t("events.participantStatus")}: {t(`events.registrationStatuses.${status}`)}</small></div>)}</div>}
       </Modal>}
     </DashboardLayout>
   );

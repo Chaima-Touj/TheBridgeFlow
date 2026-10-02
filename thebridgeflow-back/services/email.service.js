@@ -124,6 +124,32 @@ const infoRow = (label, value) =>
     <td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#0F172A;font-weight:600;">${value}</td>
   </tr>`;
 
+const escapeHtml = (value = "") => String(value)
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;");
+
+const eventEmailData = ({ eventTitle, startsAt, timezone = "Africa/Tunis", location, description, eventId }) => {
+  const date = new Date(startsAt);
+  const dateLabel = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: timezone,
+  }).format(date);
+  const timeLabel = new Intl.DateTimeFormat("fr-FR", {
+    hour: "2-digit", minute: "2-digit", timeZone: timezone,
+  }).format(date);
+  const baseUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+  return {
+    eventTitle: escapeHtml(eventTitle),
+    dateLabel: escapeHtml(dateLabel),
+    timeLabel: escapeHtml(timeLabel),
+    location: location ? escapeHtml(location) : "",
+    description: description ? escapeHtml(String(description).slice(0, 600)) : "",
+    eventUrl: `${baseUrl}/events/${encodeURIComponent(eventId)}`,
+  };
+};
+
 // ─── Templates ────────────────────────────────────────────────────────────────
 
 // 1. Bienvenue après inscription
@@ -311,9 +337,24 @@ const interviewProposedTemplate = ({ studentName, companyName, offerTitle, sched
 };
 
 // 6. Statut entretien mis à jour
-const interviewStatusTemplate = ({ recipientName, status, offerTitle, scheduledAt }) => {
+const interviewStatusTemplate = ({
+  recipientName,
+  status,
+  offerTitle,
+  scheduledAt,
+  recipientRole,
+  link = "/dashboard/student/interviews",
+  linkLabel = "Voir mes entretiens",
+}) => {
   const configs = {
-    "confirmé": { icon: "✅", title: "Entretien confirmé !", color: "#10B981", message: "L'entretien a été confirmé. Préparez-vous bien !" },
+    "confirmé": {
+      icon: "✅",
+      title: "Entretien confirmé !",
+      color: "#10B981",
+      message: recipientRole === "admin"
+        ? "L'entretien a été confirmé par l'étudiant. Consultez la plateforme pour plus de détails."
+        : "L'entretien a été confirmé. Préparez-vous bien !",
+    },
     "annulé":   { icon: "❌", title: "Entretien annulé",    color: "#EF4444", message: "L'entretien a été annulé. Consultez la plateforme pour plus d'informations." },
     "terminé":  { icon: "🏁", title: "Entretien terminé",   color: "#8B5CF6", message: "L'entretien est maintenant marqué comme terminé." },
   };
@@ -329,23 +370,130 @@ const interviewStatusTemplate = ({ recipientName, status, offerTitle, scheduledA
       </div>
 
       <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
-        Bonjour <strong>${recipientName}</strong>, ${cfg.message}
+        Bonjour <strong>${escapeHtml(recipientName)}</strong>, ${cfg.message}
       </p>
 
       <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
         <table width="100%" cellpadding="0" cellspacing="0">
-          ${infoRow("Offre", offerTitle)}
+          ${infoRow("Offre", escapeHtml(offerTitle))}
           ${infoRow("Date prévue", date)}
           ${infoRow("Nouveau statut", status.charAt(0).toUpperCase() + status.slice(1))}
         </table>
       </div>
 
       <div style="text-align:center;">
-        ${button("Voir mes entretiens", `${process.env.CLIENT_URL || "http://localhost:5173"}/dashboard/student/interviews`, cfg.color)}
+        ${button(linkLabel, `${process.env.CLIENT_URL || "http://localhost:5173"}${link}`, cfg.color)}
       </div>
     `),
   };
 };
+
+const enrollmentRequestReceivedTemplate = ({ adminName, studentName, formationTitle, mode }) => {
+  const directEnrollment = mode === "Inscription directe";
+  const cta = directEnrollment
+    ? { label: "Voir les inscriptions", path: "/dashboard/admin/inscriptions" }
+    : { label: "Traiter la demande", path: "/dashboard/admin/demandes" };
+  return {
+    subject: `${directEnrollment ? "Nouvelle inscription" : "Nouvelle demande d'inscription"} — ${formationTitle}`,
+    html: layout(directEnrollment ? "Nouvelle inscription" : "Nouvelle demande d'inscription", `
+      <h1 style="font-size:24px;color:#0F172A;">${directEnrollment ? "Nouvelle inscription à une formation" : "Nouvelle demande de formation"}</h1>
+      <p style="color:#475569;line-height:1.7;">Bonjour <strong>${escapeHtml(adminName || "Administrateur")}</strong>, ${escapeHtml(studentName)} ${directEnrollment ? "s'est inscrit à" : "a demandé son inscription à"} la formation <strong>${escapeHtml(formationTitle)}</strong>.</p>
+      <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin:24px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow("Étudiant", escapeHtml(studentName))}
+          ${infoRow("Formation", escapeHtml(formationTitle))}
+          ${infoRow("Mode", escapeHtml(mode))}
+        </table>
+      </div>
+      <div style="text-align:center;">${button(cta.label, `${process.env.CLIENT_URL || "http://localhost:5173"}${cta.path}`)}</div>
+    `),
+  };
+};
+
+const enrollmentRequestStatusTemplate = ({ studentName, formationTitle, status, link }) => {
+  const accepted = status === "acceptée" || status === "inscrite";
+  return {
+    subject: `Mise à jour de votre inscription — ${formationTitle}`,
+    html: layout("Mise à jour de votre inscription", `
+      <h1 style="font-size:24px;color:#0F172A;">${accepted ? "Inscription confirmée" : "Mise à jour de votre demande"}</h1>
+      <p style="color:#475569;line-height:1.7;">Bonjour <strong>${escapeHtml(studentName)}</strong>, votre demande concernant la formation <strong>${escapeHtml(formationTitle)}</strong> a été mise à jour.</p>
+      <div style="background:${accepted ? "#ECFDF5" : "#FEF2F2"};border-radius:12px;padding:18px;margin:24px 0;">
+        <p style="margin:0;color:#0F172A;"><strong>Statut : ${escapeHtml(status.charAt(0).toUpperCase() + status.slice(1))}</strong></p>
+      </div>
+      <div style="text-align:center;">${button("Voir mes formations", `${process.env.CLIENT_URL || "http://localhost:5173"}${link || "/dashboard/student/demandes"}`, accepted ? "#10B981" : "#2563EB")}</div>
+    `),
+  };
+};
+
+const eventEmailBody = ({ heading, intro, recipientName, event }) => {
+  const details = eventEmailData(event);
+  return layout(heading, `
+    <h1 style="font-size:24px;color:#0F172A;">${escapeHtml(heading)}</h1>
+    <p style="color:#475569;line-height:1.7;">Bonjour <strong>${escapeHtml(recipientName || "Étudiant")}</strong>, ${escapeHtml(intro)}</p>
+    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin:24px 0;">
+      <h2 style="margin:0 0 12px;color:#0F172A;font-size:19px;">${details.eventTitle}</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("Date", details.dateLabel)}
+        ${infoRow("Heure", details.timeLabel)}
+        ${details.location ? infoRow("Lieu", details.location) : ""}
+      </table>
+      ${details.description ? `<p style="margin:16px 0 0;color:#475569;line-height:1.6;">${details.description}</p>` : ""}
+    </div>
+    <div style="text-align:center;">${button("Voir l'événement", details.eventUrl)}</div>
+  `);
+};
+
+const eventPublishedTemplate = (data) => ({
+  subject: `Nouvel événement disponible — ${data.event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Un nouvel événement est disponible !",
+    intro: "nous avons le plaisir de vous informer qu'un nouvel événement vient d'être publié sur TheBridgeFlow.",
+    recipientName: data.recipientName,
+    event: data.event,
+  }),
+});
+
+const eventRegistrationConfirmedTemplate = (data) => ({
+  subject: `Participation confirmée — ${data.event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Votre participation est confirmée",
+    intro: "votre participation à l'événement suivant a bien été enregistrée.",
+    recipientName: data.recipientName,
+    event: data.event,
+  }),
+});
+
+const eventRegistrationReceivedTemplate = (data) => ({
+  subject: `Nouvelle participation — ${data.event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Nouvelle participation à un événement",
+    intro: `${data.studentName} vient de participer à l'événement suivant.`,
+    recipientName: data.adminName || "Administrateur",
+    event: data.event,
+  }),
+});
+
+const eventRegistrationCancelledTemplate = (data) => ({
+  subject: `Participation annulée — ${data.event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Participation annulée",
+    intro: data.studentName
+      ? `${data.studentName} a annulé sa participation à l'événement suivant.`
+      : "votre participation à l'événement suivant a été annulée.",
+    recipientName: data.recipientName,
+    event: data.event,
+  }),
+});
+
+const eventUpdatedTemplate = (data) => ({
+  subject: `Informations mises à jour — ${data.event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Un événement a été mis à jour",
+    intro: "des informations importantes concernant votre événement ont changé.",
+    recipientName: data.recipientName,
+    event: data.event,
+  }),
+});
 
 // 7. Nouveau message reçu
 const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
@@ -629,6 +777,13 @@ const emailService = {
   sendApplicationStatus:   (to, data) => sendEmail({ to, ...applicationStatusTemplate(data) }),
   sendInterviewProposed:   (to, data) => sendEmail({ to, ...interviewProposedTemplate(data) }),
   sendInterviewStatus:     (to, data) => sendEmail({ to, ...interviewStatusTemplate(data) }),
+  sendEnrollmentRequestReceived: (to, data) => sendEmail({ to, ...enrollmentRequestReceivedTemplate(data) }),
+  sendEnrollmentRequestStatus:   (to, data) => sendEmail({ to, ...enrollmentRequestStatusTemplate(data) }),
+  sendEventPublished:      (to, data) => sendEmail({ to, ...eventPublishedTemplate(data) }),
+  sendEventRegistrationConfirmed: (to, data) => sendEmail({ to, ...eventRegistrationConfirmedTemplate(data) }),
+  sendEventRegistrationReceived: (to, data) => sendEmail({ to, ...eventRegistrationReceivedTemplate(data) }),
+  sendEventRegistrationCancelled: (to, data) => sendEmail({ to, ...eventRegistrationCancelledTemplate(data) }),
+  sendEventUpdated:        (to, data) => sendEmail({ to, ...eventUpdatedTemplate(data) }),
   sendNewMessage:          (to, data) => sendEmail({ to, ...newMessageTemplate(data) }),
   sendNewUserAdmin:        (to, data) => sendEmail({ to, ...newUserAdminTemplate(data) }),
   sendAccountCreatedByAdmin: (to, data) => sendEmail({ to, ...accountCreatedByAdminTemplate(data) }),

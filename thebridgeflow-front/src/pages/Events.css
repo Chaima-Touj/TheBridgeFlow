@@ -275,14 +275,15 @@
 }
 
 .ev-participants > div {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .8rem;
   border-bottom: 1px solid var(--border);
   padding: .65rem 0;
 }
 
-.ev-participants span {
+.ev-participants span,
+.ev-participants small {
   color: var(--text-muted);
 }
 
@@ -323,6 +324,6 @@
   }
 
   .ev-participants > div {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }

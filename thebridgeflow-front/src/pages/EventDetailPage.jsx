@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
+import Modal from "../components/common/Modal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
@@ -23,6 +24,9 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [participationModal, setParticipationModal] = useState("");
+  const [registeredEventId, setRegisteredEventId] = useState(null);
+  const participationConfirmed = registeredEventId === id;
 
   useDocumentMeta({ title: event ? `${event.title} — TheBridgeFlow` : t("events.title"), description: event?.description || t("events.description") });
 
@@ -35,9 +39,26 @@ export default function EventDetailPage() {
     return () => { active = false; };
   }, [id, t]);
 
+  useEffect(() => {
+    if (user?.role !== "étudiant" || !event?.registrationRequired) return undefined;
+    let active = true;
+    eventsService.getMyRegistrations()
+      .then(({ data }) => {
+        if (!active) return;
+        const registration = data.registrations?.find(
+          (item) => item.event?._id === id && item.status === "registered"
+        );
+        setRegisteredEventId((current) => current === id ? current : registration ? id : null);
+      })
+      .catch((err) => {
+        if (active) console.error("Failed to check current event participation", err);
+      });
+    return () => { active = false; };
+  }, [event?.registrationRequired, id, user?.role]);
+
   const handleRegister = async () => {
     if (!user) {
-      navigate("/login", { state: { from: `/events/${id}` } });
+      setParticipationModal("login");
       return;
     }
     if (user.role !== "étudiant") return;
@@ -45,7 +66,8 @@ export default function EventDetailPage() {
     setError("");
     try {
       await eventsService.register(id);
-      navigate("/dashboard/student/events");
+      setRegisteredEventId(id);
+      setParticipationModal("success");
     } catch (err) {
       setError(err.response?.data?.message || t("events.actionError"));
     } finally {
@@ -78,14 +100,35 @@ export default function EventDetailPage() {
                   {event.status === "published" && event.registrationRequired && new Date(event.startsAt) > new Date() && (
                     <div className="ev-detail__actions">
                       {user?.role === "étudiant"
-                        ? <button className="btn btn-primary" type="button" onClick={handleRegister} disabled={submitting || (event.capacity !== null && event.registrationCount >= event.capacity)}>{submitting ? t("events.working") : t("events.register")}</button>
-                        : !user && <button className="btn btn-primary" type="button" onClick={handleRegister}>{t("events.loginToRegister")}</button>}
+                        ? <button className="btn btn-primary" type="button" onClick={handleRegister} disabled={submitting || participationConfirmed || (event.capacity !== null && event.registrationCount >= event.capacity)}>{submitting ? t("events.working") : participationConfirmed ? t("events.participationConfirmed") : t("events.participate")}</button>
+                        : !user && <button className="btn btn-primary" type="button" onClick={handleRegister}>{t("events.participate")}</button>}
                     </div>
                   )}
                 </div>
               </article>
             )}
       </main>
+      {participationModal === "login" && (
+        <Modal
+          title={t("events.loginRequiredTitle")}
+          onClose={() => setParticipationModal("")}
+          footer={<>
+            <button type="button" className="btn btn-ghost" onClick={() => setParticipationModal("")}>{t("common.cancel")}</button>
+            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: `/events/${id}` } })}>{t("events.signIn")}</button>
+          </>}
+        >
+          <p>{t("events.loginRequiredMessage")}</p>
+        </Modal>
+      )}
+      {participationModal === "success" && (
+        <Modal
+          title={t("events.participationSuccessTitle")}
+          onClose={() => setParticipationModal("")}
+          footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("common.close")}</button>}
+        >
+          <p>{t("events.participationSuccessMessage")}</p>
+        </Modal>
+      )}
     </div>
   );
 }

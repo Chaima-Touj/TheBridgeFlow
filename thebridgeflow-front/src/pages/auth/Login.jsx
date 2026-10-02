@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -20,6 +20,7 @@ export default function Login() {
   const { t } = useTranslation();
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +48,9 @@ export default function Login() {
 
       // Mettre à jour AuthContext sans refaire un appel API
       loginWithToken(data.token, data.user, remember);
-      navigate(ROUTES[data.user?.role] || "/dashboard/student");
+      const returnTo = location.state?.from;
+      const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//");
+      navigate(safeReturnTo ? returnTo : ROUTES[data.user?.role] || "/dashboard/student");
 
     } catch (err) {
       const d = err.response?.data;

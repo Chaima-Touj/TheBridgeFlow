@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import Enrollment from "../models/enrollment.model.js";
 import Formation  from "../models/formation.model.js";
-import Notification from "../models/notification.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { buildInitialWeekProgress } from "../utils/enrollmentProgress.js";
+import { notifyAdmins, notifyUser } from "../services/notification.service.js";
 
 /* ── GET /api/enrollments ─────────────────────────────────────────────────────
    Toutes les inscriptions de l'étudiant connecté, formation peuplée           */
@@ -52,7 +52,9 @@ export const getAllEnrollments = asyncHandler(async (req, res) => {
 /* ── DELETE /api/enrollments/admin/:id ────────────────────────────────────────
    Annule (supprime) une inscription — réservé à l'admin.                     */
 export const cancelEnrollment = asyncHandler(async (req, res) => {
-  const enrollment = await Enrollment.findById(req.params.id).populate("formation", "title slug");
+  const enrollment = await Enrollment.findById(req.params.id)
+    .populate("formation", "title slug")
+    .populate("student", "name email");
   if (!enrollment) {
     const err = new Error("Inscription introuvable."); err.statusCode = 404; throw err;
   }
@@ -60,13 +62,23 @@ export const cancelEnrollment = asyncHandler(async (req, res) => {
   const { student, formation } = enrollment;
   await enrollment.deleteOne();
 
-  // Notification in-app
-  await Notification.create({
-    userId:  student,
-    title:   "Inscription annulée",
-    message: `Votre inscription à "${formation.title}" a été annulée par l'administration.`,
-    type:    "warning",
-    link:    formation.slug ? `/dashboard/student/formations/${formation.slug}` : "/dashboard/student/formations",
+  const link = formation.slug ? `/dashboard/student/formations/${formation.slug}` : "/dashboard/student/formations";
+  await notifyUser({
+    userId: student._id,
+    email: student.email,
+    notification: {
+      title: "Inscription annulée",
+      message: `Votre inscription à "${formation.title}" a été annulée par l'administration.`,
+      type: "warning",
+      link,
+    },
+    emailMethod: "sendEnrollmentRequestStatus",
+    emailData: {
+      studentName: student.name,
+      formationTitle: formation.title,
+      status: "annulée",
+      link,
+    },
   });
 
   res.json({ message: "Inscription annulée.", id: req.params.id });
@@ -100,6 +112,38 @@ export const enroll = asyncHandler(async (req, res) => {
   });
 
   await enrollment.populate("formation");
+  await notifyAdmins((admin) => ({
+    notification: {
+      title: "Nouvelle inscription à une formation",
+      message: `${req.user.name} est maintenant inscrit à la formation "${formation.title}".`,
+      type: "info",
+      link: "/dashboard/admin/inscriptions",
+    },
+    emailMethod: "sendEnrollmentRequestReceived",
+    emailData: {
+      adminName: admin.name,
+      studentName: req.user.name,
+      formationTitle: formation.title,
+      mode: "Inscription directe",
+    },
+  }));
+  await notifyUser({
+    userId: req.user._id,
+    email: req.user.email,
+    notification: {
+      title: "Inscription confirmée",
+      message: `Votre inscription à "${formation.title}" est confirmée.`,
+      type: "success",
+      link: formation.slug ? `/dashboard/student/formations/${formation.slug}` : "/dashboard/student/formations",
+    },
+    emailMethod: "sendEnrollmentRequestStatus",
+    emailData: {
+      studentName: req.user.name,
+      formationTitle: formation.title,
+      status: "inscrite",
+      link: formation.slug ? `/dashboard/student/formations/${formation.slug}` : "/dashboard/student/formations",
+    },
+  });
   res.status(201).json(enrollment);
 });
 

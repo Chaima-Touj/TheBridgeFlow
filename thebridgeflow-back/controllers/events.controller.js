@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import Event from "../models/event.model.js";
 import EventRegistration from "../models/eventRegistration.model.js";
-import Notification from "../models/notification.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { getActiveStudents, notifyAdmins, notifyUser, notifyUsers } from "../services/notification.service.js";
 
 const EVENT_FIELDS = [
   "title", "description", "image", "category", "startsAt", "endsAt",
@@ -102,6 +102,108 @@ function validateEventPayload(data, { partial = false } = {}) {
   return payload;
 }
 
+function getEventEmailData(event) {
+  return {
+    eventTitle: event.title,
+    description: event.description,
+    startsAt: event.startsAt,
+    timezone: event.timezone,
+    location: event.location,
+    eventId: String(event._id),
+  };
+}
+
+async function announcePublishedEvent(event) {
+  let students;
+  try {
+    students = await getActiveStudents();
+  } catch (error) {
+    console.error("[events] Failed to load announcement recipients", {
+      eventId: String(event._id),
+      message: error.message,
+    });
+    return;
+  }
+
+  const claimedAt = new Date();
+  const staleClaimBefore = new Date(claimedAt.getTime() - 10 * 60 * 1000);
+  let claim;
+  try {
+    claim = await Event.findOneAndUpdate(
+      {
+        _id: event._id,
+        status: "published",
+        publishedAnnouncementSentAt: null,
+        $or: [
+          { publishedAnnouncementClaimedAt: null },
+          { publishedAnnouncementClaimedAt: { $lt: staleClaimBefore } },
+        ],
+      },
+      { $set: { publishedAnnouncementClaimedAt: claimedAt } },
+      { new: true }
+    ).select("_id");
+  } catch (error) {
+    console.error("[events] Failed to claim publication announcement", {
+      eventId: String(event._id),
+      message: error.message,
+    });
+    return;
+  }
+  if (!claim) return;
+
+  try {
+    const eventData = getEventEmailData(event);
+    await notifyUsers(students, (student) => ({
+      notification: {
+        title: "Un nouvel événement est disponible !",
+        message: `Un nouvel événement vient d'être publié : "${event.title}".`,
+        type: "info",
+        link: `/events/${event._id}`,
+      },
+      emailMethod: "sendEventPublished",
+      emailData: { recipientName: student.name, event: eventData },
+    }));
+
+    const finalized = await Event.updateOne(
+      {
+        _id: event._id,
+        status: "published",
+        publishedAnnouncementSentAt: null,
+        publishedAnnouncementClaimedAt: claimedAt,
+      },
+      {
+        $set: { publishedAnnouncementSentAt: new Date() },
+        $unset: { publishedAnnouncementClaimedAt: 1 },
+      }
+    );
+    if (finalized.modifiedCount === 0) {
+      console.error("[events] Publication announcement claim was lost before finalization", {
+        eventId: String(event._id),
+      });
+      await Event.updateOne(
+        { _id: event._id, publishedAnnouncementClaimedAt: claimedAt },
+        { $unset: { publishedAnnouncementClaimedAt: 1 } }
+      );
+    }
+  } catch (error) {
+    console.error("[events] Failed to process publication announcement", {
+      eventId: String(event._id),
+      message: error.message,
+    });
+    try {
+      await Event.updateOne(
+        { _id: event._id, publishedAnnouncementClaimedAt: claimedAt },
+        { $unset: { publishedAnnouncementClaimedAt: 1 } }
+      );
+    } catch (releaseError) {
+      console.error("[events] Failed to release publication announcement claim", {
+        eventId: String(event._id),
+        message: releaseError.message,
+      });
+    }
+  }
+}
+
 const publicProjection = [
   "title", "description", "image", "category", "startsAt", "endsAt",
   "timezone", "mode", "location", "capacity", "registrationRequired",
@@ -139,6 +241,7 @@ export const getAdminEvents = asyncHandler(async (req, res) => {
 export const createEvent = asyncHandler(async (req, res) => {
   const payload = validateEventPayload(req.body);
   const event = await Event.create({ ...payload, createdBy: req.user._id });
+  if (event.status === "published") await announcePublishedEvent(event);
   res.status(201).json({ event });
 });
 
@@ -152,10 +255,16 @@ export const updateEvent = asyncHandler(async (req, res) => {
   if (Object.keys(payload).length === 0) fail("Aucun champ d'événement valide à modifier.", 400);
 
   const previous = {
+    title: event.title,
+    description: event.description,
+    category: event.category,
     startsAt: event.startsAt?.getTime(),
     endsAt: event.endsAt?.getTime(),
+    mode: event.mode,
     location: event.location,
     meetingUrl: event.meetingUrl,
+    capacity: event.capacity,
+    registrationRequired: event.registrationRequired,
     status: event.status,
   };
   if (payload.status === "archived" && event.status === "published" && event.startsAt > new Date()) {
@@ -185,36 +294,48 @@ export const updateEvent = asyncHandler(async (req, res) => {
   await event.save();
 
   const registrations = await EventRegistration.find({ event: event._id, status: "registered" })
-    .select("student")
+    .populate("student", "name email")
     .lean();
   const eventLink = `/events/${event._id}`;
-  let title = "";
-  let message = "";
-  let type = "info";
+  const becamePublished = previous.status !== "published" && event.status === "published";
   if (previous.status !== "cancelled" && event.status === "cancelled") {
-    title = "Événement annulé";
-    message = `L'événement "${event.title}" a été annulé.`;
-    type = "warning";
     await EventRegistration.updateMany({ event: event._id, status: "registered" }, { status: "cancelled" });
     event.registrationCount = 0;
     await event.save();
+    await notifyUsers(registrations.map(({ student }) => student).filter(Boolean), (student) => ({
+      notification: {
+        title: "Événement annulé",
+        message: `L'événement "${event.title}" a été annulé.`,
+        type: "warning",
+        link: eventLink,
+      },
+      emailMethod: "sendEventRegistrationCancelled",
+      emailData: { recipientName: student.name, event: getEventEmailData(event) },
+    }));
+  } else if (becamePublished || (event.status === "published" && !event.publishedAnnouncementSentAt)) {
+    await announcePublishedEvent(event);
   } else if (
+    previous.title !== event.title ||
+    previous.description !== event.description ||
+    previous.category !== event.category ||
     previous.startsAt !== event.startsAt?.getTime() ||
     previous.endsAt !== event.endsAt?.getTime() ||
+    previous.mode !== event.mode ||
     previous.location !== event.location ||
-    previous.meetingUrl !== event.meetingUrl
+    previous.meetingUrl !== event.meetingUrl ||
+    previous.capacity !== event.capacity ||
+    previous.registrationRequired !== event.registrationRequired
   ) {
-    title = "Mise à jour d'un événement";
-    message = `Les informations de l'événement "${event.title}" ont changé.`;
-  }
-  if (title && registrations.length) {
-    await Notification.insertMany(registrations.map(({ student }) => ({
-      userId: student,
-      title,
-      message,
-      type,
-      link: eventLink,
-    })));
+    await notifyUsers(registrations.map(({ student }) => student).filter(Boolean), (student) => ({
+      notification: {
+        title: "Mise à jour d'un événement",
+        message: `Les informations de l'événement "${event.title}" ont changé.`,
+        type: "info",
+        link: eventLink,
+      },
+      emailMethod: "sendEventUpdated",
+      emailData: { recipientName: student.name, event: getEventEmailData(event) },
+    }));
   }
   res.json({ event });
 });
@@ -222,7 +343,8 @@ export const updateEvent = asyncHandler(async (req, res) => {
 // POST /api/events/:id/registrations
 export const registerForEvent = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
-  const current = await Event.findById(req.params.id).select("registrationRequired status startsAt capacity");
+  const current = await Event.findById(req.params.id)
+    .select("title description category registrationRequired status startsAt timezone mode location capacity");
   if (!current || current.status !== "published") fail("Événement introuvable.", 404);
   if (!current.registrationRequired) fail("Cet événement ne nécessite pas d'inscription.", 409);
   if (current.startsAt <= new Date()) fail("Les inscriptions à cet événement sont terminées.", 409);
@@ -270,13 +392,33 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     fail("Cette inscription vient d'être modifiée. Actualisez la page.", 409);
   }
 
-  await Notification.create({
+  const eventData = getEventEmailData(reservedEvent);
+  await notifyUser({
     userId: req.user._id,
-    title: "Inscription à l'événement confirmée",
-    message: `Votre inscription à "${reservedEvent.title}" est confirmée.`,
-    type: "success",
-    link: `/events/${reservedEvent._id}`,
+    email: req.user.email,
+    notification: {
+      title: "Votre participation est confirmée",
+      message: `Votre participation à l'événement "${reservedEvent.title}" a bien été enregistrée.`,
+      type: "success",
+      link: `/events/${reservedEvent._id}`,
+    },
+    emailMethod: "sendEventRegistrationConfirmed",
+    emailData: { recipientName: req.user.name, event: eventData },
   });
+  await notifyAdmins((admin) => ({
+    notification: {
+      title: "Nouvelle participation à un événement",
+      message: `${req.user.name} vient de participer à l'événement "${reservedEvent.title}".`,
+      type: "info",
+      link: "/dashboard/admin/events",
+    },
+    emailMethod: "sendEventRegistrationReceived",
+    emailData: {
+      adminName: admin.name,
+      studentName: req.user.name,
+      event: eventData,
+    },
+  }));
   res.status(201).json({ registration, event: reservedEvent });
 });
 
@@ -300,16 +442,46 @@ export const getMyEventRegistrations = asyncHandler(async (req, res) => {
 // DELETE /api/events/:id/registrations
 export const cancelEventRegistration = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
+  const event = await Event.findById(req.params.id)
+    .select("title description startsAt timezone location _id");
   const registration = await EventRegistration.findOneAndUpdate(
     { event: req.params.id, student: req.user._id, status: "registered" },
     { status: "cancelled" },
     { new: true }
   );
   if (!registration) fail("Inscription active introuvable.", 404);
+  if (!event) fail("Événement introuvable.", 404);
   await Event.findOneAndUpdate(
     { _id: registration.event, registrationCount: { $gt: 0 } },
     { $inc: { registrationCount: -1 } }
   );
+  const eventData = getEventEmailData(event);
+  await notifyUser({
+    userId: req.user._id,
+    email: req.user.email,
+    notification: {
+      title: "Participation annulée",
+      message: `Votre participation à l'événement "${event.title}" a été annulée.`,
+      type: "info",
+      link: `/events/${event._id}`,
+    },
+    emailMethod: "sendEventRegistrationCancelled",
+    emailData: { recipientName: req.user.name, event: eventData },
+  });
+  await notifyAdmins((admin) => ({
+    notification: {
+      title: "Participation annulée",
+      message: `${req.user.name} a annulé sa participation à l'événement "${event.title}".`,
+      type: "info",
+      link: "/dashboard/admin/events",
+    },
+    emailMethod: "sendEventRegistrationCancelled",
+    emailData: {
+      recipientName: admin.name,
+      studentName: req.user.name,
+      event: eventData,
+    },
+  }));
   res.json({ message: "Inscription annulée.", registration });
 });
 

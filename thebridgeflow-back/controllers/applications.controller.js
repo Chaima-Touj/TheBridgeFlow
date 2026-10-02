@@ -1,9 +1,9 @@
 import Application from "../models/applications.model.js";
+import Interview from "../models/interview.model.js";
 import Offer from "../models/offers.model.js";
 import User from "../models/users.model.js";
-import Notification from "../models/notification.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import emailService from "../services/email.service.js";
+import { notifyAdmins, notifyUser } from "../services/notification.service.js";
 
 // POST /api/applications — réservé aux étudiants
 export const createApplication = asyncHandler(async (req, res) => {
@@ -44,40 +44,39 @@ export const createApplication = asyncHandler(async (req, res) => {
     cvUrl,
   });
 
-  // Email à l'étudiant — confirmation d'envoi
-  emailService.sendApplicationSent(req.user.email, {
-    studentName: req.user.name,
-    offerTitle:  offer.title,
-    companyName: offer.companyName,
+  const studentNotification = {
+    title: "Candidature envoyée",
+    message: `Votre candidature pour l'offre "${offer.title}" a bien été transmise.`,
+    type: "success",
+    link: "/dashboard/student/applications",
+  };
+  await notifyUser({
+    userId: req.user._id,
+    email: req.user.email,
+    notification: studentNotification,
+    emailMethod: "sendApplicationSent",
+    emailData: {
+      studentName: req.user.name,
+      offerTitle: offer.title,
+      companyName: offer.companyName,
+    },
   });
 
-  // Notification (cloche) + email à tous les admins — nouvelle candidature
-  // reçue. L'admin gère désormais les offres/candidatures (plus de compte
-  // "entreprise" séparé à notifier via offer.companyId).
-  const admins = await User.find({ role: "admin", isActive: true }).select("email name").lean();
-
-  await Promise.all(
-    admins.map((admin) =>
-      Notification.create({
-        userId:  admin._id,
-        title:   "Nouvelle candidature",
-        message: `${req.user.name} a postulé à l'offre "${offer.title}".`,
-        type:    "info",
-        link:    "/dashboard/admin/candidatures",
-      })
-    )
-  );
-
-  admins.forEach((admin) => {
-    if (admin.email) {
-      emailService.sendApplicationReceived(admin.email, {
-        companyName:  admin.name,
-        studentName:  req.user.name,
-        studentEmail: req.user.email,
-        offerTitle:   offer.title,
-      });
-    }
-  });
+  await notifyAdmins((admin) => ({
+    notification: {
+      title: "Nouvelle candidature",
+      message: `${req.user.name} a postulé à l'offre "${offer.title}".`,
+      type: "info",
+      link: "/dashboard/admin/candidatures",
+    },
+    emailMethod: "sendApplicationReceived",
+    emailData: {
+      companyName: admin.name,
+      studentName: req.user.name,
+      studentEmail: req.user.email,
+      offerTitle: offer.title,
+    },
+  }));
 
   res.status(201).json({ application });
 });
@@ -152,38 +151,58 @@ export const updateStatus = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  application.status = status;
-  await application.save();
+  if (
+    ["acceptée", "refusée"].includes(status) &&
+    !await Interview.exists({ applicationId: application._id })
+  ) {
+    const err = new Error("Aucun entretien enregistré pour cette candidature. Actualisez la page avant de prendre une décision.");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const previousStatus = application.status;
+  if (previousStatus === status) return res.json({ application });
+
+  const updatedApplication = await Application.findOneAndUpdate(
+    { _id: application._id, status: previousStatus },
+    { $set: { status } },
+    { new: true }
+  ).populate("offerId");
+  if (!updatedApplication) {
+    const err = new Error("La candidature a été modifiée par une autre action. Actualisez la page.");
+    err.statusCode = 409;
+    throw err;
+  }
 
   // Notification in-app
   const statusMessages = {
-    "acceptée": `Bonne nouvelle ! Ta candidature pour "${application.offerId.title}" a été acceptée.`,
-    "refusée":  `Ta candidature pour "${application.offerId.title}" n'a pas été retenue cette fois.`,
-    "en cours": `Ta candidature pour "${application.offerId.title}" est en cours d'examen.`,
+    "acceptée": `Bonne nouvelle ! Ta candidature pour "${updatedApplication.offerId.title}" a été acceptée.`,
+    "refusée":  `Ta candidature pour "${updatedApplication.offerId.title}" n'a pas été retenue cette fois.`,
+    "en cours": `Ta candidature pour "${updatedApplication.offerId.title}" est en cours d'examen.`,
   };
 
   if (statusMessages[status]) {
-    await Notification.create({
-      userId:  application.studentId,
-      title:   "Mise à jour de candidature",
-      message: statusMessages[status],
-      type:    status === "acceptée" ? "success" : status === "refusée" ? "warning" : "info",
-      link:    "/dashboard/student/applications",
+    const student = await User.findById(updatedApplication.studentId).select("email name").lean();
+    await notifyUser({
+      userId: updatedApplication.studentId,
+      email: student?.email,
+      notification: {
+        title: "Mise à jour de candidature",
+        message: statusMessages[status],
+        type: status === "acceptée" ? "success" : status === "refusée" ? "warning" : "info",
+        link: "/dashboard/student/applications",
+      },
+      ...(status !== "en attente" ? {
+        emailMethod: "sendApplicationStatus",
+        emailData: {
+        studentName: student.name,
+        offerTitle: updatedApplication.offerId.title,
+        companyName: updatedApplication.offerId.companyName,
+        status,
+        },
+      } : {}),
     });
   }
 
-  // Email à l'étudiant — statut mis à jour
-  if (status !== "en attente") {
-    const student = await User.findById(application.studentId).select("email name").lean();
-    if (student?.email) {
-      emailService.sendApplicationStatus(student.email, {
-        studentName: student.name,
-        offerTitle:  application.offerId.title,
-        companyName: application.offerId.companyName,
-        status,
-      });
-    }
-  }
-
-  res.json({ application });
+  res.json({ application: updatedApplication });
 });
