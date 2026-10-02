@@ -1,17 +1,31 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ImageOff, MapPin, Users, Video } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
-import { resolveDriveUrl } from "../constants/videoUrls.js";
+import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
   return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone: timezone || "Africa/Tunis" }).format(new Date(value));
+}
+
+function EventCardImage({ image, category }) {
+  const [failed, setFailed] = useState(false);
+  const src = resolveDriveThumbnailProxyUrl(image) || resolveDriveUrl(image, "image");
+
+  return (
+    <div className="ev-card__media">
+      {image && !failed
+        ? <img className="ev-card__image" src={src} alt="" loading="lazy" onError={() => setFailed(true)} />
+        : <div className="ev-card__image-fallback" aria-hidden="true"><ImageOff size={30} /></div>}
+      <span className="ev-category">{category}</span>
+    </div>
+  );
 }
 
 export default function EventsPage() {
@@ -78,21 +92,23 @@ export default function EventsPage() {
               : <div className="ev-grid">
                 {events.map((event) => (
                   <article className="ev-card" key={event._id}>
-                    {event.image && <img className="ev-card__image" src={resolveDriveUrl(event.image, "image")} alt="" loading="lazy" />}
+                    <EventCardImage image={event.image} category={event.category} />
                     <div className="ev-card__body">
-                      <span className="ev-category">{event.category}</span>
                       <h2 className="ev-card__title">{event.title}</h2>
-                      <p className="ev-card__description">{event.description}</p>
-                      <div className="ev-meta">
-                        <span><CalendarDays size={15} />{formatDate(event.startsAt, i18n.language, event.timezone)}</span>
-                        <span><Users size={15} />{t(`events.modes.${event.mode}`)}</span>
-                        {event.location && <span><MapPin size={15} />{event.location}</span>}
-                        {event.capacity !== null && <span><Users size={15} />{t("events.seats", { count: Math.max(0, event.capacity - event.registrationCount) })}</span>}
+                      <div className="ev-card__date">
+                        <CalendarDays size={18} aria-hidden="true" />
+                        <time dateTime={event.startsAt}>{formatDate(event.startsAt, i18n.language, event.timezone)}</time>
                       </div>
+                      <div className="ev-meta ev-card__meta">
+                        <span><Video size={15} aria-hidden="true" />{t(`events.modes.${event.mode}`)}</span>
+                        {event.location && <span><MapPin size={15} aria-hidden="true" />{event.location}</span>}
+                        {event.capacity !== null && <span><Users size={15} aria-hidden="true" />{t("events.seats", { count: Math.max(0, event.capacity - event.registrationCount) })}</span>}
+                      </div>
+                      <p className="ev-card__description">{event.description}</p>
                       <div className="ev-card__actions">
-                        <Link className="btn btn-ghost" to={`/events/${event._id}`}>{t("events.details")}</Link>
+                        <Link className="btn btn-primary ev-card__details" to={`/events/${event._id}`}>{t("events.details")}<ArrowUpRight size={16} aria-hidden="true" /></Link>
                         {event.registrationRequired && event.status === "published" && period === "upcoming" && user?.role === "étudiant" && (
-                          <button type="button" className="btn btn-primary" onClick={() => register(event._id)}>{t("events.register")}</button>
+                          <button type="button" className="btn btn-ghost" onClick={() => register(event._id)}>{t("events.register")}</button>
                         )}
                       </div>
                     </div>

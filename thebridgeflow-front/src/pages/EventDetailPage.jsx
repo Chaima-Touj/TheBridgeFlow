@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, MapPin, Users, Video } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import Modal from "../components/common/Modal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
-import { resolveDriveUrl } from "../constants/videoUrls.js";
+import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
@@ -26,7 +26,10 @@ export default function EventDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [participationModal, setParticipationModal] = useState("");
   const [registeredEventId, setRegisteredEventId] = useState(null);
+  const registrationLock = useRef(false);
   const participationConfirmed = registeredEventId === id;
+  const capacityReached = Boolean(event && event.capacity !== null && event.capacity !== undefined &&
+    event.registrationCount >= event.capacity);
 
   useDocumentMeta({ title: event ? `${event.title} — TheBridgeFlow` : t("events.title"), description: event?.description || t("events.description") });
 
@@ -61,7 +64,8 @@ export default function EventDetailPage() {
       setParticipationModal("login");
       return;
     }
-    if (user.role !== "étudiant") return;
+    if (user.role !== "étudiant" || registrationLock.current || capacityReached || participationConfirmed) return;
+    registrationLock.current = true;
     setSubmitting(true);
     setError("");
     try {
@@ -71,6 +75,7 @@ export default function EventDetailPage() {
     } catch (err) {
       setError(err.response?.data?.message || t("events.actionError"));
     } finally {
+      registrationLock.current = false;
       setSubmitting(false);
     }
   };
@@ -83,26 +88,45 @@ export default function EventDetailPage() {
           : error && !event ? <p className="ev-state ev-error">{error}</p>
             : event && (
               <article className="ev-detail">
-                {event.image && <img className="ev-detail__image" src={resolveDriveUrl(event.image, "image")} alt="" />}
+                {event.image && <img className="ev-detail__image" src={resolveDriveThumbnailProxyUrl(event.image) || resolveDriveUrl(event.image, "image")} alt="" />}
                 <div className="ev-detail__content">
                   <Link to="/events" className="ev-back">{t("events.back")}</Link>
                   <span className="ev-category">{event.category}</span>
                   <h1>{event.title}</h1>
+                  <div className="ev-detail__date">
+                    <CalendarDays size={20} aria-hidden="true" />
+                    <time dateTime={event.startsAt}>{formatDate(event.startsAt, i18n.language, event.timezone)}</time>
+                  </div>
                   <div className="ev-meta">
-                    <span><CalendarDays size={16} />{formatDate(event.startsAt, i18n.language, event.timezone)}</span>
-                    <span><Users size={16} />{t(`events.modes.${event.mode}`)}</span>
-                    {event.location && <span><MapPin size={16} />{event.location}</span>}
-                    {event.capacity !== null && <span><Users size={16} />{t("events.seats", { count: Math.max(0, event.capacity - event.registrationCount) })}</span>}
+                    <span><Video size={16} aria-hidden="true" />{t(`events.modes.${event.mode}`)}</span>
+                    {event.location && <span><MapPin size={16} aria-hidden="true" />{event.location}</span>}
+                    {event.capacity !== null && <span><Users size={16} aria-hidden="true" />{t("events.seats", { count: Math.max(0, event.capacity - event.registrationCount) })}</span>}
                   </div>
                   <p className="ev-detail__description">{event.description}</p>
                   {error && <p className="ev-form-error" role="alert">{error}</p>}
                   {event.status === "cancelled" && <p className="ev-form-error" role="status">{t("events.cancelledMessage")}</p>}
-                  {event.status === "published" && event.registrationRequired && new Date(event.startsAt) > new Date() && (
-                    <div className="ev-detail__actions">
-                      {user?.role === "étudiant"
-                        ? <button className="btn btn-primary" type="button" onClick={handleRegister} disabled={submitting || participationConfirmed || (event.capacity !== null && event.registrationCount >= event.capacity)}>{submitting ? t("events.working") : participationConfirmed ? t("events.participationConfirmed") : t("events.participate")}</button>
-                        : !user && <button className="btn btn-primary" type="button" onClick={handleRegister}>{t("events.participate")}</button>}
-                    </div>
+                  {event.status === "published" && event.registrationRequired === true && new Date(event.startsAt) > new Date() &&
+                    (!user || user.role === "étudiant") && (
+                    <section className="ev-registration-card" aria-labelledby="ev-registration-title">
+                      <div className="ev-registration-card__copy">
+                        <span className="ev-registration-card__eyebrow">{t("events.registrationEyebrow")}</span>
+                        <h2 id="ev-registration-title">{t("events.registrationTitle")}</h2>
+                        <p>{t("events.registrationDescription")}</p>
+                      </div>
+                      <button
+                        className="btn btn-primary ev-participate-btn"
+                        type="button"
+                        onClick={handleRegister}
+                        disabled={submitting || (user?.role === "étudiant" && participationConfirmed) || capacityReached}
+                      >
+                        <span>{submitting ? t("events.working") : participationConfirmed ? t("events.participationConfirmed") : capacityReached ? t("events.full") : t("events.participate")}</span>
+                        {participationConfirmed
+                          ? <CheckCircle2 size={19} aria-hidden="true" />
+                          : capacityReached
+                            ? <Users size={19} aria-hidden="true" />
+                            : <ArrowRight size={19} aria-hidden="true" />}
+                      </button>
+                    </section>
                   )}
                 </div>
               </article>
@@ -124,7 +148,7 @@ export default function EventDetailPage() {
         <Modal
           title={t("events.participationSuccessTitle")}
           onClose={() => setParticipationModal("")}
-          footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("common.close")}</button>}
+          footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("events.close")}</button>}
         >
           <p>{t("events.participationSuccessMessage")}</p>
         </Modal>

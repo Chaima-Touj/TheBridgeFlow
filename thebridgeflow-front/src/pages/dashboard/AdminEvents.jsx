@@ -4,6 +4,7 @@ import { FiCalendar, FiPlus, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { eventsService } from "../../services/events.service.js";
+import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 import "../Events.css";
@@ -45,7 +46,7 @@ function EventImagePreview({ src, alt, t }) {
   return (
     <div className="ev-image-preview" aria-live="polite">
       {!imageError
-        ? <img src={src} alt={alt} onError={() => setImageError(true)} />
+        ? <img src={resolveDriveThumbnailProxyUrl(src) || resolveDriveUrl(src, "image")} alt={alt} onError={() => setImageError(true)} />
         : <p className="ev-form-error" role="status">{t("events.imageLoadError")}</p>}
     </div>
   );
