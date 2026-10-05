@@ -6,6 +6,7 @@ import User              from "../models/users.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
 import { buildInitialWeekProgress } from "../utils/enrollmentProgress.js";
 import { notifyAdmins, notifyUser } from "../services/notification.service.js";
+import emailService from "../services/email.service.js";
 
 /* ── POST /api/enrollment-requests ────────────────────────────────────────────
    Soumettre une demande d'inscription à une formation                          */
@@ -66,6 +67,20 @@ export const createRequest = asyncHandler(async (req, res) => {
       mode,
     },
   }));
+
+  try {
+    await emailService.sendEnrollmentRequestSent(req.user.email, {
+      studentName: req.user.name,
+      formationTitle: request.formation.title,
+      mode,
+      message: request.message,
+    });
+  } catch (error) {
+    console.error("[email] Enrollment request confirmation dispatch failed", {
+      recipient: req.user.email,
+      errorMessage: error.message,
+    });
+  }
 
   res.status(201).json(request);
 });

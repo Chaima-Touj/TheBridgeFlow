@@ -424,6 +424,23 @@ const enrollmentRequestReceivedTemplate = ({ adminName, studentName, studentEmai
   };
 };
 
+const enrollmentRequestSentTemplate = ({ studentName, formationTitle, mode, message }) => ({
+  subject: `Demande d'inscription envoyée — ${formationTitle}`,
+  html: layout("Demande d'inscription enregistrée", `
+    <h1 style="font-size:24px;color:#0F172A;">Demande d'inscription enregistrée</h1>
+    <p style="color:#475569;line-height:1.7;">Bonjour <strong>${escapeHtml(studentName || "Étudiant")}</strong>, votre demande d'inscription à la formation <strong>${escapeHtml(formationTitle)}</strong> a bien été enregistrée.</p>
+    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin:24px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("Formation", escapeHtml(formationTitle))}
+        ${infoRow("Mode", escapeHtml(mode))}
+        ${infoRow("Statut", "En attente de traitement")}
+        ${message ? infoRow("Votre message", escapeHtml(message)) : ""}
+      </table>
+    </div>
+    <p style="color:#475569;line-height:1.7;">Vous recevrez un nouvel email lorsque l'administration aura traité votre demande.</p>
+  `),
+});
+
 const enrollmentRequestStatusTemplate = ({ studentName, formationTitle, status, link }) => {
   const accepted = status === "acceptée" || status === "inscrite";
   return {
@@ -776,6 +793,7 @@ const htmlToPlainText = (html) =>
 
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
+  console.info("[email] Sending email", { recipient: to, subject });
   try {
     const transporter = getTransporter();
     const info = await transporter.sendMail({
@@ -786,14 +804,19 @@ const sendEmail = async ({ to, subject, html }) => {
       html,
       text: htmlToPlainText(html),
     });
-    console.log(`✅ [email] Envoi réussi — destinataire=${to} sujet="${subject}" messageId=${info.messageId} (${Date.now() - startedAt}ms)`);
+    console.info("[email] Email sent successfully", {
+      recipient: to,
+      messageId: info.messageId,
+      durationMs: Date.now() - startedAt,
+    });
     return { success: true, messageId: info.messageId };
   } catch (err) {
-    console.error(`❌ [email] Échec d'envoi — destinataire=${to} sujet="${subject}" :`, {
-      code:       err.code,
-      message:    err.message,
+    console.error("[email] Email sending failed", {
+      recipient: to,
+      subject,
+      errorCode: err.code,
+      errorMessage: err.message,
       durationMs: Date.now() - startedAt,
-      stack:      err.stack,
     });
     return { success: false, error: err.message, code: err.code };
   }
@@ -808,6 +831,7 @@ const emailService = {
   sendInterviewProposed:   (to, data) => sendEmail({ to, ...interviewProposedTemplate(data) }),
   sendInterviewStatus:     (to, data) => sendEmail({ to, ...interviewStatusTemplate(data) }),
   sendEnrollmentRequestReceived: (to, data) => sendEmail({ to, ...enrollmentRequestReceivedTemplate(data) }),
+  sendEnrollmentRequestSent: (to, data) => sendEmail({ to, ...enrollmentRequestSentTemplate(data) }),
   sendEnrollmentRequestStatus:   (to, data) => sendEmail({ to, ...enrollmentRequestStatusTemplate(data) }),
   sendEventPublished:      (to, data) => sendEmail({ to, ...eventPublishedTemplate(data) }),
   sendEventRegistrationConfirmed: (to, data) => sendEmail({ to, ...eventRegistrationConfirmedTemplate(data) }),
