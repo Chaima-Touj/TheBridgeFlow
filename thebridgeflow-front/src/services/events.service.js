@@ -6,6 +6,7 @@ export const eventsService = {
   getAdmin: () => api.get("/events/admin"),
   create: (event) => api.post("/events", event),
   update: (id, event) => api.patch(`/events/${id}`, event),
+  deleteEvent: (id) => api.delete(`/events/${id}`),
   getRegistrations: (id) => api.get(`/events/${id}/registrations`),
   register: (id) => api.post(`/events/${id}/registrations`),
   getMyRegistrations: () => api.get("/events/my-registrations"),

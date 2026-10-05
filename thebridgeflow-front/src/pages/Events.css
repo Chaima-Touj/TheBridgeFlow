@@ -640,6 +640,51 @@
   gap: .4rem;
 }
 
+.ev-admin-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 9%, var(--bg-card));
+  color: var(--danger);
+}
+
+.ev-admin-delete:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 16%, var(--bg-card));
+}
+
+.ev-toast {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  max-width: min(420px, calc(100vw - 2rem));
+  padding: .875rem 1.125rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .12);
+  cursor: pointer;
+}
+
+.ev-toast--success {
+  border: 1px solid color-mix(in srgb, var(--secondary) 25%, transparent);
+  background: color-mix(in srgb, var(--secondary) 12%, var(--bg-card));
+  color: var(--secondary);
+}
+
+.ev-toast--error {
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, var(--bg-card));
+  color: var(--danger);
+}
+
+.ev-toast__icon {
+  display: flex;
+  flex-shrink: 0;
+}
+
 .ev-admin-category {
   display: block;
   margin-top: .3rem;

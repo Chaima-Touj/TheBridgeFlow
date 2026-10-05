@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiCalendar, FiPlus, FiUsers } from "react-icons/fi";
+import { FiCalendar, FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { eventsService } from "../../services/events.service.js";
@@ -68,6 +68,20 @@ function formatDate(value, language, timezone) {
   return value ? new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone: timezone || "Africa/Tunis" }).format(new Date(value)) : "—";
 }
 
+function Toast({ toast, onDismiss }) {
+  if (!toast) return null;
+  return (
+    <div
+      className={`ev-toast ev-toast--${toast.type}`}
+      role={toast.type === "error" ? "alert" : "status"}
+      onClick={onDismiss}
+    >
+      <span className="ev-toast__icon">{toast.type === "success" ? <FiCheck size={15} /> : <FiX size={15} />}</span>
+      <span>{toast.message}</span>
+    </div>
+  );
+}
+
 export default function AdminEvents() {
   const { t, i18n } = useTranslation();
   const [events, setEvents] = useState([]);
@@ -80,7 +94,21 @@ export default function AdminEvents() {
   const [formationCategories, setFormationCategories] = useState([]);
   const [categoryLoadError, setCategoryLoadError] = useState(false);
   const [participants, setParticipants] = useState(null);
+  const [deletingEventId, setDeletingEventId] = useState(null);
+  const [toast, setToast] = useState(null);
   const submitLock = useRef(false);
+  const deleteLock = useRef(false);
+  const toastTimer = useRef(null);
+
+  const showToast = useCallback((type, message) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
+
+  useEffect(() => () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -192,6 +220,27 @@ export default function AdminEvents() {
     }
   };
 
+  const removeEvent = async (event) => {
+    if (!window.confirm(`${t("events.deleteConfirmation")}\n\n${t("events.deleteWarning")}`)) return;
+    if (deleteLock.current) return;
+
+    deleteLock.current = true;
+    setDeletingEventId(event._id);
+    setError("");
+    try {
+      await eventsService.deleteEvent(event._id);
+      setEvents((current) => current.filter(({ _id }) => _id !== event._id));
+      showToast("success", t("events.deleteSuccess"));
+    } catch (err) {
+      const message = err.response?.data?.message || t("events.deleteError");
+      setError(message);
+      showToast("error", message);
+    } finally {
+      deleteLock.current = false;
+      setDeletingEventId(null);
+    }
+  };
+
   return (
     <DashboardLayout title={t("events.adminTitle")} subtitle={t("events.adminSubtitle")}>
       <div className="sd-root">
@@ -217,6 +266,15 @@ export default function AdminEvents() {
                       {event.status === "draft" && <button className="btn btn-primary" type="button" onClick={() => setStatus(event, "published")}>{t("events.publish")}</button>}
                       {event.status === "published" && <button className="btn btn-ghost" type="button" onClick={() => setStatus(event, "cancelled")}>{t("events.cancelEvent")}</button>}
                       {event.status !== "archived" && (event.status !== "published" || new Date(event.startsAt) <= new Date()) && <button className="btn btn-ghost" type="button" onClick={() => setStatus(event, "archived")}>{t("events.archive")}</button>}
+                      <button
+                        className="btn ev-admin-delete"
+                        type="button"
+                        onClick={() => removeEvent(event)}
+                        disabled={deletingEventId !== null}
+                      >
+                        <FiTrash2 size={15} />
+                        {deletingEventId === event._id ? t("events.deleting") : t("events.delete")}
+                      </button>
                     </div></td>
                   </tr>
                 ))}</tbody>
@@ -288,6 +346,7 @@ export default function AdminEvents() {
       {participants && <Modal title={t("events.participantsFor", { title: participants.event.title, count: participants.rows.length })} onClose={() => setParticipants(null)} maxWidth={620}>
         {participants.rows.length === 0 ? <p>{t("events.noParticipants")}</p> : <div className="ev-participants">{participants.rows.map(({ _id, student, createdAt, status }) => <div key={_id}><strong>{student?.name}</strong><span>{student?.email}</span><small>{t("events.participantDate")}: {formatDate(createdAt, i18n.language, participants.event.timezone)}</small><small>{t("events.participantStatus")}: {t(`events.registrationStatuses.${status}`)}</small></div>)}</div>}
       </Modal>}
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </DashboardLayout>
   );
 }

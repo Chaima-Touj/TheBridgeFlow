@@ -4,6 +4,7 @@ import { requireStudentPhone } from "../middleware/requireStudentPhone.middlewar
 import {
   cancelEventRegistration,
   createEvent,
+  deleteEvent,
   getAdminEvents,
   getEventRegistrations,
   getMyEventRegistrations,
@@ -22,6 +23,7 @@ router.post("/", protect, authorize("admin"), createEvent);
 router.get("/:id/registrations", protect, authorize("admin"), getEventRegistrations);
 router.post("/:id/registrations", protect, authorize("étudiant"), requireStudentPhone, registerForEvent);
 router.delete("/:id/registrations", protect, authorize("étudiant"), cancelEventRegistration);
+router.delete("/:id", protect, authorize("admin"), deleteEvent);
 router.patch("/:id", protect, authorize("admin"), updateEvent);
 router.get("/:id", getPublicEvent);
 

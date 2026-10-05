@@ -236,6 +236,17 @@ export const getAdminEvents = asyncHandler(async (req, res) => {
   res.json({ events });
 });
 
+// DELETE /api/events/:id — admin uniquement
+export const deleteEvent = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
+  const event = await Event.findById(req.params.id);
+  if (!event) fail("Événement introuvable.", 404);
+
+  await EventRegistration.deleteMany({ event: event._id });
+  await event.deleteOne();
+  res.json({ message: "Événement supprimé." });
+});
+
 // POST /api/events
 export const createEvent = asyncHandler(async (req, res) => {
   const payload = validateEventPayload(req.body);
