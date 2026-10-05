@@ -566,28 +566,30 @@ const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
 const newUserAdminTemplate = ({ userName, userEmail, userPhone, userRole }) => {
   const roleLabel = { étudiant: "Étudiant", admin: "Administrateur" }[userRole] || userRole;
   const roleColor = { étudiant: "#2563EB", admin: "#8B5CF6" }[userRole] || "#2563EB";
+  const isStudent = userRole === "étudiant";
 
   return {
-    subject: `Nouvelle inscription — ${userName} (${roleLabel}) 👤`,
-    html: layout("Nouvelle inscription", `
+    subject: isStudent ? `Nouvelle inscription étudiant vérifiée — ${userName} 👤` : `Nouvelle inscription — ${userName} (${roleLabel}) 👤`,
+    html: layout(isStudent ? "Nouvelle inscription étudiant vérifiée" : "Nouvelle inscription", `
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-size:48px;margin-bottom:16px;">👤</div>
-        <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">Nouvelle inscription</h1>
-        <p style="margin:0;color:#64748B;font-size:15px;">Un nouvel utilisateur vient de rejoindre TheBridgeFlow.</p>
+        <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">${isStudent ? "Nouvelle inscription étudiant vérifiée" : "Nouvelle inscription"}</h1>
+        <p style="margin:0;color:#64748B;font-size:15px;">${isStudent ? "Un nouvel étudiant vient de créer et vérifier son compte sur TheBridgeFlow." : "Un nouvel utilisateur vient de rejoindre TheBridgeFlow."}</p>
       </div>
 
       <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:24px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow("Nom", userName)}
           ${infoRow("Email", userEmail)}
+          ${infoRow("Téléphone", userPhone || "Non renseigné")}
           ${infoRow("Rôle", `<span style="background:${roleColor}18;color:${roleColor};padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">${roleLabel}</span>`)}
           ${infoRow("Date", new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }))}
         </table>
       </div>
-      ${userRole === "étudiant" ? studentContactSection({
+      ${isStudent ? studentContactSection({
         studentName: userName,
         studentEmail: userEmail,
-        studentPhone: userPhone,
+        studentPhone: userPhone || "Non renseigné",
       }) : ""}
 
       <div style="text-align:center;">

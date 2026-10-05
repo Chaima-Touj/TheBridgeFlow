@@ -66,6 +66,36 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
 // Génère un code à 6 chiffres
 const generateCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
+const sendVerificationSuccessEmails = async (user) => {
+  if (!user || user.role !== "étudiant") return;
+
+  const studentPhone = normalizeTunisianPhone(user.phone || "") || "";
+
+  const welcomeResult = await emailService.sendWelcome(user.email, { name: user.name, role: user.role });
+  if (!welcomeResult.success) {
+    console.error(`⚠️  Email de bienvenue non envoyé à ${user.email} : ${welcomeResult.error}`);
+  }
+
+  const admins = await User.find({ role: "admin", isActive: true }).select("name email").lean();
+  if (!admins.length) {
+    console.log(`ℹ️  Aucun administrateur actif pour notifier l'inscription vérifiée de ${user.email}`);
+    return;
+  }
+
+  await Promise.all(admins.map(async (admin) => {
+    const result = await emailService.sendNewUserAdmin(admin.email, {
+      userName: user.name,
+      userEmail: user.email,
+      userPhone: studentPhone,
+      userRole: user.role,
+    });
+
+    if (!result.success) {
+      console.error(`⚠️  Notification admin non envoyée à ${admin.email} pour ${user.email} : ${result.error}`);
+    }
+  }));
+};
+
 // POST /api/auth/register
 export const register = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, acceptedTerms } = req.body;
@@ -141,22 +171,7 @@ export const register = asyncHandler(async (req, res) => {
 
   console.log(`📝 Nouvelle inscription : ${user.name} (${user.email}) — rôle: ${user.role}`);
 
-  // Email de bienvenue (non-bloquant, non critique pour le flux d'inscription)
-  emailService.sendWelcome(user.email, { name: user.name, role: user.role });
-
-  // Email admin (non-bloquant, non critique)
-  User.findOne({ role: "admin" }).select("email").lean().then((admin) => {
-    if (admin?.email) {
-      emailService.sendNewUserAdmin(admin.email, {
-        userName:  user.name,
-        userEmail: user.email,
-        userPhone: user.phone,
-        userRole:  user.role,
-      });
-    }
-  });
-
-  // Code de vérification : critique pour la suite du flux, on attend le résultat réel.
+  // Code de vérification uniquement : c'est le seul email envoyé pendant l'inscription.
   const codeResult = await emailService.sendVerifyCode(user.email, { name: user.name, code });
   if (!codeResult.success) {
     console.error(`⚠️  Code de vérification non envoyé à ${user.email} : ${codeResult.error}`);
@@ -218,6 +233,8 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
   const token = signToken({ id: user._id });
   console.log(`✅ Email vérifié : ${user.name} (${user.email})`);
+
+  await sendVerificationSuccessEmails(user);
 
   res.json({ token, user });
 });
