@@ -128,6 +128,25 @@
   border-color: var(--primary);
 }
 
+.fp-card__title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.fp-card__title a:focus-visible::after {
+  border-radius: var(--radius-lg);
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.fp-details,
+.fp-card__actions {
+  position: relative;
+  z-index: 2;
+}
+
 /* Subtle top accent line on hover */
 .fp-card::before {
   content: "";
