@@ -206,10 +206,12 @@ const FormationDetail = () => {
   const handleEnroll = useCallback(() => {
     if (!user) {
       navigate("/login", { state: { from: location.pathname } });
-    } else {
-      navigate("/dashboard");
+    } else if (formation?.slug) {
+      navigate(`/dashboard/student/formations/${formation.slug}`, {
+        state: { openEnrollmentModal: true },
+      });
     }
-  }, [user, navigate, location]);
+  }, [user, formation, navigate, location]);
 
   // Derived data
   const iconEntries  = formation ? getIconEntry(formation.slug) : [{ Comp: SiReact, color: "#61DAFB" }];
@@ -381,8 +383,8 @@ const FormationDetail = () => {
                         )}
                       </div>
 
-                      {/* CTA — connecté : flux d'inscription réel (handleEnroll
-                          navigue vers /dashboard) ; non connecté : /login */}
+                      {/* CTA — étudiant connecté : ouvre la demande dans le dashboard ;
+                          non connecté : /login */}
                       <button className="fd-enroll-btn" onClick={handleEnroll}>
                         {user ? t("formationDetail.enroll") : t("formationDetail.loginToEnroll")}
                       </button>

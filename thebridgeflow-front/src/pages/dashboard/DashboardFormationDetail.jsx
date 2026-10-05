@@ -1,21 +1,21 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLang } from "../../context/langContext.js";
 import {
   FiArrowLeft, FiChevronDown, FiAward, FiClock, FiMonitor, FiUsers,
   FiCheck, FiStar, FiChevronRight, FiPlay, FiMessageCircle, FiZap,
-  FiBook, FiTarget, FiShield, FiHelpCircle, FiX, FiCheckCircle,
+  FiBook, FiTarget, FiShield, FiHelpCircle,
   FiCpu, FiLock, FiTrendingUp,
 } from "react-icons/fi";
 import { FaChartBar, FaRobot } from "react-icons/fa";
 import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiKubernetes } from "react-icons/si";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import CoursePreviewModal from "../../components/common/CoursePreviewModal.jsx";
+import EnrollmentRequestModal, { EnrollmentRequestToast } from "../../components/common/EnrollmentRequestModal.jsx";
 import VideoTestimonialCarousel from "../../components/common/VideoTestimonialCarousel.jsx";
 import { formationsService } from "../../services/formations.service.js";
-import { enrollmentRequestsService } from "../../services/enrollmentRequests.service.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../../utils/thumbUtils.js";
 import { getAllFormationTestimonials } from "../../constants/testimonials.js";
 import "../FormationDetail.css";
@@ -144,148 +144,11 @@ function SkeletonHero() {
   );
 }
 
-// ─── Enrollment request modal ─────────────────────────────────────────────────
-function EnrollModal({ formation, onClose, onSuccess }) {
-  const { t } = useTranslation();
-  const [mode,        setMode]       = useState("Présentiel");
-  const [message,     setMessage]    = useState("");
-  const [submitting,  setSubmitting] = useState(false);
-  const [alreadySent, setAlreadySent] = useState(false);
-  const [requestError, setRequestError] = useState("");
-
-  const MODES = [
-    { value: "Présentiel", label: t("dfd.modeOnsite") },
-    { value: "En ligne",   label: t("dfd.modeOnline") },
-  ];
-
-  /* Scroll lock */
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
-  /* Escape key */
-  const handleKey = useCallback((e) => {
-    if (e.key === "Escape") onClose();
-  }, [onClose]);
-  useEffect(() => {
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [handleKey]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    setRequestError("");
-    try {
-      await enrollmentRequestsService.create(formation._id, mode, message);
-      onSuccess();
-      onClose();
-    } catch (err) {
-      if (err?.response?.status === 409) {
-        setAlreadySent(true);
-      } else {
-        setRequestError(
-          err?.response?.data?.message || err?.message || t("dfd.submitError")
-        );
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="dfd-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="dfd-modal" onClick={(e) => e.stopPropagation()}>
-
-        <div className="dfd-modal__header">
-          <h3 className="dfd-modal__title">{t("dfd.modalTitle")}</h3>
-          <button className="dfd-modal__close" onClick={onClose} aria-label={t("dfd.modalClose")}>
-            <FiX size={18} />
-          </button>
-        </div>
-
-        <p className="dfd-modal__formation">{formation.title}</p>
-
-        {alreadySent ? (
-          <div className="dfd-modal__already">
-            <FiCheckCircle size={20} />
-            <span>{t("dfd.alreadySent")}</span>
-          </div>
-        ) : (
-          <form className="dfd-modal__form" onSubmit={handleSubmit}>
-
-            {/* Mode */}
-            <fieldset className="dfd-modal__fieldset">
-              <legend className="dfd-modal__legend">{t("dfd.modeLegend")}</legend>
-              <div className="dfd-modal__radios">
-                {MODES.map((m) => (
-                  <label
-                    key={m.value}
-                    className={`dfd-modal__radio${mode === m.value ? " dfd-modal__radio--active" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="mode"
-                      value={m.value}
-                      checked={mode === m.value}
-                      onChange={() => setMode(m.value)}
-                    />
-                    {m.label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            {/* Message */}
-            <label className="dfd-modal__label">
-              {t("dfd.messageLabel")}
-              <textarea
-                className="dfd-modal__textarea"
-                placeholder={t("dfd.messagePlaceholder")}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                maxLength={800}
-              />
-            </label>
-
-            {requestError && (
-              <div className="dfd-modal__error" role="alert">
-                {requestError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="dfd-modal__submit"
-              disabled={submitting}
-            >
-              {submitting ? t("dfd.submitting") : t("dfd.submitBtn")}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function Toast({ visible }) {
-  const { t } = useTranslation();
-  return (
-    <div className={`dfd-toast${visible ? " dfd-toast--visible" : ""}`} role="status">
-      <FiCheckCircle size={16} />
-      {t("dfd.toastSuccess")}
-    </div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 export default function DashboardFormationDetail() {
   const { slug }      = useParams();
+  const location      = useLocation();
+  const navigate      = useNavigate();
   const { t }         = useTranslation();
   const { lang }      = useLang();
 
@@ -321,6 +184,17 @@ export default function DashboardFormationDetail() {
       });
     return () => { active = false; };
   }, [slug, t]);
+
+  useEffect(() => {
+    if (!location.state?.openEnrollmentModal || loadedSlug !== slug || !formation) return;
+    // Sync the modal with the one-time navigation intent after its formation loads.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowModal(true);
+    navigate(location.pathname, {
+      replace: true,
+      state: { ...location.state, openEnrollmentModal: false },
+    });
+  }, [formation, loadedSlug, location.pathname, location.state, navigate, slug]);
 
   const handleSuccess = () => {
     setToastVisible(true);
@@ -821,7 +695,7 @@ export default function DashboardFormationDetail() {
 
       {/* ── Modal ──────────────────────────────────────────────────────────── */}
       {showModal && formation && (
-        <EnrollModal
+        <EnrollmentRequestModal
           formation={formation}
           onClose={() => setShowModal(false)}
           onSuccess={handleSuccess}
@@ -840,7 +714,7 @@ export default function DashboardFormationDetail() {
       )}
 
       {/* ── Toast ────────────────────────────────────────────────────────── */}
-      <Toast visible={toastVisible} />
+      <EnrollmentRequestToast visible={toastVisible} />
     </DashboardLayout>
   );
 }

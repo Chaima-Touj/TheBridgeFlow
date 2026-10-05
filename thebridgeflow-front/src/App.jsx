@@ -138,7 +138,7 @@ export default function App() {
         <ProtectedRoute><DashboardFormations/></ProtectedRoute>
       }/>
       <Route path="/dashboard/student/formations/:slug" element={
-        <ProtectedRoute><DashboardFormationDetail/></ProtectedRoute>
+        <ProtectedRoute role="étudiant"><DashboardFormationDetail/></ProtectedRoute>
       }/>
       <Route path="/dashboard/student/demandes" element={
         <ProtectedRoute><MesDemandes/></ProtectedRoute>

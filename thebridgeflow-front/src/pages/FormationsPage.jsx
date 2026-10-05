@@ -8,6 +8,7 @@ import { SiFlutter, SiSpringboot, SiAngular, SiReact, SiNodedotjs, SiDocker, SiK
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
+import EnrollmentRequestModal, { EnrollmentRequestToast } from "../components/common/EnrollmentRequestModal.jsx";
 import api from "../services/api.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
@@ -69,6 +70,8 @@ const FormationsPage = () => {
 
   const [formations, setFormations] = useState([]);
   const [loading,    setLoading]    = useState(true);
+  const [enrollmentFormation, setEnrollmentFormation] = useState(null);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -79,12 +82,17 @@ const FormationsPage = () => {
     return () => { active = false; };
   }, []);
 
-  const handleEnroll = (formationId) => {
+  const handleEnroll = (formation) => {
     if (!user) {
-      navigate("/login", { state: { from: location.pathname, formationId } });
-    } else {
-      navigate("/dashboard");
+      navigate("/login", { state: { from: location.pathname, formationId: formation._id } });
+    } else if (user.role === "étudiant") {
+      setEnrollmentFormation(formation);
     }
+  };
+
+  const handleRequestSuccess = () => {
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 4000);
   };
 
   return (
@@ -214,7 +222,7 @@ const FormationsPage = () => {
                     </Link>
                     <button
                       className="fp-card__cta"
-                      onClick={() => handleEnroll(f._id)}
+                      onClick={() => handleEnroll(f)}
                     >
                       {user ? t("formations.enroll") : t("formations.loginToEnroll")}
                     </button>
@@ -236,6 +244,14 @@ const FormationsPage = () => {
           </motion.div>
         )}
       </main>
+      {enrollmentFormation && (
+        <EnrollmentRequestModal
+          formation={enrollmentFormation}
+          onClose={() => setEnrollmentFormation(null)}
+          onSuccess={handleRequestSuccess}
+        />
+      )}
+      <EnrollmentRequestToast visible={toastVisible} />
     </div>
   );
 };
