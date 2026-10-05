@@ -1,493 +1,288 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  FiUser, FiMail, FiLock, FiArrowRight,
-  FiPlus, FiTrash2, FiChevronLeft, FiMapPin,
-  FiEye, FiEyeOff,
-} from "react-icons/fi";
+import { FiArrowRight, FiEye, FiEyeOff, FiLock, FiMail, FiUser } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
 import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
-import BoxReveal from "../../components/auth/BoxReveal.jsx";
 import api from "../../services/api.js";
 import "./Auth.css";
 
-/* ─── Composants utilitaires — EN DEHORS du composant principal ─────────── */
-const Field = ({ label, children }) => (
+const passwordRequirements = [
+  (value) => value.length >= 8,
+  (value) => /\p{Lu}/u.test(value),
+  (value) => /\d/u.test(value),
+  (value) => /[^\p{L}\p{N}\s]/u.test(value),
+];
+
+const Field = ({ id, label, error, children }) => (
   <div className="auth-field">
-    {label && <label className="auth-label">{label}</label>}
+    <label className="auth-label" htmlFor={id}>{label}</label>
     {children}
+    {error && <p className="register-field-error" id={`${id}-error`}>{error}</p>}
   </div>
 );
 
-const AuthInput = ({ icon, ...props }) => (
-  <div className="auth-input-wrap">
-    {icon && <span className="auth-input-icon">{icon}</span>}
-    <input
-      className="auth-input"
-      style={icon ? {} : { paddingLeft: "1rem" }}
-      {...props}
-    />
-  </div>
-);
-
-/* Niveaux : valeurs canoniques françaises (alignées sur le schéma backend / ProfileEditor) — affichage traduit via profileEditor.level* */
-const SKILL_LEVELS = ["Débutant", "Intermédiaire", "Avancé", "Expert"];
-const LANG_LEVELS  = ["Débutant", "Intermédiaire", "Courant", "Natif"];
-const LEVEL_KEY = {
-  "Débutant": "profileEditor.levelDebutant",
-  "Intermédiaire": "profileEditor.levelIntermediaire",
-  "Avancé": "profileEditor.levelAvance",
-  "Expert": "profileEditor.levelExpert",
-  "Courant": "profileEditor.levelCourant",
-  "Natif": "profileEditor.levelNatif",
-};
-
-const EMPTY_SKILL    = { name: "", level: "Débutant" };
-const EMPTY_LANGUAGE = { name: "", level: "Courant" };
-const EMPTY_EXP      = { company:"", position:"", location:"", startDate:"", endDate:"", current:false, description:"", technologies:"" };
-
-/* ─── Composant principal ────────────────────────────────────────────────── */
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [values, setValues] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptedTerms: false,
+  });
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const submitting = useRef(false);
 
-  const [step,     setStep]     = useState(0);
-  const [error,    setError]    = useState("");
-  const [loading,  setLoading]  = useState(false);
-  const [showPass, setShowPass] = useState(false);
-
-  const [account,    setAccount]    = useState({ name:"", email:"", password:"", gender:"", phone:"", university:"", specialty:"", bio:"" });
-  const [education,  setEducation]  = useState({ institution:"", degree:"", fieldOfStudy:"", startDate:"", endDate:"", current:false, grade:"", courses:"" });
-  const [experience, setExperience] = useState([]);
-  const [skills,     setSkills]     = useState([{ ...EMPTY_SKILL }]);
-  const [languages,  setLanguages]  = useState([{ ...EMPTY_LANGUAGE }]);
-  const [socialLinks,setSocialLinks]= useState({ linkedin:"", github:"", portfolio:"" });
-
-  const addSkill    = () => setSkills([...skills, { ...EMPTY_SKILL }]);
-  const removeSkill = (i) => setSkills(skills.filter((_, idx) => idx !== i));
-  const updateSkill = (i, field, val) => setSkills(skills.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
-
-  const addLang    = () => setLanguages([...languages, { ...EMPTY_LANGUAGE }]);
-  const removeLang = (i) => setLanguages(languages.filter((_, idx) => idx !== i));
-  const updateLang = (i, field, val) => setLanguages(languages.map((l, idx) => idx === i ? { ...l, [field]: val } : l));
-
-  const addExp    = () => setExperience([...experience, { ...EMPTY_EXP }]);
-  const removeExp = (i) => setExperience(experience.filter((_, idx) => idx !== i));
-  const updateExp = (i, field, val) => setExperience(experience.map((e, idx) => {
-    if (idx !== i) return e;
-    if (field === "current" && val) return { ...e, [field]: val, endDate: "" };
-    return { ...e, [field]: val };
-  }));
-
-  const nextStep = (e) => {
-    e.preventDefault();
-    setError("");
-    if (step === 0 && (!account.name || !account.email || !account.password)) {
-      setError(t("register.errorRequired"));
-      return;
-    }
-    if (step === 0 && account.password.length < 6) {
-      setError(t("register.errorPasswordLength"));
-      return;
-    }
-    if (step === 0 && !account.gender) {
-      setError(t("register.errorGenderRequired"));
-      return;
-    }
-    setStep(s => s + 1);
+  const updateValue = (field, value) => {
+    setValues((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: "" }));
+    setFormError("");
   };
 
-  const prevStep = () => {
-    setError("");
-    setStep(s => s - 1);
+  const validate = () => {
+    const nextErrors = {};
+    const firstName = values.firstName.trim();
+    const lastName = values.lastName.trim();
+    const email = values.email.trim();
+
+    if (!firstName) nextErrors.firstName = t("register.errorFirstNameRequired");
+    if (!lastName) nextErrors.lastName = t("register.errorLastNameRequired");
+    if (!email) {
+      nextErrors.email = t("register.errorEmailRequired");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = t("register.errorEmailInvalid");
+    }
+    if (!values.password) {
+      nextErrors.password = t("register.errorPasswordRequired");
+    } else if (passwordRequirements.some((test) => !test(values.password))) {
+      nextErrors.password = t("register.errorPasswordRequirements");
+    }
+    if (!values.confirmPassword) {
+      nextErrors.confirmPassword = t("register.errorConfirmRequired");
+    } else if (values.confirmPassword !== values.password) {
+      nextErrors.confirmPassword = t("register.errorPasswordMismatch");
+    }
+    if (!values.acceptedTerms) nextErrors.acceptedTerms = t("register.errorTermsRequired");
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError("");
+    if (submitting.current || !validate()) return;
+
+    submitting.current = true;
     setLoading(true);
-
     const payload = {
-      ...account,
-      education: education.institution ? {
-        ...education,
-        startDate: education.startDate || null,
-        endDate:   education.current ? null : (education.endDate || null),
-        courses:   education.courses ? education.courses.split(",").map(c => c.trim()).filter(Boolean) : [],
-      } : undefined,
-      skills:     skills.filter(s => s.name.trim()),
-      languages:  languages.filter(l => l.name.trim()),
-      experience: experience
-        .filter(exp => exp.company.trim() || exp.position.trim())
-        .map(exp => ({ ...exp, startDate: exp.startDate || null, endDate: exp.current ? null : (exp.endDate || null), technologies: exp.technologies ? exp.technologies.split(",").map(t => t.trim()).filter(Boolean) : [] })),
-      socialLinks,
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      email: values.email.trim().toLowerCase(),
+      password: values.password,
+      acceptedTerms: values.acceptedTerms,
     };
 
     try {
       const { data } = await api.post("/auth/register", payload);
       if (data.needsVerify) {
         navigate("/verify-email", { state: { email: data.email } });
-        return;
       }
-      navigate("/dashboard/student");
-    } catch (err) {
-      setError(err.response?.data?.message || t("register.errorDefault"));
+    } catch (error) {
+      setFormError(error.response?.data?.message || t("register.errorDefault"));
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };
 
-  const stepLabels = [
-    t("register.stepAccount"), t("profileEditor.formation"), t("register.expLabel"),
-    t("profileEditor.skills"), t("register.summary"),
-  ];
-
-  const btnStyle = { border:"1.5px dashed var(--primary)", borderRadius:"8px", background:"transparent", color:"var(--primary)", padding:"0.4rem 0.75rem", cursor:"pointer", fontSize:"0.85rem", fontWeight:600, display:"inline-flex", alignItems:"center", gap:"0.25rem" };
-  const cardStyle = { background:"var(--bg)", border:"1px solid var(--border)", borderRadius:"12px", padding:"1.25rem", marginBottom:"1rem" };
-
   return (
-    <div className="auth-page">
-
-      {/* ── Panneau gauche ─────────────────────────────────────────────── */}
+    <div className="auth-page auth-page--register">
       <div className="auth-left">
-        <AuthOrbit/>
+        <AuthOrbit />
         <Link to="/" className="auth-left__logo">
           <img src="/favicon.png" alt="Logo" className="auth-left__logo-icon" />
-          <span>TheBridge<span style={{opacity:0.85}}>Flow</span></span>
+          <span>TheBridge<span style={{ opacity: 0.85 }}>Flow</span></span>
         </Link>
         <div className="auth-left__content">
-          <h2 className="auth-left__title">{t("login.left1")}<br/>{t("login.left2")}</h2>
+          <h2 className="auth-left__title">{t("login.left1")}<br />{t("login.left2")}</h2>
           <p className="auth-left__sub">{t("login.leftSub")}</p>
         </div>
       </div>
 
-      {/* ── Panneau droit ──────────────────────────────────────────────── */}
       <div className="auth-right">
-        <div className="auth-form-wrap" style={{maxWidth:480, overflowY:"auto", maxHeight:"100vh", paddingTop:"1.5rem", paddingBottom:"1.5rem"}}>
-
-          <div style={{ display:"flex", justifyContent:"flex-end" }}>
-            <LangFlags/>
+        <div className="auth-form-wrap register-form-wrap">
+          <div className="register-language">
+            <LangFlags />
           </div>
 
-          {/* Steps */}
-          <div className="auth-steps">
-            {stepLabels.map((label, i) => (
-              <div key={i} className={`auth-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}>
-                <div className="auth-step-dot">{i < step ? "✓" : i + 1}</div>
-                <span className="auth-step-label">{label}</span>
-              </div>
-            ))}
-          </div>
+          <h1 className="auth-form-title register-title">{t("register.title")}</h1>
+          <p className="register-subtitle">{t("register.subtitle")}</p>
 
-          {error && <div className="auth-error">{error}</div>}
+          {formError && <div className="auth-error" role="alert">{formError}</div>}
 
-          {/* ── Étape 0 : Compte ─────────────────────────────────────── */}
-          {step === 0 && (
-            <form onSubmit={nextStep} className="auth-form-body" noValidate>
-              <BoxReveal width="100%"><h2 className="auth-form-title" style={{marginBottom:"1rem"}}>{t("login.signup")}</h2></BoxReveal>
-
-              <div className="auth-socials" style={{marginBottom:"1rem"}}>
-                <GoogleAuthButton onError={setError} />
-              </div>
-              <div className="auth-separator" style={{marginBottom:"1.25rem"}}>
-                <span/><em>{t("login.or")}</em><span/>
-              </div>
-
-              <Field label={`${t("profileEditor.fullName")} *`}>
-                <AuthInput icon={<FiUser size={15}/>} placeholder="Sarra Ben Ali"
-                  value={account.name} onChange={e => setAccount({...account, name:e.target.value})} required/>
-              </Field>
-
-              <Field label={`${t("register.genderLabel")} *`}>
-                <div className="auth-gender-toggle">
-                  <button type="button" className={`auth-gender-btn ${account.gender === "femme" ? "active" : ""}`}
-                    onClick={() => setAccount({...account, gender:"femme"})}>
-                    {t("register.genderFemale")}
-                  </button>
-                  <button type="button" className={`auth-gender-btn ${account.gender === "homme" ? "active" : ""}`}
-                    onClick={() => setAccount({...account, gender:"homme"})}>
-                    {t("register.genderMale")}
-                  </button>
-                </div>
-              </Field>
-
-              <Field label={`${t("profile.email")} *`}>
-                <AuthInput icon={<FiMail size={15}/>} type="email" placeholder="sarra.benali@example.com"
-                  value={account.email} onChange={e => setAccount({...account, email:e.target.value})} required/>
-              </Field>
-
-              <Field label={`${t("profileEditor.password")} *`}>
+          <form className="auth-form-body" onSubmit={handleSubmit} noValidate>
+            <div className="register-grid">
+              <Field id="register-first-name" label={t("register.firstName")} error={errors.firstName}>
                 <div className="auth-input-wrap">
-                  <span className="auth-input-icon"><FiLock size={15}/></span>
-                  <input type={showPass ? "text" : "password"} className="auth-input"
-                    placeholder="••••••••" value={account.password} required minLength={6}
-                    onChange={e => setAccount({...account, password:e.target.value})}/>
-                  <button type="button" className="auth-input-toggle" onClick={() => setShowPass(!showPass)}>
-                    {showPass ? <FiEyeOff size={15}/> : <FiEye size={15}/>}
+                  <span className="auth-input-icon"><FiUser size={15} /></span>
+                  <input
+                    id="register-first-name"
+                    className="auth-input"
+                    type="text"
+                    autoComplete="given-name"
+                    required
+                    placeholder={t("register.firstNamePlaceholder")}
+                    value={values.firstName}
+                    onChange={(event) => updateValue("firstName", event.target.value)}
+                    aria-invalid={Boolean(errors.firstName)}
+                    aria-describedby={errors.firstName ? "register-first-name-error" : undefined}
+                  />
+                </div>
+              </Field>
+
+              <Field id="register-last-name" label={t("register.lastName")} error={errors.lastName}>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><FiUser size={15} /></span>
+                  <input
+                    id="register-last-name"
+                    className="auth-input"
+                    type="text"
+                    autoComplete="family-name"
+                    required
+                    placeholder={t("register.lastNamePlaceholder")}
+                    value={values.lastName}
+                    onChange={(event) => updateValue("lastName", event.target.value)}
+                    aria-invalid={Boolean(errors.lastName)}
+                    aria-describedby={errors.lastName ? "register-last-name-error" : undefined}
+                  />
+                </div>
+              </Field>
+            </div>
+
+            <Field id="register-email" label={t("register.email")} error={errors.email}>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon"><FiMail size={15} /></span>
+                <input
+                  id="register-email"
+                  className="auth-input"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder={t("register.emailPlaceholder")}
+                  value={values.email}
+                  onChange={(event) => updateValue("email", event.target.value)}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? "register-email-error" : undefined}
+                />
+              </div>
+            </Field>
+
+            <div className="register-grid">
+              <Field id="register-password" label={t("register.password")} error={errors.password}>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><FiLock size={15} /></span>
+                  <input
+                    id="register-password"
+                    className="auth-input"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    minLength={8}
+                    required
+                    placeholder={t("register.passwordPlaceholder")}
+                    value={values.password}
+                    onChange={(event) => updateValue("password", event.target.value)}
+                    aria-invalid={Boolean(errors.password)}
+                    aria-describedby={errors.password ? "register-password-error" : "register-password-hint"}
+                  />
+                  <button
+                    type="button"
+                    className="auth-input-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={showPassword ? t("register.hidePassword") : t("register.showPassword")}
+                  >
+                    {showPassword ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+                  </button>
+                </div>
+                <p className="register-password-hint" id="register-password-hint">
+                  {t("register.passwordRequirements")}
+                </p>
+              </Field>
+
+              <Field id="register-confirm-password" label={t("register.confirmPassword")} error={errors.confirmPassword}>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><FiLock size={15} /></span>
+                  <input
+                    id="register-confirm-password"
+                    className="auth-input"
+                    type={showConfirmation ? "text" : "password"}
+                    autoComplete="new-password"
+                    required
+                    placeholder={t("register.passwordPlaceholder")}
+                    value={values.confirmPassword}
+                    onChange={(event) => updateValue("confirmPassword", event.target.value)}
+                    aria-invalid={Boolean(errors.confirmPassword)}
+                    aria-describedby={errors.confirmPassword ? "register-confirm-password-error" : undefined}
+                  />
+                  <button
+                    type="button"
+                    className="auth-input-toggle"
+                    onClick={() => setShowConfirmation((visible) => !visible)}
+                    aria-label={showConfirmation ? t("register.hidePassword") : t("register.showPassword")}
+                  >
+                    {showConfirmation ? <FiEyeOff size={15} /> : <FiEye size={15} />}
                   </button>
                 </div>
               </Field>
+            </div>
 
-              <div className="reg-grid2">
-                <Field label={t("profile.university")}>
-                  <AuthInput placeholder="ESPRIT" value={account.university}
-                    onChange={e => setAccount({...account, university:e.target.value})}/>
-                </Field>
-                <Field label={t("profile.specialty")}>
-                  <AuthInput placeholder={t("register.fieldExample")} value={account.specialty}
-                    onChange={e => setAccount({...account, specialty:e.target.value})}/>
-                </Field>
-              </div>
-              <Field label={t("register.shortBio")}>
-                <textarea className="auth-input" rows={2} placeholder={t("register.bioPh")}
-                  style={{paddingLeft:"1rem", paddingTop:"0.75rem", resize:"vertical"}}
-                  value={account.bio} onChange={e => setAccount({...account, bio:e.target.value})}/>
-              </Field>
-
-              <button type="submit" className="auth-submit-btn" style={{marginTop:"0.5rem"}}>
-                {t("register.next")} <FiArrowRight size={16}/>
-              </button>
-              <p className="auth-switch" style={{marginTop:"1rem"}}>
-                {t("register.alreadyAccount")} <Link to="/login">{t("nav.signIn")}</Link>
-              </p>
-            </form>
-          )}
-
-          {/* ── Étape 1 : Formation ──────────────────────────────────── */}
-          {step === 1 && (
-            <form onSubmit={nextStep} className="auth-form-body" noValidate>
-              <BoxReveal width="100%"><h2 className="auth-form-title" style={{marginBottom:"1rem"}}>{t("profileEditor.formation")}</h2></BoxReveal>
-
-              <Field label={t("profileEditor.institution")}>
-                <AuthInput placeholder="ESPRIT" value={education.institution}
-                  onChange={e => setEducation({...education, institution:e.target.value})}/>
-              </Field>
-
-              <div className="reg-grid2">
-                <Field label={t("profileEditor.degree")}>
-                  <AuthInput placeholder={t("profileEditor.degreePlaceholder")} value={education.degree}
-                    onChange={e => setEducation({...education, degree:e.target.value})}/>
-                </Field>
-                <Field label={t("profileEditor.fieldOfStudy")}>
-                  <AuthInput placeholder={t("register.fieldExample")} value={education.fieldOfStudy}
-                    onChange={e => setEducation({...education, fieldOfStudy:e.target.value})}/>
-                </Field>
-                <Field label={t("register.startDate")}>
-                  <AuthInput type="date" value={education.startDate}
-                    onChange={e => setEducation({...education, startDate:e.target.value})}/>
-                </Field>
-                <Field label={t("register.endDate")}>
-                  <AuthInput type="date" disabled={education.current} value={education.endDate}
-                    onChange={e => setEducation({...education, endDate:e.target.value})}/>
-                </Field>
-                <Field label={t("register.grade")}>
-                  <AuthInput placeholder="14.5/20" value={education.grade}
-                    onChange={e => setEducation({...education, grade:e.target.value})}/>
-                </Field>
-                <Field label={t("register.courses")}>
-                  <AuthInput placeholder={t("register.coursesPh")} value={education.courses}
-                    onChange={e => setEducation({...education, courses:e.target.value})}/>
-                </Field>
-              </div>
-
-              <label className="auth-checkbox" style={{margin:"0.5rem 0 1rem"}}>
-                <input type="checkbox" checked={education.current}
-                  onChange={e => setEducation({...education, current:e.target.checked})}/>
-                <span>{t("register.inProgress")}</span>
+            <div className="register-terms-field">
+              <label className="register-terms" htmlFor="register-terms">
+                <input
+                  id="register-terms"
+                  type="checkbox"
+                  required
+                  checked={values.acceptedTerms}
+                  onChange={(event) => updateValue("acceptedTerms", event.target.checked)}
+                  aria-invalid={Boolean(errors.acceptedTerms)}
+                  aria-describedby={errors.acceptedTerms ? "register-terms-error" : undefined}
+                />
+                <span>
+                  {t("register.termsBefore")}
+                  <Link to="/conditions">{t("register.termsLink")}</Link>
+                  {t("register.termsBetween")}
+                  <Link to="/confidentialite">{t("register.privacyLink")}</Link>
+                  {t("register.termsAfter")}
+                </span>
               </label>
-
-              <div className="auth-nav">
-                <button type="button" className="auth-nav-back" onClick={prevStep}>
-                  <FiChevronLeft/> {t("offers.previous")}
-                </button>
-                <button type="submit" className="auth-submit-btn" style={{marginBottom:0}}>
-                  {t("register.next")} <FiArrowRight size={15}/>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* ── Étape 2 : Expériences ────────────────────────────────── */}
-          {step === 2 && (
-            <form onSubmit={nextStep} className="auth-form-body" noValidate>
-              <BoxReveal width="100%"><h2 className="auth-form-title" style={{marginBottom:"1rem"}}>{t("register.expLabel")}</h2></BoxReveal>
-
-              {experience.length === 0 && (
-                <div style={{textAlign:"center", padding:"1.5rem", border:"1.5px dashed var(--border)", borderRadius:"12px", color:"var(--text-muted)", marginBottom:"1rem"}}>
-                  {t("profile.noExperience")}
-                </div>
+              {errors.acceptedTerms && (
+                <p className="register-field-error" id="register-terms-error">{errors.acceptedTerms}</p>
               )}
+            </div>
 
-              {experience.map((exp, i) => (
-                <div key={i} style={cardStyle}>
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.75rem"}}>
-                    <span style={{fontWeight:700, fontSize:"0.9rem"}}>#{i+1}</span>
-                    <button type="button" onClick={() => removeExp(i)}
-                      style={{border:"none", background:"none", color:"#EF4444", cursor:"pointer", fontSize:"0.8rem", display:"flex", alignItems:"center", gap:"0.25rem"}}>
-                      <FiTrash2 size={13}/> {t("notifications.deleteLabel")}
-                    </button>
-                  </div>
-                  <div className="reg-grid2">
-                    <Field label={t("profileEditor.company")}>
-                      <AuthInput placeholder="BeeCoders" value={exp.company}
-                        onChange={e => updateExp(i,"company",e.target.value)}/>
-                    </Field>
-                    <Field label={t("profileEditor.position")}>
-                      <AuthInput placeholder={t("register.positionPh")} value={exp.position}
-                        onChange={e => updateExp(i,"position",e.target.value)}/>
-                    </Field>
-                  </div>
-                  <Field label={t("profileEditor.location")}>
-                    <AuthInput icon={<FiMapPin size={14}/>} placeholder={t("profileEditor.locationPlaceholder")}
-                      value={exp.location} onChange={e => updateExp(i,"location",e.target.value)}/>
-                  </Field>
-                  <div className="reg-grid2">
-                    <Field label={t("register.startDate")}>
-                      <AuthInput type="date" value={exp.startDate}
-                        onChange={e => updateExp(i,"startDate",e.target.value)}/>
-                    </Field>
-                    <Field label={t("register.endDate")}>
-                      <AuthInput type="date" disabled={exp.current} value={exp.endDate}
-                        onChange={e => updateExp(i,"endDate",e.target.value)}/>
-                    </Field>
-                  </div>
-                  <label className="auth-checkbox" style={{margin:"0.25rem 0 0.75rem"}}>
-                    <input type="checkbox" checked={exp.current}
-                      onChange={e => updateExp(i,"current",e.target.checked)}/>
-                    <span>{t("register.currentPosition")}</span>
-                  </label>
-                  <Field label={t("profileEditor.description")}>
-                    <textarea className="auth-input" rows={2} placeholder={t("register.descPh")}
-                      style={{paddingLeft:"1rem", paddingTop:"0.75rem", resize:"vertical"}}
-                      value={exp.description} onChange={e => updateExp(i,"description",e.target.value)}/>
-                  </Field>
-                  <Field label={t("register.technologies")}>
-                    <AuthInput placeholder="React, Node.js" value={exp.technologies}
-                      onChange={e => updateExp(i,"technologies",e.target.value)}/>
-                  </Field>
-                </div>
-              ))}
+            <button type="submit" className="auth-submit-btn register-submit" disabled={loading}>
+              {loading ? t("register.creating") : t("register.createAccount")}
+              {!loading && <FiArrowRight size={17} />}
+            </button>
+          </form>
 
-              <button type="button" onClick={addExp} style={{...btnStyle, width:"100%", justifyContent:"center", marginBottom:"1rem", padding:"0.75rem"}}>
-                + {t("profileEditor.addExperience")}
-              </button>
-
-              <div className="auth-nav">
-                <button type="button" className="auth-nav-back" onClick={prevStep}>
-                  <FiChevronLeft/> {t("offers.previous")}
-                </button>
-                <button type="submit" className="auth-submit-btn" style={{marginBottom:0}}>
-                  {t("register.next")} <FiArrowRight size={15}/>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* ── Étape 3 : Compétences ────────────────────────────────── */}
-          {step === 3 && (
-            <form onSubmit={nextStep} className="auth-form-body" noValidate>
-              <BoxReveal width="100%"><h2 className="auth-form-title" style={{marginBottom:"1rem"}}>{t("profileEditor.skills")}</h2></BoxReveal>
-
-              <p style={{fontWeight:700, fontSize:"0.85rem", color:"var(--text)", marginBottom:"0.5rem"}}>{t("register.technicalSkills")}</p>
-              {skills.map((s, i) => (
-                <div key={i} className="reg-skill-row">
-                  <AuthInput placeholder="React" value={s.name}
-                    onChange={e => updateSkill(i,"name",e.target.value)}/>
-                  <select className="auth-input" style={{paddingLeft:"0.75rem"}}
-                    value={s.level} onChange={e => updateSkill(i,"level",e.target.value)}>
-                    {SKILL_LEVELS.map(l => <option key={l} value={l}>{t(LEVEL_KEY[l])}</option>)}
-                  </select>
-                  {skills.length > 1 && (
-                    <button type="button" onClick={() => removeSkill(i)}
-                      style={{border:"none", background:"none", color:"#EF4444", cursor:"pointer"}}>
-                      <FiTrash2 size={15}/>
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button type="button" onClick={addSkill} style={{...btnStyle, marginBottom:"1rem"}}>
-                <FiPlus size={13}/> {t("register.addSkillShort")}
-              </button>
-
-              <p style={{fontWeight:700, fontSize:"0.85rem", color:"var(--text)", margin:"0.75rem 0 0.5rem"}}>{t("profile.languages")}</p>
-              {languages.map((l, i) => (
-                <div key={i} className="reg-skill-row">
-                  <AuthInput placeholder={t("profileEditor.languageNamePlaceholder")} value={l.name}
-                    onChange={e => updateLang(i,"name",e.target.value)}/>
-                  <select className="auth-input" style={{paddingLeft:"0.75rem"}}
-                    value={l.level} onChange={e => updateLang(i,"level",e.target.value)}>
-                    {LANG_LEVELS.map(lv => <option key={lv} value={lv}>{t(LEVEL_KEY[lv])}</option>)}
-                  </select>
-                  {languages.length > 1 && (
-                    <button type="button" onClick={() => removeLang(i)}
-                      style={{border:"none", background:"none", color:"#EF4444", cursor:"pointer"}}>
-                      <FiTrash2 size={15}/>
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button type="button" onClick={addLang} style={{...btnStyle, marginBottom:"1rem"}}>
-                <FiPlus size={13}/> {t("register.addLangShort")}
-              </button>
-
-              <p style={{fontWeight:700, fontSize:"0.85rem", color:"var(--text)", margin:"0.75rem 0 0.5rem"}}>{t("profileEditor.socialLinks")}</p>
-              <Field label={t("profileEditor.linkedin")}>
-                <AuthInput placeholder="https://linkedin.com/in/sarra-benali"
-                  value={socialLinks.linkedin}
-                  onChange={e => setSocialLinks({...socialLinks, linkedin:e.target.value})}/>
-              </Field>
-              <Field label={t("profileEditor.github")}>
-                <AuthInput placeholder="https://github.com/sarrabenali"
-                  value={socialLinks.github}
-                  onChange={e => setSocialLinks({...socialLinks, github:e.target.value})}/>
-              </Field>
-
-              <div className="auth-nav">
-                <button type="button" className="auth-nav-back" onClick={prevStep}>
-                  <FiChevronLeft/> {t("offers.previous")}
-                </button>
-                <button type="submit" className="auth-submit-btn" style={{marginBottom:0}}>
-                  {t("register.next")} <FiArrowRight size={15}/>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* ── Étape 4 : Confirmation ───────────────────────────────── */}
-          {step === 4 && (
-            <form onSubmit={handleSubmit} className="auth-form-body" noValidate>
-              <BoxReveal width="100%"><h2 className="auth-form-title" style={{marginBottom:"1rem"}}>{t("register.summary")}</h2></BoxReveal>
-
-              <div style={{...cardStyle, display:"flex", flexDirection:"column", gap:"0.75rem"}}>
-                {[
-                  [t("register.nameLabel"), account.name],
-                  [t("profile.email"), account.email],
-                  [t("register.genderLabel"), account.gender === "femme" ? t("register.genderFemale") : t("register.genderMale")],
-                  account.university ? [t("profile.university"), account.university] : null,
-                  education.institution ? [t("profileEditor.formation"), `${education.institution} — ${education.degree}`] : null,
-                  experience.filter(e => e.company).length > 0 ? [t("register.expLabel"), experience.filter(e => e.company).map(e => e.company).join(", ")] : null,
-                  skills.filter(s => s.name).length > 0 ? [t("profileEditor.skills"), skills.filter(s => s.name).map(s => s.name).join(", ")] : null,
-                ].filter(Boolean).map(([label, value], i) => (
-                  <div key={i} style={{display:"flex", justifyContent:"space-between", fontSize:"0.875rem", gap:"1rem"}}>
-                    <span style={{color:"var(--text-secondary)", fontWeight:600, flexShrink:0}}>{label}</span>
-                    <span style={{color:"var(--text)", textAlign:"right"}}>{value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="auth-nav">
-                <button type="button" className="auth-nav-back" onClick={prevStep}>
-                  <FiChevronLeft/> {t("offers.previous")}
-                </button>
-                <button type="submit" className="auth-submit-btn" style={{marginBottom:0}} disabled={loading}>
-                  {loading ? t("register.creating") : <>{t("register.confirm")} <FiArrowRight size={15}/></>}
-                </button>
-              </div>
-            </form>
-          )}
-
+          <div className="auth-separator register-separator">
+            <span /><em>{t("login.or")}</em><span />
+          </div>
+          <div className="auth-socials register-socials">
+            <GoogleAuthButton onError={setFormError} />
+          </div>
+          <p className="auth-switch register-switch">
+            {t("register.alreadyAccount")} <Link to="/login">{t("nav.signIn")}</Link>
+          </p>
         </div>
       </div>
     </div>

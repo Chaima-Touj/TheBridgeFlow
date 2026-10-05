@@ -9,6 +9,12 @@ import emailService from "../services/email.service.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Avatar assigné automatiquement selon le sexe choisi dans le profil.
+const AVATAR_BY_GENDER = {
+  homme: "/images/avatars/avatar-homme.png",
+  femme: "/images/avatars/avatar-femme.png",
+};
+
 // Crée/relie/connecte un utilisateur à partir d'une identité tierce déjà vérifiée
 // (Google, Facebook…) et renvoie le JWT — logique commune aux deux providers.
 const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, provider }) => {
@@ -55,42 +61,46 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
   return user;
 };
 
-// Rôles autorisés à l'inscription publique — seul "étudiant" existe côté
-// inscription ; "admin" n'est assignable que par un autre admin (voir
-// admin.controller.js).
-const ALLOWED_REGISTER_ROLES = ["étudiant"];
-
-// Avatar assigné automatiquement selon le sexe déclaré à l'inscription.
-const AVATAR_BY_GENDER = {
-  homme: "/images/avatars/avatar-homme.png",
-  femme: "/images/avatars/avatar-femme.png",
-};
-
 // Génère un code à 6 chiffres
 const generateCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
 // POST /api/auth/register
 export const register = asyncHandler(async (req, res) => {
-  const {
-    name, email, password, role, gender, phone, university, specialty,
-    bio, education, experience, skills, languages, socialLinks,
-  } = req.body;
+  const { firstName, lastName, email, password, acceptedTerms } = req.body;
+  const normalizedFirstName = typeof firstName === "string" ? firstName.trim() : "";
+  const normalizedLastName = typeof lastName === "string" ? lastName.trim() : "";
+  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-  if (!name || !email || !password) {
-    const err = new Error("Champs requis manquants");
+  if (!normalizedFirstName || !normalizedLastName || !normalizedEmail || typeof password !== "string" || !password) {
+    const err = new Error("Le prénom, le nom, l'email et le mot de passe sont requis.");
     err.statusCode = 400;
     throw err;
   }
 
-  if (!AVATAR_BY_GENDER[gender]) {
-    const err = new Error("Le champ sexe est requis (homme ou femme).");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    const err = new Error("Adresse email invalide.");
     err.statusCode = 400;
     throw err;
   }
 
-  const safeRole = ALLOWED_REGISTER_ROLES.includes(role) ? role : "étudiant";
+  const validPassword =
+    password.length >= 8 &&
+    /\p{Lu}/u.test(password) &&
+    /\d/u.test(password) &&
+    /[^\p{L}\p{N}\s]/u.test(password);
+  if (!validPassword) {
+    const err = new Error("Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.");
+    err.statusCode = 400;
+    throw err;
+  }
 
-  const existing = await User.findOne({ email });
+  if (acceptedTerms !== true) {
+    const err = new Error("L'acceptation des conditions et de la politique de confidentialité est requise.");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const existing = await User.findOne({ email: normalizedEmail });
   if (existing) {
     const err = new Error("Email déjà utilisé");
     err.statusCode = 409;
@@ -101,17 +111,31 @@ export const register = asyncHandler(async (req, res) => {
   const code    = generateCode();
   const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-  const user = await User.create({
-    name, email, password,
-    role: safeRole,
-    gender,
-    avatarUrl: AVATAR_BY_GENDER[gender],
-    phone, university, specialty,
-    bio, education, experience, skills, languages, socialLinks,
-    isVerified:        false,
-    verifyCode:        code,
-    verifyCodeExpires: expires,
-  });
+  let user;
+  try {
+    user = await User.create({
+      name: `${normalizedFirstName} ${normalizedLastName}`,
+      email: normalizedEmail,
+      password,
+      role: "étudiant",
+      termsAcceptedAt: new Date(),
+      isVerified: false,
+      verifyCode: code,
+      verifyCodeExpires: expires,
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      const duplicateError = new Error("Email déjà utilisé");
+      duplicateError.statusCode = 409;
+      throw duplicateError;
+    }
+    if (error.name === "ValidationError") {
+      const validationError = new Error("Les données d'inscription sont invalides.");
+      validationError.statusCode = 400;
+      throw validationError;
+    }
+    throw error;
+  }
 
   console.log(`📝 Nouvelle inscription : ${user.name} (${user.email}) — rôle: ${user.role}`);
 

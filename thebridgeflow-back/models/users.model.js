@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     role:     { type: String, enum: ["étudiant", "admin"], default: "étudiant" },
+    termsAcceptedAt: { type: Date },
 
     // Pas de "required" au niveau schéma : les comptes déjà en base avant
     // l'ajout de ce champ n'en ont pas et ne doivent pas échouer une future

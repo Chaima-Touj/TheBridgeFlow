@@ -515,6 +515,70 @@
 .register-nav { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .register-nav .btn-primary { flex: 1; }
 
+/* Simple public registration form */
+.auth-page--register .register-form-wrap {
+  max-width: 500px;
+  padding: 1.5rem 0;
+}
+.register-language { display: flex; justify-content: flex-end; margin-bottom: 1.25rem; }
+.register-title { margin-bottom: 0.35rem; }
+.register-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+.register-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 0.75rem;
+}
+.register-field-error {
+  color: #DC2626;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+}
+.register-password-hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+}
+.register-terms-field { margin: 0 0 1rem; }
+.register-terms {
+  align-items: flex-start;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.82rem;
+  gap: 0.55rem;
+  line-height: 1.5;
+}
+.register-terms input {
+  accent-color: var(--primary);
+  flex: 0 0 auto;
+  height: 16px;
+  margin: 2px 0 0;
+  width: 16px;
+}
+.register-terms a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.register-submit {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 0;
+}
+.register-separator { margin-top: 1.25rem; }
+.register-socials { margin-bottom: 1rem; }
+.register-switch { margin-top: 1.25rem; }
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .auth-page { grid-template-columns: 1fr; }
@@ -527,6 +591,7 @@
   .auth-left__title { font-size: 2.25rem; }
   .reg-grid2 { grid-template-columns: 1fr; }
   .reg-skill-row { grid-template-columns: 1fr; }
+  .register-grid { grid-template-columns: 1fr; }
   .auth-step-label { display: none; } /* step dots stay, labels too tight for 5 steps on a phone */
   .auth-socials { gap: 0.5rem; }
   .auth-social-btn { width: 46px; height: 46px; }
