@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowUpRight, CalendarDays, ImageOff, MapPin, Users, Video } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
+import Modal from "../components/common/Modal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
@@ -40,6 +41,10 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [registeredEventIds, setRegisteredEventIds] = useState(() => new Set());
+  const [registrationsLoadedUserId, setRegistrationsLoadedUserId] = useState(null);
+  const [alreadyRegisteredModal, setAlreadyRegisteredModal] = useState(false);
+  const registrationsLoaded = user?.role !== "étudiant" || registrationsLoadedUserId === user?._id;
 
   useDocumentMeta({ title: `${t("events.title")} — TheBridgeFlow`, description: t("events.description") });
 
@@ -52,12 +57,47 @@ export default function EventsPage() {
     return () => { active = false; };
   }, [period]);
 
+  useEffect(() => {
+    if (user?.role !== "étudiant") return undefined;
+    let active = true;
+    let eventIds = new Set();
+    eventsService.getMyRegistrations()
+      .then(({ data }) => {
+        if (!active) return;
+        eventIds = new Set(
+          (data.registrations || [])
+            .filter((registration) => registration.status === "registered")
+            .map((registration) => registration.event?._id)
+            .filter(Boolean)
+        );
+      })
+      .catch((err) => {
+        if (active) console.error("Failed to load current event registrations", err);
+      })
+      .finally(() => {
+        if (!active) return;
+        setRegisteredEventIds(eventIds);
+        setRegistrationsLoadedUserId(user._id);
+      });
+    return () => { active = false; };
+  }, [user?._id, user?.role]);
+
+  const showAlreadyRegistered = () => {
+    setActionError("");
+    setAlreadyRegisteredModal(true);
+  };
+
   const submitRegistration = async (id) => {
     setActionError("");
     try {
       await eventsService.register(id);
       navigate("/dashboard/student/events");
     } catch (err) {
+      if (err.response?.data?.message?.includes("déjà inscrit")) {
+        setRegisteredEventIds((current) => new Set(current).add(id));
+        showAlreadyRegistered();
+        return;
+      }
       setActionError(err.response?.data?.message || t("events.actionError"));
     }
   };
@@ -68,6 +108,11 @@ export default function EventsPage() {
       return;
     }
     if (user.role !== "étudiant") return;
+    if (!registrationsLoaded) return;
+    if (registeredEventIds.has(id)) {
+      showAlreadyRegistered();
+      return;
+    }
     await runWithPhone(() => submitRegistration(id));
   };
 
@@ -123,7 +168,7 @@ export default function EventsPage() {
                       <div className="ev-card__actions">
                         <Link className="btn btn-primary ev-card__details" to={`/events/${event._id}`}>{t("events.details")}<ArrowUpRight size={16} aria-hidden="true" /></Link>
                         {event.registrationRequired && event.status === "published" && period === "upcoming" && user?.role === "étudiant" && (
-                          <button type="button" className="btn btn-ghost" onClick={() => register(event._id)}>{t("events.register")}</button>
+                          <button type="button" className="btn btn-ghost" onClick={() => register(event._id)} disabled={!registrationsLoaded}>{t("events.register")}</button>
                         )}
                       </div>
                     </div>
@@ -131,6 +176,15 @@ export default function EventsPage() {
                 ))}
               </div>}
       </main>
+      {alreadyRegisteredModal && (
+        <Modal
+          title={t("events.alreadyRegisteredTitle")}
+          onClose={() => setAlreadyRegisteredModal(false)}
+          footer={<button type="button" className="btn btn-primary" onClick={() => setAlreadyRegisteredModal(false)}>{t("events.close")}</button>}
+        >
+          <p>{t("events.alreadyRegisteredMessage")}</p>
+        </Modal>
+      )}
     </div>
   );
 }

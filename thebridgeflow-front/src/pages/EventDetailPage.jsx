@@ -20,6 +20,15 @@ function formatTime(value, language, timezone) {
   return new Intl.DateTimeFormat(language, { timeStyle: "short", timeZone: timezone || "Africa/Tunis" }).format(new Date(value));
 }
 
+function formatProfilePhone(phone) {
+  if (typeof phone !== "string" || !phone.trim()) return "";
+  const digits = phone.replace(/\D/g, "").replace(/^216(?=\d{8}$)/, "");
+  if (/^\d{8}$/.test(digits)) {
+    return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+  }
+  return phone.trim();
+}
+
 export default function EventDetailPage() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
@@ -95,6 +104,11 @@ export default function EventDetailPage() {
         console.error("Failed to load event meeting link after registration", registrationError);
       }
     } catch (err) {
+      if (err.response?.data?.message?.includes("déjà inscrit")) {
+        setRegistrationDetails({ eventId: id, studentId: user._id, meetingUrl: "" });
+        setParticipationModal("alreadyRegistered");
+        return;
+      }
       setError(err.response?.data?.message || t("events.actionError"));
     } finally {
       registrationLock.current = false;
@@ -212,6 +226,18 @@ export default function EventDetailPage() {
           footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("events.close")}</button>}
         >
           <p>{t("events.participationSuccessMessage")}</p>
+          {formatProfilePhone(user?.phone)
+            ? <p>{t("events.participationPhoneMessage", { phone: formatProfilePhone(user.phone) })}</p>
+            : <p>{t("events.participationPhoneUnavailable")}</p>}
+        </Modal>
+      )}
+      {participationModal === "alreadyRegistered" && (
+        <Modal
+          title={t("events.alreadyRegisteredTitle")}
+          onClose={() => setParticipationModal("")}
+          footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("events.close")}</button>}
+        >
+          <p>{t("events.alreadyRegisteredMessage")}</p>
         </Modal>
       )}
     </div>
