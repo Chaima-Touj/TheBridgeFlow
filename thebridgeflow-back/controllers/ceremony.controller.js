@@ -224,15 +224,45 @@ async function setProjectStatus(id, status) {
   return project;
 }
 
+async function sendProjectDecisionEmail(project, accepted) {
+  const student = await User.findById(project.studentId).select("name email").lean();
+  if (!student?.email) {
+    console.error("[ceremony] Project decision email skipped: student email unavailable", {
+      projectId: String(project._id),
+      status: project.status,
+    });
+    return;
+  }
+
+  const sendEmail = accepted
+    ? emailService.sendCeremonyProjectAccepted
+    : emailService.sendCeremonyProjectRejected;
+  const result = await sendEmail(student.email, {
+    studentName: student.name,
+    projectTitle: project.title,
+    edition: project.edition,
+  });
+  if (!result.success) {
+    console.error("[ceremony] Project decision email failed", {
+      recipient: student.email,
+      projectId: String(project._id),
+      status: project.status,
+      error: result.error,
+    });
+  }
+}
+
 // PATCH /api/ceremony/admin/projects/:id/accept — réservé admin
 export const acceptProject = asyncHandler(async (req, res) => {
   const project = await setProjectStatus(req.params.id, "approuvé");
+  await sendProjectDecisionEmail(project, true);
   res.json(project);
 });
 
 // PATCH /api/ceremony/admin/projects/:id/reject — réservé admin
 export const rejectProject = asyncHandler(async (req, res) => {
   const project = await setProjectStatus(req.params.id, "refusé");
+  await sendProjectDecisionEmail(project, false);
   res.json(project);
 });
 

@@ -818,6 +818,36 @@ const ceremonyResultsTemplate = ({ studentName, winnerTitle, winnerStudentName, 
   `),
 });
 
+const ceremonyProjectDecisionTemplate = ({ studentName, projectTitle, edition, accepted }) => {
+  const decision = accepted ? "accepté" : "refusé";
+  const ceremonyName = edition === undefined || edition === null || edition === ""
+    ? "Cérémonie"
+    : `Cérémonie ${escapeHtml(edition)}`;
+
+  return {
+    subject: `Votre projet a été ${decision} — TheBridgeFlow`,
+    html: layout(`Projet ${decision}`, `
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-size:48px;margin-bottom:16px;">${accepted ? "🎉" : "📋"}</div>
+        <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0F172A;">Bonjour ${escapeHtml(studentName || "Étudiant")},</h1>
+        <p style="margin:0;color:#64748B;font-size:15px;">Votre projet a été <strong>${decision}</strong> pour la ${ceremonyName} de TheBridgeFlow.</p>
+      </div>
+
+      <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow("Projet", escapeHtml(projectTitle || "Non renseigné"))}
+          ${infoRow("Cérémonie", ceremonyName)}
+          ${infoRow("Décision", accepted ? "Accepté" : "Refusé")}
+        </table>
+      </div>
+
+      <div style="text-align:center;">
+        ${button("Voir la Cérémonie", `${process.env.CLIENT_URL || "http://localhost:5173"}/ceremonie`)}
+      </div>
+    `),
+  };
+};
+
 // Génère une version texte brut à partir du HTML — un email HTML-only sans
 // alternative texte est un signal spam classique pour la plupart des filtres.
 const htmlToPlainText = (html) =>
@@ -893,6 +923,8 @@ const emailService = {
   sendVoteConfirmation:    (to, data) => sendEmail({ to, ...voteConfirmationTemplate(data) }),
   sendWinnerCongrats:      (to, data) => sendEmail({ to, ...winnerCongratsTemplate(data) }),
   sendCeremonyResults:     (to, data) => sendEmail({ to, ...ceremonyResultsTemplate(data) }),
+  sendCeremonyProjectAccepted: (to, data) => sendEmail({ to, ...ceremonyProjectDecisionTemplate({ ...data, accepted: true }) }),
+  sendCeremonyProjectRejected: (to, data) => sendEmail({ to, ...ceremonyProjectDecisionTemplate({ ...data, accepted: false }) }),
 };
 
 export default emailService;
