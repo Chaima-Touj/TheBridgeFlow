@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { normalizeTunisianPhone } from "../utils/tunisianPhone.js";
 
 // ─── Configuration Gmail SMTP ──────────────────────────────────────────────────
 // Toute la communication passe par smtp.gmail.com:465 (SMTPS), via Nodemailer,
@@ -140,6 +141,23 @@ const studentContactSection = ({ studentName, studentEmail, studentPhone } = {})
         ? `<a href="mailto:${encodeURIComponent(studentEmail)}" style="color:#2563EB;">${escapeHtml(studentEmail)}</a>`
         : "Non renseigné")}
       ${infoRow("Téléphone", escapeHtml(studentPhone || "Non renseigné"))}
+    </table>
+  </div>`;
+
+const formatStudentPhone = (phone) => {
+  const normalizedPhone = normalizeTunisianPhone(phone);
+  return normalizedPhone ? normalizedPhone.replace(/^\+216\s*/, "") : "Non renseigné";
+};
+
+const studentInfoSection = ({ studentName, studentEmail, studentPhone } = {}) => `
+  <div style="background:#EFF6FF;border-radius:12px;padding:20px;margin:24px 0;border-left:4px solid #2563EB;">
+    <h2 style="margin:0 0 12px;color:#0F172A;font-size:16px;">Informations étudiant</h2>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${infoRow("Nom", escapeHtml(studentName || "Non renseigné"))}
+      ${infoRow("Email", studentEmail
+        ? `<a href="mailto:${encodeURIComponent(studentEmail)}" style="color:#2563EB;">${escapeHtml(studentEmail)}</a>`
+        : "Non renseigné")}
+      ${infoRow("Téléphone", escapeHtml(formatStudentPhone(studentPhone)))}
     </table>
   </div>`;
 
@@ -356,6 +374,11 @@ const interviewStatusTemplate = ({
   offerTitle,
   scheduledAt,
   recipientRole,
+  studentName,
+  studentEmail,
+  studentPhone,
+  mode,
+  location,
   link = "/dashboard/student/interviews",
   linkLabel = "Voir mes entretiens",
 }) => {
@@ -372,7 +395,9 @@ const interviewStatusTemplate = ({
     "terminé":  { icon: "🏁", title: "Entretien terminé",   color: "#8B5CF6", message: "L'entretien est maintenant marqué comme terminé." },
   };
   const cfg = configs[status] || { icon: "📅", title: "Mise à jour entretien", color: "#2563EB", message: `Le statut de votre entretien est maintenant : ${status}.` };
-  const date = new Date(scheduledAt).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const interviewDate = new Date(scheduledAt);
+  const date = interviewDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const time = interviewDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
   return {
     subject: `Entretien ${status} — ${offerTitle} ${cfg.icon}`,
@@ -386,10 +411,15 @@ const interviewStatusTemplate = ({
         Bonjour <strong>${escapeHtml(recipientName)}</strong>, ${cfg.message}
       </p>
 
+      ${recipientRole === "admin" ? studentInfoSection({ studentName, studentEmail, studentPhone }) : ""}
+
       <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow("Offre", escapeHtml(offerTitle))}
           ${infoRow("Date prévue", date)}
+          ${recipientRole === "admin" ? infoRow("Heure prévue", time) : ""}
+          ${recipientRole === "admin" && mode ? infoRow("Mode", escapeHtml(mode)) : ""}
+          ${recipientRole === "admin" && location ? infoRow("Lieu / Lien", escapeHtml(location)) : ""}
           ${infoRow("Nouveau statut", status.charAt(0).toUpperCase() + status.slice(1))}
         </table>
       </div>
@@ -538,7 +568,15 @@ const eventUpdatedTemplate = (data) => ({
 });
 
 // 7. Nouveau message reçu
-const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
+const newMessageTemplate = ({
+  recipientName,
+  senderName,
+  senderEmail,
+  senderPhone,
+  recipientRole,
+  preview,
+  link,
+}) => ({
   subject: `Nouveau message de ${senderName} 💬`,
   html: layout("Nouveau message", `
     <div style="text-align:center;margin-bottom:32px;">
@@ -551,8 +589,15 @@ const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
       Bonjour <strong>${recipientName}</strong>,
     </p>
 
+    ${recipientRole === "admin" ? studentInfoSection({
+      studentName: senderName,
+      studentEmail: senderEmail,
+      studentPhone: senderPhone,
+    }) : ""}
+
     <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:28px;border-left:4px solid #2563EB;">
-      <p style="margin:0 0 8px;font-size:12px;color:#94A3B8;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">Message de ${senderName}</p>
+      <p style="margin:0 0 8px;font-size:12px;color:#94A3B8;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">${recipientRole === "admin" ? "Message" : `Message de ${senderName}`}</p>
+      ${recipientRole === "admin" ? `<p style="margin:0 0 8px;font-size:12px;color:#94A3B8;">De ${senderName}</p>` : ""}
       <p style="margin:0;font-size:15px;color:#0F172A;line-height:1.6;font-style:italic;">"${preview.length > 200 ? preview.substring(0, 200) + "…" : preview}"</p>
     </div>
 

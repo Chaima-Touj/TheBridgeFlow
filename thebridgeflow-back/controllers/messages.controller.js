@@ -73,6 +73,9 @@ export const sendMessage = asyncHandler(async (req, res) => {
   emailService.sendNewMessage(receiver.email, {
     recipientName: receiver.name,
     senderName:    req.user.name,
+    senderEmail:   req.user.email,
+    senderPhone:   req.user.phone,
+    recipientRole: receiver.role,
     preview:       content.trim(),
     link:          messagesLink,
   });

@@ -173,7 +173,7 @@ export const updateInterviewStatus = asyncHandler(async (req, res) => {
     const scheduledAt = updatedInterview.scheduledAt;
 
     const [student, company] = await Promise.all([
-      User.findById(updatedInterview.studentId).select("email name").lean(),
+      User.findById(updatedInterview.studentId).select("email name phone").lean(),
       User.findById(updatedInterview.companyId).select("email name").lean(),
     ]);
     const recipient = isStudent ? company : student;
@@ -194,6 +194,11 @@ export const updateInterviewStatus = asyncHandler(async (req, res) => {
         offerTitle,
         scheduledAt,
         recipientRole: isStudent ? "admin" : "étudiant",
+        studentName: isStudent ? student?.name : undefined,
+        studentEmail: isStudent ? student?.email : undefined,
+        studentPhone: isStudent ? student?.phone : undefined,
+        mode: updatedInterview.mode,
+        location: updatedInterview.location,
         link,
         linkLabel: isStudent ? "Gérer les candidatures" : "Voir mes entretiens",
       },
