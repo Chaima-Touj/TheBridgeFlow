@@ -4,6 +4,19 @@
     "subtitle": "La page que vous cherchez n'existe pas ou a été déplacée.",
     "backHome": "Retour à l'accueil"
   },
+  "phoneRequirement": {
+    "dashboardTitle": "Numéro de téléphone requis",
+    "dashboardMessage": "Veuillez ajouter votre numéro de téléphone dans votre profil afin que nous puissions vous contacter si nécessaire.",
+    "completeProfile": "Compléter mon profil",
+    "modalTitle": "Ajoutez un numéro de téléphone",
+    "modalMessage": "Un numéro mobile tunisien valide est nécessaire pour continuer cette action.",
+    "phoneLabel": "Numéro de téléphone",
+    "phonePlaceholder": "20 123 456 ou +216 20 123 456",
+    "invalidPhone": "Saisissez un numéro mobile tunisien valide (20 à 29, suivi de six chiffres).",
+    "save": "Enregistrer et continuer",
+    "saving": "Enregistrement…",
+    "saveError": "Le numéro a été enregistré, mais votre profil n'a pas pu être actualisé. Réessayez."
+  },
   "nav": {
     "home": "Accueil",
     "offers": "Stages",
@@ -1754,6 +1767,7 @@
     "genericError": "Une erreur est survenue",
     "errors": {
       "nameRequired": "Nom requis",
+      "phoneInvalid": "Saisissez un numéro mobile tunisien valide.",
       "emailInvalid": "Email invalide",
       "emailRequired": "Email requis",
       "passwordRequired": "Mot de passe requis",

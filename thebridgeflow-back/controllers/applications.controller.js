@@ -74,6 +74,7 @@ export const createApplication = asyncHandler(async (req, res) => {
       companyName: admin.name,
       studentName: req.user.name,
       studentEmail: req.user.email,
+      studentPhone: req.user.phone,
       offerTitle: offer.title,
     },
   }));

@@ -13,6 +13,7 @@ import { useAuth }               from "../../context/AuthContext.jsx";
 import { offersService }         from "../../services/offers.service.js";
 import { profileService }        from "../../services/profile.service.js";
 import { applicationsService }   from "../../services/applications.service.js";
+import { usePhoneRequirement } from "../../hooks/usePhoneRequirement.jsx";
 import "./ApplyOffer.css";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
@@ -126,6 +127,7 @@ export default function ApplyOffer() {
   const navigate = useNavigate();
   const { t }    = useTranslation();
   const { user } = useAuth();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
   /* state ─────────────────────────────────────────────────────────────────── */
   const [offer,          setOffer]         = useState(null);
@@ -187,10 +189,7 @@ export default function ApplyOffer() {
   };
 
   /* submit ─────────────────────────────────────────────────────────────────── */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
+  const submitApplication = async () => {
     setError("");
     setSubmitting(true);
     try {
@@ -213,6 +212,12 @@ export default function ApplyOffer() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    await runWithPhone(submitApplication);
   };
 
   /* file handler ──────────────────────────────────────────────────────────── */
@@ -244,6 +249,7 @@ export default function ApplyOffer() {
   if (isLoading) {
     return (
       <DashboardLayout title={t("apply.title")}>
+        {phoneRequiredModal}
         <div className="ao-page">
           <div className="ao-skel ao-skel-back" />
           <div className="ao-layout">

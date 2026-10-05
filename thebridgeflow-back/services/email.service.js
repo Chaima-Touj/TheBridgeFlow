@@ -131,6 +131,18 @@ const escapeHtml = (value = "") => String(value)
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#39;");
 
+const studentContactSection = ({ studentName, studentEmail, studentPhone } = {}) => `
+  <div style="background:#EFF6FF;border-radius:12px;padding:20px;margin:24px 0;border-left:4px solid #2563EB;">
+    <h2 style="margin:0 0 12px;color:#0F172A;font-size:16px;">Coordonnées de l'étudiant</h2>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${infoRow("Nom", escapeHtml(studentName || "Non renseigné"))}
+      ${infoRow("Email", studentEmail
+        ? `<a href="mailto:${encodeURIComponent(studentEmail)}" style="color:#2563EB;">${escapeHtml(studentEmail)}</a>`
+        : "Non renseigné")}
+      ${infoRow("Téléphone", escapeHtml(studentPhone || "Non renseigné"))}
+    </table>
+  </div>`;
+
 const eventEmailData = ({ eventTitle, startsAt, timezone = "Africa/Tunis", location, description, eventId }) => {
   const date = new Date(startsAt);
   const dateLabel = new Intl.DateTimeFormat("fr-FR", {
@@ -227,7 +239,7 @@ const applicationSentTemplate = ({ studentName, offerTitle, companyName }) => ({
 });
 
 // 3. Nouvelle candidature reçue (à l'entreprise)
-const applicationReceivedTemplate = ({ companyName, studentName, studentEmail, offerTitle }) => ({
+const applicationReceivedTemplate = ({ companyName, studentName, studentEmail, studentPhone, offerTitle }) => ({
   subject: `Nouvelle candidature — ${offerTitle} 👤`,
   html: layout("Nouvelle candidature reçue", `
     <div style="text-align:center;margin-bottom:32px;">
@@ -248,6 +260,7 @@ const applicationReceivedTemplate = ({ companyName, studentName, studentEmail, o
         ${infoRow("Reçue le", new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }))}
       </table>
     </div>
+    ${studentContactSection({ studentName, studentEmail, studentPhone })}
 
     <div style="text-align:center;">
       ${button("Voir la candidature", `${process.env.CLIENT_URL || "http://localhost:5173"}/dashboard/admin/candidatures`, "#10B981")}
@@ -388,7 +401,7 @@ const interviewStatusTemplate = ({
   };
 };
 
-const enrollmentRequestReceivedTemplate = ({ adminName, studentName, formationTitle, mode }) => {
+const enrollmentRequestReceivedTemplate = ({ adminName, studentName, studentEmail, studentPhone, formationTitle, mode }) => {
   const directEnrollment = mode === "Inscription directe";
   const cta = directEnrollment
     ? { label: "Voir les inscriptions", path: "/dashboard/admin/inscriptions" }
@@ -405,6 +418,7 @@ const enrollmentRequestReceivedTemplate = ({ adminName, studentName, formationTi
           ${infoRow("Mode", escapeHtml(mode))}
         </table>
       </div>
+      ${studentContactSection({ studentName, studentEmail, studentPhone })}
       <div style="text-align:center;">${button(cta.label, `${process.env.CLIENT_URL || "http://localhost:5173"}${cta.path}`)}</div>
     `),
   };
@@ -425,7 +439,7 @@ const enrollmentRequestStatusTemplate = ({ studentName, formationTitle, status, 
   };
 };
 
-const eventEmailBody = ({ heading, intro, recipientName, event }) => {
+const eventEmailBody = ({ heading, intro, recipientName, event, studentContact }) => {
   const details = eventEmailData(event);
   return layout(heading, `
     <h1 style="font-size:24px;color:#0F172A;">${escapeHtml(heading)}</h1>
@@ -439,6 +453,7 @@ const eventEmailBody = ({ heading, intro, recipientName, event }) => {
       </table>
       ${details.description ? `<p style="margin:16px 0 0;color:#475569;line-height:1.6;">${details.description}</p>` : ""}
     </div>
+    ${studentContact ? studentContactSection(studentContact) : ""}
     <div style="text-align:center;">${button("Voir l'événement", details.eventUrl)}</div>
   `);
 };
@@ -470,6 +485,11 @@ const eventRegistrationReceivedTemplate = (data) => ({
     intro: `${data.studentName} vient de participer à l'événement suivant.`,
     recipientName: data.adminName || "Administrateur",
     event: data.event,
+    studentContact: {
+      studentName: data.studentName,
+      studentEmail: data.studentEmail,
+      studentPhone: data.studentPhone,
+    },
   }),
 });
 
@@ -482,6 +502,11 @@ const eventRegistrationCancelledTemplate = (data) => ({
       : "votre participation à l'événement suivant a été annulée.",
     recipientName: data.recipientName,
     event: data.event,
+    studentContact: data.studentEmail ? {
+      studentName: data.studentName,
+      studentEmail: data.studentEmail,
+      studentPhone: data.studentPhone,
+    } : null,
   }),
 });
 
@@ -521,7 +546,7 @@ const newMessageTemplate = ({ recipientName, senderName, preview, link }) => ({
 });
 
 // 8. Nouvelle inscription — notification admin
-const newUserAdminTemplate = ({ userName, userEmail, userRole }) => {
+const newUserAdminTemplate = ({ userName, userEmail, userPhone, userRole }) => {
   const roleLabel = { étudiant: "Étudiant", admin: "Administrateur" }[userRole] || userRole;
   const roleColor = { étudiant: "#2563EB", admin: "#8B5CF6" }[userRole] || "#2563EB";
 
@@ -542,6 +567,11 @@ const newUserAdminTemplate = ({ userName, userEmail, userRole }) => {
           ${infoRow("Date", new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }))}
         </table>
       </div>
+      ${userRole === "étudiant" ? studentContactSection({
+        studentName: userName,
+        studentEmail: userEmail,
+        studentPhone: userPhone,
+      }) : ""}
 
       <div style="text-align:center;">
         ${button("Gérer les utilisateurs", `${process.env.CLIENT_URL || "http://localhost:5173"}/dashboard/admin/users`, "#8B5CF6")}

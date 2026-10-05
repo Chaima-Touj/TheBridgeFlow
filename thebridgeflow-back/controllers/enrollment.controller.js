@@ -123,6 +123,8 @@ export const enroll = asyncHandler(async (req, res) => {
     emailData: {
       adminName: admin.name,
       studentName: req.user.name,
+      studentEmail: req.user.email,
+      studentPhone: req.user.phone,
       formationTitle: formation.title,
       mode: "Inscription directe",
     },

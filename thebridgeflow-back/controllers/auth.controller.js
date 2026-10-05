@@ -6,6 +6,7 @@ import LoginHistory from "../models/loginHistory.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { signToken } from "../utils/jwt.js";
 import emailService from "../services/email.service.js";
+import { normalizeTunisianPhone } from "../utils/tunisianPhone.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -46,6 +47,7 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
         emailService.sendNewUserAdmin(admin.email, {
           userName:  user.name,
           userEmail: user.email,
+          userPhone: user.phone,
           userRole:  user.role,
         });
       }
@@ -148,6 +150,7 @@ export const register = asyncHandler(async (req, res) => {
       emailService.sendNewUserAdmin(admin.email, {
         userName:  user.name,
         userEmail: user.email,
+        userPhone: user.phone,
         userRole:  user.role,
       });
     }
@@ -608,9 +611,20 @@ export const updateProfile = asyncHandler(async (req, res) => {
     bio, education, experience, skills, languages, socialLinks, cv, gender,
   } = req.body;
 
+  let normalizedPhone;
+  if (phone !== undefined) {
+    normalizedPhone = normalizeTunisianPhone(phone);
+    if (normalizedPhone === null) {
+      const err = new Error("Saisissez un numéro mobile tunisien valide.");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
   const updateData = {
-    name, phone, university, specialty, bio, education, experience, skills, languages, socialLinks,
+    name, university, specialty, bio, education, experience, skills, languages, socialLinks,
   };
+  if (normalizedPhone !== undefined) updateData.phone = normalizedPhone;
   if (cv !== undefined) updateData.cv = cv;
 
   if (gender === "homme" || gender === "femme") {

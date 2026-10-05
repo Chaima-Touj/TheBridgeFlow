@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, authorize, validateObjectId } from "../middleware/auth.middleware.js";
+import { requireStudentPhone } from "../middleware/requireStudentPhone.middleware.js";
 import {
   createRequest,
   getMyRequests,
@@ -20,6 +21,6 @@ router.use(protect);
 router.use(authorize("étudiant"));
 
 router.get("/",  getMyRequests);
-router.post("/", createRequest);
+router.post("/", requireStudentPhone, createRequest);
 
 export default router;

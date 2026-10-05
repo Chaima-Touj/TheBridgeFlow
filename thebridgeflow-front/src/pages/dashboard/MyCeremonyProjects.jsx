@@ -7,6 +7,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
 import { ceremonyService } from "../../services/ceremony.service.js";
+import { usePhoneRequirement } from "../../hooks/usePhoneRequirement.jsx";
 import "../../components/common/NewsSection.css";
 import "./MyCeremonyProjects.css";
 
@@ -132,6 +133,7 @@ function ProjectForm({ submitting, formError, onSubmit, onCancel }) {
 
 export default function MyCeremonyProjects() {
   const { t } = useTranslation();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
   const [projects,   setProjects]   = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [showForm,   setShowForm]   = useState(false);
@@ -150,7 +152,7 @@ export default function MyCeremonyProjects() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(loadProjects, []);
 
-  const handleCreate = async (payload) => {
+  const submitProject = async (payload) => {
     setSubmitting(true);
     setFormError("");
     try {
@@ -164,8 +166,13 @@ export default function MyCeremonyProjects() {
     }
   };
 
+  const handleCreate = async (payload) => {
+    await runWithPhone(() => submitProject(payload));
+  };
+
   return (
     <DashboardLayout title={t("myCeremonyProjects.pageTitle")} subtitle={t("myCeremonyProjects.pageSubtitle")}>
+      {phoneRequiredModal}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
         <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
           <FiPlus size={16} /> {t("myCeremonyProjects.newProject")}

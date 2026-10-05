@@ -415,6 +415,8 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     emailData: {
       adminName: admin.name,
       studentName: req.user.name,
+      studentEmail: req.user.email,
+      studentPhone: req.user.phone,
       event: eventData,
     },
   }));
@@ -478,6 +480,8 @@ export const cancelEventRegistration = asyncHandler(async (req, res) => {
     emailData: {
       recipientName: admin.name,
       studentName: req.user.name,
+      studentEmail: req.user.email,
+      studentPhone: req.user.phone,
       event: eventData,
     },
   }));

@@ -1,5 +1,6 @@
 import express from "express";
 import { authorize, protect } from "../middleware/auth.middleware.js";
+import { requireStudentPhone } from "../middleware/requireStudentPhone.middleware.js";
 import {
   cancelEventRegistration,
   createEvent,
@@ -19,7 +20,7 @@ router.get("/my-registrations", protect, authorize("étudiant"), getMyEventRegis
 router.get("/admin", protect, authorize("admin"), getAdminEvents);
 router.post("/", protect, authorize("admin"), createEvent);
 router.get("/:id/registrations", protect, authorize("admin"), getEventRegistrations);
-router.post("/:id/registrations", protect, authorize("étudiant"), registerForEvent);
+router.post("/:id/registrations", protect, authorize("étudiant"), requireStudentPhone, registerForEvent);
 router.delete("/:id/registrations", protect, authorize("étudiant"), cancelEventRegistration);
 router.patch("/:id", protect, authorize("admin"), updateEvent);
 router.get("/:id", getPublicEvent);

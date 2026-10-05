@@ -28,7 +28,7 @@ export default function CeremonyProjectDetail() {
   const { selected, toggleSelect, clearSelection } = useCeremonySelection();
   const voteGateReason = useCeremonyVoteGate();
   const voteDisabled = voteGateReason !== null;
-  const { submitting, error: voteError, success, confirmVote } = useCeremonyVoteSubmit(clearSelection);
+  const { submitting, error: voteError, success, confirmVote, phoneRequiredModal } = useCeremonyVoteSubmit(clearSelection);
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,7 @@ export default function CeremonyProjectDetail() {
   return (
     <div className="fp-page">
       <SiteNavbar />
+      {phoneRequiredModal}
 
       <main className="cpd-main">
         <Link to="/ceremonie" className="cpd-back">

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext.jsx";
 import { ceremonyService } from "../services/ceremony.service.js";
+import { usePhoneRequirement } from "./usePhoneRequirement.jsx";
 
 // Logique de soumission du vote — extraite de CeremonyPage.jsx pour être
 // réutilisée telle quelle (pas réimplémentée) sur CeremonyProjectDetail.jsx,
@@ -13,19 +14,13 @@ export function useCeremonyVoteSubmit(clearSelection) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState("");
   const [success,    setSuccess]    = useState(false);
 
-  const confirmVote = async (selected) => {
-    if (selected.length < 1) return;
-
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
+  const submitVote = async (selected) => {
     setSubmitting(true);
     setError("");
     try {
@@ -39,7 +34,18 @@ export function useCeremonyVoteSubmit(clearSelection) {
     }
   };
 
+  const confirmVote = async (selected) => {
+    if (selected.length < 1) return;
+
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    await runWithPhone(() => submitVote(selected));
+  };
+
   const clearError = () => setError("");
 
-  return { submitting, error, success, confirmVote, clearError };
+  return { submitting, error, success, confirmVote, clearError, phoneRequiredModal };
 }

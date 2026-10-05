@@ -18,6 +18,7 @@ import {
 import SectionCard from "../common/SectionCard";
 import FileUpload from "../common/FileUpload";
 import "./ProfileEditor.css";
+import { isValidTunisianPhone } from "../../utils/tunisianPhone.js";
 
 const splitComma = (val, orig) =>
   typeof orig === "string"
@@ -64,7 +65,11 @@ const languageSchema = yup.object().shape({
 
 const studentProfileSchema = yup.object().shape({
   name: yup.string().required("profileEditor.errors.nameRequired"),
-  phone: yup.string().nullable(),
+  phone: yup.string().nullable().test(
+    "tunisian-phone",
+    "profileEditor.errors.phoneInvalid",
+    (value) => !value?.trim() || isValidTunisianPhone(value)
+  ),
   university: yup.string().nullable(),
   specialty: yup.string().nullable(),
   email: yup.string().email("profileEditor.errors.emailInvalid").required("profileEditor.errors.emailRequired"),
@@ -174,7 +179,7 @@ const ProfileEditor = ({
       if (externalSubmit) {
         await externalSubmit(data);
       }
-      if (onSuccess) onSuccess();
+      if (onSuccess) await onSuccess();
     } catch (err) {
       setError(err.response?.data?.message || t("profileEditor.genericError"));
     } finally {

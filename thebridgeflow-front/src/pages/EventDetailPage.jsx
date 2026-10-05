@@ -7,6 +7,7 @@ import Loader from "../components/common/Loader.jsx";
 import Modal from "../components/common/Modal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
+import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
@@ -19,6 +20,7 @@ export default function EventDetailPage() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,12 +61,7 @@ export default function EventDetailPage() {
     return () => { active = false; };
   }, [event?.registrationRequired, id, user?.role]);
 
-  const handleRegister = async () => {
-    if (!user) {
-      setParticipationModal("login");
-      return;
-    }
-    if (user.role !== "étudiant" || registrationLock.current || capacityReached || participationConfirmed) return;
+  const submitRegistration = async () => {
     registrationLock.current = true;
     setSubmitting(true);
     setError("");
@@ -80,9 +77,19 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleRegister = async () => {
+    if (!user) {
+      setParticipationModal("login");
+      return;
+    }
+    if (user.role !== "étudiant" || registrationLock.current || capacityReached || participationConfirmed) return;
+    await runWithPhone(submitRegistration);
+  };
+
   return (
     <div className="ev-public-page">
       <SiteNavbar />
+      {phoneRequiredModal}
       <main className="ev-detail-wrap">
         {loading ? <div className="ev-loading"><Loader size="lg" /></div>
           : error && !event ? <p className="ev-state ev-error">{error}</p>

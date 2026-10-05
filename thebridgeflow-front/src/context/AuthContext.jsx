@@ -73,9 +73,12 @@ export function AuthProvider({ children }) {
       const { data } = await authService.getMe();
       setUser(data.user);
       return data.user;
-    } catch {
-      logout();
-      return null;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        logout();
+        return null;
+      }
+      throw error;
     }
   };
 

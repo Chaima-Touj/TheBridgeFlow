@@ -4,6 +4,19 @@
     "subtitle": "The page you're looking for doesn't exist or has been moved.",
     "backHome": "Back to home"
   },
+  "phoneRequirement": {
+    "dashboardTitle": "Phone number required",
+    "dashboardMessage": "Please add your phone number to your profile so we can contact you if needed.",
+    "completeProfile": "Complete my profile",
+    "modalTitle": "Add a phone number",
+    "modalMessage": "A valid Tunisian mobile number is required to continue this action.",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "20 123 456 or +216 20 123 456",
+    "invalidPhone": "Enter a valid Tunisian mobile number (20 to 29 followed by six digits).",
+    "save": "Save and continue",
+    "saving": "Saving…",
+    "saveError": "The number was saved, but your profile could not be refreshed. Please try again."
+  },
   "nav": {
     "home": "Home",
     "offers": "Internships",
@@ -1754,6 +1767,7 @@
     "genericError": "An error occurred",
     "errors": {
       "nameRequired": "Name required",
+      "phoneInvalid": "Enter a valid Tunisian mobile number.",
       "emailInvalid": "Invalid email",
       "emailRequired": "Email required",
       "passwordRequired": "Password required",

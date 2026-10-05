@@ -6,6 +6,7 @@ import {
   getCeremonyArchives, getCeremonyArchiveEdition,
 } from "../controllers/ceremony.controller.js";
 import { protect, authorize, validateObjectId } from "../middleware/auth.middleware.js";
+import { requireStudentPhone } from "../middleware/requireStudentPhone.middleware.js";
 
 const router = express.Router();
 
@@ -19,8 +20,8 @@ router.get("/archives/:edition", getCeremonyArchiveEdition);
 
 // ─── Étudiant connecté ──────────────────────────────────────────────────────
 router.get("/my-projects",  protect, getMyProjects);
-router.post("/projects",    protect, createProject);
-router.post("/vote",        protect, vote);
+router.post("/projects",    protect, requireStudentPhone, createProject);
+router.post("/vote",        protect, requireStudentPhone, vote);
 
 // ─── Admin — modération, config, clôture ────────────────────────────────────
 router.get("/admin/projects",              protect, authorize("admin"), getAdminProjects);

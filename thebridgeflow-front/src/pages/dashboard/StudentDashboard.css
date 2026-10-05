@@ -8,6 +8,58 @@
   gap:            1.375rem;
 }
 
+.sd-phone-required {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #f59e0b;
+  border-left-width: 5px;
+  border-radius: var(--radius);
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.sd-phone-required__content {
+  flex: 1;
+}
+
+.sd-phone-required__content h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.sd-phone-required__content p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.sd-phone-required__link {
+  flex: none;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.55rem;
+  background: #b45309;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .sd-phone-required {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .sd-phone-required__content {
+    flex-basis: calc(100% - 3rem);
+  }
+
+  .sd-phone-required__link {
+    margin-left: 2rem;
+  }
+}
+
 /* ── Skeleton shimmer ────────────────────────────────────────────────────── */
 .sd-skeleton {
   background:      linear-gradient(90deg, var(--border) 25%, var(--bg) 50%, var(--border) 75%);

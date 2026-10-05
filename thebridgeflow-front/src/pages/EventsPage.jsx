@@ -6,6 +6,7 @@ import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
+import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
@@ -31,6 +32,7 @@ function EventCardImage({ image, category }) {
 export default function EventsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
   const navigate = useNavigate();
   const location = useLocation();
   const [period, setPeriod] = useState("upcoming");
@@ -50,12 +52,7 @@ export default function EventsPage() {
     return () => { active = false; };
   }, [period]);
 
-  const register = async (id) => {
-    if (!user) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-    if (user.role !== "étudiant") return;
+  const submitRegistration = async (id) => {
     setActionError("");
     try {
       await eventsService.register(id);
@@ -63,6 +60,15 @@ export default function EventsPage() {
     } catch (err) {
       setActionError(err.response?.data?.message || t("events.actionError"));
     }
+  };
+
+  const register = async (id) => {
+    if (!user) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    if (user.role !== "étudiant") return;
+    await runWithPhone(() => submitRegistration(id));
   };
 
   return (
@@ -76,6 +82,7 @@ export default function EventsPage() {
         </div>
       </section>
       <main className="ev-main">
+        {phoneRequiredModal}
         <div className="ev-toolbar">
           <div className="ev-tabs" role="group" aria-label={t("events.periodLabel")}>
             {["upcoming", "past"].map((value) => (

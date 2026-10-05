@@ -7,6 +7,7 @@ import { useLang } from "../../context/langContext.js";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Loader from "../../components/common/Loader.jsx";
 import { profileService } from "../../services/profile.service.js";
+import { normalizeTunisianPhone } from "../../utils/tunisianPhone.js";
 import {
   FiUser, FiMoon, FiSun, FiBell, FiShield, FiLock, FiCpu,
   FiBriefcase, FiAlertTriangle, FiCheck, FiX,
@@ -223,10 +224,15 @@ export default function Settings() {
   // ── Save: Compte ─────────────────────────────────────────────────────────
   const saveCompte = async () => {
     if (!compteForm.name.trim()) return showToast("error", t("settings.errors.nameRequired"));
+    const normalizedPhone = normalizeTunisianPhone(compteForm.phone);
+    if (normalizedPhone === null) return showToast("error", t("phoneRequirement.invalidPhone"));
     setSaving(true);
     try {
-      await profileService.updateProfile(compteForm);
-      await refreshUser();
+      await profileService.updateProfile({ ...compteForm, phone: normalizedPhone });
+      const updatedUser = await refreshUser();
+      if (!updatedUser) throw new Error(t("settings.toast.saveError"));
+      setProfile(updatedUser);
+      setCompteForm((current) => ({ ...current, phone: updatedUser.phone || "" }));
       showToast("success", t("settings.toast.profileSaved"));
     } catch (e) {
       showToast("error", e?.response?.data?.message || t("settings.toast.saveError"));

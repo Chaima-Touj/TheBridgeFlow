@@ -16,6 +16,7 @@ import { offersService } from "../../services/offers.service.js";
 import { aiService } from "../../services/ai.service.js";
 import api from "../../services/api.js";
 import { computeCompletion } from "../../utils/profileUtils";
+import { isValidTunisianPhone } from "../../utils/tunisianPhone.js";
 import "./StudentDashboard.css";
 
 /* ─── Constants ───────────────────────────────────────────────────────────── */
@@ -475,6 +476,19 @@ export default function StudentDashboard() {
       subtitle={t("dashboard.student.subtitle")}
     >
       <div className="sd-root">
+
+        {user?.role === "étudiant" && !isValidTunisianPhone(user.phone) && (
+          <section className="sd-phone-required" role="alert">
+            <FiAlertCircle size={22} aria-hidden="true" />
+            <div className="sd-phone-required__content">
+              <h2>{t("phoneRequirement.dashboardTitle")}</h2>
+              <p>{t("phoneRequirement.dashboardMessage")}</p>
+            </div>
+            <Link className="sd-phone-required__link" to="/dashboard/student/profile">
+              {t("phoneRequirement.completeProfile")}
+            </Link>
+          </section>
+        )}
 
         {/* ── 1. Hero ────────────────────────────────────────────────────── */}
         <div className="sd-hero">

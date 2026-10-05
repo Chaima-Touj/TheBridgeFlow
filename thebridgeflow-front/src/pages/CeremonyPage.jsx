@@ -34,7 +34,7 @@ export default function CeremonyPage() {
   const [loading,     setLoading]     = useState(true);
   const [hasArchives, setHasArchives] = useState(false);
   const { selected, toggleSelect: toggleSelection, clearSelection } = useCeremonySelection();
-  const { submitting, error, success, confirmVote, clearError } = useCeremonyVoteSubmit(clearSelection);
+  const { submitting, error, success, confirmVote, clearError, phoneRequiredModal } = useCeremonyVoteSubmit(clearSelection);
 
   useEffect(() => {
     ceremonyService.getProjects()
@@ -74,6 +74,7 @@ export default function CeremonyPage() {
   return (
     <div className="fp-page">
       <SiteNavbar />
+      {phoneRequiredModal}
 
       <section className="fp-hero">
         <div className="fp-hero__inner">

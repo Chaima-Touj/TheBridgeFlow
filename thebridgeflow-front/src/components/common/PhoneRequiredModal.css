@@ -1,0 +1,89 @@
+.phone-required-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 62%);
+}
+
+.phone-required-modal {
+  width: min(100%, 440px);
+  padding: 1.5rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 1rem;
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  box-shadow: 0 24px 70px rgb(15 23 42 / 28%);
+}
+
+.phone-required-modal h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.25rem;
+}
+
+.phone-required-modal > p {
+  margin: 0 0 1.25rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.55;
+}
+
+.phone-required-modal form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.phone-required-modal label {
+  font-weight: 600;
+}
+
+.phone-required-modal input {
+  width: 100%;
+  min-height: 2.8rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.6rem;
+  background: var(--background, #fff);
+  color: inherit;
+  font: inherit;
+}
+
+.phone-required-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+.phone-required-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.6rem;
+}
+
+.phone-required-actions button {
+  min-height: 2.6rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.6rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.phone-required-cancel {
+  background: transparent;
+  color: inherit;
+}
+
+.phone-required-submit {
+  border-color: var(--primary, #2563eb) !important;
+  background: var(--primary, #2563eb);
+  color: #fff;
+}
+
+.phone-required-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
