@@ -12,6 +12,10 @@
   padding: 2.5rem 0 4rem;
 }
 
+.ev-detail-wrap {
+  padding-top: calc(64px + 2rem);
+}
+
 .ev-toolbar {
   display: flex;
   justify-content: flex-end;
@@ -276,20 +280,23 @@
 }
 
 .ev-detail__media {
-  display: grid;
-  min-height: 0;
-  max-height: 34rem;
-  aspect-ratio: 16 / 9;
-  place-items: center;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
   background: color-mix(in srgb, var(--primary-light) 55%, var(--bg));
 }
 
 .ev-detail__image {
   display: block;
-  width: 100%;
-  max-height: 34rem;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: clamp(240px, 60vh, 600px);
   object-fit: contain;
+  object-position: center;
+  margin-inline: auto;
 }
 
 .ev-detail__content {
@@ -770,6 +777,10 @@
     padding-top: 1.5rem;
   }
 
+  .ev-detail-wrap {
+    padding-top: calc(64px + 1rem);
+  }
+
   @media (max-width: 640px) {
     .modal-card.ev-delete-modal__card {
       width: min(100%, 30rem);
@@ -786,12 +797,11 @@
   }
 
   .ev-detail__media {
-    aspect-ratio: 4 / 3;
-    max-height: 28rem;
+    width: 100%;
   }
 
   .ev-detail__image {
-    max-height: 28rem;
+    max-height: clamp(200px, 55vh, 420px);
   }
 
   .ev-detail__content {
@@ -838,6 +848,14 @@
   .ev-dashboard {
     width: min(100% - 1.25rem, 1160px);
     padding-top: 1.5rem;
+  }
+
+  .ev-detail-wrap {
+    padding-top: calc(64px + 1rem);
+  }
+
+  .ev-detail__image {
+    max-height: clamp(180px, 52vh, 360px);
   }
 
   .ev-card__actions {
