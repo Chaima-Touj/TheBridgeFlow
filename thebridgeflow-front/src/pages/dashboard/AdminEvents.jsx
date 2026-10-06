@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiCalendar, FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import { eventsService } from "../../services/events.service.js";
@@ -95,6 +95,8 @@ export default function AdminEvents() {
   const [categoryLoadError, setCategoryLoadError] = useState(false);
   const [participants, setParticipants] = useState(null);
   const [deletingEventId, setDeletingEventId] = useState(null);
+  const [pendingDeleteEvent, setPendingDeleteEvent] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
   const [toast, setToast] = useState(null);
   const submitLock = useRef(false);
   const deleteLock = useRef(false);
@@ -220,21 +222,22 @@ export default function AdminEvents() {
     }
   };
 
-  const removeEvent = async (event) => {
-    if (!window.confirm(`${t("events.deleteConfirmation")}\n\n${t("events.deleteWarning")}`)) return;
+  const removeEvent = async () => {
+    const event = pendingDeleteEvent;
+    if (!event) return;
     if (deleteLock.current) return;
 
     deleteLock.current = true;
     setDeletingEventId(event._id);
-    setError("");
+    setDeleteError("");
     try {
       await eventsService.deleteEvent(event._id);
       setEvents((current) => current.filter(({ _id }) => _id !== event._id));
+      setPendingDeleteEvent(null);
       showToast("success", t("events.deleteSuccess"));
     } catch (err) {
       const message = err.response?.data?.message || t("events.deleteError");
-      setError(message);
-      showToast("error", message);
+      setDeleteError(message);
     } finally {
       deleteLock.current = false;
       setDeletingEventId(null);
@@ -269,7 +272,11 @@ export default function AdminEvents() {
                       <button
                         className="btn ev-admin-delete"
                         type="button"
-                        onClick={() => removeEvent(event)}
+                        onClick={() => {
+                          setError("");
+                          setDeleteError("");
+                          setPendingDeleteEvent(event);
+                        }}
                         disabled={deletingEventId !== null}
                       >
                         <FiTrash2 size={15} />
@@ -341,6 +348,49 @@ export default function AdminEvents() {
           {error && <p className="ev-form-error" role="alert">{error}</p>}
           <div className="modal-footer"><button type="button" className="btn btn-ghost" onClick={() => setModal(null)} disabled={submitting}>{t("common.cancel")}</button><button type="submit" className="btn btn-primary ev-form-submit" disabled={submitting}>{submitting ? t("events.saving") : t("common.save")}</button></div>
         </form>
+      </Modal>}
+
+      {pendingDeleteEvent && <Modal
+        title={t("events.deleteTitle")}
+        onClose={() => {
+          if (deletingEventId === null) {
+            setPendingDeleteEvent(null);
+            setDeleteError("");
+          }
+        }}
+        maxWidth={480}
+        className="ev-delete-modal__card"
+        overlayClassName="ev-delete-modal"
+        footer={<>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            autoFocus
+            onClick={() => {
+              setPendingDeleteEvent(null);
+              setDeleteError("");
+            }}
+            disabled={deletingEventId !== null}
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            className="btn ev-delete-modal__confirm"
+            type="button"
+            onClick={removeEvent}
+            disabled={deletingEventId !== null}
+          >
+            <FiTrash2 size={15} />
+            {deletingEventId === pendingDeleteEvent._id ? t("events.deleting") : t("events.delete")}
+          </button>
+        </>}
+      >
+        <div className="ev-delete-modal__content">
+          <span className="ev-delete-modal__icon" aria-hidden="true"><FiAlertTriangle size={24} /></span>
+          <p>{t("events.deleteConfirmation")}</p>
+          <p className="ev-delete-modal__warning">{t("events.deleteWarning")}</p>
+          {deleteError && <p className="ev-form-error" role="alert">{deleteError}</p>}
+        </div>
       </Modal>}
 
       {participants && <Modal title={t("events.participantsFor", { title: participants.event.title, count: participants.rows.length })} onClose={() => setParticipants(null)} maxWidth={620}>

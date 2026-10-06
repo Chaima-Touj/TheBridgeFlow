@@ -90,6 +90,7 @@
     "edit": "تعديل",
     "delete": "حذف",
     "deleting": "جارٍ الحذف…",
+    "deleteTitle": "هل تريد حذف هذه الفعالية؟",
     "deleteConfirmation": "هل أنت متأكد من حذف هذه الفعالية؟",
     "deleteWarning": "هذا الإجراء نهائي.",
     "deleteSuccess": "تم حذف الفعالية بنجاح.",

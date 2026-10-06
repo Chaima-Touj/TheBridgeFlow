@@ -90,6 +90,7 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "deleting": "Suppression…",
+    "deleteTitle": "Supprimer cet événement ?",
     "deleteConfirmation": "Voulez-vous vraiment supprimer cet événement ?",
     "deleteWarning": "Cette action est définitive.",
     "deleteSuccess": "Événement supprimé avec succès.",
