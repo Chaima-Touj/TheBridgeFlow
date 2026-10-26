@@ -394,7 +394,19 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
             <strong>{form.metaTitle || form.title || t("adminNews.titleLabel")}</strong>
             <p>{form.metaDescription || form.excerpt || t("adminNews.previewEmpty")}</p>
           </div>
+          {form.image && (
+            <img
+              className="an-preview__image"
+              src={isGoogleDriveUrl(form.image) ? resolveDriveUrl(form.image, "image") : form.image}
+              alt=""
+              onError={(event) => { event.currentTarget.hidden = true; }}
+            />
+          )}
           <h2>{form.title || t("adminNews.preview")}</h2>
+          <div className="an-preview__meta">
+            {form.category && <span>{form.category}</span>}
+            {form.publishedAt && <time dateTime={form.publishedAt}>{formatDate(form.publishedAt)}</time>}
+          </div>
           {form.excerpt && <p className="news-detail__excerpt">{form.excerpt}</p>}
           {form.content
             ? <NewsArticleBody content={form.content} className="an-preview__body" />
