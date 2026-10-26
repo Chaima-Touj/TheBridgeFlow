@@ -1,5 +1,5 @@
 import { GoogleLogin } from "@react-oauth/google";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../services/api.js";
 
@@ -19,12 +19,15 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export default function GoogleAuthButton({ onError }) {
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSuccess = async (credentialResponse) => {
     try {
       const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
       loginWithToken(data.token, data.user);
-      navigate(ROUTES[data.user?.role] || "/dashboard/student");
+      const returnTo = location.state?.from;
+      const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//");
+      navigate(safeReturnTo ? returnTo : ROUTES[data.user?.role] || "/dashboard/student");
     } catch (err) {
       onError?.(err.response?.data?.message || "Connexion Google impossible. Réessayez.");
     }

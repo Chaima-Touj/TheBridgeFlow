@@ -36,6 +36,7 @@ import CeremonySection from "../components/common/CeremonySection.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
+import { newsletterService } from "../services/newsletter.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
@@ -95,6 +96,8 @@ export default function LandingPage() {
   const [form,        setForm]        = useState({ name: "", email: "", subject: "", message: "" });
   const [sent,        setSent]        = useState(false);
   const [newsletter,  setNewsletter]  = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState(null);
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [allFormations, setAllFormations] = useState([]);
   const [promoOpen,   setPromoOpen]   = useState(false);
 
@@ -143,6 +146,25 @@ export default function LandingPage() {
     setSent(true);
     setForm({ name: "", email: "", subject: "", message: "" });
     setTimeout(() => setSent(false), 4000);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (newsletterSubmitting) return;
+    setNewsletterSubmitting(true);
+    setNewsletterStatus(null);
+    try {
+      const { data } = await newsletterService.subscribe(newsletter, lang);
+      setNewsletterStatus({ type: "success", message: data.message || t("landing.newsletterSuccess") });
+      setNewsletter("");
+    } catch (err) {
+      setNewsletterStatus({
+        type: "error",
+        message: err.response?.data?.message || t("landing.newsletterError"),
+      });
+    } finally {
+      setNewsletterSubmitting(false);
+    }
   };
 
   // ── Scroll-tilt 3D effect for promo video section ─────────────────────
@@ -818,17 +840,23 @@ export default function LandingPage() {
             <h3 className="lp-newsletter__title">{t("landing.newsletterTitle")}</h3>
             <p className="lp-newsletter__sub">{t("landing.newsletterSub")}</p>
           </div>
-          <div className="lp-newsletter__form">
+          <form className="lp-newsletter__form" onSubmit={handleNewsletterSubmit}>
             <input
+              type="email"
+              required
+              maxLength={254}
               value={newsletter}
-              onChange={e => setNewsletter(e.target.value)}
+              onChange={e => { setNewsletter(e.target.value); setNewsletterStatus(null); }}
               className="lp-newsletter__input"
               placeholder={t("landing.newsletterInput")}
+              aria-label={t("landing.newsletterInput")}
+              autoComplete="email"
             />
-            <button className="btn btn-primary" onClick={() => setNewsletter("")}>
-              {t("landing.newsletterBtn")}
+            <button className="btn btn-primary" type="submit" disabled={newsletterSubmitting}>
+              {newsletterSubmitting ? t("landing.newsletterSubmitting") : t("landing.newsletterBtn")}
             </button>
-          </div>
+          </form>
+          {newsletterStatus && <p className={`lp-newsletter__status lp-newsletter__status--${newsletterStatus.type}`} role={newsletterStatus.type === "error" ? "alert" : "status"}>{newsletterStatus.message}</p>}
         </div>
       </section>
 

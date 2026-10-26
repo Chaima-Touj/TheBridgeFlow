@@ -2,6 +2,7 @@ import express from "express";
 import { protect, authorize } from "../middleware/auth.middleware.js";
 import {
   getAllNews,
+  getAdminNews,
   getNewsById,
   createNews,
   updateNews,
@@ -12,6 +13,7 @@ const router = express.Router();
 
 // ─── Lecture — publique (Blog + Landing) ────────────────────────────────────
 router.get("/", getAllNews);
+router.get("/admin", protect, authorize("admin"), getAdminNews);
 router.get("/:id", getNewsById);
 
 // ─── Écriture — réservée à l'admin ──────────────────────────────────────────

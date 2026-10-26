@@ -2,6 +2,7 @@ import News from "../models/news.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { normalizeDriveUrl, isBase64Image } from "../utils/driveHelper.js";
 import { containsRawHtml } from "../utils/markdownContent.js";
+import { processNewsletterJobs } from "../services/newsletter.service.js";
 
 // image peut être un lien Google Drive (normalisé) ou une image base64
 // (compression côté client, voir imageCompression.js — jamais passée à
@@ -109,6 +110,10 @@ function validateNewsFields(body, { partial = false } = {}) {
     if (Number.isNaN(publishedAt.getTime())) badRequest("La date de publication est invalide.");
     payload.publishedAt = publishedAt;
   }
+  if (body.status !== undefined) {
+    if (!["draft", "published"].includes(body.status)) badRequest("Le statut de l'article est invalide.");
+    payload.status = body.status;
+  }
   const faq = validateFaq(body.faq);
   if (faq !== undefined) payload.faq = faq;
   return payload;
@@ -117,16 +122,26 @@ function validateNewsFields(body, { partial = false } = {}) {
 // GET /api/news?limit=3 — public, triée par date de publication décroissante.
 export const getAllNews = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 0;
-  let query = News.find().sort({ publishedAt: -1 }).select("-__v");
+  let query = News.find({
+    $or: [{ status: "published" }, { status: { $exists: false } }],
+  }).sort({ publishedAt: -1 }).select("-__v");
   if (limit > 0) query = query.limit(limit);
   const news = await query;
   res.json(news);
 });
 
 export const getNewsById = asyncHandler(async (req, res) => {
-  const article = await News.findById(req.params.id).select("-__v");
+  const article = await News.findOne({
+    _id: req.params.id,
+    $or: [{ status: "published" }, { status: { $exists: false } }],
+  }).select("-__v");
   if (!article) return res.status(404).json({ message: "Actualité introuvable." });
   res.json(article);
+});
+
+export const getAdminNews = asyncHandler(async (req, res) => {
+  const news = await News.find().sort({ updatedAt: -1 }).select("-__v").lean();
+  res.json(news);
 });
 
 /* ── POST /api/news ───────────────────────────────────────────────────────────
@@ -145,8 +160,11 @@ export const createNews = asyncHandler(async (req, res) => {
     image: normalizeNewsImage(image),
     author: req.user?.name || "admin",
     publishedAt: fields.publishedAt || Date.now(),
+    status: fields.status || "published",
+    ...((fields.status || "published") === "published" ? { newsletterCampaignEligibleAt: new Date() } : {}),
   });
 
+  if (article.status === "published") void processNewsletterJobs();
   res.status(201).json(article);
 });
 
@@ -163,6 +181,7 @@ export const updateNews = asyncHandler(async (req, res) => {
 
   const body = req.body || {};
   const fields = validateNewsFields(body, { partial: true });
+  const previousStatus = article.status || "published";
   Object.assign(article, fields);
   validateCta(article.ctaLabel, article.ctaUrl);
   if (body.image !== undefined) {
@@ -170,7 +189,12 @@ export const updateNews = asyncHandler(async (req, res) => {
     article.image = normalizeNewsImage(image);
   }
 
+  if (previousStatus !== "published" && article.status === "published" &&
+      !article.newsletterCampaignEligibleAt && !article.newsletterCampaignSentAt) {
+    article.newsletterCampaignEligibleAt = new Date();
+  }
   await article.save();
+  if (previousStatus !== "published" && article.status === "published") void processNewsletterJobs();
   res.json(article);
 });
 

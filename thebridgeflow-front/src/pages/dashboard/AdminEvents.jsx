@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiCalendar, FiCheck, FiDownload, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
+import { FiCalendar, FiCheck, FiCopy, FiDownload, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
 import { eventsService } from "../../services/events.service.js";
 import { formationsService } from "../../services/formations.service.js";
 import { buildEventParticipantEmailsPdf } from "../../utils/exportEventParticipantEmails.js";
+import { buildEventDuplicateDraft } from "../../utils/eventDuplication.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -14,7 +15,7 @@ import "../Events.css";
 
 const emptyForm = {
   title: "", description: "", image: "", category: "", startsAt: "", endsAt: "",
-  timezone: "Africa/Tunis", mode: "onsite", location: "", meetingUrl: "",
+  timezone: "Africa/Tunis", mode: "onsite", location: "", meetingUrl: "", sessionUrl: "",
   capacity: "", registrationRequired: true, status: "draft",
 };
 
@@ -48,6 +49,15 @@ function localDateValue(value) {
 function isHttpUrl(value) {
   try {
     return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function isSafeHttpsUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password;
   } catch {
     return false;
   }
@@ -147,17 +157,22 @@ export default function AdminEvents() {
   }, [t]);
   useEffect(() => { load(); }, [load]);
 
-  const openForm = (event) => {
+  const openForm = (event, duplicate = false) => {
     setError("");
     setDateError("");
-    setForm(event ? {
+    setForm(event ? duplicate ? {
+      ...emptyForm,
+      ...buildEventDuplicateDraft(event, t("events.copySuffix")),
+      startsAt: localDateValue(event.startsAt),
+      endsAt: localDateValue(event.endsAt),
+    } : {
       ...emptyForm,
       ...event,
       startsAt: localDateValue(event.startsAt),
       endsAt: localDateValue(event.endsAt),
       capacity: event.capacity ?? "",
     } : emptyForm);
-    setModal(event || "create");
+    setModal(duplicate ? "create" : event || "create");
   };
 
   const updateField = (key) => (e) => {
@@ -186,6 +201,10 @@ export default function AdminEvents() {
     if ((form.image && !isHttpUrl(form.image)) ||
         (form.mode !== "onsite" && form.meetingUrl && !isHttpUrl(form.meetingUrl))) {
       setError(t("events.invalidUrl"));
+      return;
+    }
+    if (form.sessionUrl && !isSafeHttpsUrl(form.sessionUrl)) {
+      setError(t("events.invalidSessionUrl"));
       return;
     }
 
@@ -331,6 +350,7 @@ export default function AdminEvents() {
                     <td>{t("events.participantsCount", { count: event.registrationCount })}{event.capacity !== null ? ` / ${event.capacity}` : ""}</td>
                     <td><div className="ev-admin-actions">
                       <button className="btn btn-ghost" type="button" onClick={() => openForm(event)}>{t("events.edit")}</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => openForm(event, true)} aria-label={t("events.duplicate")} title={t("events.duplicate")}><FiCopy size={16} /></button>
                       <button className="btn btn-ghost" type="button" onClick={() => showParticipants(event)} aria-label={t("events.viewParticipants")}><FiUsers size={16} /></button>
                       {event.status === "draft" && <button className="btn btn-primary" type="button" onClick={() => setStatus(event, "published")}>{t("events.publish")}</button>}
                       {event.status === "published" && <button className="btn btn-ghost" type="button" onClick={() => setStatus(event, "cancelled")}>{t("events.cancelEvent")}</button>}
@@ -390,6 +410,7 @@ export default function AdminEvents() {
             </div>
             {form.mode !== "online" && <label>{t("events.location")}<input required value={form.location} onChange={updateField("location")} /></label>}
             {form.mode !== "onsite" && <label>{t("events.meetingUrl")}<input required type="url" value={form.meetingUrl} onChange={updateField("meetingUrl")} placeholder="https://" /></label>}
+            <label>{t("events.sessionUrl")}<input type="url" value={form.sessionUrl} onChange={updateField("sessionUrl")} placeholder="https://" /><small>{t("events.sessionUrlHint")}</small></label>
           </section>
 
           <section className="ev-form-section">

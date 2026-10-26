@@ -37,6 +37,8 @@ import testimonialScreenshotRoutes from "./routes/testimonialScreenshot.routes.j
 import driveProxyRoutes            from "./routes/driveProxy.routes.js";
 import ceremonyRoutes              from "./routes/ceremony.routes.js";
 import eventsRoutes                from "./routes/events.routes.js";
+import newsletterRoutes            from "./routes/newsletter.routes.js";
+import { startNewsletterWorker } from "./services/newsletter.service.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -183,6 +185,7 @@ app.use("/api/testimonial-screenshots", apiLimiter, testimonialScreenshotRoutes)
 app.use("/api/drive-thumbnail",     thumbnailLimiter, driveProxyRoutes);
 app.use("/api/ceremony",            apiLimiter, ceremonyRoutes);
 app.use("/api/events",              apiLimiter, eventsRoutes);
+app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────
@@ -198,6 +201,7 @@ process.on("unhandledRejection", (err) => {
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
+  startNewsletterWorker();
   app.listen(PORT, () => {
     console.log("─────────────────────────────────────");
     console.log(`🚀 Server running on port ${PORT}`);

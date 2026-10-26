@@ -15,6 +15,9 @@ Projet réalisé par **Chaima Touj**, étudiante en BTS Informatique de Gestion 
 - **Formations** — catalogue multi-semaines avec contenu vidéo, suivi de progression, demandes d'inscription
 - **Assistant IA SAGE** — assistant conversationnel contextualisé au profil de l'étudiant (candidatures, entretiens, formations), avec protection anti-jailbreak
 - **Cérémonie de projets** — soumission de projets, vote de la communauté (1 à 3 projets), classement en direct, clôture et annonce du gagnant
+- **Événements** — gestion et duplication en brouillon, inscriptions, annulations, et accès étudiant au lien de séance uniquement après l'heure de fin configurée
+- **Actualités** — rédaction en brouillon ou publication, duplication, champs SEO, contenu Markdown, aperçu, conclusion, appel à l'action et FAQ
+- **Newsletter** — abonnements persistants, emails de bienvenue et de publication, désabonnement sécurisé, gestion admin et export PDF
 - **Messagerie interne** — échanges directs entre étudiants et administrateurs
 - **Notifications** — suivi des événements clés de la plateforme
 - **Tableau de bord administrateur** — gestion des offres, formations, utilisateurs, actualités, et statistiques réelles d'utilisation
@@ -44,7 +47,9 @@ Projet réalisé par **Chaima Touj**, étudiante en BTS Informatique de Gestion 
 - Groq API (modèle `openai/gpt-oss-20b`) — assistant SAGE
 - Google OAuth & Facebook OAuth
 - Google Drive API (hébergement des vidéos de formation)
-- Brevo (envoi d'emails transactionnels en production)
+- Gmail SMTP via Nodemailer (emails transactionnels et newsletter)
+
+La newsletter réutilise les variables backend existantes `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `CLIENT_URL` et `JWT_SECRET`. `JWT_SECRET` doit rester stable tant que des livraisons sont en attente ou que des abonnés actifs existent, car il sert aussi à chiffrer les jetons de désabonnement stockés pour les prochains emails.
 
 **Déploiement**
 - Render (frontend + backend), intégration continue sur push vers `main`

@@ -10,6 +10,7 @@ import NewsArticleBody from "../../components/common/NewsArticleBody.jsx";
 import { newsService } from "../../services/news.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
 import { isSafeContentUrl } from "../../utils/safeContentUrl.js";
+import { buildNewsDuplicateDraft } from "../../utils/newsDuplication.js";
 import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -30,6 +31,7 @@ const EMPTY_FORM = {
   articleUrl: "",
   category: "",
   publishedAt: new Date().toISOString().slice(0, 10),
+  status: "draft",
   image: "",
 };
 
@@ -47,6 +49,7 @@ function articleToForm(article) {
     articleUrl:  article._id || "",
     category:    article.category || "",
     publishedAt: article.publishedAt ? new Date(article.publishedAt).toISOString().slice(0, 10) : "",
+    status: article.status || "published",
     image:       article.image || "",
   };
 }
@@ -61,7 +64,7 @@ function formatDate(iso) {
 }
 
 /* ─── Menu d'actions par ligne ("•••" → Modifier / Supprimer) ────────────── */
-function RowActionsMenu({ onEdit, onDelete }) {
+function RowActionsMenu({ onEdit, onDuplicate, onDelete }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -81,6 +84,9 @@ function RowActionsMenu({ onEdit, onDelete }) {
         <div className="af-row-menu-dropdown" role="menu">
           <button type="button" role="menuitem" onClick={() => { setOpen(false); onEdit(); }}>
             {t("adminFormations.editAction")}
+          </button>
+          <button type="button" role="menuitem" onClick={() => { setOpen(false); onDuplicate(); }}>
+            {t("adminNews.duplicate")}
           </button>
           <button type="button" role="menuitem" className="af-row-menu-danger" onClick={() => { setOpen(false); onDelete(); }}>
             {t("notifications.deleteLabel")}
@@ -159,6 +165,7 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
       metaDescription: form.metaDescription.trim(),
       category:    form.category.trim(),
       publishedAt: form.publishedAt,
+      status: form.status,
       image:       form.image.trim(),
     });
   };
@@ -290,6 +297,13 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
           <div className="af-form-row">
             <label className="label" htmlFor="an-date">{t("adminNews.publishedAtLabel")}</label>
             <input id="an-date" type="date" className="input" value={form.publishedAt} onChange={set("publishedAt")} />
+          </div>
+          <div className="af-form-row">
+            <label className="label" htmlFor="an-status">{t("adminNews.statusLabel")}</label>
+            <select id="an-status" className="input" value={form.status} onChange={set("status")}>
+              <option value="draft">{t("adminNews.statusDraft")}</option>
+              <option value="published">{t("adminNews.statusPublished")}</option>
+            </select>
           </div>
         </div>
 
@@ -438,7 +452,7 @@ export default function AdminNews() {
   const [deleteError,  setDeleteError]  = useState("");
 
   const loadNews = useCallback(() => {
-    newsService.getAll()
+    newsService.getAdmin()
       .then(({ data }) => { setNews(data); setError(false); })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
@@ -448,13 +462,18 @@ export default function AdminNews() {
 
   const openCreate = () => { setFormError(""); setFormModal("create"); };
   const openEdit   = (article) => { setFormError(""); setFormModal(article); };
+  const openDuplicate = (article) => {
+    const duplicate = buildNewsDuplicateDraft(article, t("adminNews.copySuffix"));
+    setFormError("");
+    setFormModal({ ...duplicate, _id: null, title: duplicate.title });
+  };
   const closeForm  = () => { if (!submitting) { setFormModal(null); setFormError(""); } };
 
   const handleFormSubmit = async (payload) => {
     setSubmitting(true);
     setFormError("");
     try {
-      if (formModal === "create") {
+      if (formModal === "create" || !formModal._id) {
         await newsService.createNews(payload);
       } else {
         await newsService.updateNews(formModal._id, payload);
@@ -524,6 +543,7 @@ export default function AdminNews() {
                     <th>{t("adminNews.colArticle")}</th>
                     <th>{t("adminNews.colCategory")}</th>
                     <th>{t("adminNews.colDate")}</th>
+                    <th>{t("adminNews.statusLabel")}</th>
                     <th>{t("adminNews.colAuthor")}</th>
                     <th></th>
                   </tr>
@@ -539,9 +559,10 @@ export default function AdminNews() {
                       </td>
                       <td><span className="badge badge-primary">{a.category}</span></td>
                       <td>{formatDate(a.publishedAt)}</td>
+                      <td><span className={`badge ${a.status === "draft" ? "badge-warning" : "badge-success"}`}>{a.status === "draft" ? t("adminNews.statusDraft") : t("adminNews.statusPublished")}</span></td>
                       <td>{a.author}</td>
                       <td>
-                        <RowActionsMenu onEdit={() => openEdit(a)} onDelete={() => openDelete(a)} />
+                        <RowActionsMenu onEdit={() => openEdit(a)} onDuplicate={() => openDuplicate(a)} onDelete={() => openDelete(a)} />
                       </td>
                     </tr>
                   ))}
@@ -554,13 +575,13 @@ export default function AdminNews() {
 
       {formModal && (
         <Modal
-          title={formModal === "create" ? t("adminNews.newArticle") : t("adminNews.editArticleTitle", { title: formModal.title })}
+          title={formModal === "create" || !formModal._id ? t("adminNews.newArticle") : t("adminNews.editArticleTitle", { title: formModal.title })}
           onClose={closeForm}
           maxWidth={640}
         >
           <NewsForm
             initial={formModal === "create" ? EMPTY_FORM : articleToForm(formModal)}
-            isEdit={formModal !== "create"}
+            isEdit={formModal !== "create" && Boolean(formModal._id)}
             submitting={submitting}
             formError={formError}
             onSubmit={handleFormSubmit}

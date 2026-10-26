@@ -3,11 +3,13 @@ import Event from "../models/event.model.js";
 import EventRegistration from "../models/eventRegistration.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getActiveStudents, notifyAdmins, notifyUser, notifyUsers } from "../services/notification.service.js";
+import { processNewsletterJobs } from "../services/newsletter.service.js";
+import { isSafeSessionUrl, isSessionLinkAvailable } from "../utils/eventSessionAccess.js";
 
 const EVENT_FIELDS = [
   "title", "description", "image", "category", "startsAt", "endsAt",
   "timezone", "mode", "location", "meetingUrl", "capacity",
-  "registrationRequired", "status",
+  "sessionUrl", "registrationRequired", "status",
 ];
 
 const fail = (message, statusCode) => {
@@ -68,7 +70,7 @@ function validateEventPayload(data, { partial = false } = {}) {
     fail("La capacité doit être un entier positif ou null.", 400);
   }
   if (payload.capacity !== undefined && payload.capacity !== null) payload.capacity = Number(payload.capacity);
-  const stringLimits = { image: 2048, location: 500, meetingUrl: 2048, timezone: 100 };
+  const stringLimits = { image: 2048, location: 500, meetingUrl: 2048, sessionUrl: 2048, timezone: 100 };
   for (const [key, maxLength] of Object.entries(stringLimits)) {
     if (payload[key] !== undefined && typeof payload[key] !== "string") fail(`${key} doit être une chaîne.`, 400);
     if (typeof payload[key] === "string") {
@@ -81,11 +83,14 @@ function validateEventPayload(data, { partial = false } = {}) {
     try { new Intl.DateTimeFormat("en", { timeZone: payload.timezone }); }
     catch { fail("Le fuseau horaire est invalide.", 400); }
   }
-  for (const key of ["image", "meetingUrl"]) {
+  for (const key of ["image", "meetingUrl", "sessionUrl"]) {
     if (payload[key]) {
       let parsed;
       try { parsed = new URL(payload[key]); } catch { fail(`L'URL ${key} est invalide.`, 400); }
-      if (!["http:", "https:"].includes(parsed.protocol)) fail(`L'URL ${key} doit utiliser HTTP ou HTTPS.`, 400);
+      const allowedProtocols = key === "sessionUrl" ? ["https:"] : ["http:", "https:"];
+      if (!allowedProtocols.includes(parsed.protocol) || parsed.username || parsed.password) {
+        fail(`L'URL ${key} n'utilise pas un protocole autorisé.`, 400);
+      }
     }
   }
   if (payload.status !== undefined && !["draft", "published", "cancelled", "archived"].includes(payload.status)) {
@@ -216,7 +221,11 @@ export const getPublicEvents = asyncHandler(async (req, res) => {
   if (req.query.period === "upcoming") filter.startsAt = { $gte: now };
   if (req.query.period === "past") filter.startsAt = { $lt: now };
   const sortDirection = req.query.period === "past" ? -1 : 1;
-  const events = await Event.find(filter).select(publicProjection).sort({ startsAt: sortDirection }).lean();
+  const events = await Event.find(filter).select(`${publicProjection} sessionUrl`).sort({ startsAt: sortDirection }).lean();
+  for (const event of events) {
+    event.sessionLinkAvailable = isSessionLinkAvailable(event, now);
+    delete event.sessionUrl;
+  }
   res.json({ events });
 });
 
@@ -224,9 +233,11 @@ export const getPublicEvents = asyncHandler(async (req, res) => {
 export const getPublicEvent = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
   const event = await Event.findOne({ _id: req.params.id, status: { $in: ["published", "cancelled"] } })
-    .select(publicProjection)
+    .select(`${publicProjection} sessionUrl`)
     .lean();
   if (!event) fail("Événement introuvable.", 404);
+  event.sessionLinkAvailable = isSessionLinkAvailable(event);
+  delete event.sessionUrl;
   res.json({ event });
 });
 
@@ -262,8 +273,13 @@ export const deleteEvent = asyncHandler(async (req, res) => {
 // POST /api/events
 export const createEvent = asyncHandler(async (req, res) => {
   const payload = validateEventPayload(req.body);
-  const event = await Event.create({ ...payload, createdBy: req.user._id });
+  const event = await Event.create({
+    ...payload,
+    createdBy: req.user._id,
+    ...(payload.status === "published" ? { newsletterCampaignEligibleAt: new Date() } : {}),
+  });
   if (event.status === "published") await announcePublishedEvent(event);
+  if (event.status === "published") void processNewsletterJobs();
   res.status(201).json({ event });
 });
 
@@ -288,6 +304,7 @@ export const updateEvent = asyncHandler(async (req, res) => {
     capacity: event.capacity,
     registrationRequired: event.registrationRequired,
     status: event.status,
+    newsletterCampaignEligibleAt: event.newsletterCampaignEligibleAt,
   };
   if (payload.status === "archived" && event.status === "published" && event.startsAt > new Date()) {
     fail("Annulez d'abord un événement à venir avant de l'archiver.", 409);
@@ -310,6 +327,14 @@ export const updateEvent = asyncHandler(async (req, res) => {
     fail("Un lien de visioconférence est requis pour un événement en ligne ou hybride.", 400);
   }
   Object.assign(event, payload);
+  if (
+    previous.status !== "published" &&
+    event.status === "published" &&
+    !previous.newsletterCampaignEligibleAt &&
+    !event.newsletterCampaignSentAt
+  ) {
+    event.newsletterCampaignEligibleAt = new Date();
+  }
   if (event.capacity !== null && event.capacity < event.registrationCount) {
     fail("La capacité ne peut pas être inférieure au nombre d'inscriptions actives.", 409);
   }
@@ -358,6 +383,9 @@ export const updateEvent = asyncHandler(async (req, res) => {
       emailMethod: "sendEventUpdated",
       emailData: { recipientName: student.name, event: getEventEmailData(event) },
     }));
+  }
+  if (event.status === "published" && event.newsletterCampaignEligibleAt && !event.newsletterCampaignSentAt) {
+    void processNewsletterJobs();
   }
   res.json({ event });
 });
@@ -521,4 +549,26 @@ export const getEventRegistrations = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
   res.json({ registrations });
+});
+
+export const getEventSessionLink = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
+  const event = await Event.findOne({ _id: req.params.id, status: "published" })
+    .select("sessionUrl endsAt registrationRequired")
+    .lean();
+  if (!event) fail("Événement introuvable.", 404);
+  if (!event.endsAt || event.endsAt > new Date()) {
+    fail("Le lien de séance sera disponible après la fin de l'événement.", 403);
+  }
+  if (!event.sessionUrl) fail("Le lien de séance n'est pas encore renseigné.", 404);
+  if (!isSafeSessionUrl(event.sessionUrl)) fail("Le lien de séance configuré n'est pas sécurisé.", 500);
+  if (event.registrationRequired) {
+    const registration = await EventRegistration.exists({
+      event: event._id,
+      student: req.user._id,
+      status: "registered",
+    });
+    if (!registration) fail("Une inscription active est nécessaire pour accéder au lien de séance.", 403);
+  }
+  res.set("Cache-Control", "no-store").json({ sessionUrl: event.sessionUrl });
 });

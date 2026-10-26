@@ -7,6 +7,7 @@ import {
   deleteEvent,
   getAdminEvents,
   getEventRegistrations,
+  getEventSessionLink,
   getMyEventRegistrations,
   getPublicEvent,
   getPublicEvents,
@@ -21,6 +22,7 @@ router.get("/my-registrations", protect, authorize("étudiant"), getMyEventRegis
 router.get("/admin", protect, authorize("admin"), getAdminEvents);
 router.post("/", protect, authorize("admin"), createEvent);
 router.get("/:id/registrations", protect, authorize("admin"), getEventRegistrations);
+router.get("/:id/session-link", protect, authorize("étudiant"), getEventSessionLink);
 router.post("/:id/registrations", protect, authorize("étudiant"), requireStudentPhone, registerForEvent);
 router.delete("/:id/registrations", protect, authorize("étudiant"), cancelEventRegistration);
 router.delete("/:id", protect, authorize("admin"), deleteEvent);

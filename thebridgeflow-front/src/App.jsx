@@ -43,6 +43,9 @@ import CeremonyArchives         from "./pages/CeremonyArchives.jsx";
 import CeremonyArchiveDetail    from "./pages/CeremonyArchiveDetail.jsx";
 import EventsPage               from "./pages/EventsPage.jsx";
 import EventDetailPage          from "./pages/EventDetailPage.jsx";
+import EventSessionAccessPage   from "./pages/EventSessionAccessPage.jsx";
+import NewsletterUnsubscribePage from "./pages/NewsletterUnsubscribePage.jsx";
+import AdminNewsletter from "./pages/dashboard/AdminNewsletter.jsx";
 import AdminEvents              from "./pages/dashboard/AdminEvents.jsx";
 import MyEvents                 from "./pages/dashboard/MyEvents.jsx";
 import MyCeremonyProjects       from "./pages/dashboard/MyCeremonyProjects.jsx";
@@ -66,9 +69,10 @@ import AdminSettings            from "./pages/dashboard/AdminSettings.jsx";
 
 
 function ProtectedRoute({ children, role }) {
+  const location = useLocation();
   const { user, loading } = useAuth();
   if (loading) return <div style={{display:"flex",justifyContent:"center",alignItems:"center",height:"100vh"}}><Loader size="lg" /></div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />;
   if (role && user.role !== role) return <Navigate to="/" replace />;
   return children;
 }
@@ -165,6 +169,9 @@ export default function App() {
       <Route path="/dashboard/admin/news" element={
         <ProtectedRoute role="admin"><AdminNews/></ProtectedRoute>
       }/>
+      <Route path="/dashboard/admin/newsletter" element={
+        <ProtectedRoute role="admin"><AdminNewsletter/></ProtectedRoute>
+      }/>
       <Route path="/dashboard/admin/events" element={
         <ProtectedRoute role="admin"><AdminEvents/></ProtectedRoute>
       }/>
@@ -204,6 +211,7 @@ export default function App() {
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
       <Route path="/events"            element={<EventsPage />} />
+      <Route path="/events/:id/session" element={<ProtectedRoute role="étudiant"><EventSessionAccessPage /></ProtectedRoute>} />
       <Route path="/events/:id"        element={<EventDetailPage />} />
 
       <Route path="/ceremonie"                    element={<CeremonyPage />} />
@@ -213,6 +221,7 @@ export default function App() {
 
       <Route path="/blog"                 element={<BlogPage />} />
       <Route path="/blog/:id"             element={<NewsDetailPage />} />
+      <Route path="/newsletter/unsubscribe/:token" element={<NewsletterUnsubscribePage />} />
       <Route path="/tarifs"               element={<PricingPage />} />
       <Route path="/guides"               element={<GuidesPage />} />
       <Route path="/aide"                 element={<HelpPage />} />

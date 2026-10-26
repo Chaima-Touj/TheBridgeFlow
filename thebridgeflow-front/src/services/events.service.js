@@ -3,6 +3,7 @@ import api from "./api.js";
 export const eventsService = {
   getPublic: (period) => api.get("/events", { params: period ? { period } : undefined }),
   getOne: (id) => api.get(`/events/${id}`),
+  getSessionLink: (id) => api.get(`/events/${id}/session-link`),
   getAdmin: () => api.get("/events/admin"),
   create: (event) => api.post("/events", event),
   update: (id, event) => api.patch(`/events/${id}`, event),

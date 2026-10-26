@@ -169,6 +169,17 @@ export default function EventDetailPage() {
                       </div>
                     )}
                   </div>
+                  {event.sessionLinkAvailable && (
+                    <div className="ev-detail__session-link">
+                      <button
+                        className="btn btn-primary"
+                        type="button"
+                        onClick={() => navigate(`/events/${encodeURIComponent(id)}/session`)}
+                      >
+                        {t("events.openSessionLink")}
+                      </button>
+                    </div>
+                  )}
                   <section className="ev-detail__description-section">
                     <h2>{t("events.descriptionLabel")}</h2>
                     <p className="ev-detail__description">{event.description}</p>

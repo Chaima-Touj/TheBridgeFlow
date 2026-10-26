@@ -868,6 +868,93 @@ const htmlToPlainText = (html) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
+const NEWSLETTER_COPY = {
+  fr: {
+    welcomeSubject: "Bienvenue dans la newsletter TheBridgeFlow",
+    welcomeTitle: "Bienvenue dans la communauté !",
+    welcomeBody: "Votre inscription à la newsletter TheBridgeFlow est confirmée. Nous vous informerons des nouvelles actualités et des événements publiés.",
+    unsubscribe: "Se désabonner",
+    adminSubject: "Nouvel abonné à la newsletter",
+    adminTitle: "Nouvelle inscription à la newsletter",
+    adminBody: "Un visiteur vient de s'abonner à la newsletter.",
+    publicationSubject: "Nouveauté TheBridgeFlow : ",
+    publicationTitle: "Une nouveauté est disponible",
+    publicationButton: "Découvrir",
+    publicationFooter: "Vous recevez cet email car vous êtes abonné à la newsletter TheBridgeFlow.",
+  },
+  en: {
+    welcomeSubject: "Welcome to TheBridgeFlow newsletter",
+    welcomeTitle: "Welcome to the community!",
+    welcomeBody: "Your subscription to the TheBridgeFlow newsletter is confirmed. We will let you know when new articles and events are published.",
+    unsubscribe: "Unsubscribe",
+    adminSubject: "New newsletter subscriber",
+    adminTitle: "New newsletter subscription",
+    adminBody: "A visitor has subscribed to the newsletter.",
+    publicationSubject: "TheBridgeFlow update: ",
+    publicationTitle: "A new update is available",
+    publicationButton: "Discover",
+    publicationFooter: "You received this email because you subscribed to TheBridgeFlow newsletter.",
+  },
+  ar: {
+    welcomeSubject: "مرحبًا بك في نشرة TheBridgeFlow",
+    welcomeTitle: "مرحبًا بك في مجتمعنا!",
+    welcomeBody: "تم تأكيد اشتراكك في نشرة TheBridgeFlow. سنخبرك عند نشر مقالات أو فعاليات جديدة.",
+    unsubscribe: "إلغاء الاشتراك",
+    adminSubject: "مشترك جديد في النشرة",
+    adminTitle: "اشتراك جديد في النشرة",
+    adminBody: "اشترك زائر جديد في النشرة.",
+    publicationSubject: "جديد TheBridgeFlow: ",
+    publicationTitle: "هناك جديد متاح",
+    publicationButton: "اكتشف",
+    publicationFooter: "تتلقى هذا البريد لأنك مشترك في نشرة TheBridgeFlow.",
+  },
+};
+
+const newsletterCopy = (language) => NEWSLETTER_COPY[language] || NEWSLETTER_COPY.fr;
+
+const newsletterWelcomeTemplate = ({ language = "fr", unsubscribeUrl }) => {
+  const copy = newsletterCopy(language);
+  return {
+    subject: copy.welcomeSubject,
+    html: layout(copy.welcomeTitle, `
+      <h1 style="font-size:24px;color:#0F172A;">${copy.welcomeTitle}</h1>
+      <p style="color:#475569;line-height:1.7;">${copy.welcomeBody}</p>
+      <p style="font-size:13px;color:#64748B;margin-top:32px;">
+        <a href="${unsubscribeUrl}" style="color:#475569;">${copy.unsubscribe}</a>
+      </p>
+    `),
+  };
+};
+
+const newsletterAdminTemplate = ({ language = "fr", subscriberEmail }) => {
+  const copy = newsletterCopy(language);
+  return {
+    subject: copy.adminSubject,
+    html: layout(copy.adminTitle, `
+      <h1 style="font-size:24px;color:#0F172A;">${copy.adminTitle}</h1>
+      <p style="color:#475569;line-height:1.7;">${copy.adminBody}</p>
+      <p style="color:#0F172A;"><strong>${escapeHtml(subscriberEmail)}</strong></p>
+    `),
+  };
+};
+
+const newsletterPublicationTemplate = ({ language = "fr", title, excerpt, url, unsubscribeUrl }) => {
+  const copy = newsletterCopy(language);
+  const subjectTitle = String(title || "").replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, 200);
+  return {
+    subject: `${copy.publicationSubject}${subjectTitle}`,
+    html: layout(copy.publicationTitle, `
+      <h1 style="font-size:24px;color:#0F172A;">${copy.publicationTitle}</h1>
+      <h2 style="font-size:19px;color:#0F172A;">${escapeHtml(title)}</h2>
+      <p style="color:#475569;line-height:1.7;">${escapeHtml(excerpt || "")}</p>
+      <div style="text-align:center;">${button(copy.publicationButton, url)}</div>
+      <p style="font-size:13px;color:#64748B;margin-top:32px;">${copy.publicationFooter}
+        <a href="${escapeHtml(unsubscribeUrl || "")}" style="color:#475569;">${copy.unsubscribe}</a>
+      </p>
+    `),
+  };
+};
+
 const sendEmail = async ({ to, subject, html }) => {
   const startedAt = Date.now();
   console.info("[email] Sending email", { recipient: to, subject });
@@ -923,6 +1010,9 @@ const emailService = {
   sendVoteConfirmation:    (to, data) => sendEmail({ to, ...voteConfirmationTemplate(data) }),
   sendWinnerCongrats:      (to, data) => sendEmail({ to, ...winnerCongratsTemplate(data) }),
   sendCeremonyResults:     (to, data) => sendEmail({ to, ...ceremonyResultsTemplate(data) }),
+  sendNewsletterWelcome: (to, data) => sendEmail({ to, ...newsletterWelcomeTemplate(data) }),
+  sendNewsletterAdmin: (to, data) => sendEmail({ to, ...newsletterAdminTemplate(data) }),
+  sendNewsletterPublication: (to, data) => sendEmail({ to, ...newsletterPublicationTemplate(data) }),
   sendCeremonyProjectAccepted: (to, data) => sendEmail({ to, ...ceremonyProjectDecisionTemplate({ ...data, accepted: true }) }),
   sendCeremonyProjectRejected: (to, data) => sendEmail({ to, ...ceremonyProjectDecisionTemplate({ ...data, accepted: false }) }),
 };

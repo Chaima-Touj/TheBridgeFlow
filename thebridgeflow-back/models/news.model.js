@@ -24,8 +24,13 @@ const newsSchema = new mongoose.Schema({
   image:       { type: String, required: true },
   author:      { type: String, default: "admin" },
   publishedAt: { type: Date, default: Date.now },
+  status: { type: String, enum: ["draft", "published"], default: undefined, index: true },
+  newsletterCampaignEligibleAt: { type: Date, default: null },
+  newsletterCampaignClaimedAt: { type: Date, default: null },
+  newsletterCampaignSentAt: { type: Date, default: null },
 }, { timestamps: true });
 
 newsSchema.index({ publishedAt: -1 });
+newsSchema.index({ status: 1, publishedAt: -1 });
 
 export default mongoose.model("News", newsSchema);
