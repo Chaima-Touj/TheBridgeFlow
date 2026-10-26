@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { FiX, FiCheckCircle, FiAlertTriangle, FiInfo, FiTrash2, FiBell } from "react-icons/fi";
+import DestructiveActionModal from "../common/DestructiveActionModal.jsx";
 import "./NotificationPanel.css";
 
 const TYPE_CONFIG = {
@@ -26,6 +28,9 @@ function timeAgo(dateStr, t) {
 export default function NotificationPanel({ notifications, onClose, onMarkAsRead, onMarkAllRead, onDelete }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleItemClick = (n) => {
@@ -34,6 +39,7 @@ export default function NotificationPanel({ notifications, onClose, onMarkAsRead
   };
 
   return (
+    <>
     <div className="np" role="dialog" aria-label={t("sidebar.student.notifications")}>
 
       {/* ── Header ──────────────────────────────────────────────────── */}
@@ -87,7 +93,11 @@ export default function NotificationPanel({ notifications, onClose, onMarkAsRead
                 {!n.isRead && <div className="np__item-dot" aria-label={t("messages.unreadBadge")}/>}
                 <button
                   className="np__item-del"
-                  onClick={(e) => { e.stopPropagation(); onDelete(n._id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteError("");
+                    setDeleteTarget(n);
+                  }}
                   aria-label={t("notifications.deleteLabel")}
                   title={t("notifications.deleteLabel")}
                 >
@@ -100,5 +110,38 @@ export default function NotificationPanel({ notifications, onClose, onMarkAsRead
       </div>
 
     </div>
+      {deleteTarget && (
+        <DestructiveActionModal
+          title={t("notificationPanel.deleteTitle")}
+          description={t("adminDestructive.genericPrompt")}
+          itemName={deleteTarget.title}
+          consequence={t("notificationPanel.deleteWarning")}
+          error={deleteError}
+          isLoading={deleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={() => {
+            if (!deleting) {
+              setDeleteTarget(null);
+              setDeleteError("");
+            }
+          }}
+          onConfirm={async () => {
+            if (!deleteTarget || deleting) return;
+            setDeleting(true);
+            setDeleteError("");
+            try {
+              await onDelete(deleteTarget._id);
+              setDeleteTarget(null);
+            } catch (err) {
+              setDeleteError(err?.response?.data?.message || t("notificationPanel.deleteError"));
+            } finally {
+              setDeleting(false);
+            }
+          }}
+        />
+      )}
+    </>
   );
 }

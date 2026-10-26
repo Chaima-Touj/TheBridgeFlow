@@ -7,6 +7,7 @@ import {
   FiZap, FiCalendar, FiMessageSquare, FiAward,
 } from "react-icons/fi";
 import DashboardLayout              from "../../components/layout/DashboardLayout.jsx";
+import DestructiveActionModal       from "../../components/common/DestructiveActionModal.jsx";
 import { notificationsService }     from "../../services/notifications.service.js";
 import "./NotificationsPage.css";
 
@@ -93,13 +94,11 @@ function StatCard({ value, label, icon: Icon, color }) {
 
 /* ── Notification card ────────────────────────────── */
 function NotifCard({ n, t, onMarkRead, onDelete }) {
-  const [removing, setRemoving] = useState(false);
   const cfg = getSmartIcon(n);
 
-  const handleDelete = async (e) => {
+  const handleDelete = (e) => {
     e.stopPropagation();
-    setRemoving(true);
-    await onDelete(n._id);
+    onDelete(n);
   };
 
   const handleClick = () => {
@@ -108,7 +107,7 @@ function NotifCard({ n, t, onMarkRead, onDelete }) {
 
   return (
     <div
-      className={`notif-card${!n.isRead ? " notif-card--unread" : ""}${removing ? " notif-card--removing" : ""}`}
+      className={`notif-card${!n.isRead ? " notif-card--unread" : ""}`}
       onClick={handleClick}
       role={!n.isRead ? "button" : undefined}
       tabIndex={!n.isRead ? 0 : undefined}
@@ -203,6 +202,9 @@ export default function NotificationsPage() {
   const [page,          setPage]          = useState(1);
   const [totalCount,    setTotalCount]    = useState(0);
   const [loadingMore,   setLoadingMore]   = useState(false);
+  const [deleteTarget,  setDeleteTarget]  = useState(null);
+  const [deleting,      setDeleting]      = useState(false);
+  const [deleteError,   setDeleteError]   = useState("");
 
   /* load — first page */
   useEffect(() => {
@@ -277,22 +279,26 @@ export default function NotificationsPage() {
     catch { /* revert if needed — not critical */ }
   }, []);
 
-  const handleDelete = useCallback(async (id) => {
-    // Small delay to allow exit animation
-    setTimeout(() => {
-      setNotifications((prev) => prev.filter((n) => n._id !== id));
-      setTotalCount((prev) => Math.max(0, prev - 1));
-    }, 200);
-    try { await notificationsService.delete(id); }
-    catch {
-      // Revert on error — reload from server
-      notificationsService.getAll({ page: 1, limit: PAGE_SIZE }).then(({ data }) => {
-        setNotifications(data.notifications || []);
-        setTotalCount(data.total ?? (data.notifications || []).length);
-        setPage(1);
-      }).catch(() => {});
-    }
+  const handleDelete = useCallback((notification) => {
+    setDeleteError("");
+    setDeleteTarget(notification);
   }, []);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await notificationsService.delete(deleteTarget._id);
+      setNotifications((prev) => prev.filter(({ _id }) => _id !== deleteTarget._id));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      setDeleteTarget(null);
+    } catch (err) {
+      setDeleteError(err?.response?.data?.message || t("notificationPanel.deleteError"));
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleMarkAllRead = useCallback(async () => {
     if (stats.unread === 0 || markingAll) return;
@@ -459,6 +465,26 @@ export default function NotificationsPage() {
         )}
 
       </div>
+      {deleteTarget && (
+        <DestructiveActionModal
+          title={t("notificationPanel.deleteTitle")}
+          description={t("adminDestructive.genericPrompt")}
+          itemName={deleteTarget.title}
+          consequence={t("notificationPanel.deleteWarning")}
+          error={deleteError}
+          isLoading={deleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={() => {
+            if (!deleting) {
+              setDeleteTarget(null);
+              setDeleteError("");
+            }
+          }}
+          onConfirm={confirmDelete}
+        />
+      )}
     </DashboardLayout>
   );
 }

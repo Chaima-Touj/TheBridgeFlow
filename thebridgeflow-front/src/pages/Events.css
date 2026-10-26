@@ -770,6 +770,19 @@
   color: var(--text-muted);
 }
 
+.ev-participants__export {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.ev-participants__export .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
 @media (max-width: 700px) {
   .ev-main,
   .ev-detail-wrap {
@@ -888,5 +901,9 @@
 
   .ev-participants > div {
     grid-template-columns: 1fr;
+  }
+
+  .ev-participants__export .btn {
+    width: 100%;
   }
 }

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiAlertTriangle, FiCalendar, FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
+import { FiCalendar, FiCheck, FiDownload, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
 import { eventsService } from "../../services/events.service.js";
 import { formationsService } from "../../services/formations.service.js";
+import { buildEventParticipantEmailsPdf } from "../../utils/exportEventParticipantEmails.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -97,9 +99,16 @@ export default function AdminEvents() {
   const [deletingEventId, setDeletingEventId] = useState(null);
   const [pendingDeleteEvent, setPendingDeleteEvent] = useState(null);
   const [deleteError, setDeleteError] = useState("");
+  const [pendingCancelEvent, setPendingCancelEvent] = useState(null);
+  const [cancelEventError, setCancelEventError] = useState("");
+  const [cancelingEventId, setCancelingEventId] = useState(null);
+  const [cancelEventFromForm, setCancelEventFromForm] = useState(false);
   const [toast, setToast] = useState(null);
   const submitLock = useRef(false);
   const deleteLock = useRef(false);
+  const cancelLock = useRef(false);
+  const cancelConfirmationAccepted = useRef(false);
+  const eventFormRef = useRef(null);
   const toastTimer = useRef(null);
 
   const showToast = useCallback((type, message) => {
@@ -180,6 +189,19 @@ export default function AdminEvents() {
       return;
     }
 
+    if (
+      modal !== "create" &&
+      modal.status !== "cancelled" &&
+      form.status === "cancelled" &&
+      !cancelConfirmationAccepted.current
+    ) {
+      setCancelEventError("");
+      setCancelEventFromForm(true);
+      setPendingCancelEvent(modal);
+      return;
+    }
+    cancelConfirmationAccepted.current = false;
+
     submitLock.current = true;
     setSubmitting(true);
     setError("");
@@ -202,7 +224,40 @@ export default function AdminEvents() {
     }
   };
 
+  const confirmCancelEvent = async () => {
+    if (!pendingCancelEvent || cancelLock.current) return;
+
+    if (cancelEventFromForm) {
+      cancelConfirmationAccepted.current = true;
+      setPendingCancelEvent(null);
+      setCancelEventFromForm(false);
+      eventFormRef.current?.requestSubmit();
+      return;
+    }
+
+    cancelLock.current = true;
+    setCancelingEventId(pendingCancelEvent._id);
+    setCancelEventError("");
+    try {
+      await eventsService.update(pendingCancelEvent._id, { status: "cancelled" });
+      setPendingCancelEvent(null);
+      load();
+      showToast("success", t("events.cancelSuccess"));
+    } catch (err) {
+      setCancelEventError(err.response?.data?.message || t("events.actionError"));
+    } finally {
+      cancelLock.current = false;
+      setCancelingEventId(null);
+    }
+  };
+
   const setStatus = async (event, status) => {
+    if (status === "cancelled" && event.status !== "cancelled") {
+      setCancelEventError("");
+      setCancelEventFromForm(false);
+      setPendingCancelEvent(event);
+      return;
+    }
     setError("");
     try {
       await eventsService.update(event._id, { status });
@@ -242,6 +297,17 @@ export default function AdminEvents() {
       deleteLock.current = false;
       setDeletingEventId(null);
     }
+  };
+
+  const exportEmails = () => {
+    if (!participants) return;
+    const { doc, filename } = buildEventParticipantEmailsPdf(
+      participants.event,
+      participants.rows,
+      t,
+      i18n.language,
+    );
+    doc.save(filename);
   };
 
   return (
@@ -290,7 +356,7 @@ export default function AdminEvents() {
       </div>
 
       {modal && <Modal title={modal === "create" ? t("events.create") : t("events.edit")} onClose={() => !submitting && setModal(null)} maxWidth={820}>
-        <form className="ev-form" onSubmit={submit}>
+        <form ref={eventFormRef} className="ev-form" onSubmit={submit}>
           <section className="ev-form-section">
             <div className="ev-form-section__heading">
               <h2>{t("events.generalSection")}</h2>
@@ -350,51 +416,53 @@ export default function AdminEvents() {
         </form>
       </Modal>}
 
-      {pendingDeleteEvent && <Modal
+      {pendingDeleteEvent && <DestructiveActionModal
         title={t("events.deleteTitle")}
-        onClose={() => {
+        description={t("events.deleteConfirmation")}
+        itemName={pendingDeleteEvent.title}
+        consequence={t("events.deleteWarning")}
+        error={deleteError}
+        isLoading={deletingEventId !== null}
+        cancelLabel={t("adminDestructive.return")}
+        confirmLabel={t("adminDestructive.confirmDelete")}
+        loadingLabel={t("events.deleting")}
+        onCancel={() => {
           if (deletingEventId === null) {
             setPendingDeleteEvent(null);
             setDeleteError("");
           }
         }}
-        maxWidth={480}
-        className="ev-delete-modal__card"
-        overlayClassName="ev-delete-modal"
-        footer={<>
-          <button
-            className="btn btn-ghost"
-            type="button"
-            autoFocus
-            onClick={() => {
-              setPendingDeleteEvent(null);
-              setDeleteError("");
-            }}
-            disabled={deletingEventId !== null}
-          >
-            {t("common.cancel")}
-          </button>
-          <button
-            className="btn ev-delete-modal__confirm"
-            type="button"
-            onClick={removeEvent}
-            disabled={deletingEventId !== null}
-          >
-            <FiTrash2 size={15} />
-            {deletingEventId === pendingDeleteEvent._id ? t("events.deleting") : t("events.delete")}
-          </button>
-        </>}
-      >
-        <div className="ev-delete-modal__content">
-          <span className="ev-delete-modal__icon" aria-hidden="true"><FiAlertTriangle size={24} /></span>
-          <p>{t("events.deleteConfirmation")}</p>
-          <p className="ev-delete-modal__warning">{t("events.deleteWarning")}</p>
-          {deleteError && <p className="ev-form-error" role="alert">{deleteError}</p>}
-        </div>
-      </Modal>}
+        onConfirm={removeEvent}
+      />}
+
+      {pendingCancelEvent && <DestructiveActionModal
+        title={t("events.cancelEvent")}
+        description={t("events.cancelConfirmation")}
+        itemName={pendingCancelEvent.title}
+        consequence={t("events.cancelWarning")}
+        error={cancelEventError}
+        isLoading={cancelingEventId !== null}
+        cancelLabel={t("adminDestructive.return")}
+        confirmLabel={t("adminDestructive.confirmCancel")}
+        loadingLabel={t("adminDestructive.processing")}
+        isCancellation
+        onCancel={() => {
+          if (cancelingEventId === null) {
+            setPendingCancelEvent(null);
+            setCancelEventFromForm(false);
+            cancelConfirmationAccepted.current = false;
+          }
+        }}
+        onConfirm={confirmCancelEvent}
+      />}
 
       {participants && <Modal title={t("events.participantsFor", { title: participants.event.title, count: participants.rows.length })} onClose={() => setParticipants(null)} maxWidth={620}>
         {participants.rows.length === 0 ? <p>{t("events.noParticipants")}</p> : <div className="ev-participants">{participants.rows.map(({ _id, student, createdAt, status }) => <div key={_id}><strong>{student?.name}</strong><span>{student?.email}</span><small>{t("events.participantDate")}: {formatDate(createdAt, i18n.language, participants.event.timezone)}</small><small>{t("events.participantStatus")}: {t(`events.registrationStatuses.${status}`)}</small></div>)}</div>}
+        <div className="ev-participants__export">
+          <button className="btn btn-primary" type="button" onClick={exportEmails}>
+            <FiDownload size={16} /> {t("events.exportEmailsPdf")}
+          </button>
+        </div>
       </Modal>}
       <Toast toast={toast} onDismiss={() => setToast(null)} />
     </DashboardLayout>

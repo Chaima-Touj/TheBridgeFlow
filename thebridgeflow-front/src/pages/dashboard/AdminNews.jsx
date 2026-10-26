@@ -5,8 +5,11 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
+import NewsArticleBody from "../../components/common/NewsArticleBody.jsx";
 import { newsService } from "../../services/news.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
+import { isSafeContentUrl } from "../../utils/safeContentUrl.js";
 import { isGoogleDriveUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -18,6 +21,13 @@ const EMPTY_FORM = {
   title: "",
   excerpt: "",
   content: "",
+  conclusion: "",
+  ctaLabel: "",
+  ctaUrl: "",
+  faq: [],
+  metaTitle: "",
+  metaDescription: "",
+  articleUrl: "",
   category: "",
   publishedAt: new Date().toISOString().slice(0, 10),
   image: "",
@@ -28,6 +38,13 @@ function articleToForm(article) {
     title:       article.title || "",
     excerpt:     article.excerpt || "",
     content:     article.content || "",
+    conclusion:  article.conclusion || "",
+    ctaLabel:    article.ctaLabel || "",
+    ctaUrl:      article.ctaUrl || "",
+    faq:         Array.isArray(article.faq) ? article.faq.map(({ question = "", answer = "" }) => ({ question, answer })) : [],
+    metaTitle:   article.metaTitle || "",
+    metaDescription: article.metaDescription || "",
+    articleUrl:  article._id || "",
     category:    article.category || "",
     publishedAt: article.publishedAt ? new Date(article.publishedAt).toISOString().slice(0, 10) : "",
     image:       article.image || "",
@@ -81,9 +98,14 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
   const [fieldErrors, setFieldErrors] = useState({});
   const [imageMode, setImageMode] = useState(initial.image?.startsWith("data:image/") ? "upload" : "drive");
   const [compressing, setCompressing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef(null);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const setFaq = (index, key, value) => setForm((current) => ({
+    ...current,
+    faq: current.faq.map((entry, entryIndex) => entryIndex === index ? { ...entry, [key]: value } : entry),
+  }));
 
   // Compression 100% locale (FileReader + canvas, voir imageCompression.js) —
   // plus d'upload disque : le champ image part directement en base64 avec le
@@ -110,6 +132,14 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
     if (!form.excerpt.trim())  errors.excerpt  = t("adminNews.errors.excerptRequired");
     if (!form.category.trim()) errors.category = t("adminNews.errors.categoryRequired");
     if (!form.image.trim())    errors.image    = t("adminNews.errors.imageRequired");
+    if (form.faq.some(({ question, answer }) => !question.trim() || !answer.trim())) {
+      errors.faq = t("adminNews.errors.faqEntryRequired");
+    }
+    if (Boolean(form.ctaLabel.trim()) !== Boolean(form.ctaUrl.trim())) {
+      errors.cta = t("adminNews.errors.ctaPairRequired");
+    } else if (form.ctaUrl.trim() && !isSafeContentUrl(form.ctaUrl)) {
+      errors.cta = t("adminNews.errors.ctaUrlInvalid");
+    }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -121,6 +151,12 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
       title:       form.title.trim(),
       excerpt:     form.excerpt.trim(),
       content:     form.content.trim(),
+      conclusion:  form.conclusion.trim(),
+      ctaLabel:    form.ctaLabel.trim(),
+      ctaUrl:      form.ctaUrl.trim(),
+      faq:         form.faq.map(({ question, answer }) => ({ question: question.trim(), answer: answer.trim() })),
+      metaTitle:   form.metaTitle.trim(),
+      metaDescription: form.metaDescription.trim(),
       category:    form.category.trim(),
       publishedAt: form.publishedAt,
       image:       form.image.trim(),
@@ -206,44 +242,173 @@ function NewsForm({ initial, isEdit, submitting, formError, onSubmit, onCancel }
         {fieldErrors.image && <span className="af-field-error">{fieldErrors.image}</span>}
       </div>
 
-      <div className="af-form-row">
-        <label className="label" htmlFor="an-title">{t("adminNews.titleLabel")}</label>
-        <input id="an-title" className="input" value={form.title} onChange={set("title")} />
-        {fieldErrors.title && <span className="af-field-error">{fieldErrors.title}</span>}
-      </div>
-
-      <div className="af-form-grid">
+      <section className="an-form-section" aria-labelledby="an-seo-heading">
+        <h3 id="an-seo-heading">{t("adminNews.seoSection")}</h3>
         <div className="af-form-row">
-          <label className="label" htmlFor="an-category">{t("adminNews.categoryLabel")}</label>
-          <input
-            id="an-category"
-            className="input"
-            list="an-category-options"
-            placeholder={t("adminNews.categoryPlaceholder")}
-            value={form.category}
-            onChange={set("category")}
-          />
-          <datalist id="an-category-options">
-            {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
-          </datalist>
-          {fieldErrors.category && <span className="af-field-error">{fieldErrors.category}</span>}
+          <label className="label" htmlFor="an-meta-title">{t("adminNews.metaTitleLabel")}</label>
+          <input id="an-meta-title" className="input" maxLength={70} value={form.metaTitle} onChange={set("metaTitle")} />
+          <small>{t("adminNews.metaTitleHelp")}</small>
         </div>
         <div className="af-form-row">
-          <label className="label" htmlFor="an-date">{t("adminNews.publishedAtLabel")}</label>
-          <input id="an-date" type="date" className="input" value={form.publishedAt} onChange={set("publishedAt")} />
+          <label className="label" htmlFor="an-meta-description">{t("adminNews.metaDescriptionLabel")}</label>
+          <textarea id="an-meta-description" className="input" rows={2} maxLength={320} value={form.metaDescription} onChange={set("metaDescription")} />
+          <small>{t("adminNews.metaDescriptionHelp")}</small>
         </div>
-      </div>
+        <div className="af-form-row">
+          <span className="label">{t("adminNews.publicUrlLabel")}</span>
+          {form.articleUrl
+            ? <a href={`/blog/${encodeURIComponent(form.articleUrl)}`} target="_blank" rel="noreferrer">{`${window.location.origin}/blog/${form.articleUrl}`}</a>
+            : <small>{t("adminNews.publicUrlAfterCreate")}</small>}
+        </div>
+      </section>
 
-      <div className="af-form-row">
-        <label className="label" htmlFor="an-excerpt">{t("adminNews.excerptLabel")}</label>
-        <textarea id="an-excerpt" className="input" rows={2} value={form.excerpt} onChange={set("excerpt")} />
-        {fieldErrors.excerpt && <span className="af-field-error">{fieldErrors.excerpt}</span>}
-      </div>
+      <section className="an-form-section" aria-labelledby="an-main-heading">
+        <h3 id="an-main-heading">{t("adminNews.mainSection")}</h3>
+        <div className="af-form-row">
+          <label className="label" htmlFor="an-title">{t("adminNews.titleLabel")}</label>
+          <input id="an-title" className="input" maxLength={300} value={form.title} onChange={set("title")} />
+          {fieldErrors.title && <span className="af-field-error">{fieldErrors.title}</span>}
+        </div>
 
-      <div className="af-form-row">
-        <label className="label" htmlFor="an-content">{t("adminNews.contentLabel")}</label>
-        <textarea id="an-content" className="input" rows={5} value={form.content} onChange={set("content")} />
-      </div>
+        <div className="af-form-grid">
+          <div className="af-form-row">
+            <label className="label" htmlFor="an-category">{t("adminNews.categoryLabel")}</label>
+            <input
+              id="an-category"
+              className="input"
+              maxLength={100}
+              list="an-category-options"
+              placeholder={t("adminNews.categoryPlaceholder")}
+              value={form.category}
+              onChange={set("category")}
+            />
+            <datalist id="an-category-options">
+              {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
+            </datalist>
+            {fieldErrors.category && <span className="af-field-error">{fieldErrors.category}</span>}
+          </div>
+          <div className="af-form-row">
+            <label className="label" htmlFor="an-date">{t("adminNews.publishedAtLabel")}</label>
+            <input id="an-date" type="date" className="input" value={form.publishedAt} onChange={set("publishedAt")} />
+          </div>
+        </div>
+
+        <div className="af-form-row">
+          <label className="label" htmlFor="an-excerpt">{t("adminNews.excerptLabel")}</label>
+          <textarea id="an-excerpt" className="input" rows={3} maxLength={5000} value={form.excerpt} onChange={set("excerpt")} />
+          {fieldErrors.excerpt && <span className="af-field-error">{fieldErrors.excerpt}</span>}
+        </div>
+        <div className="af-form-row">
+          <label className="label" htmlFor="an-content">{t("adminNews.contentLabel")}</label>
+          <textarea id="an-content" className="input an-markdown-input" rows={12} maxLength={100000} value={form.content} onChange={set("content")} />
+          <small>{t("adminNews.markdownHelp")}</small>
+        </div>
+      </section>
+
+      <section className="an-form-section" aria-labelledby="an-organization-heading">
+        <h3 id="an-organization-heading">{t("adminNews.organizationSection")}</h3>
+        <div className="af-form-row">
+          <label className="label" htmlFor="an-conclusion">{t("adminNews.conclusionLabel")}</label>
+          <textarea id="an-conclusion" className="input an-markdown-input" rows={4} maxLength={20000} value={form.conclusion} onChange={set("conclusion")} />
+        </div>
+        <div className="af-form-grid">
+          <div className="af-form-row">
+            <label className="label" htmlFor="an-cta-label">{t("adminNews.ctaLabel")}</label>
+            <input id="an-cta-label" className="input" maxLength={100} value={form.ctaLabel} onChange={set("ctaLabel")} />
+          </div>
+          <div className="af-form-row">
+            <label className="label" htmlFor="an-cta-url">{t("adminNews.ctaUrl")}</label>
+            <input id="an-cta-url" className="input" maxLength={2048} value={form.ctaUrl} onChange={set("ctaUrl")} placeholder="/formations ou https://..." />
+            <small>{t("adminNews.ctaHelp")}</small>
+          </div>
+        </div>
+        {fieldErrors.cta && <span className="af-field-error" role="alert">{fieldErrors.cta}</span>}
+        <div className="an-faq-heading">
+          <h4>{t("adminNews.faqSection")}</h4>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            disabled={form.faq.length >= 25}
+            onClick={() => setForm((current) => ({ ...current, faq: [...current.faq, { question: "", answer: "" }] }))}
+          >
+            {t("adminNews.addFaq")}
+          </button>
+        </div>
+        {form.faq.map((entry, index) => (
+          <div className="an-faq-entry" key={`faq-${index}`}>
+            <div className="af-form-row">
+              <label className="label" htmlFor={`an-faq-question-${index}`}>{t("adminNews.faqQuestionLabel")}</label>
+              <input
+                id={`an-faq-question-${index}`}
+                className="input"
+                maxLength={300}
+                value={entry.question}
+                onChange={(event) => setFaq(index, "question", event.target.value)}
+              />
+            </div>
+            <div className="af-form-row">
+              <label className="label" htmlFor={`an-faq-answer-${index}`}>{t("adminNews.faqAnswerLabel")}</label>
+              <textarea
+                id={`an-faq-answer-${index}`}
+                className="input"
+                rows={2}
+                maxLength={10000}
+                value={entry.answer}
+                onChange={(event) => setFaq(index, "answer", event.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost an-faq-remove"
+              onClick={() => setForm((current) => ({ ...current, faq: current.faq.filter((_, faqIndex) => faqIndex !== index) }))}
+              aria-label={t("adminNews.removeFaq")}
+            >
+              {t("adminNews.removeFaq")}
+            </button>
+          </div>
+        ))}
+        {fieldErrors.faq && <span className="af-field-error" role="alert">{fieldErrors.faq}</span>}
+      </section>
+
+      <button type="button" className="btn btn-ghost an-preview-toggle" onClick={() => setShowPreview((visible) => !visible)} aria-expanded={showPreview}>
+        {showPreview ? t("adminNews.hidePreview") : t("adminNews.preview")}
+      </button>
+      {showPreview && (
+        <section className="an-preview" aria-label={t("adminNews.preview")}>
+          <div className="an-seo-preview">
+            <small>{t("adminNews.seoPreview")}</small>
+            <strong>{form.metaTitle || form.title || t("adminNews.titleLabel")}</strong>
+            <p>{form.metaDescription || form.excerpt || t("adminNews.previewEmpty")}</p>
+          </div>
+          <h2>{form.title || t("adminNews.preview")}</h2>
+          {form.excerpt && <p className="news-detail__excerpt">{form.excerpt}</p>}
+          {form.content
+            ? <NewsArticleBody content={form.content} className="an-preview__body" />
+            : <p>{t("adminNews.previewEmpty")}</p>}
+          {form.conclusion && (
+            <section className="an-preview__conclusion">
+              <h2>{t("adminNews.conclusionLabel")}</h2>
+              <NewsArticleBody content={form.conclusion} />
+            </section>
+          )}
+          {form.ctaLabel && isSafeContentUrl(form.ctaUrl) && (
+            <a className="btn btn-primary an-preview__cta" href={form.ctaUrl}>
+              {form.ctaLabel}
+            </a>
+          )}
+          {form.faq.length > 0 && (
+            <section className="an-preview__faq">
+              <h2>{t("adminNews.faqSection")}</h2>
+              {form.faq.map(({ question, answer }, index) => (
+                <details key={`faq-preview-${index}`}>
+                  <summary>{question || t("adminNews.faqQuestionLabel")}</summary>
+                  <NewsArticleBody content={answer} />
+                </details>
+              ))}
+            </section>
+          )}
+        </section>
+      )}
 
       <div className="modal-footer" style={{ padding: "16px 0 0", borderTop: "none" }}>
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
@@ -405,32 +570,19 @@ export default function AdminNews() {
       )}
 
       {deleteTarget && (
-        <Modal
+        <DestructiveActionModal
           title={t("adminNews.deleteArticleTitle")}
-          onClose={closeDelete}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeDelete} disabled={deleting}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmDelete} disabled={deleting}>
-                {deleting ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminNews.confirmDeleteQuestion")} <strong>{deleteTarget.title}</strong> ?
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {deleteError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{deleteError}</span>
-            </div>
-          )}
-        </Modal>
+          description={t("adminDestructive.genericPrompt")}
+          itemName={deleteTarget.title}
+          consequence={t("adminFormations.irreversibleNotice")}
+          error={deleteError}
+          isLoading={deleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={closeDelete}
+          onConfirm={confirmDelete}
+        />
       )}
     </DashboardLayout>
   );

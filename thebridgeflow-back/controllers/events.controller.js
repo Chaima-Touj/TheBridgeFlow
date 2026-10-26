@@ -239,11 +239,23 @@ export const getAdminEvents = asyncHandler(async (req, res) => {
 // DELETE /api/events/:id — admin uniquement
 export const deleteEvent = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
-  const event = await Event.findById(req.params.id);
-  if (!event) fail("Événement introuvable.", 404);
-
-  await EventRegistration.deleteMany({ event: event._id });
-  await event.deleteOne();
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const event = await Event.findById(req.params.id).session(session);
+      if (!event) fail("Événement introuvable.", 404);
+      await EventRegistration.deleteMany({ event: event._id }, { session });
+      await event.deleteOne({ session });
+    });
+  } catch (error) {
+    if (error.code === 20 && /transaction numbers are only allowed/i.test(error.message)) {
+      error.statusCode = 503;
+      error.message = "La suppression atomique nécessite un MongoDB configuré en replica set. Aucune donnée n'a été supprimée.";
+    }
+    throw error;
+  } finally {
+    await session.endSession();
+  }
   res.json({ message: "Événement supprimé." });
 });
 

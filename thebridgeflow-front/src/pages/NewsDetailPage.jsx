@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarDays, ImageOff, UserRound } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
+import NewsArticleBody from "../components/common/NewsArticleBody.jsx";
 import { newsService } from "../services/news.service.js";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
+import { isSafeContentUrl } from "../utils/safeContentUrl.js";
 import "./NewsDetailPage.css";
 
 function formatDate(value, language) {
@@ -42,9 +44,9 @@ export default function NewsDetailPage() {
   const isLoading = loading || loadedId !== id;
 
   useDocumentMeta({
-    title: article ? `${article.title} — ${t("news.title")} | TheBridgeFlow` : t("news.seoTitle"),
+    title: article ? `${article.metaTitle || article.title} — ${t("news.title")} | TheBridgeFlow` : t("news.seoTitle"),
     description: article
-      ? truncateForSEO(article.excerpt || article.content || article.title)
+      ? truncateForSEO(article.metaDescription || article.excerpt || article.content || article.title)
       : t("news.seoDescription"),
   });
 
@@ -99,9 +101,29 @@ export default function NewsDetailPage() {
                 </span>
                 <span><UserRound size={17} aria-hidden="true" />{t("landing.newsByAuthor", { author: article.author })}</span>
               </div>
-              {article.excerpt && article.content && <p className="news-detail__excerpt">{article.excerpt}</p>}
-              {(article.content || article.excerpt) && (
-                <div className="news-detail__body">{article.content || article.excerpt}</div>
+              {article.excerpt && <p className="news-detail__excerpt">{article.excerpt}</p>}
+              {article.content && <NewsArticleBody content={article.content} className="news-detail__body" />}
+              {article.conclusion && (
+                <section className="news-detail__section">
+                  <h2>{t("news.conclusion")}</h2>
+                  <NewsArticleBody content={article.conclusion} />
+                </section>
+              )}
+              {article.ctaLabel && isSafeContentUrl(article.ctaUrl) && (
+                <a className="btn btn-primary news-detail__cta" href={article.ctaUrl}>
+                  {article.ctaLabel}
+                </a>
+              )}
+              {Array.isArray(article.faq) && article.faq.some(({ question, answer }) => question && answer) && (
+                <section className="news-detail__faq">
+                  <h2>{t("news.faq")}</h2>
+                  {article.faq.filter(({ question, answer }) => question && answer).map(({ _id, question, answer }, index) => (
+                    <details key={_id || `${question}-${index}`}>
+                      <summary>{question}</summary>
+                      <NewsArticleBody content={answer} />
+                    </details>
+                  ))}
+                </section>
               )}
             </div>
           </article>

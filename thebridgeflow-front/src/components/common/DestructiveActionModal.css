@@ -1,0 +1,88 @@
+.dam-modal .modal-footer {
+  flex-wrap: wrap;
+}
+
+.dam-content {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.dam-content p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.dam-content > p:not(.dam-error) {
+  grid-column: 2;
+}
+
+.dam-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, .1);
+  color: #dc2626;
+  grid-row: span 2;
+}
+
+.dam-consequence {
+  color: var(--text-secondary);
+}
+
+.dam-error {
+  grid-column: 1 / -1;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: rgba(239, 68, 68, .08);
+  color: #b91c1c;
+}
+
+.dam-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
+.dam-confirm:hover:not(:disabled) {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+
+.dam-confirm:disabled {
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+.dam-spinner {
+  animation: dam-spin 1s linear infinite;
+}
+
+@keyframes dam-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dam-spinner {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dam-modal .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .dam-modal .modal-footer .btn {
+    width: 100%;
+  }
+}

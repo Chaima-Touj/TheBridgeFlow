@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiCheckSquare, FiAlertTriangle, FiEye, FiTrash2,
+  FiCheckSquare, FiEye, FiTrash2,
   FiChevronLeft, FiChevronRight, FiCheckCircle,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { downloadCSV, exportSingleTablePDF } from "../../utils/exportTable.js";
 import { enrollmentsService } from "../../services/enrollments.service.js";
@@ -357,33 +358,20 @@ export default function AdminEnrollments() {
 
       {/* ── Modale annulation ────────────────────────────────────────────── */}
       {cancelTarget && (
-        <Modal
+        <DestructiveActionModal
           title={t("adminInscriptions.cancelModalTitle")}
-          onClose={closeCancel}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeCancel} disabled={cancelling}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmCancel} disabled={cancelling}>
-                {cancelling ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminInscriptions.confirmCancelQuestion")} <strong>{cancelTarget.student?.name}</strong>
-            {" "}({cancelTarget.formation?.title}) ?
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {cancelError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{cancelError}</span>
-            </div>
-          )}
-        </Modal>
+          description={t("adminInscriptions.confirmCancelQuestion")}
+          itemName={`${cancelTarget.student?.name || "—"} (${cancelTarget.formation?.title || "—"})`}
+          consequence={t("adminInscriptions.cancelWarning")}
+          error={cancelError}
+          isLoading={cancelling}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmCancel")}
+          loadingLabel={t("adminDestructive.processing")}
+          isCancellation
+          onCancel={closeCancel}
+          onConfirm={confirmCancel}
+        />
       )}
     </DashboardLayout>
   );

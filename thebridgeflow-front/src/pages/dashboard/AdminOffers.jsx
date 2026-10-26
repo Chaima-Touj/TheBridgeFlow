@@ -6,6 +6,7 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { offersService } from "../../services/offers.service.js";
 import "./StudentDashboard.css";
@@ -662,32 +663,19 @@ export default function AdminOffers() {
       )}
 
       {deleteTarget && (
-        <Modal
+        <DestructiveActionModal
           title={t("adminOffers.deleteOfferTitle")}
-          onClose={closeDelete}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeDelete} disabled={deleting}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmDelete} disabled={deleting}>
-                {deleting ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminOffers.confirmDeleteQuestion")} <strong>{deleteTarget.title}</strong> ?
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {deleteError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{deleteError}</span>
-            </div>
-          )}
-        </Modal>
+          description={t("adminDestructive.genericPrompt")}
+          itemName={deleteTarget.title}
+          consequence={t("adminFormations.irreversibleNotice")}
+          error={deleteError}
+          isLoading={deleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={closeDelete}
+          onConfirm={confirmDelete}
+        />
       )}
     </DashboardLayout>
   );

@@ -6,6 +6,7 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
 import { settingsService } from "../../services/settings.service.js";
 import { feedbacksService } from "../../services/feedbacks.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
@@ -559,32 +560,19 @@ export default function AdminFeedbacks() {
       )}
 
       {testimonialDeleteTarget && (
-        <Modal
+        <DestructiveActionModal
           title={t("adminFeedbacks.deleteTestimonialTitle")}
-          onClose={closeTestimonialDelete}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeTestimonialDelete} disabled={testimonialDeleting}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmTestimonialDelete} disabled={testimonialDeleting}>
-                {testimonialDeleting ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminFeedbacks.confirmDeleteTestimonial")}
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {testimonialDeleteError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{testimonialDeleteError}</span>
-            </div>
-          )}
-        </Modal>
+          description={t("adminFeedbacks.confirmDeleteTestimonial")}
+          itemName={testimonialDeleteTarget.name || testimonialDeleteTarget.title}
+          consequence={t("adminFormations.irreversibleNotice")}
+          error={testimonialDeleteError}
+          isLoading={testimonialDeleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={closeTestimonialDelete}
+          onConfirm={confirmTestimonialDelete}
+        />
       )}
 
       {/* ── Modale — Capture d'écran ───────────────────────────────────── */}
@@ -608,32 +596,19 @@ export default function AdminFeedbacks() {
       )}
 
       {screenshotDeleteTarget && (
-        <Modal
+        <DestructiveActionModal
           title={t("adminFeedbacks.deleteScreenshotTitle")}
-          onClose={closeScreenshotDelete}
-          maxWidth={460}
-          footer={
-            <>
-              <button type="button" className="btn btn-ghost" onClick={closeScreenshotDelete} disabled={screenshotDeleting}>
-                {t("common.cancel")}
-              </button>
-              <button type="button" className="btn btn-primary" style={{ background: "#EF4444" }} onClick={confirmScreenshotDelete} disabled={screenshotDeleting}>
-                {screenshotDeleting ? t("settings.danger.modal.confirming") : t("settings.danger.modal.confirm")}
-              </button>
-            </>
-          }
-        >
-          <p>
-            {t("adminFeedbacks.confirmDeleteScreenshot")}
-            {" "}{t("adminFormations.irreversibleNotice")}
-          </p>
-          {screenshotDeleteError && (
-            <div className="af-form-error" style={{ marginTop: 14 }}>
-              <FiAlertTriangle size={15} />
-              <span>{screenshotDeleteError}</span>
-            </div>
-          )}
-        </Modal>
+          description={t("adminFeedbacks.confirmDeleteScreenshot")}
+          itemName={screenshotDeleteTarget.name}
+          consequence={t("adminFormations.irreversibleNotice")}
+          error={screenshotDeleteError}
+          isLoading={screenshotDeleting}
+          cancelLabel={t("adminDestructive.return")}
+          confirmLabel={t("adminDestructive.confirmDelete")}
+          loadingLabel={t("adminDestructive.processing")}
+          onCancel={closeScreenshotDelete}
+          onConfirm={confirmScreenshotDelete}
+        />
       )}
     </DashboardLayout>
   );
