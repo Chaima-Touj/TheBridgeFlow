@@ -28,8 +28,13 @@ export function truncateForSEO(text = "", max = 155) {
  * (utile pour attendre qu'une donnée asynchrone — formation, offre — soit
  * chargée avant d'écraser le titre générique d'index.html).
  */
-export function useDocumentMeta({ title, description }) {
+export function useDocumentMeta({ title, description, lang }) {
   useEffect(() => {
+    if (lang) {
+      document.documentElement.lang = lang;
+      const ogLocale = { fr: "fr_FR", en: "en_US", ar: "ar_TN" }[lang];
+      if (ogLocale) setMetaTag("property", "og:locale", ogLocale);
+    }
     if (title) {
       document.title = title;
       setMetaTag("property", "og:title", title);
@@ -41,5 +46,5 @@ export function useDocumentMeta({ title, description }) {
     if (title || description) {
       setMetaTag("property", "og:url", window.location.href);
     }
-  }, [title, description]);
+  }, [title, description, lang]);
 }

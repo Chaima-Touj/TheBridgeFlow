@@ -104,10 +104,8 @@ export default function LandingPage() {
   useDocumentMeta({
     title: t("landing.seoTitle"),
     description: t("landing.seoDescription"),
+    lang,
   });
-
-  // Sync html lang attribute
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
 
   // Smart scroll: when landing via navigate('/', { state: { scrollTo: 'about' } })
   useEffect(() => {
@@ -291,7 +289,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: "easeOut" }}
           >
-            <span className="lp-badge">🚀 {t("landing.heroBadge")}</span>
+            <span className="lp-badge">{t("landing.heroBadge")}</span>
             <h1 className="lp-hero__title">
               <span>{t("landing.heroTitle1")}</span><br />
               <span className="lp-accent">{t("landing.heroTitle2")}</span>
@@ -301,7 +299,7 @@ export default function LandingPage() {
               <Link to="/formations" className="btn btn-primary btn-lg">
                 {t("landing.ctaFormations")} <FiArrowRight />
               </Link>
-              <Link to="/register" className="btn btn-outline btn-lg">
+              <Link to="/offers" className="btn btn-outline btn-lg">
                 {t("landing.ctaStart")}
               </Link>
             </div>

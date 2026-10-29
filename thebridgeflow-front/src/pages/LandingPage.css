@@ -82,6 +82,7 @@
 .lp-hero__inner {
   position: relative;
   z-index:  2;
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 5rem 2rem;
@@ -879,6 +880,9 @@
   .lp-hero__title        { font-size: 2.25rem; }
   .lp-hero__ctas         { justify-content: center; }
   .lp-hero__desc         { margin: 0 auto 2.25rem; }
+}
+@media (max-width: 480px) {
+  .lp-hero__title { font-size: 2rem; }
 }
 @media (max-width: 768px) {
   .lp-features__grid     { grid-template-columns: 1fr; }

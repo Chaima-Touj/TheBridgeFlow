@@ -1,8 +1,8 @@
 # TheBridgeFlow
 
-**Plateforme de gestion des stages, PFE et formations professionnelles**
+**Formations, offres de stage et de PFE, accompagnement des projets de fin d’études**
 
-TheBridgeFlow est une plateforme web full-stack (MERN) qui centralise la gestion des offres de stage/PFE, le suivi des candidatures et des entretiens, un catalogue de formations avec suivi de progression, un assistant IA contextualisé, une messagerie interne et une cérémonie de vote de projets — le tout piloté depuis un tableau de bord administrateur avec des statistiques réelles.
+TheBridgeFlow accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études. La plateforme web full-stack (MERN) centralise aussi les candidatures et les entretiens, propose un catalogue de formations avec suivi de progression, un assistant IA contextualisé, une messagerie interne et une cérémonie de vote de projets — le tout piloté depuis un tableau de bord administrateur avec des statistiques réelles.
 
 Projet réalisé par **Chaima Touj**, étudiante en BTS Informatique de Gestion à l'IMSET, dans le cadre de son PFE (Projet de Fin de Formation), au sein de **Bee Coders** (El Ghazela, Ariana).
 

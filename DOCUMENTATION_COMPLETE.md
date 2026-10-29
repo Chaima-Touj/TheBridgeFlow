@@ -17,7 +17,7 @@
 
 ### 1.1 Présentation
 
-**TheBridgeFlow** est une plateforme web centralisée de gestion des **stages**, **PFE** (projets de fin d'études) et **formations complémentaires** au sein d'un institut de formation. Elle remplace les processus manuels dispersés (emails, fichiers Excel) par un écosystème unique avec un assistant IA (**SAGE**) pour guider l'étudiant.
+**TheBridgeFlow** accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études. L’application web centralise les offres, les candidatures, les entretiens et le suivi des formations, avec un assistant IA (**SAGE**) pour guider les étudiants au sein d’un écosystème unique.
 
 Projet réalisé dans le cadre d'un Projet de Fin de Formation (PFF) — BTS Informatique de Gestion, IMSET, en partenariat avec Bee Coders. Développeuse : Chaima Touj.
 

@@ -12,7 +12,8 @@ export default defineConfig({
       manifest: {
         name: 'TheBridgeFlow',
         short_name: 'TheBridgeFlow',
-        description: 'Plateforme de gestion des stages, PFE et formations',
+        description: 'TheBridgeFlow accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études.',
+        lang: 'fr',
         theme_color: '#2563EB',
         background_color: '#2563EB',
         display: 'standalone',
