@@ -419,7 +419,7 @@ export default function LandingPage() {
         <VideoTestimonialCarousel
           sectionId="testimonials"
           items={summerCampTestimonials}
-          title={t("landing.testiFormationTitle")}
+          title={t("landing.testiSummerCampTitle")}
           subtitle={t("landing.testiFormationSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
@@ -431,7 +431,7 @@ export default function LandingPage() {
         <VideoTestimonialCarousel
           sectionId="testimonials-formation"
           items={formationTestimonials}
-          title={t("landing.testiSummerCampTitle")}
+          title={t("landing.testiFormationTitle")}
           subtitle={t("landing.testiSummerCampSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
