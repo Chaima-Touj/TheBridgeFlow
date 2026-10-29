@@ -1081,6 +1081,7 @@
     "enrollBtn": "تقديم طلب تسجيل",
     "enrollBtnShort": "تقديم طلب",
     "modalTitle": "طلب التسجيل",
+    "requestSuccessTitle": "تم إرسال الطلب بنجاح!",
     "modalClose": "إغلاق",
     "alreadySent": "لقد قدّمت طلبًا لهذا التكوين مسبقًا.",
     "requestSuccess": "شكرًا على طلبك! لتأكيد تسجيلك، اتصل بنا على:",
@@ -1413,7 +1414,14 @@
   },
   "adminFeedbacks": {
     "pageSubtitle": "إدارة شهادات الفيديو ولقطات الشاشة المعروضة على الموقع",
+    "landingVideo": {
+      "description": "يظهر هذا الفيديو في قسم التعريف بالصفحة الرئيسية.",
+      "urlLabel": "رابط الفيديو (Google Drive أو رابط مباشر)",
+      "saved": "تم حفظ رابط فيديو الصفحة الرئيسية.",
+      "saveFailed": "تعذر حفظ رابط الفيديو."
+    },
     "tabs": {
+      "landingVideo": "فيديو الصفحة الرئيسية",
       "formations": "التكوينات",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
@@ -1735,13 +1743,6 @@
     }
   },
   "adminSettings": {
-    "actionVideo": {
-      "title": "فيديو تقديم الصفحة الرئيسية",
-      "description": "اختر الفيديو الذي سيظهر في الصفحة الرئيسية.",
-      "label": "رابط الفيديو على Google Drive",
-      "saved": "تم تحديث فيديو التقديم.",
-      "saveFailed": "تعذر حفظ فيديو التقديم."
-    },
     "ceremony": {
       "label": "إظهار الحفل في القائمة العامة",
       "description": "تحكم في ظهور قسم الحفل في قائمة الموقع العامة.",

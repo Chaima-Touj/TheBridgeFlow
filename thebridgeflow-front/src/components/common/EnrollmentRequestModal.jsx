@@ -64,20 +64,19 @@ export default function EnrollmentRequestModal({ formation, onClose }) {
     <>
       <div className="dfd-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
         <div className="dfd-modal" onClick={(event) => event.stopPropagation()}>
-          <div className="dfd-modal__header">
-            <h3 className="dfd-modal__title">{t("dfd.modalTitle")}</h3>
+          <div className={`dfd-modal__header${requestSent ? " dfd-modal__header--success" : ""}`}>
+            <h3 className="dfd-modal__title">{requestSent ? t("dfd.requestSuccessTitle") : t("dfd.modalTitle")}</h3>
             <button className="dfd-modal__close" onClick={onClose} aria-label={t("dfd.modalClose")}>
               <FiX size={18} />
             </button>
           </div>
 
-          <p className="dfd-modal__formation">{formation.title}</p>
-
           {requestSent ? (
-            <div className="dfd-modal__already" role="status">
-              <FiCheckCircle size={22} />
-              <span>{t("dfd.requestSuccess")}</span>
+            <div className="dfd-modal__success" role="status">
+              <div className="dfd-modal__success-icon"><FiCheckCircle size={30} /></div>
+              <p>{t("dfd.requestSuccess")}</p>
               <a href="tel:+21658840064">+216 58 840 064</a>
+              <button type="button" className="dfd-modal__submit" onClick={onClose}>{t("dfd.modalClose")}</button>
             </div>
           ) : alreadySent ? (
             <div className="dfd-modal__already">
@@ -85,6 +84,8 @@ export default function EnrollmentRequestModal({ formation, onClose }) {
               <span>{t("dfd.alreadySent")}</span>
             </div>
           ) : (
+            <>
+            <p className="dfd-modal__formation">{formation.title}</p>
             <form className="dfd-modal__form" onSubmit={handleSubmit}>
               <fieldset className="dfd-modal__fieldset">
                 <legend className="dfd-modal__legend">{t("dfd.modeLegend")}</legend>
@@ -129,6 +130,7 @@ export default function EnrollmentRequestModal({ formation, onClose }) {
                 {submitting ? t("dfd.submitting") : t("dfd.submitBtn")}
               </button>
             </form>
+            </>
           )}
         </div>
       </div>

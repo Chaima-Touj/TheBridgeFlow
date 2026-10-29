@@ -420,7 +420,7 @@ export default function LandingPage() {
           sectionId="testimonials"
           items={summerCampTestimonials}
           title={t("landing.testiFormationTitle")}
-          subtitle={t("landing.testiSummerCampSub")}
+          subtitle={t("landing.testiFormationSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
         />
@@ -432,7 +432,7 @@ export default function LandingPage() {
           sectionId="testimonials-formation"
           items={formationTestimonials}
           title={t("landing.testiSummerCampTitle")}
-          subtitle={t("landing.testiFormationSub")}
+          subtitle={t("landing.testiSummerCampSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
         />

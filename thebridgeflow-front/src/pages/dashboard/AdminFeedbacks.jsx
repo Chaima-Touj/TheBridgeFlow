@@ -20,6 +20,7 @@ const TABS = [
   { id: "formations",   labelKey: "adminFeedbacks.tabs.formations" },
   { id: "summer-camp",  labelKey: "adminFeedbacks.tabs.summerCamp" },
   { id: "pfe",          labelKey: "adminFeedbacks.tabs.pfe" },
+  { id: "landing-video", labelKey: "adminFeedbacks.tabs.landingVideo" },
   { id: "screenshots",  labelKey: "adminFeedbacks.tabs.screenshots" },
 ];
 
@@ -296,6 +297,10 @@ export default function AdminFeedbacks() {
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [testimonialsError, setTestimonialsError] = useState(false);
+  const [landingVideoUrl, setLandingVideoUrl] = useState("");
+  const [landingVideoSaving, setLandingVideoSaving] = useState(false);
+  const [landingVideoMessage, setLandingVideoMessage] = useState("");
+  const [landingVideoError, setLandingVideoError] = useState("");
 
   const [testimonialModal, setTestimonialModal] = useState(null);
   const [testimonialSubmitting, setTestimonialSubmitting] = useState(false);
@@ -320,7 +325,11 @@ export default function AdminFeedbacks() {
   //    ensuite entre onglets sans refetch, sauf après une action CRUD) ──────
   const loadTestimonials = useCallback(() => {
     settingsService.get()
-      .then(({ data }) => { setTestimonials(data.testimonialVideos || []); setTestimonialsError(false); })
+      .then(({ data }) => {
+        setTestimonials(data.testimonialVideos || []);
+        setLandingVideoUrl(data.actionVideo?.driveUrl || data.actionVideo?.url || "");
+        setTestimonialsError(false);
+      })
       .catch(() => setTestimonialsError(true))
       .finally(() => setTestimonialsLoading(false));
   }, []);
@@ -431,6 +440,21 @@ export default function AdminFeedbacks() {
     ? t("adminFeedbacks.addScreenshot")
     : t("adminFeedbacks.addTestimonial");
 
+  const saveLandingVideo = async (event) => {
+    event.preventDefault();
+    setLandingVideoMessage("");
+    setLandingVideoError("");
+    setLandingVideoSaving(true);
+    try {
+      await settingsService.update({ actionVideo: { driveUrl: landingVideoUrl.trim(), provider: "google_drive" } });
+      setLandingVideoMessage(t("adminFeedbacks.landingVideo.saved"));
+    } catch (error) {
+      setLandingVideoError(error?.response?.data?.message || t("adminFeedbacks.landingVideo.saveFailed"));
+    } finally {
+      setLandingVideoSaving(false);
+    }
+  };
+
   return (
     <DashboardLayout title={t("sidebar.admin.feedbacks")} subtitle={t("adminFeedbacks.pageSubtitle")}>
       <div className="sd-root">
@@ -455,12 +479,34 @@ export default function AdminFeedbacks() {
           {/* ── Barre d'outils ─────────────────────────────────────────── */}
           <div className="af-toolbar">
             <h1 className="af-toolbar-title">{t(TABS.find((tb) => tb.id === activeTab).labelKey)}</h1>
-            <div className="af-toolbar-actions">
+            {activeTab !== "landing-video" && <div className="af-toolbar-actions">
               <button type="button" className="btn btn-primary" onClick={handleAddClick}>
                 <FiPlus size={15} /> {addLabel}
               </button>
-            </div>
+            </div>}
           </div>
+
+          {activeTab === "landing-video" && (
+            <form className="afd-landing-video" onSubmit={saveLandingVideo}>
+              <p>{t("adminFeedbacks.landingVideo.description")}</p>
+              <label htmlFor="afd-landing-video-url">{t("adminFeedbacks.landingVideo.urlLabel")}</label>
+              <input
+                id="afd-landing-video-url"
+                className="input"
+                type="url"
+                required
+                value={landingVideoUrl}
+                onChange={(event) => setLandingVideoUrl(event.target.value)}
+                placeholder="https://drive.google.com/file/d/.../view"
+              />
+              {landingVideoError && <p className="af-form-error" role="alert">{landingVideoError}</p>}
+              {landingVideoMessage && <p className="afd-landing-video__success" role="status">{landingVideoMessage}</p>}
+              <button type="submit" className="btn btn-primary" disabled={landingVideoSaving}>
+                {landingVideoSaving ? t("adminFormations.inProgress") : t("common.save")}
+              </button>
+              {landingVideoUrl && <a href={landingVideoUrl} target="_blank" rel="noopener noreferrer" className="afd-card-link"><FiExternalLink size={14} />{t("adminFeedbacks.viewVideo")}</a>}
+            </form>
+          )}
 
           {/* ── Onglets : Formations / Summer Camp / PFE (témoignages vidéo) ── */}
           {TESTIMONIAL_TABS.includes(activeTab) && (

@@ -1077,6 +1077,7 @@
     "enrollBtn": "Apply for enrollment",
     "enrollBtnShort": "Apply",
     "modalTitle": "Enrollment request",
+    "requestSuccessTitle": "Request sent successfully!",
     "modalClose": "Close",
     "alreadySent": "You have already submitted a request for this formation.",
     "requestSuccess": "Thank you for your request! To confirm your enrollment, contact us at:",
@@ -1409,7 +1410,14 @@
   },
   "adminFeedbacks": {
     "pageSubtitle": "Manage video testimonials and screenshots shown on the site",
+    "landingVideo": {
+      "description": "This video appears in the presentation section of the homepage.",
+      "urlLabel": "Video link (Google Drive or direct URL)",
+      "saved": "The homepage video link was saved.",
+      "saveFailed": "Unable to save the video link."
+    },
     "tabs": {
+      "landingVideo": "Homepage video",
       "formations": "Trainings",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
@@ -1731,13 +1739,6 @@
     }
   },
   "adminSettings": {
-    "actionVideo": {
-      "title": "Homepage presentation video",
-      "description": "Choose the video displayed on the homepage.",
-      "label": "Google Drive video link",
-      "saved": "The presentation video was updated.",
-      "saveFailed": "Unable to save the presentation video."
-    },
     "ceremony": {
       "label": "Show Ceremony in public menu",
       "description": "Control whether the Ceremony section appears in the public site menu.",

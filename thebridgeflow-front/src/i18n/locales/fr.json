@@ -1077,6 +1077,7 @@
     "enrollBtn": "Faire une demande d'inscription",
     "enrollBtnShort": "Faire une demande",
     "modalTitle": "Demande d'inscription",
+    "requestSuccessTitle": "Demande envoyée avec succès !",
     "modalClose": "Fermer",
     "alreadySent": "Vous avez déjà soumis une demande pour cette formation.",
     "requestSuccess": "Merci pour votre demande ! Pour confirmer votre inscription, contactez-nous au :",
@@ -1409,7 +1410,14 @@
   },
   "adminFeedbacks": {
     "pageSubtitle": "Gérer les témoignages vidéo et captures d'écran affichés sur le site",
+    "landingVideo": {
+      "description": "Cette vidéo est affichée dans la section de présentation de la page d'accueil.",
+      "urlLabel": "Lien de la vidéo (Google Drive ou URL directe)",
+      "saved": "Le lien de la vidéo de la page d'accueil a été enregistré.",
+      "saveFailed": "Impossible d'enregistrer le lien de la vidéo."
+    },
     "tabs": {
+      "landingVideo": "Vidéo de la page d'accueil",
       "formations": "Formations",
       "summerCamp": "Summer Camp",
       "pfe": "PFE",
@@ -1731,13 +1739,6 @@
     }
   },
   "adminSettings": {
-    "actionVideo": {
-      "title": "Vidéo de présentation de l'accueil",
-      "description": "Choisissez la vidéo affichée sur la page d'accueil.",
-      "label": "Lien Google Drive de la vidéo",
-      "saved": "La vidéo de présentation a été mise à jour.",
-      "saveFailed": "Impossible d'enregistrer la vidéo de présentation."
-    },
     "ceremony": {
       "label": "Afficher la Cérémonie dans le menu public",
       "description": "Contrôlez la visibilité de la rubrique Cérémonie dans le menu du site.",

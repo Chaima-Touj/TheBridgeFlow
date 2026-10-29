@@ -80,6 +80,40 @@
   font-size: 0.87rem;
 }
 
+.dfd-modal__header--success {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.dfd-modal__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px 2px;
+  text-align: center;
+}
+.dfd-modal__success-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  color: #059669;
+  background: rgba(16,185,129,0.12);
+  border-radius: 50%;
+}
+.dfd-modal__success p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.dfd-modal__success a {
+  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.dfd-modal__success .dfd-modal__submit { width: 100%; }
+
 .dfd-modal__error {
   padding: 12px 14px;
   background: rgba(239, 68, 68, 0.08);

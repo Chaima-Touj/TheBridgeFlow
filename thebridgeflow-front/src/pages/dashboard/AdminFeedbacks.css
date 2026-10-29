@@ -30,6 +30,17 @@
   border-bottom-color: var(--primary);
 }
 
+.afd-landing-video {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+  padding: 8px 20px 24px;
+}
+.afd-landing-video > p { margin: 0; color: var(--text-secondary); }
+.afd-landing-video > label { color: var(--text); font-size: .875rem; font-weight: 600; }
+.afd-landing-video__success { color: var(--success, #15803d) !important; font-weight: 600; }
+.afd-landing-video > .afd-card-link { width: fit-content; }
+
 /* ── Indice de catégorie fixe (formulaire témoignage vidéo) ─────────────────── */
 .afd-category-hint {
   margin: 0 0 14px;
