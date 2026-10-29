@@ -309,7 +309,7 @@ const FormationDetail = () => {
                       )}
                     </div>
 
-                    <h1 className="fd-hero__title">{formation.title}</h1>
+                    <h1 className="fd-hero__title">{/artificial intelligence/i.test(formation.title) ? formation.title.replace(/\([^)]*\)/, "(AI Chatbot / Système de recommandation)") : formation.title}</h1>
 
                     {formation.description && (
                       <p className="fd-hero__desc">{formation.description}</p>
@@ -713,7 +713,7 @@ const FormationDetail = () => {
                       </div>
                     ))}
                   </div>
-                  <h3 className="fd-sidebar-title">{formation.title}</h3>
+                  <h3 className="fd-sidebar-title">{/artificial intelligence/i.test(formation.title) ? formation.title.replace(/\([^)]*\)/, "(AI Chatbot / Système de recommandation)") : formation.title}</h3>
 
                   <div className="fd-sidebar-prices">
                     <div className="fd-sidebar-price">

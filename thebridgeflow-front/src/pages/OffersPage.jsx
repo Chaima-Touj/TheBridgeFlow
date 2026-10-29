@@ -145,8 +145,8 @@ const OffersPage = () => {
       if (!active) return;
       const data = res.data;
       setOffers(Array.isArray(data) ? data : (data.offers ?? []));
-      setTotal(data.total  ?? (Array.isArray(data) ? data.length : 0));
-      setPages(data.pages  ?? 1);
+      setTotal(data.pagination?.total ?? data.total ?? (Array.isArray(data) ? data.length : 0));
+      setPages(data.pagination?.totalPages ?? data.pages ?? 1);
     }).catch(err => {
       if (!active) return;
       setError(err?.response?.data?.message ?? t("offers.error"));

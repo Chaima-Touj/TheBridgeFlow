@@ -200,8 +200,19 @@
   gap: .55rem 1rem;
 }
 
-.ev-card__meta span {
+.ev-card__meta span,
+.ev-card__meta a {
+  display: inline-flex;
   align-items: center;
+  gap: .3rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ev-card__meta a:hover,
+.ev-detail__fact a:hover {
+  color: var(--primary);
+  text-decoration: underline;
 }
 
 .ev-card__description {

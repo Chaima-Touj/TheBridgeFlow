@@ -16,6 +16,11 @@ function formatDate(value, language, timezone) {
   return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone: timezone || "Africa/Tunis" }).format(new Date(value));
 }
 
+function getMapsUrl(location) {
+  if (/^https?:\/\//i.test(location || "")) return location;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
+}
+
 function EventCardImage({ image, category }) {
   const [failed, setFailed] = useState(false);
   const src = resolveDriveThumbnailProxyUrl(image) || resolveDriveUrl(image, "image");
@@ -161,7 +166,7 @@ export default function EventsPage() {
                       </div>
                       <div className="ev-meta ev-card__meta">
                         <span><Video size={15} aria-hidden="true" />{t(`events.modes.${event.mode}`)}</span>
-                        {event.location && <span><MapPin size={15} aria-hidden="true" />{event.location}</span>}
+                        {event.location && <a href={getMapsUrl(event.location)} target="_blank" rel="noopener noreferrer"><MapPin size={15} aria-hidden="true" />{event.location}</a>}
                         {event.capacity !== null && <span><Users size={15} aria-hidden="true" />{t("events.seats", { count: Math.max(0, event.capacity - event.registrationCount) })}</span>}
                       </div>
                       <p className="ev-card__description">{event.description}</p>

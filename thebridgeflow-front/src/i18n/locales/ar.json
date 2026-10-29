@@ -64,7 +64,7 @@
     "loginRequiredMessage": "سجّل الدخول إلى حسابك كطالب للمشاركة في هذه الفعالية.",
     "signIn": "تسجيل الدخول",
     "participationSuccessTitle": "تم تأكيد المشاركة 🎉",
-    "participationSuccessMessage": "تم تسجيل مشاركتك في هذه الفعالية بنجاح.",
+    "participationSuccessMessage": "تم تأكيد مشاركتك في الفعالية! أرسلنا رابط الفعالية إلى بريدك الإلكتروني: {{email}}.",
     "participationPhoneMessage": "سنتواصل معك قريبًا على رقمك {{phone}}.",
     "participationPhoneUnavailable": "سنتواصل معك قريبًا عبر رقم الهاتف المسجل في ملفك الشخصي.",
     "alreadyRegisteredTitle": "تم تسجيل مشاركتك مسبقًا",
@@ -842,11 +842,11 @@
     "why8Desc": "دروس مسائية وفي عطلة نهاية الأسبوع للجمع بين التكوين والحياة العملية.",
     "why9Title": "متابعة بعد التكوين",
     "why9Desc": "شبكة خريجينا وشركائنا تبقى نشطة لفترة طويلة بعد انتهاء الدورة.",
-    "testiSummerCampTitle": "آراء حول Summer Camp",
+    "testiSummerCampTitle": "في أجواء تكويناتنا",
     "testiSummerCampSub": "أجواء وتجربة معسكراتنا الصيفية، كما يراها المشاركون.",
     "testiPfeTitle": "آراء حول مشاريع التخرج (PFE)",
     "testiPfeSub": "حصلوا على تدريب نهاية الدراسة بفضل TheBridgeFlow.",
-    "testiFormationTitle": "في أجواء تكويناتنا",
+    "testiFormationTitle": "آراء حول Summer Camp",
     "testiFormationSub": "ما يقوله طلابنا عن تكويناتنا.",
     "techMarqueeTitle": "التقنيات التي ستتقنها",
     "techMarqueeSub": "مجموعة واسعة من الأدوات واللغات تغطي التطوير والبيانات والتصميم.",
@@ -882,6 +882,8 @@
     "newsletterInput": "بريدك الإلكتروني",
     "newsletterBtn": "اشتراك",
     "newsletterSubmitting": "جارٍ الاشتراك…",
+    "newsletterSuccessTitle": "تم تأكيد الاشتراك 🎉",
+    "newsletterErrorTitle": "تعذر إتمام الاشتراك",
     "newsletterSuccess": "تم تأكيد اشتراكك في النشرة.",
     "newsletterError": "تعذر إتمام الاشتراك. يرجى المحاولة مرة أخرى.",
     "unsubscribeTitle": "إلغاء الاشتراك في النشرة",
@@ -1081,6 +1083,7 @@
     "modalTitle": "طلب التسجيل",
     "modalClose": "إغلاق",
     "alreadySent": "لقد قدّمت طلبًا لهذا التكوين مسبقًا.",
+    "requestSuccess": "شكرًا على طلبك! لتأكيد تسجيلك، اتصل بنا على:",
     "submitError": "تعذّر إرسال الطلب. يُرجى المحاولة مرة أخرى.",
     "modeLegend": "الأسلوب المفضّل",
     "modeOnsite": "حضوري",
@@ -1732,6 +1735,13 @@
     }
   },
   "adminSettings": {
+    "actionVideo": {
+      "title": "فيديو تقديم الصفحة الرئيسية",
+      "description": "اختر الفيديو الذي سيظهر في الصفحة الرئيسية.",
+      "label": "رابط الفيديو على Google Drive",
+      "saved": "تم تحديث فيديو التقديم.",
+      "saveFailed": "تعذر حفظ فيديو التقديم."
+    },
     "ceremony": {
       "label": "إظهار الحفل في القائمة العامة",
       "description": "تحكم في ظهور قسم الحفل في قائمة الموقع العامة.",

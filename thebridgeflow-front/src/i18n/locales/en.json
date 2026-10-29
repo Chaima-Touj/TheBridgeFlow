@@ -64,7 +64,7 @@
     "loginRequiredMessage": "Sign in to your student account to participate in this event.",
     "signIn": "Sign in",
     "participationSuccessTitle": "Participation confirmed 🎉",
-    "participationSuccessMessage": "Your participation in this event has been recorded.",
+    "participationSuccessMessage": "You're in! The event link has been sent to your email address: {{email}}.",
     "participationPhoneMessage": "We will contact you soon at {{phone}}.",
     "participationPhoneUnavailable": "We will contact you soon using the phone number saved in your profile.",
     "alreadyRegisteredTitle": "Registration already recorded",
@@ -838,11 +838,11 @@
     "why8Desc": "Evening and weekend classes to combine training with an active life.",
     "why9Title": "Post-training follow-up",
     "why9Desc": "Our alumni and partner network stays active long after the course ends.",
-    "testiSummerCampTitle": "Summer Camp Feedback",
+    "testiSummerCampTitle": "Inside the training experience",
     "testiSummerCampSub": "The atmosphere and experience of our summer camps, seen by our participants.",
     "testiPfeTitle": "PFE Feedback",
     "testiPfeSub": "They landed their final-year internship thanks to TheBridgeFlow.",
-    "testiFormationTitle": "Inside the training experience",
+    "testiFormationTitle": "Summer Camp Feedback",
     "testiFormationSub": "What our students say about our trainings.",
     "techMarqueeTitle": "The technologies you'll master",
     "techMarqueeSub": "A wide range of tools and languages covering development, data and design.",
@@ -878,6 +878,8 @@
     "newsletterInput": "Enter your email",
     "newsletterBtn": "Subscribe",
     "newsletterSubmitting": "Subscribing…",
+    "newsletterSuccessTitle": "Subscription confirmed 🎉",
+    "newsletterErrorTitle": "Subscription failed",
     "newsletterSuccess": "Your newsletter subscription is confirmed.",
     "newsletterError": "Your subscription could not be completed. Please try again.",
     "unsubscribeTitle": "Newsletter unsubscribe",
@@ -1077,6 +1079,7 @@
     "modalTitle": "Enrollment request",
     "modalClose": "Close",
     "alreadySent": "You have already submitted a request for this formation.",
+    "requestSuccess": "Thank you for your request! To confirm your enrollment, contact us at:",
     "submitError": "Unable to send the request. Please try again.",
     "modeLegend": "Preferred mode",
     "modeOnsite": "On-site",
@@ -1728,6 +1731,13 @@
     }
   },
   "adminSettings": {
+    "actionVideo": {
+      "title": "Homepage presentation video",
+      "description": "Choose the video displayed on the homepage.",
+      "label": "Google Drive video link",
+      "saved": "The presentation video was updated.",
+      "saveFailed": "Unable to save the presentation video."
+    },
     "ceremony": {
       "label": "Show Ceremony in public menu",
       "description": "Control whether the Ceremony section appears in the public site menu.",

@@ -168,7 +168,7 @@ const FormationsPage = () => {
 
                   {/* Title */}
                   <h2 className="fp-card__title">
-                    <Link to={`/formations/${f.slug}`}>{f.title}</Link>
+                    <Link to={`/formations/${f.slug}`}>{/artificial intelligence/i.test(f.title) ? f.title.replace(/\([^)]*\)/, "(AI Chatbot / Système de recommandation)") : f.title}</Link>
                   </h2>
 
                   {/* Description */}

@@ -37,6 +37,8 @@ export default function AdminSettings() {
   const [ceremonyLoading, setCeremonyLoading] = useState(true);
   const [ceremonyLoadError, setCeremonyLoadError] = useState(false);
   const [ceremonySaving, setCeremonySaving] = useState(false);
+  const [actionVideoUrl, setActionVideoUrl] = useState("");
+  const [actionVideoSaving, setActionVideoSaving] = useState(false);
 
   useEffect(() => {
     const map = { small: "13px", medium: "15px", large: "17px" };
@@ -49,7 +51,10 @@ export default function AdminSettings() {
     let active = true;
     settingsService.get()
       .then(({ data }) => {
-        if (active) setCeremonyEnabled(data.ceremonyEnabled === true);
+        if (active) {
+          setCeremonyEnabled(data.ceremonyEnabled === true);
+          setActionVideoUrl(data.actionVideo?.driveUrl || data.actionVideo?.url || "");
+        }
       })
       .catch(() => {
         if (active) setCeremonyLoadError(true);
@@ -69,6 +74,19 @@ export default function AdminSettings() {
   const applyFontSize = (value) => {
     setFontSize(value);
     showToast("success", t("adminSettings.toast.saved"));
+  };
+
+  const saveActionVideo = async (event) => {
+    event.preventDefault();
+    setActionVideoSaving(true);
+    try {
+      await settingsService.update({ actionVideo: { driveUrl: actionVideoUrl.trim(), provider: "google_drive" } });
+      showToast("success", t("adminSettings.actionVideo.saved"));
+    } catch {
+      showToast("error", t("adminSettings.actionVideo.saveFailed"));
+    } finally {
+      setActionVideoSaving(false);
+    }
   };
 
   const updateCeremonyVisibility = async (event) => {
@@ -92,6 +110,21 @@ export default function AdminSettings() {
     <DashboardLayout title={t("sidebar.settings")}>
       <div className="stg-root">
         <Toast toast={toast} onDismiss={() => setToast(null)}/>
+
+        <div className="stg-section">
+          <div className="stg-section__header">
+            <div className="stg-section__icon stg-section__icon--amber"><FiSun size={18}/></div>
+            <div>
+              <h2 className="stg-section__title">{t("adminSettings.actionVideo.title")}</h2>
+              <p className="stg-section__desc">{t("adminSettings.actionVideo.description")}</p>
+            </div>
+          </div>
+          <form onSubmit={saveActionVideo} className="stg-pref-row" style={{ display: "block" }}>
+            <label className="stg-pref-row__label" htmlFor="admin-action-video">{t("adminSettings.actionVideo.label")}</label>
+            <input id="admin-action-video" className="input" type="url" value={actionVideoUrl} onChange={(e) => setActionVideoUrl(e.target.value)} placeholder="https://drive.google.com/file/d/.../view" />
+            <button className="btn btn-primary" type="submit" disabled={actionVideoSaving} style={{ marginTop: 12 }}>{actionVideoSaving ? t("adminFormations.inProgress") : t("common.save")}</button>
+          </form>
+        </div>
 
         <div className="stg-section">
           <div className="stg-section__header">

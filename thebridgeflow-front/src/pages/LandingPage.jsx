@@ -37,6 +37,7 @@ import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
 import { newsletterService } from "../services/newsletter.service.js";
+import Modal from "../components/common/Modal.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
@@ -218,9 +219,7 @@ export default function LandingPage() {
       .catch(() => setScreenshotItems([]));
   }, []);
   const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
-  const promoIsDrive  = actionVideo
-    ? actionVideo.provider === "google_drive"
-    : promoVideoUrl.includes("drive.google.com");
+  const promoIsDrive  = promoVideoUrl.includes("drive.google.com");
   // Best-effort autoplay params for the Drive iframe preview — Google Drive's
   // embedded /preview player has no postMessage control API (unlike YouTube),
   // so play()/pause() can't be called on it from outside. `mute=1` is
@@ -420,7 +419,7 @@ export default function LandingPage() {
         <VideoTestimonialCarousel
           sectionId="testimonials"
           items={summerCampTestimonials}
-          title={t("landing.testiSummerCampTitle")}
+          title={t("landing.testiFormationTitle")}
           subtitle={t("landing.testiSummerCampSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
@@ -432,7 +431,7 @@ export default function LandingPage() {
         <VideoTestimonialCarousel
           sectionId="testimonials-formation"
           items={formationTestimonials}
-          title={t("landing.testiFormationTitle")}
+          title={t("landing.testiSummerCampTitle")}
           subtitle={t("landing.testiFormationSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
@@ -854,9 +853,18 @@ export default function LandingPage() {
               {newsletterSubmitting ? t("landing.newsletterSubmitting") : t("landing.newsletterBtn")}
             </button>
           </form>
-          {newsletterStatus && <p className={`lp-newsletter__status lp-newsletter__status--${newsletterStatus.type}`} role={newsletterStatus.type === "error" ? "alert" : "status"}>{newsletterStatus.message}</p>}
         </div>
       </section>
+
+      {newsletterStatus && (
+        <Modal
+          title={newsletterStatus.type === "success" ? t("landing.newsletterSuccessTitle") : t("landing.newsletterErrorTitle")}
+          onClose={() => setNewsletterStatus(null)}
+          footer={<button type="button" className="btn btn-primary" onClick={() => setNewsletterStatus(null)}>{t("common.close")}</button>}
+        >
+          <p role={newsletterStatus.type === "error" ? "alert" : "status"}>{newsletterStatus.message}</p>
+        </Modal>
+      )}
 
       <SiteFooter />
 

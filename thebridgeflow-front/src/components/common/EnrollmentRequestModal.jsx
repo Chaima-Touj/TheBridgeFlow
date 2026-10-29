@@ -5,12 +5,13 @@ import { enrollmentRequestsService } from "../../services/enrollmentRequests.ser
 import { usePhoneRequirement } from "../../hooks/usePhoneRequirement.jsx";
 import "./EnrollmentRequestModal.css";
 
-export default function EnrollmentRequestModal({ formation, onClose, onSuccess }) {
+export default function EnrollmentRequestModal({ formation, onClose }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState("Présentiel");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [alreadySent, setAlreadySent] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const [requestError, setRequestError] = useState("");
   const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
@@ -40,8 +41,7 @@ export default function EnrollmentRequestModal({ formation, onClose, onSuccess }
     setRequestError("");
     try {
       await enrollmentRequestsService.create(formation._id, mode, message);
-      onSuccess();
-      onClose();
+      setRequestSent(true);
     } catch (error) {
       if (error?.response?.status === 409) {
         setAlreadySent(true);
@@ -73,7 +73,13 @@ export default function EnrollmentRequestModal({ formation, onClose, onSuccess }
 
           <p className="dfd-modal__formation">{formation.title}</p>
 
-          {alreadySent ? (
+          {requestSent ? (
+            <div className="dfd-modal__already" role="status">
+              <FiCheckCircle size={22} />
+              <span>{t("dfd.requestSuccess")}</span>
+              <a href="tel:+21658840064">+216 58 840 064</a>
+            </div>
+          ) : alreadySent ? (
             <div className="dfd-modal__already">
               <FiCheckCircle size={20} />
               <span>{t("dfd.alreadySent")}</span>

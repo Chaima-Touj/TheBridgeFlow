@@ -64,7 +64,7 @@
     "loginRequiredMessage": "Connectez-vous à votre compte étudiant pour participer à cet événement.",
     "signIn": "Se connecter",
     "participationSuccessTitle": "Participation confirmée 🎉",
-    "participationSuccessMessage": "Votre participation à cet événement a bien été enregistrée.",
+    "participationSuccessMessage": "C'est bon, vous participez à l'événement ! Le lien de l'événement a été envoyé à votre adresse e-mail : {{email}}.",
     "participationPhoneMessage": "Nous vous contacterons prochainement sur votre numéro {{phone}}.",
     "participationPhoneUnavailable": "Nous vous contacterons prochainement via le numéro enregistré dans votre profil.",
     "alreadyRegisteredTitle": "Inscription déjà enregistrée",
@@ -838,11 +838,11 @@
     "why8Desc": "Cours en soirée et le week-end pour allier formation et vie active.",
     "why9Title": "Suivi post-formation",
     "why9Desc": "Notre réseau d'alumni et de partenaires reste actif bien après la fin du cours.",
-    "testiSummerCampTitle": "Feedbacks Summer Camp",
+    "testiSummerCampTitle": "Dans l'ambiance de nos formations",
     "testiSummerCampSub": "L'ambiance et l'expérience de nos summer camps, vues par nos participants.",
     "testiPfeTitle": "Feedbacks PFE",
     "testiPfeSub": "Ils ont décroché leur stage de fin d'études grâce à TheBridgeFlow.",
-    "testiFormationTitle": "Dans l'ambiance de nos formations",
+    "testiFormationTitle": "Feedbacks Summer Camp",
     "testiFormationSub": "Ce que nos étudiants disent de nos formations.",
     "techMarqueeTitle": "Les technologies que vous allez maîtriser",
     "techMarqueeSub": "Un large éventail d'outils et de langages couvrant le développement, la data et le design.",
@@ -878,6 +878,8 @@
     "newsletterInput": "Entrez votre email",
     "newsletterBtn": "S'abonner",
     "newsletterSubmitting": "Inscription…",
+    "newsletterSuccessTitle": "Inscription confirmée 🎉",
+    "newsletterErrorTitle": "Inscription impossible",
     "newsletterSuccess": "Votre inscription à la newsletter est confirmée.",
     "newsletterError": "L'inscription n'a pas pu être effectuée. Réessayez.",
     "unsubscribeTitle": "Désabonnement à la newsletter",
@@ -1077,6 +1079,7 @@
     "modalTitle": "Demande d'inscription",
     "modalClose": "Fermer",
     "alreadySent": "Vous avez déjà soumis une demande pour cette formation.",
+    "requestSuccess": "Merci pour votre demande ! Pour confirmer votre inscription, contactez-nous au :",
     "submitError": "Impossible d'envoyer la demande. Veuillez réessayer.",
     "modeLegend": "Mode souhaité",
     "modeOnsite": "Présentiel",
@@ -1728,6 +1731,13 @@
     }
   },
   "adminSettings": {
+    "actionVideo": {
+      "title": "Vidéo de présentation de l'accueil",
+      "description": "Choisissez la vidéo affichée sur la page d'accueil.",
+      "label": "Lien Google Drive de la vidéo",
+      "saved": "La vidéo de présentation a été mise à jour.",
+      "saveFailed": "Impossible d'enregistrer la vidéo de présentation."
+    },
     "ceremony": {
       "label": "Afficher la Cérémonie dans le menu public",
       "description": "Contrôlez la visibilité de la rubrique Cérémonie dans le menu du site.",

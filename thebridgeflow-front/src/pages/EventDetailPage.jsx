@@ -20,13 +20,9 @@ function formatTime(value, language, timezone) {
   return new Intl.DateTimeFormat(language, { timeStyle: "short", timeZone: timezone || "Africa/Tunis" }).format(new Date(value));
 }
 
-function formatProfilePhone(phone) {
-  if (typeof phone !== "string" || !phone.trim()) return "";
-  const digits = phone.replace(/\D/g, "").replace(/^216(?=\d{8}$)/, "");
-  if (/^\d{8}$/.test(digits)) {
-    return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
-  }
-  return phone.trim();
+function getMapsUrl(location) {
+  if (/^https?:\/\//i.test(location || "")) return location;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
 }
 
 export default function EventDetailPage() {
@@ -155,7 +151,7 @@ export default function EventDetailPage() {
                     {event.location && (
                       <div className="ev-detail__fact">
                         <MapPin size={19} aria-hidden="true" />
-                        <span><span className="ev-detail__fact-label">{t("events.locationLabel")}</span>{event.location}</span>
+                        <span><span className="ev-detail__fact-label">{t("events.locationLabel")}</span><a href={getMapsUrl(event.location)} target="_blank" rel="noopener noreferrer">{event.location}</a></span>
                       </div>
                     )}
                     <div className="ev-detail__fact">
@@ -236,10 +232,7 @@ export default function EventDetailPage() {
           onClose={() => setParticipationModal("")}
           footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("events.close")}</button>}
         >
-          <p>{t("events.participationSuccessMessage")}</p>
-          {formatProfilePhone(user?.phone)
-            ? <p>{t("events.participationPhoneMessage", { phone: formatProfilePhone(user.phone) })}</p>
-            : <p>{t("events.participationPhoneUnavailable")}</p>}
+          <p>{t("events.participationSuccessMessage", { email: user?.email || "" })}</p>
         </Modal>
       )}
       {participationModal === "alreadyRegistered" && (
