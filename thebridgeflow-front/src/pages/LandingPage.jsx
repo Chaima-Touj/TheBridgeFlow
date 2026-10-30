@@ -71,6 +71,10 @@ const ICON_MAP = {
 
 const getIconEntry = (slug = "") => ICON_MAP[slug] ?? [{ Comp: SiReact, color: "#61DAFB" }];
 
+function getYouTubeId(url = "") {
+  return url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]{11})/)?.[1] || null;
+}
+
 /* Placeholder discret pendant le chargement des témoignages/captures depuis
    l'API — évite un flash de section vide entre le montage et la résolution
    du fetch (voir testimonialVideos/screenshotItems, initialisés à `null`). */
@@ -222,6 +226,8 @@ export default function LandingPage() {
   }, []);
   const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
   const promoIsDrive  = promoVideoUrl.includes("drive.google.com");
+  const promoYouTubeId = getYouTubeId(promoVideoUrl);
+  const promoIsYouTube = Boolean(promoYouTubeId);
   // Best-effort autoplay params for the Drive iframe preview — Google Drive's
   // embedded /preview player has no postMessage control API (unlike YouTube),
   // so play()/pause() can't be called on it from outside. `mute=1` is
@@ -505,6 +511,16 @@ export default function LandingPage() {
                       tabIndex={-1}
                     />
                   )
+                ) : promoIsYouTube ? (
+                  promoInView && (
+                    <iframe
+                      className="lp-promo-video__preview"
+                      src={`https://www.youtube-nocookie.com/embed/${promoYouTubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${promoYouTubeId}&playsinline=1&rel=0`}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      title={t("landing.promoVideoLabel")}
+                      tabIndex={-1}
+                    />
+                  )
                 ) : (
                   <video
                     ref={promoVideoRef}
@@ -573,6 +589,14 @@ export default function LandingPage() {
                   allow="autoplay; encrypted-media"
                   allowFullScreen
                   title="Stageflow Coding Academy"
+                />
+              ) : promoIsYouTube ? (
+                <iframe
+                  className="lp-promo-video__modal-video"
+                  src={`https://www.youtube-nocookie.com/embed/${promoYouTubeId}?autoplay=1&rel=0&playsinline=1`}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  title={t("landing.promoVideoLabel")}
                 />
               ) : (
                 <video
