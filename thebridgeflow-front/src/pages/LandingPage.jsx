@@ -418,18 +418,28 @@ export default function LandingPage() {
           communauté), en pont narratif entre les deux. ──────────────────── */}
       {ceremonyEnabled && <CeremonySection />}
 
-      {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Summer Camp, PFE, puis Formation.
-          Summer Camp/PFE viennent de l'API (SiteSettings.testimonialVideos) ; Formation
-          reste sur testimonials.js — pas de gestion admin dédiée pour cette catégorie. ── */}
-      {summerCampTestimonials === null ? (
+      {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Formation, Summer Camp, puis PFE.
+          Les trois catégories viennent de SiteSettings.testimonialVideos. ── */}
+      {formationTestimonials === null ? (
         <TestimonialsLoadingSkeleton />
-
       ) : (
         <VideoTestimonialCarousel
           sectionId="testimonials-formation"
           items={formationTestimonials}
           title={t("landing.testiSummerCampTitle")}
           subtitle={t("landing.testiFormationSub")}
+          ctaLabel={t("testimonials.ctaDefault")}
+          ctaHref="/formations"
+        />
+      )}
+      {summerCampTestimonials === null ? (
+        <TestimonialsLoadingSkeleton />
+      ) : (
+        <VideoTestimonialCarousel
+          sectionId="testimonials-summer-camp"
+          items={summerCampTestimonials}
+          title={t("landing.testiFormationTitle")}
+          subtitle={t("landing.testiSummerCampSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
         />
