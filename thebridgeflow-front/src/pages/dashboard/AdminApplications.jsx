@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiFileText, FiAlertTriangle, FiCheck, FiX, FiCalendar,
+  FiFileText, FiAlertTriangle, FiCalendar,
   FiChevronLeft, FiChevronRight, FiSend,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { downloadCSV, exportSingleTablePDF } from "../../utils/exportTable.js";
 import { applicationsService } from "../../services/applications.service.js";
@@ -369,47 +370,16 @@ export default function AdminApplications() {
                               {t(`status.${app.status}`)}
                             </span>
                           </td>
-                          <td>
-                            {isPending ? (
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                style={{ padding: "6px 12px", fontSize: "0.8rem" }}
-                                disabled={isUpdating}
-                                onClick={() => setInterviewTarget(app)}
-                              >
-                                <FiCalendar size={13} />
-                                {t("adminCandidatures.proposeInterviewAction")}
-                              </button>
-                            ) : isInReview ? (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <button
-                                  type="button"
-                                  className="af-icon-btn"
-                                  style={{ color: "#10B981" }}
-                                  disabled={isUpdating}
-                                  title={t("adminCandidatures.acceptAction")}
-                                  aria-label={t("adminCandidatures.acceptAction")}
-                                  onClick={() => handleDecision(app, "accept")}
-                                >
-                                  <FiCheck size={16} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="af-icon-btn"
-                                  style={{ color: "#EF4444" }}
-                                  disabled={isUpdating}
-                                  title={t("adminCandidatures.rejectAction")}
-                                  aria-label={t("adminCandidatures.rejectAction")}
-                                  onClick={() => handleDecision(app, "reject")}
-                                >
-                                  <FiX size={16} />
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="au-user-email">—</span>
-                            )}
-                          </td>
+                          <td><AdminRowActions
+                            ariaLabel={t("adminFormations.actionsAriaLabel")}
+                            actions={[
+                              ...(isPending ? [{ label: t("adminCandidatures.proposeInterviewAction"), onClick: () => setInterviewTarget(app), disabled: isUpdating }] : []),
+                              ...(isInReview ? [
+                                { label: t("adminCandidatures.acceptAction"), onClick: () => handleDecision(app, "accept"), disabled: isUpdating },
+                                { label: t("adminCandidatures.rejectAction"), onClick: () => handleDecision(app, "reject"), disabled: isUpdating, danger: true },
+                              ] : []),
+                            ]}
+                          /></td>
                         </tr>
                       );
                     })}

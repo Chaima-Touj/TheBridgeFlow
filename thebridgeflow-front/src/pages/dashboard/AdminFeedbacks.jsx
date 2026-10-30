@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiPlus, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
+  FiPlus, FiAlertTriangle, FiImage,
   FiExternalLink, FiVideo,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import { settingsService } from "../../services/settings.service.js";
 import { feedbacksService } from "../../services/feedbacks.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
@@ -38,33 +39,6 @@ const TESTIMONIAL_TABS = ["formations", "summer-camp", "pfe"];
 
 function extractErrorMessage(err, fallback) {
   return err?.response?.data?.message || fallback;
-}
-
-/* ─── Menu d'actions par ligne/carte (Modifier / Supprimer) ────────────────── */
-function RowActionsMenu({ onEdit, onDelete }) {
-  const { t } = useTranslation();
-  return (
-    <div className="af-row-actions">
-      <button
-        type="button"
-        className="af-action-btn af-action-btn--edit"
-        onClick={onEdit}
-        title={t("adminFormations.editAction")}
-        aria-label={t("adminFormations.editAction")}
-      >
-        <FiEdit2 size={15} />
-      </button>
-      <button
-        type="button"
-        className="af-action-btn af-action-btn--delete"
-        onClick={onDelete}
-        title={t("notifications.deleteLabel")}
-        aria-label={t("notifications.deleteLabel")}
-      >
-        <FiTrash2 size={15} />
-      </button>
-    </div>
-  );
 }
 
 /* ─── Champ image réutilisable — bascule lien Google Drive / upload local
@@ -542,7 +516,10 @@ export default function AdminFeedbacks() {
                       <a href={item.url} target="_blank" rel="noopener noreferrer" className="afd-card-link">
                         <FiExternalLink size={12} /> {t("adminFeedbacks.viewVideo")}
                       </a>
-                      <RowActionsMenu onEdit={() => openTestimonialEdit(item)} onDelete={() => openTestimonialDelete(item)} />
+                      <AdminRowActions ariaLabel={t("adminFormations.actionsAriaLabel")} actions={[
+                        { label: t("adminFormations.editAction"), onClick: () => openTestimonialEdit(item) },
+                        { label: t("notifications.deleteLabel"), onClick: () => openTestimonialDelete(item), danger: true },
+                      ]} />
                     </div>
                   </div>
                   );
@@ -575,7 +552,10 @@ export default function AdminFeedbacks() {
                     <div className="afd-card-body">
                       <span className="afd-card-name">{shot.name || t("adminFeedbacks.screenshotUnnamed")}</span>
                       <span className="afd-card-order">#{shot.order}</span>
-                      <RowActionsMenu onEdit={() => openScreenshotEdit(shot)} onDelete={() => openScreenshotDelete(shot)} />
+                      <AdminRowActions ariaLabel={t("adminFormations.actionsAriaLabel")} actions={[
+                        { label: t("adminFormations.editAction"), onClick: () => openScreenshotEdit(shot) },
+                        { label: t("notifications.deleteLabel"), onClick: () => openScreenshotDelete(shot), danger: true },
+                      ]} />
                     </div>
                   </div>
                 ))}

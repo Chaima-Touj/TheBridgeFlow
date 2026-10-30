@@ -55,7 +55,7 @@ export default function AdminNewsletter() {
         all.push(...(data.subscribers || []));
         cursor = data.nextCursor || "";
       } while (cursor);
-      buildNewsletterSubscribersPdf(all, t, i18n.language)
+      buildNewsletterSubscribersPdf(all)
         .save("abonnes-newsletter-thebridgeflow.pdf");
     } catch (requestError) {
       setError(requestError.response?.data?.message || t("adminNewsletter.exportError"));

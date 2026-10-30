@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { FiAward, FiAlertTriangle, FiCheck, FiX, FiFlag, FiRefreshCw, FiTrendingUp } from "react-icons/fi";
+import { FiAward, FiAlertTriangle, FiFlag, FiRefreshCw, FiTrendingUp } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import Modal from "../../components/common/Modal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import { downloadCSV, exportSingleTablePDF } from "../../utils/exportTable.js";
 import { ceremonyService } from "../../services/ceremony.service.js";
 import "./StudentDashboard.css";
@@ -374,32 +375,13 @@ export default function AdminCeremony() {
                             {t(STATUS_LABEL_KEY[p.status] || "adminCeremony.statusPending")}
                           </span>
                         </td>
-                        <td>
-                          <div style={{ display: "flex", gap: 6 }}>
-                            <button
-                              type="button"
-                              className="af-icon-btn"
-                              style={{ color: "#10B981" }}
-                              disabled={isUpdating || p.status === "approuvé"}
-                              title={t("adminCeremony.acceptAction")}
-                              aria-label={t("adminCeremony.acceptAction")}
-                              onClick={() => handleDecision(p, "accept")}
-                            >
-                              <FiCheck size={16} />
-                            </button>
-                            <button
-                              type="button"
-                              className="af-icon-btn"
-                              style={{ color: "#EF4444" }}
-                              disabled={isUpdating || p.status === "refusé"}
-                              title={t("adminCeremony.rejectAction")}
-                              aria-label={t("adminCeremony.rejectAction")}
-                              onClick={() => handleDecision(p, "reject")}
-                            >
-                              <FiX size={16} />
-                            </button>
-                          </div>
-                        </td>
+                        <td><AdminRowActions
+                          ariaLabel={t("adminFormations.actionsAriaLabel")}
+                          actions={[
+                            { label: t("adminCeremony.acceptAction"), onClick: () => handleDecision(p, "accept"), disabled: isUpdating || p.status === "approuvé" },
+                            { label: t("adminCeremony.rejectAction"), onClick: () => handleDecision(p, "reject"), disabled: isUpdating || p.status === "refusé", danger: true },
+                          ]}
+                        /></td>
                       </tr>
                     );
                   })}

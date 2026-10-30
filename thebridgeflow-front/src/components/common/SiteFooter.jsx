@@ -68,7 +68,7 @@ export default function SiteFooter() {
 
         <div className="lp-footer__col">
           <h4>{t("nav.contact")}</h4>
-          <a href="https://maps.app.goo.gl/R4JBunHzfqFemjNX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> Lac 1, Tunis — Level 1</a>
+          <a href="https://maps.app.goo.gl/R4JBunHzfqFemjNX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> <span>FIQR Coworking Space<br />24 Rue Mendes France, Ariana 2036</span></a>
           <span><FiMapPin size={13} /> Sahloul, Sousse — Rockets</span>
           <span><FiPhone size={13} /> <span dir="ltr">{PHONE_NUMBER}</span></span>
           <span><FiMail size={13} /> contact@9antra.tn</span>

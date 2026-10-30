@@ -824,7 +824,7 @@ export default function LandingPage() {
                   <FiMapPin size={14} /> {t("landing.mapTitle")}
                 </div>
                 {[
-                  { city: "Lac 1, Tunis", place: "Level 1", href: "https://maps.app.goo.gl/R4JBunHzfqFemjNX9" },
+                  { city: "FIQR Coworking Space", place: "24 Rue Mendes France, Ariana 2036", href: "https://maps.app.goo.gl/R4JBunHzfqFemjNX9" },
                   { city: "Sahloul, Sousse", place: "Rockets", href: "https://maps.app.goo.gl/YJY6vKBw1RJJ9XEo7" },
                 ].map(addr => (
                   <div key={addr.city} className="lp-contact__address-card">

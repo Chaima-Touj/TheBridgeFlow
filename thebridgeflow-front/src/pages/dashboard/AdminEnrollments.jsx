@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiCheckSquare, FiEye, FiTrash2,
+  FiCheckSquare,
   FiChevronLeft, FiChevronRight, FiCheckCircle,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { downloadCSV, exportSingleTablePDF } from "../../utils/exportTable.js";
 import { enrollmentsService } from "../../services/enrollments.service.js";
@@ -249,29 +250,13 @@ export default function AdminEnrollments() {
                         </td>
                         <td>{progressText(enr.weekProgress)}</td>
                         <td>{formatDate(enr.createdAt)}</td>
-                        <td>
-                          <div style={{ display: "flex", gap: 6 }}>
-                            <button
-                              type="button"
-                              className="af-icon-btn"
-                              title={t("adminInscriptions.viewDetailAction")}
-                              aria-label={t("adminInscriptions.viewDetailAction")}
-                              onClick={() => setDetailTarget(enr)}
-                            >
-                              <FiEye size={16} />
-                            </button>
-                            <button
-                              type="button"
-                              className="af-icon-btn"
-                              style={{ color: "#EF4444" }}
-                              title={t("adminInscriptions.cancelAction")}
-                              aria-label={t("adminInscriptions.cancelAction")}
-                              onClick={() => openCancel(enr)}
-                            >
-                              <FiTrash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
+                        <td><AdminRowActions
+                          ariaLabel={t("adminFormations.actionsAriaLabel")}
+                          actions={[
+                            { label: t("adminInscriptions.viewDetailAction"), onClick: () => setDetailTarget(enr) },
+                            { label: t("adminInscriptions.cancelAction"), onClick: () => openCancel(enr), danger: true },
+                          ]}
+                        /></td>
                       </tr>
                     ))}
                   </tbody>

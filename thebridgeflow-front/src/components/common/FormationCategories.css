@@ -117,12 +117,12 @@
 }
 
 .fcat-item__label {
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
 }
 .fcat-item__count {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   margin-top: -0.3rem;
 }
@@ -147,5 +147,7 @@
   .fcat-section { padding: 1.75rem 1.25rem; }
   .fcat-track { gap: 1.1rem; justify-content: flex-start; }
   .fcat-item__circle { width: 88px; height: 88px; }
+  .fcat-item__label { font-size: 0.9rem; }
+  .fcat-item__count { font-size: 0.75rem; }
   .fcat-arrow { width: 34px; height: 34px; }
 }

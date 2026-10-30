@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiCalendar, FiCheck, FiCopy, FiDownload, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
+import { FiCalendar, FiCheck, FiDownload, FiPlus, FiX } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import { eventsService } from "../../services/events.service.js";
 import { formationsService } from "../../services/formations.service.js";
 import { buildEventParticipantEmailsPdf } from "../../utils/exportEventParticipantEmails.js";
@@ -348,27 +349,18 @@ export default function AdminEvents() {
                     <td>{formatDate(event.startsAt, i18n.language, event.timezone)}</td>
                     <td><span className={`badge ${event.status === "published" ? "badge-success" : event.status === "cancelled" ? "badge-danger" : "badge-warning"}`}>{t(`events.statuses.${event.status}`)}</span></td>
                     <td>{t("events.participantsCount", { count: event.registrationCount })}{event.capacity !== null ? ` / ${event.capacity}` : ""}</td>
-                    <td><div className="ev-admin-actions">
-                      <button className="btn btn-ghost" type="button" onClick={() => openForm(event)}>{t("events.edit")}</button>
-                      <button className="btn btn-ghost" type="button" onClick={() => openForm(event, true)} aria-label={t("events.duplicate")} title={t("events.duplicate")}><FiCopy size={16} /></button>
-                      <button className="btn btn-ghost" type="button" onClick={() => showParticipants(event)} aria-label={t("events.viewParticipants")}><FiUsers size={16} /></button>
-                      {event.status === "draft" && <button className="btn btn-primary" type="button" onClick={() => setStatus(event, "published")}>{t("events.publish")}</button>}
-                      {event.status === "published" && <button className="btn btn-ghost" type="button" onClick={() => setStatus(event, "cancelled")}>{t("events.cancelEvent")}</button>}
-                      {event.status !== "archived" && (event.status !== "published" || new Date(event.startsAt) <= new Date()) && <button className="btn btn-ghost" type="button" onClick={() => setStatus(event, "archived")}>{t("events.archive")}</button>}
-                      <button
-                        className="btn ev-admin-delete"
-                        type="button"
-                        onClick={() => {
-                          setError("");
-                          setDeleteError("");
-                          setPendingDeleteEvent(event);
-                        }}
-                        disabled={deletingEventId !== null}
-                      >
-                        <FiTrash2 size={15} />
-                        {deletingEventId === event._id ? t("events.deleting") : t("events.delete")}
-                      </button>
-                    </div></td>
+                    <td><AdminRowActions
+                      ariaLabel={t("adminFormations.actionsAriaLabel")}
+                      actions={[
+                        { label: t("events.edit"), onClick: () => openForm(event) },
+                        { label: t("events.duplicate"), onClick: () => openForm(event, true) },
+                        { label: t("events.viewParticipants"), onClick: () => showParticipants(event) },
+                        ...(event.status === "draft" ? [{ label: t("events.publish"), onClick: () => setStatus(event, "published") }] : []),
+                        ...(event.status === "published" ? [{ label: t("events.cancelEvent"), onClick: () => setStatus(event, "cancelled") }] : []),
+                        ...(event.status !== "archived" && (event.status !== "published" || new Date(event.startsAt) <= new Date()) ? [{ label: t("events.archive"), onClick: () => setStatus(event, "archived") }] : []),
+                        { label: deletingEventId === event._id ? t("events.deleting") : t("events.delete"), danger: true, disabled: deletingEventId !== null, onClick: () => { setError(""); setDeleteError(""); setPendingDeleteEvent(event); } },
+                      ]}
+                    /></td>
                   </tr>
                 ))}</tbody>
               </table></div>}

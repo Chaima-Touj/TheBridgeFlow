@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiPlus, FiBookOpen, FiAlertTriangle, FiImage, FiTrash2, FiEdit2,
+  FiPlus, FiBookOpen, FiAlertTriangle, FiImage, FiTrash2,
   FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
 } from "react-icons/fi";
 import jsPDF from "jspdf";
@@ -9,6 +9,7 @@ import autoTable from "jspdf-autotable";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
 import { formationsService } from "../../services/formations.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
@@ -225,34 +226,6 @@ function SortIcon({ active, dir }) {
       <FiChevronUp size={10} className={active && dir === "asc" ? "af-sort-ico--active" : ""} />
       <FiChevronDown size={10} className={active && dir === "desc" ? "af-sort-ico--active" : ""} />
     </span>
-  );
-}
-
-/* ─── Actions par ligne (Modifier / Supprimer, toujours visibles) ────────── */
-function RowActionsMenu({ onEdit, onDelete }) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="af-row-actions">
-      <button
-        type="button"
-        className="af-action-btn af-action-btn--edit"
-        onClick={onEdit}
-        title={t("adminFormations.editAction")}
-        aria-label={t("adminFormations.editAction")}
-      >
-        <FiEdit2 size={15} />
-      </button>
-      <button
-        type="button"
-        className="af-action-btn af-action-btn--delete"
-        onClick={onDelete}
-        title={t("notifications.deleteLabel")}
-        aria-label={t("notifications.deleteLabel")}
-      >
-        <FiTrash2 size={15} />
-      </button>
-    </div>
   );
 }
 
@@ -892,7 +865,13 @@ export default function AdminFormations() {
                         <td className="af-cell-duration" title={f.duration || ""}>{f.duration || "—"}</td>
                         <td>{f.weeks?.length ?? 0}</td>
                         <td>
-                          <RowActionsMenu onEdit={() => openEdit(f)} onDelete={() => openDelete(f)} />
+                          <AdminRowActions
+                            ariaLabel={t("adminFormations.actionsAriaLabel")}
+                            actions={[
+                              { label: t("adminFormations.editAction"), onClick: () => openEdit(f) },
+                              { label: t("notifications.deleteLabel"), onClick: () => openDelete(f), danger: true },
+                            ]}
+                          />
                         </td>
                       </tr>
                     ))}

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiClipboard, FiAlertTriangle, FiCheck, FiX,
+  FiClipboard, FiAlertTriangle,
   FiChevronLeft, FiChevronRight, FiMapPin, FiMonitor,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import ExportMenu from "../../components/common/ExportMenu.jsx";
+import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import { downloadCSV, exportSingleTablePDF } from "../../utils/exportTable.js";
 import { enrollmentRequestsService } from "../../services/enrollmentRequests.service.js";
 import "./StudentDashboard.css";
@@ -250,36 +251,13 @@ export default function AdminEnrollmentRequests() {
                               {t(STATUS_LABEL_KEY[req.status] || "mesDemandes.statusPending")}
                             </span>
                           </td>
-                          <td>
-                            {isPending ? (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <button
-                                  type="button"
-                                  className="af-icon-btn"
-                                  style={{ color: "#10B981" }}
-                                  disabled={isUpdating}
-                                  title={t("adminDemandes.acceptAction")}
-                                  aria-label={t("adminDemandes.acceptAction")}
-                                  onClick={() => handleDecision(req, "accept")}
-                                >
-                                  <FiCheck size={16} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="af-icon-btn"
-                                  style={{ color: "#EF4444" }}
-                                  disabled={isUpdating}
-                                  title={t("adminDemandes.rejectAction")}
-                                  aria-label={t("adminDemandes.rejectAction")}
-                                  onClick={() => handleDecision(req, "reject")}
-                                >
-                                  <FiX size={16} />
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="au-user-email">—</span>
-                            )}
-                          </td>
+                          <td><AdminRowActions
+                            ariaLabel={t("adminFormations.actionsAriaLabel")}
+                            actions={isPending ? [
+                              { label: t("adminDemandes.acceptAction"), onClick: () => handleDecision(req, "accept"), disabled: isUpdating },
+                              { label: t("adminDemandes.rejectAction"), onClick: () => handleDecision(req, "reject"), disabled: isUpdating, danger: true },
+                            ] : []}
+                          /></td>
                         </tr>
                       );
                     })}
