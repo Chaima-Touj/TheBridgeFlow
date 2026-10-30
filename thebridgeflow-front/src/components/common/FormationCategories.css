@@ -97,8 +97,8 @@
 }
 
 .fcat-item__circle {
-  width: 56px;
-  height: 56px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -146,6 +146,6 @@
 @media (max-width: 640px) {
   .fcat-section { padding: 1.75rem 1.25rem; }
   .fcat-track { gap: 1.1rem; justify-content: flex-start; }
-  .fcat-item__circle { width: 48px; height: 48px; }
+  .fcat-item__circle { width: 88px; height: 88px; }
   .fcat-arrow { width: 34px; height: 34px; }
 }

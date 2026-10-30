@@ -100,6 +100,7 @@ export default function LandingPage() {
   const [newsletterStatus, setNewsletterStatus] = useState(null);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [allFormations, setAllFormations] = useState([]);
+  const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
   const [promoOpen,   setPromoOpen]   = useState(false);
 
   useDocumentMeta({
@@ -201,6 +202,7 @@ export default function LandingPage() {
       .then(({ data }) => {
         setActionVideo(data.actionVideo);
         setTestimonialVideos(data.testimonialVideos || []);
+        setCeremonyEnabled(data.ceremonyEnabled === true);
       })
       .catch(() => setTestimonialVideos([])); // actionVideo garde son fallback VIDEO_URLS
   }, []);
@@ -408,31 +410,20 @@ export default function LandingPage() {
           témoignages (ce qu'on en dit) : montre ce que les étudiants
           construisent concrètement (projets de stage/PFE votés par la
           communauté), en pont narratif entre les deux. ──────────────────── */}
-      <CeremonySection />
+      {ceremonyEnabled && <CeremonySection />}
 
       {/* ── TESTIMONIALS (vidéo) — 3 carrousels distincts : Summer Camp, PFE, puis Formation.
           Summer Camp/PFE viennent de l'API (SiteSettings.testimonialVideos) ; Formation
           reste sur testimonials.js — pas de gestion admin dédiée pour cette catégorie. ── */}
       {summerCampTestimonials === null ? (
         <TestimonialsLoadingSkeleton />
-      ) : (
-        <VideoTestimonialCarousel
-          sectionId="testimonials"
-          items={summerCampTestimonials}
-          title={t("landing.testiSummerCampTitle")}
-          subtitle={t("landing.testiFormationSub")}
-          ctaLabel={t("testimonials.ctaDefault")}
-          ctaHref="/formations"
-        />
-      )}
-      {formationTestimonials === null ? (
-        <TestimonialsLoadingSkeleton />
+
       ) : (
         <VideoTestimonialCarousel
           sectionId="testimonials-formation"
           items={formationTestimonials}
-          title={t("landing.testiFormationTitle")}
-          subtitle={t("landing.testiSummerCampSub")}
+          title={t("landing.testiSummerCampTitle")}
+          subtitle={t("landing.testiFormationSub")}
           ctaLabel={t("testimonials.ctaDefault")}
           ctaHref="/formations"
         />
@@ -809,7 +800,7 @@ export default function LandingPage() {
                   <FiMapPin size={14} /> {t("landing.mapTitle")}
                 </div>
                 {[
-                  { city: "Lac 1, Tunis", place: "Level 1", href: "https://maps.app.goo.gl/fapcW6wn8dZgZaFX9" },
+                  { city: "Lac 1, Tunis", place: "Level 1", href: "https://maps.app.goo.gl/R4JBunHzfqFemjNX9" },
                   { city: "Sahloul, Sousse", place: "Rockets", href: "https://maps.app.goo.gl/YJY6vKBw1RJJ9XEo7" },
                 ].map(addr => (
                   <div key={addr.city} className="lp-contact__address-card">

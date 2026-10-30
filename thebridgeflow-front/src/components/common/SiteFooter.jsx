@@ -28,7 +28,7 @@ export default function SiteFooter() {
     <footer className="lp-footer">
       <div className="lp-footer__inner">
         <div className="lp-footer__brand">
-          <Link to="/" className="lp-nav__logo" style={{ color: "#94A3B8" }}>
+          <Link to="/" className="lp-nav__logo">
             <img src="/favicon.png" alt="Logo" className="lp-nav__logo-icon" />
             <span>TheBridge<span className="lp-accent">Flow</span></span>
           </Link>
@@ -68,7 +68,7 @@ export default function SiteFooter() {
 
         <div className="lp-footer__col">
           <h4>{t("nav.contact")}</h4>
-          <span><FiMapPin size={13} /> Lac 1, Tunis — Level 1</span>
+          <a href="https://maps.app.goo.gl/R4JBunHzfqFemjNX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> Lac 1, Tunis — Level 1</a>
           <span><FiMapPin size={13} /> Sahloul, Sousse — Rockets</span>
           <span><FiPhone size={13} /> <span dir="ltr">{PHONE_NUMBER}</span></span>
           <span><FiMail size={13} /> contact@9antra.tn</span>

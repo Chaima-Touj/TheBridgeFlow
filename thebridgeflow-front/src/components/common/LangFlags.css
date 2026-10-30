@@ -1,88 +1,14 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   LangFlags — 3 drapeaux images, aucun texte, aucun dropdown
-   ════════════════════════════════════════════════════════════════════════════ */
-
-.lf-flags {
-  display:     flex;
-  align-items: center;
-  gap:         4px;
-}
-
-/* ── Bouton (conteneur) ─────────────────────────────────────────────────── */
-.lf-btn {
-  width:           25px;
-  height:          25px;
-  padding:         0;
-  border-radius:   8px;
-  border:          1.5px solid transparent;
-  background:      transparent;
-  cursor:          pointer;
-  user-select:     none;
-  outline:         none;
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-
-  /* Inactif */
-  opacity:  0.5;
-  filter:   saturate(0.6);
-  transform: scale(1);
-
-  transition:
-    transform    200ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity      200ms ease,
-    filter       200ms ease,
-    border-color 200ms ease,
-    background   200ms ease,
-    box-shadow   200ms ease;
-}
-
-/* ── Image drapeau ──────────────────────────────────────────────────────── */
-.lf-flag-img {
-  width:          16px;
-  height:         16px;
-  object-fit:     cover;
-  border-radius:  3px;
-  display:        block;
-  pointer-events: none;
-}
-
-/* ── Hover ──────────────────────────────────────────────────────────────── */
-.lf-btn:hover {
-  opacity:   0.8;
-  filter:    saturate(1);
-  transform: scale(1.1);
-}
-
-/* ── Clic ───────────────────────────────────────────────────────────────── */
-.lf-btn:active {
-  transform:           scale(0.9);
-  transition-duration: 80ms;
-}
-
-/* ── Actif ──────────────────────────────────────────────────────────────── */
-.lf-btn--active {
-  opacity:      1;
-  filter:       saturate(1);
-  transform:    scale(1);
-  border-color: var(--primary);
-  background:   color-mix(in srgb, var(--primary) 10%, transparent);
-  box-shadow:   0 0 8px color-mix(in srgb, var(--primary) 40%, transparent);
-}
-
-.lf-btn--active:hover {
-  transform: scale(1.1);
-}
-
-/* ── Responsive ─────────────────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .lf-btn     { width: 28px; height: 28px; position: relative; }
-  .lf-flag-img { width: 18px; height: 18px; }
-  /* Keep the visible chip small (unchanged design) but grow the actual tap
-     target to ~44px (WCAG 2.5.5) via an invisible expanded hitbox. */
-  .lf-btn::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-  }
-}
+.lf-trigger { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+.lf-trigger:hover { color: var(--primary); border-color: var(--primary); }
+.lf-backdrop { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 1rem; background: rgba(15, 23, 42, 0.38); backdrop-filter: blur(5px); }
+.lf-dialog { width: min(620px, 100%); padding: 1.5rem; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-card); box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22); color: var(--text); }
+.lf-dialog__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.lf-dialog__header h2 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.lf-dialog__header button { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.lf-dialog__header button:hover { background: var(--bg); }
+.lf-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.lf-option { min-height: 48px; display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--text-secondary); text-align: left; cursor: pointer; }
+.lf-option:hover { background: var(--bg); color: var(--text); }
+.lf-option--active { border-color: var(--border); background: var(--bg); color: var(--text); font-weight: 600; }
+.lf-flag-img { width: 20px; height: 20px; object-fit: cover; border-radius: 50%; display: block; flex: 0 0 auto; }
+@media (max-width: 480px) { .lf-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lf-dialog { padding: 1.15rem; } }
