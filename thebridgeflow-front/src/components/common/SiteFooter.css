@@ -41,7 +41,45 @@
 }
 .lp-footer__socials a:hover { background: var(--primary); color: white; }
 .lp-footer__col { display: flex; flex-direction: column; gap: 0.6rem; }
-.lp-footer__col h4 { font-size: 0.875rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+.lp-footer__col h4 {
+  position: relative;
+  width: fit-content;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.45rem;
+  padding-bottom: 0.65rem;
+}
+.lp-footer__col h4::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 1.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--primary, #2563eb);
+}
+.lp-footer__to-top {
+  position: fixed;
+  inset-inline-end: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--primary, #2563eb);
+  box-shadow: 0 5px 18px rgb(37 99 235 / 32%);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.lp-footer__to-top svg { width: 20px; height: 20px; stroke-width: 2.5; }
+.lp-footer__to-top:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgb(37 99 235 / 42%); }
+.lp-footer__to-top:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .lp-footer__col a,
 .lp-footer__col span {
   font-size: 0.825rem;
@@ -70,4 +108,5 @@
 @media (max-width: 400px) {
   .lp-footer .lp-nav__logo { gap: 0.35rem; font-size: 1.05rem; }
   .lp-footer .lp-nav__logo-icon { width: 42px; height: 42px; }
+  .lp-footer__to-top { inset-inline-end: 1rem; bottom: 1rem; width: 44px; height: 44px; }
 }

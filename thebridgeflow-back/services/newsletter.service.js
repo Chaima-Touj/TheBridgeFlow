@@ -60,31 +60,7 @@ async function queueSubscriptionMessages(subscriber, token, version) {
     return;
   }
 
-  const emailAdmins = admins.filter(({ email }) => email);
-  const adminEmailDeliveries = emailAdmins.map((admin) => ({
-    updateOne: {
-      filter: { deliveryKey: `admin:${subscriber._id}:${version}:${admin._id}` },
-      update: {
-        $setOnInsert: {
-          deliveryKey: `admin:${subscriber._id}:${version}:${admin._id}`,
-          kind: "admin",
-          recipientEmail: admin.email.toLowerCase(),
-          recipientName: admin.name || "",
-          language: subscriber.language,
-          subscriber: subscriber._id,
-          sourceId: subscriber._id,
-        },
-      },
-      upsert: true,
-    },
-  }));
-  let result = null;
-  if (adminEmailDeliveries.length) {
-    result = await NewsletterDelivery.bulkWrite(adminEmailDeliveries, { ordered: false });
-  }
-  const newDeliveryIndices = new Set(Object.keys(result?.upsertedIds || {}).map(Number));
-  const notificationAdmins = emailAdmins.filter((_, index) => newDeliveryIndices.has(index));
-  const notificationDocs = notificationAdmins.map((admin) => ({
+  const notificationDocs = admins.map((admin) => ({
     userId: admin._id,
     title: "Nouvel abonné à la newsletter",
     message: `${subscriber.email} s'est abonné à la newsletter.`,
@@ -135,15 +111,8 @@ async function sendDelivery(delivery) {
     });
     return assertEmailSuccess(result);
   }
-  if (delivery.kind === "admin") {
-    const subscriber = await NewsletterSubscriber.findById(delivery.sourceId).select("email").lean();
-    if (!subscriber) return true;
-    const result = await emailService.sendNewsletterAdmin(delivery.recipientEmail, {
-      language: delivery.language,
-      subscriberEmail: subscriber.email,
-    });
-    return assertEmailSuccess(result);
-  }
+  // Ignore legacy queued admin newsletter deliveries after email notifications were disabled.
+  if (delivery.kind === "admin") return null;
   const subscriber = await NewsletterSubscriber.findOne({ _id: delivery.subscriber, subscribed: true })
     .select("_id +encryptedUnsubscribeToken +unsubscribeTokenIv +unsubscribeTokenAuthTag")
     .lean();
@@ -326,10 +295,7 @@ export async function queueSubscriberEmails(subscriber, token, version) {
   await NewsletterDelivery.updateMany(
     {
       status: "failed",
-      $or: [
-        { deliveryKey: `welcome:${subscriberId}:${version}` },
-        { deliveryKey: { $regex: `^admin:${subscriberId}:${version}:` } },
-      ],
+      deliveryKey: `welcome:${subscriberId}:${version}`,
     },
     {
       $set: { status: "pending", attempts: 0, nextAttemptAt: new Date(), lastError: "" },

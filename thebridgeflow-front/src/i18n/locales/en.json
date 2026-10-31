@@ -260,6 +260,7 @@
     "view": "View",
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "back": "Back",
     "clearSearch": "Clear search",
     "whatsappPrefill": "Hello 👋 Welcome to TheBridgeFlow!\n- I'm interested in your platform, could you tell me more?\n- What exactly is TheBridgeFlow?\n- What trainings do you offer?"
@@ -903,6 +904,7 @@
     "footerPrivacy": "Privacy policy",
     "footerCGU": "Terms of use",
     "copyright": "All rights reserved",
+    "backToTop": "Back to top",
     "themeToggleAriaLabel": "Toggle theme",
     "menuAriaLabel": "Menu",
     "heroImgAlt": "TheBridgeFlow illustration",

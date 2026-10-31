@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
-  FiMapPin, FiPhone, FiMail,
+  FiMapPin, FiPhone, FiMail, FiArrowUp,
 } from "react-icons/fi";
 import { TbBrandWhatsapp } from "react-icons/tb";
 import { PHONE_NUMBER } from "../../utils/phoneDisplay.jsx";
@@ -69,6 +69,7 @@ export default function SiteFooter() {
         <div className="lp-footer__col">
           <h4>{t("nav.contact")}</h4>
           <a href="https://maps.app.goo.gl/R4JBunHzfqFemjNX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> <span>FIQR Coworking Space<br />24 Rue Mendes France, Ariana 2036</span></a>
+          <a href="https://maps.app.goo.gl/fapcW6wn8dZgZaFX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> Lac 1, Tunis — Level 1</a>
           <span><FiMapPin size={13} /> Sahloul, Sousse — Rockets</span>
           <span><FiPhone size={13} /> <span dir="ltr">{PHONE_NUMBER}</span></span>
           <span><FiMail size={13} /> contact@9antra.tn</span>
@@ -78,6 +79,15 @@ export default function SiteFooter() {
       <div className="lp-footer__bottom">
         © 2026 TheBridgeFlow. {t("landing.copyright")}.
       </div>
+      <button
+        type="button"
+        className="lp-footer__to-top"
+        aria-label={t("landing.backToTop")}
+        title={t("landing.backToTop")}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        <FiArrowUp aria-hidden="true" />
+      </button>
     </footer>
   );
 }

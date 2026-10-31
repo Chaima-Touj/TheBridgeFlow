@@ -264,6 +264,7 @@
     "view": "عرض",
     "save": "حفظ",
     "cancel": "إلغاء",
+    "close": "إغلاق",
     "back": "رجوع",
     "clearSearch": "مسح البحث",
     "whatsappPrefill": "مرحبًا 👋 أهلًا بكم في TheBridgeFlow!\n- أنا مهتم(ة) بمنصتكم، هل يمكنكم إخباري بالمزيد؟\n- ما هي TheBridgeFlow بالتحديد؟\n- ما هي التدريبات التي تقدمونها؟"
@@ -907,6 +908,7 @@
     "footerPrivacy": "سياسة الخصوصية",
     "footerCGU": "شروط الاستخدام",
     "copyright": "جميع الحقوق محفوظة",
+    "backToTop": "العودة إلى الأعلى",
     "themeToggleAriaLabel": "تبديل المظهر",
     "menuAriaLabel": "القائمة",
     "heroImgAlt": "رسم توضيحي TheBridgeFlow",

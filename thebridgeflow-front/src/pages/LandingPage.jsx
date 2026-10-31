@@ -828,13 +828,14 @@ export default function LandingPage() {
                 <a href="https://www.instagram.com/9antra.tn_the_bridge/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="lp-contact__social-btn"><FiInstagram size={17} /></a>
               </div>
 
-              {/* Adresses — 2 localisations, chacune avec un lien Google Maps */}
+              {/* Adresses — 3 localisations, chacune avec un lien Google Maps */}
               <div className="lp-contact__addresses">
                 <div className="lp-contact__map-label">
                   <FiMapPin size={14} /> {t("landing.mapTitle")}
                 </div>
                 {[
                   { city: "FIQR Coworking Space", place: "24 Rue Mendes France, Ariana 2036", href: "https://maps.app.goo.gl/R4JBunHzfqFemjNX9" },
+                  { city: "Lac 1, Tunis", place: "Level 1", href: "https://maps.app.goo.gl/fapcW6wn8dZgZaFX9" },
                   { city: "Sahloul, Sousse", place: "Rockets", href: "https://maps.app.goo.gl/YJY6vKBw1RJJ9XEo7" },
                 ].map(addr => (
                   <div key={addr.city} className="lp-contact__address-card">

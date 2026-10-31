@@ -260,6 +260,7 @@
     "view": "Voir",
     "save": "Enregistrer",
     "cancel": "Annuler",
+    "close": "Fermer",
     "back": "Retour",
     "clearSearch": "Effacer la recherche",
     "whatsappPrefill": "Bonjour 👋 Bienvenue chez TheBridgeFlow !\n- Je suis intéressé(e) par votre plateforme, pouvez-vous m'en dire plus ?\n- Qu'est-ce que TheBridgeFlow exactement ?\n- Quelles formations proposez-vous ?"
@@ -903,6 +904,7 @@
     "footerPrivacy": "Politique de confidentialité",
     "footerCGU": "CGU",
     "copyright": "Tous droits réservés",
+    "backToTop": "Retour en haut",
     "themeToggleAriaLabel": "Changer de thème",
     "menuAriaLabel": "Menu",
     "heroImgAlt": "Illustration TheBridgeFlow",

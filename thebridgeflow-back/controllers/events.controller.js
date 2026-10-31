@@ -462,14 +462,6 @@ export const registerForEvent = asyncHandler(async (req, res) => {
       type: "info",
       link: "/dashboard/admin/events",
     },
-    emailMethod: "sendEventRegistrationReceived",
-    emailData: {
-      adminName: admin.name,
-      studentName: req.user.name,
-      studentEmail: req.user.email,
-      studentPhone: req.user.phone,
-      event: eventData,
-    },
   }));
   res.status(201).json({ registration, event: reservedEvent });
 });
@@ -526,14 +518,6 @@ export const cancelEventRegistration = asyncHandler(async (req, res) => {
       message: `${req.user.name} a annulé sa participation à l'événement "${event.title}".`,
       type: "info",
       link: "/dashboard/admin/events",
-    },
-    emailMethod: "sendEventRegistrationCancelled",
-    emailData: {
-      recipientName: admin.name,
-      studentName: req.user.name,
-      studentEmail: req.user.email,
-      studentPhone: req.user.phone,
-      event: eventData,
     },
   }));
   res.json({ message: "Inscription annulée.", registration });
