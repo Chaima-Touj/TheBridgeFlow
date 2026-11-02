@@ -1392,11 +1392,19 @@
     "title": "Website messages",
     "subtitle": "Messages sent through the public contact form.",
     "count": "{{count}} message(s)",
+    "unread": "{{count}} unread",
     "refresh": "Refresh",
+    "search": "Search messages…",
     "loading": "Loading messages…",
     "loadError": "Unable to load messages.",
     "empty": "No messages received yet.",
-    "from": "Message from"
+    "noResults": "No messages match your search.",
+    "unknownSender": "Unknown sender",
+    "noSubject": "No subject",
+    "messageDetails": "Message details",
+    "messageLabel": "Message content",
+    "reply": "Reply by email",
+    "replyPrefix": "Re:"
   },
   "adminNewsletter": {
     "title": "Newsletter subscribers",

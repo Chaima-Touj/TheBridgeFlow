@@ -1392,11 +1392,19 @@
     "title": "Messages du site",
     "subtitle": "Messages envoyés depuis le formulaire de contact public.",
     "count": "{{count}} message(s)",
+    "unread": "{{count}} non lu(s)",
     "refresh": "Actualiser",
+    "search": "Rechercher un message…",
     "loading": "Chargement des messages…",
     "loadError": "Impossible de charger les messages.",
     "empty": "Aucun message reçu pour le moment.",
-    "from": "Message reçu de"
+    "noResults": "Aucun message ne correspond à la recherche.",
+    "unknownSender": "Expéditeur inconnu",
+    "noSubject": "Sans objet",
+    "messageDetails": "Détails du message",
+    "messageLabel": "Contenu du message",
+    "reply": "Répondre par email",
+    "replyPrefix": "Re :"
   },
   "adminNewsletter": {
     "title": "Abonnés à la newsletter",

@@ -224,6 +224,7 @@ export const getPublicEvents = asyncHandler(async (req, res) => {
   const events = await Event.find(filter).select(`${publicProjection} sessionUrl`).sort({ startsAt: sortDirection }).lean();
   for (const event of events) {
     event.sessionLinkAvailable = isSessionLinkAvailable(event, now);
+    event.sessionLinkConfigured = Boolean(event.sessionUrl && isSafeSessionUrl(event.sessionUrl));
     delete event.sessionUrl;
   }
   res.json({ events });
@@ -237,6 +238,7 @@ export const getPublicEvent = asyncHandler(async (req, res) => {
     .lean();
   if (!event) fail("Événement introuvable.", 404);
   event.sessionLinkAvailable = isSessionLinkAvailable(event);
+  event.sessionLinkConfigured = Boolean(event.sessionUrl && isSafeSessionUrl(event.sessionUrl));
   delete event.sessionUrl;
   res.json({ event });
 });
@@ -538,21 +540,10 @@ export const getEventRegistrations = asyncHandler(async (req, res) => {
 export const getEventSessionLink = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
   const event = await Event.findOne({ _id: req.params.id, status: "published" })
-    .select("sessionUrl endsAt registrationRequired")
+    .select("sessionUrl")
     .lean();
   if (!event) fail("Événement introuvable.", 404);
-  if (!event.endsAt || event.endsAt > new Date()) {
-    fail("Le lien de séance sera disponible après la fin de l'événement.", 403);
-  }
   if (!event.sessionUrl) fail("Le lien de séance n'est pas encore renseigné.", 404);
   if (!isSafeSessionUrl(event.sessionUrl)) fail("Le lien de séance configuré n'est pas sécurisé.", 500);
-  if (event.registrationRequired) {
-    const registration = await EventRegistration.exists({
-      event: event._id,
-      student: req.user._id,
-      status: "registered",
-    });
-    if (!registration) fail("Une inscription active est nécessaire pour accéder au lien de séance.", 403);
-  }
   res.set("Cache-Control", "no-store").json({ sessionUrl: event.sessionUrl });
 });

@@ -7,11 +7,9 @@ export function isSafeSessionUrl(value) {
   }
 }
 
-export function isSessionLinkAvailable(event, now = new Date()) {
+export function isSessionLinkAvailable(event) {
   return Boolean(
     event?.status === "published" &&
-    event.endsAt &&
-    new Date(event.endsAt) <= now &&
     isSafeSessionUrl(event.sessionUrl)
   );
 }
