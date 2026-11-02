@@ -62,6 +62,7 @@
     "descriptionLabel": "About this event",
     "loginRequiredTitle": "Sign-in required",
     "loginRequiredMessage": "Sign in to your student account to participate in this event.",
+    "sessionLoginMessage": "Please sign in to your student account to view this event recording.",
     "signIn": "Sign in",
     "participationSuccessTitle": "Participation confirmed 🎉",
     "participationSuccessMessage": "You're in! The event link has been sent to your email address: {{email}}.",
@@ -296,6 +297,7 @@
       "ceremony": "Ceremony",
       "feedbacks": "Feedbacks",
       "messages": "Messaging",
+      "contactMessages": "Website messages",
       "notifications": "Notifications",
       "candidatures": "Applications",
       "demandes": "Enrollment requests",
@@ -773,9 +775,9 @@
     "terminé": "Done"
   },
   "landing": {
-    "seoTitle": "TheBridgeFlow | Training, Internships and Capstone Project Support",
+    "seoTitle": "TheBridgeFlow | Training, Internships and Capstone Project Mentoring",
     "seoDescription": "Explore TheBridgeFlow training programs, find internship and capstone project opportunities, and get personalized support to complete your projects and develop your professional skills.",
-    "heroBadge": "Training · Mentoring · Support",
+    "heroBadge": "Training · Internships · Capstone Mentoring",
     "heroTitle1": "Develop your skills",
     "heroTitle2": "and succeed in your professional journey with TheBridgeFlow",
     "heroDesc": "Explore training programs aligned with your goals, get personalized support for your final-year project, and find internship opportunities to prepare for your career.",
@@ -871,6 +873,8 @@
     "contactMessage": "Your message...",
     "contactSend": "Send message",
     "contactSuccess": "Message sent successfully!",
+    "contactSending": "Sending…",
+    "contactError": "The message could not be sent. Please try again.",
     "contactPhone": "Phone",
     "mapTitle": "Our locations",
     "viewOnMaps": "View on Maps",
@@ -1081,7 +1085,7 @@
     "modalTitle": "Enrollment request",
     "requestSuccessTitle": "Request sent successfully!",
     "modalClose": "Close",
-    "alreadySent": "You have already submitted a request for this formation.",
+    "alreadySent": "You have already submitted a request for this formation. To confirm, contact us at:",
     "requestSuccess": "Thank you for your request! To confirm your enrollment, contact us at:",
     "submitError": "Unable to send the request. Please try again.",
     "modeLegend": "Preferred mode",
@@ -1383,6 +1387,16 @@
     "editArticleTitle": "Edit — {{title}}",
     "deleteArticleTitle": "Delete article",
     "confirmDeleteQuestion": "Are you sure you want to delete"
+  },
+  "adminContactMessages": {
+    "title": "Website messages",
+    "subtitle": "Messages sent through the public contact form.",
+    "count": "{{count}} message(s)",
+    "refresh": "Refresh",
+    "loading": "Loading messages…",
+    "loadError": "Unable to load messages.",
+    "empty": "No messages received yet.",
+    "from": "Message from"
   },
   "adminNewsletter": {
     "title": "Newsletter subscribers",

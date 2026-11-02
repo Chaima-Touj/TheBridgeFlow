@@ -49,6 +49,7 @@
 .ev-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-auto-rows: 1fr;
   align-items: stretch;
   gap: clamp(1rem, 2.5vw, 1.5rem);
 }
@@ -132,6 +133,7 @@
 
 .ev-card__body {
   display: flex;
+  flex: 1;
   min-height: 330px;
   flex-direction: column;
   align-items: stretch;
@@ -151,7 +153,9 @@
 }
 
 .ev-card__title {
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 3.9em;
   margin: 0;
   color: var(--text);
   font-size: clamp(1.1rem, 1.6vw, 1.35rem);
@@ -159,6 +163,8 @@
   letter-spacing: -.015em;
   line-height: 1.3;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .ev-card__title-link {
@@ -196,7 +202,9 @@
 
 .ev-card__meta {
   display: flex;
+  min-height: 2.6em;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: .55rem 1rem;
 }
 
@@ -270,6 +278,32 @@
 .ev-card__actions > .btn {
   min-height: 48px;
   border-radius: 12px;
+}
+
+.ev-session-recording-btn {
+  position: relative;
+  overflow: hidden;
+  animation: ev-recording-glow 2.4s ease-in-out infinite;
+}
+.ev-session-recording-btn::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 25%, rgb(255 255 255 / 22%) 48%, transparent 68%);
+  transform: translateX(-130%);
+  animation: ev-recording-shine 3.4s ease-in-out infinite;
+}
+@keyframes ev-recording-glow {
+  0%, 100% { box-shadow: 0 5px 16px rgb(37 99 235 / 20%); }
+  50% { box-shadow: 0 8px 24px rgb(37 99 235 / 45%); }
+}
+@keyframes ev-recording-shine {
+  0%, 35% { transform: translateX(-130%); }
+  70%, 100% { transform: translateX(130%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-session-recording-btn, .ev-session-recording-btn::after { animation: none; }
 }
 
 .ev-state,

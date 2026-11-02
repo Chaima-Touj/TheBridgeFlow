@@ -81,7 +81,10 @@ export default function EnrollmentRequestModal({ formation, onClose }) {
           ) : alreadySent ? (
             <div className="dfd-modal__already">
               <FiCheckCircle size={20} />
-              <span>{t("dfd.alreadySent")}</span>
+              <div>
+                <span>{t("dfd.alreadySent")}</span>
+                <a href="tel:+21658840064">+216 58 840 064</a>
+              </div>
             </div>
           ) : (
             <>

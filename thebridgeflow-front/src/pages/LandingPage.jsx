@@ -37,6 +37,7 @@ import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
 import { newsletterService } from "../services/newsletter.service.js";
+import { contactMessagesService } from "../services/contactMessages.service.js";
 import Modal from "../components/common/Modal.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
@@ -100,6 +101,8 @@ export default function LandingPage() {
 
   const [form,        setForm]        = useState({ name: "", email: "", subject: "", message: "" });
   const [sent,        setSent]        = useState(false);
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState("");
   const [newsletter,  setNewsletter]  = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState(null);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
@@ -145,11 +148,21 @@ export default function LandingPage() {
     };
   }, [promoOpen]);
 
-  const handleContact = (e) => {
+  const handleContact = async (e) => {
     e.preventDefault();
-    setSent(true);
-    setForm({ name: "", email: "", subject: "", message: "" });
-    setTimeout(() => setSent(false), 4000);
+    if (contactSending) return;
+    setContactSending(true);
+    setContactError("");
+    try {
+      await contactMessagesService.submit(form);
+      setSent(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setTimeout(() => setSent(false), 4000);
+    } catch (error) {
+      setContactError(error.response?.data?.message || t("landing.contactError"));
+    } finally {
+      setContactSending(false);
+    }
   };
 
   const handleNewsletterSubmit = async (e) => {
@@ -744,6 +757,7 @@ export default function LandingPage() {
                 ✅ {t("landing.contactSuccess")}
               </div>
             )}
+            {contactError && <div className="lp-contact__success lp-contact__error" role="alert">{contactError}</div>}
 
             <form className="lp-contact__form" onSubmit={handleContact}>
               <div className="lp-form-row">
@@ -772,6 +786,7 @@ export default function LandingPage() {
               <div className="lp-input-wrap">
                 <span className="lp-input-icon">📌</span>
                 <input
+                  required
                   value={form.subject}
                   onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
                   className="lp-input"
@@ -789,8 +804,8 @@ export default function LandingPage() {
                   placeholder={t("landing.contactMessage")}
                 />
               </div>
-              <button type="submit" className="btn btn-primary lp-contact__submit">
-                {t("landing.contactSend")} <FiSend size={16} />
+              <button type="submit" className="btn btn-primary lp-contact__submit" disabled={contactSending}>
+                {contactSending ? t("landing.contactSending") : t("landing.contactSend")} <FiSend size={16} />
               </button>
             </form>
           </div>

@@ -79,6 +79,8 @@
   color: #059669;
   font-size: 0.87rem;
 }
+.dfd-modal__already > div { display: flex; flex-direction: column; gap: 6px; }
+.dfd-modal__already a { color: inherit; font-weight: 750; text-decoration: underline; }
 
 .dfd-modal__header--success {
   padding-bottom: 14px;

@@ -38,6 +38,7 @@ import driveProxyRoutes            from "./routes/driveProxy.routes.js";
 import ceremonyRoutes              from "./routes/ceremony.routes.js";
 import eventsRoutes                from "./routes/events.routes.js";
 import newsletterRoutes            from "./routes/newsletter.routes.js";
+import contactMessagesRoutes       from "./routes/contactMessages.routes.js";
 import { startNewsletterWorker } from "./services/newsletter.service.js";
 
 const app = express();
@@ -186,6 +187,7 @@ app.use("/api/drive-thumbnail",     thumbnailLimiter, driveProxyRoutes);
 app.use("/api/ceremony",            apiLimiter, ceremonyRoutes);
 app.use("/api/events",              apiLimiter, eventsRoutes);
 app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
+app.use("/api/contact-messages",    apiLimiter, contactMessagesRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────

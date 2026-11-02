@@ -62,6 +62,7 @@
     "descriptionLabel": "حول هذه الفعالية",
     "loginRequiredTitle": "تسجيل الدخول مطلوب",
     "loginRequiredMessage": "سجّل الدخول إلى حسابك كطالب للمشاركة في هذه الفعالية.",
+    "sessionLoginMessage": "يرجى تسجيل الدخول إلى حسابك كطالب لمشاهدة تسجيل هذه الفعالية.",
     "signIn": "تسجيل الدخول",
     "participationSuccessTitle": "تم تأكيد المشاركة 🎉",
     "participationSuccessMessage": "تم تأكيد مشاركتك في الفعالية! أرسلنا رابط الفعالية إلى بريدك الإلكتروني: {{email}}.",
@@ -282,6 +283,7 @@
       "aiAssistant": "المساعد الذكي",
       "documents": "وثائقي",
       "messages": "الرسائل",
+      "contactMessages": "رسائل الموقع",
       "notifications": "الإشعارات",
       "formations": "تكويناتي",
       "demandes": "طلباتي",
@@ -777,9 +779,9 @@
     "terminé": "منتهٍ"
   },
   "landing": {
-    "seoTitle": "TheBridgeFlow | التكوينات والتدريب ومرافقة مشاريع التخرج",
+    "seoTitle": "TheBridgeFlow | التكوينات والتدريب وتأطير مشاريع التخرج",
     "seoDescription": "اكتشف برامج التكوين في TheBridgeFlow، واعثر على فرص التدريب ومشاريع التخرج، واستفد من مرافقة شخصية لإنجاز مشاريعك وتطوير مهاراتك المهنية.",
-    "heroBadge": "التكوين · التأطير · المتابعة",
+    "heroBadge": "التكوين · التدريب · تأطير مشاريع التخرج",
     "heroTitle1": "طوّر مهاراتك",
     "heroTitle2": "وحقّق النجاح في مسارك المهني مع TheBridgeFlow",
     "heroDesc": "اكتشف برامج تكوين تناسب أهدافك، واستفد من مرافقة شخصية لمشروعك الختامي (PFE)، واطّلع على عروض التدريب استعدادًا لمستقبلك المهني.",
@@ -875,6 +877,8 @@
     "contactMessage": "رسالتك...",
     "contactSend": "إرسال الرسالة",
     "contactSuccess": "تم إرسال رسالتك بنجاح!",
+    "contactSending": "جارٍ الإرسال…",
+    "contactError": "تعذّر إرسال الرسالة. حاول مرة أخرى.",
     "contactPhone": "الهاتف",
     "mapTitle": "مواقعنا",
     "viewOnMaps": "عرض على خرائط جوجل",
@@ -1085,7 +1089,7 @@
     "modalTitle": "طلب التسجيل",
     "requestSuccessTitle": "تم إرسال الطلب بنجاح!",
     "modalClose": "إغلاق",
-    "alreadySent": "لقد قدّمت طلبًا لهذا التكوين مسبقًا.",
+    "alreadySent": "لقد قدّمت طلبًا لهذا التكوين مسبقًا. لتأكيد التسجيل، اتصل بنا على:",
     "requestSuccess": "شكرًا على طلبك! لتأكيد تسجيلك، اتصل بنا على:",
     "submitError": "تعذّر إرسال الطلب. يُرجى المحاولة مرة أخرى.",
     "modeLegend": "الأسلوب المفضّل",
@@ -1387,6 +1391,16 @@
     "editArticleTitle": "تعديل — {{title}}",
     "deleteArticleTitle": "حذف الخبر",
     "confirmDeleteQuestion": "هل تريد فعلاً حذف"
+  },
+  "adminContactMessages": {
+    "title": "رسائل الموقع",
+    "subtitle": "الرسائل المرسلة من نموذج التواصل العام.",
+    "count": "{{count}} رسالة",
+    "refresh": "تحديث",
+    "loading": "جارٍ تحميل الرسائل…",
+    "loadError": "تعذّر تحميل الرسائل.",
+    "empty": "لا توجد رسائل حتى الآن.",
+    "from": "رسالة من"
   },
   "adminNewsletter": {
     "title": "مشتركو النشرة",

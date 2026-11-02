@@ -1,0 +1,22 @@
+.acm-page { display: flex; flex-direction: column; gap: 1rem; }
+.acm-toolbar { display: flex; align-items: center; justify-content: space-between; color: var(--text-muted); }
+.acm-toolbar .btn { display: inline-flex; align-items: center; gap: .5rem; }
+.acm-error { color: #dc2626; }
+.acm-empty { display: grid; min-height: 220px; place-items: center; color: var(--text-muted); }
+.acm-layout { display: grid; grid-template-columns: minmax(260px, 360px) minmax(0, 1fr); min-height: 480px; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-card); }
+.acm-list { border-inline-end: 1px solid var(--border); overflow-y: auto; }
+.acm-item { display: flex; width: 100%; flex-direction: column; gap: .4rem; padding: 1rem; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); text-align: start; cursor: pointer; }
+.acm-item:hover, .acm-item.is-active { background: var(--bg); }
+.acm-item.is-unread .acm-item__subject::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-inline-end: .45rem; border-radius: 50%; background: var(--primary); }
+.acm-item__top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.acm-item__top time, .acm-detail__meta time { color: var(--text-muted); font-size: .78rem; }
+.acm-item__subject { font-weight: 700; }
+.acm-item__preview { overflow: hidden; color: var(--text-muted); font-size: .85rem; text-overflow: ellipsis; white-space: nowrap; }
+.acm-detail { padding: clamp(1.25rem, 3vw, 2rem); }
+.acm-detail__heading { display: flex; justify-content: space-between; gap: 1rem; color: var(--primary); }
+.acm-detail__eyebrow { color: var(--text-muted); font-size: .8rem; }
+.acm-detail__heading h2 { margin: .35rem 0 1.25rem; color: var(--text); }
+.acm-detail__meta { display: flex; flex-wrap: wrap; gap: .45rem 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.acm-detail__meta a { color: var(--primary); }
+.acm-detail__body { margin-top: 1.5rem; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 720px) { .acm-layout { grid-template-columns: 1fr; } .acm-list { max-height: 280px; border-inline-end: 0; border-bottom: 1px solid var(--border); } }

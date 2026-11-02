@@ -497,6 +497,7 @@
   margin-bottom: 1rem;
   font-size: 0.875rem;
 }
+.lp-contact__error { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
 .lp-contact__form { display: flex; flex-direction: column; gap: 1rem; }
 
 .lp-input-wrap {

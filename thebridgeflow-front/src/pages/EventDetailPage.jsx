@@ -121,6 +121,14 @@ export default function EventDetailPage() {
     await runWithPhone(submitRegistration);
   };
 
+  const openSessionRecording = () => {
+    if (!user) {
+      setParticipationModal("sessionLogin");
+      return;
+    }
+    navigate(`/events/${encodeURIComponent(id)}/session`);
+  };
+
   return (
     <div className="ev-public-page">
       <SiteNavbar />
@@ -168,9 +176,9 @@ export default function EventDetailPage() {
                   {event.sessionLinkAvailable && (
                     <div className="ev-detail__session-link">
                       <button
-                        className="btn btn-primary"
+                        className="btn btn-primary ev-session-recording-btn"
                         type="button"
-                        onClick={() => navigate(`/events/${encodeURIComponent(id)}/session`)}
+                        onClick={openSessionRecording}
                       >
                         {t("events.openSessionLink")}
                       </button>
@@ -214,16 +222,16 @@ export default function EventDetailPage() {
               </article>
             )}
       </main>
-      {participationModal === "login" && (
+      {(participationModal === "login" || participationModal === "sessionLogin") && (
         <Modal
           title={t("events.loginRequiredTitle")}
           onClose={() => setParticipationModal("")}
           footer={<>
             <button type="button" className="btn btn-ghost" onClick={() => setParticipationModal("")}>{t("common.cancel")}</button>
-            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: `/events/${id}` } })}>{t("events.signIn")}</button>
+            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: participationModal === "sessionLogin" ? `/events/${id}/session` : `/events/${id}` } })}>{t("events.signIn")}</button>
           </>}
         >
-          <p>{t("events.loginRequiredMessage")}</p>
+          <p>{t(participationModal === "sessionLogin" ? "events.sessionLoginMessage" : "events.loginRequiredMessage")}</p>
         </Modal>
       )}
       {participationModal === "success" && (

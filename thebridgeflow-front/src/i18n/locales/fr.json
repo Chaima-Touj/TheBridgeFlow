@@ -62,6 +62,7 @@
     "descriptionLabel": "À propos de l'événement",
     "loginRequiredTitle": "Connexion requise",
     "loginRequiredMessage": "Connectez-vous à votre compte étudiant pour participer à cet événement.",
+    "sessionLoginMessage": "Veuillez vous connecter à votre compte étudiant pour consulter l'enregistrement de cet événement.",
     "signIn": "Se connecter",
     "participationSuccessTitle": "Participation confirmée 🎉",
     "participationSuccessMessage": "C'est bon, vous participez à l'événement ! Le lien de l'événement a été envoyé à votre adresse e-mail : {{email}}.",
@@ -295,6 +296,7 @@
       "events": "Événements",
       "ceremony": "Cérémonie",
       "feedbacks": "Feedbacks",
+      "contactMessages": "Messages du site",
       "messages": "Messagerie",
       "notifications": "Notifications",
       "candidatures": "Candidatures",
@@ -773,9 +775,9 @@
     "terminé": "Terminé"
   },
   "landing": {
-    "seoTitle": "TheBridgeFlow | Formations, Stages et Accompagnement PFE",
+    "seoTitle": "TheBridgeFlow | Formations, Stages et Encadrement PFE - 9antra.tn",
     "seoDescription": "Découvrez les formations TheBridgeFlow, trouvez des offres de stage et de PFE et bénéficiez d’un accompagnement personnalisé pour réussir vos projets et développer vos compétences professionnelles.",
-    "heroBadge": "Formation · Encadrement · Suivi",
+    "heroBadge": "Formation · Stage · Encadrement PFE",
     "heroTitle1": "Développez vos compétences",
     "heroTitle2": "et réussissez votre projet professionnel avec TheBridgeFlow",
     "heroDesc": "Découvrez des formations adaptées à vos objectifs, bénéficiez d’un accompagnement personnalisé pour votre projet de fin d’études (PFE) et accédez à des offres de stage pour préparer votre avenir professionnel.",
@@ -871,6 +873,8 @@
     "contactMessage": "Votre message...",
     "contactSend": "Envoyer le message",
     "contactSuccess": "Message envoyé avec succès !",
+    "contactSending": "Envoi en cours…",
+    "contactError": "Le message n'a pas pu être envoyé. Veuillez réessayer.",
     "contactPhone": "Téléphone",
     "mapTitle": "Nos localisations",
     "viewOnMaps": "Voir sur Maps",
@@ -1081,7 +1085,7 @@
     "modalTitle": "Demande d'inscription",
     "requestSuccessTitle": "Demande envoyée avec succès !",
     "modalClose": "Fermer",
-    "alreadySent": "Vous avez déjà soumis une demande pour cette formation.",
+    "alreadySent": "Vous avez déjà soumis une demande pour cette formation. Pour confirmer, contactez-nous au :",
     "requestSuccess": "Merci pour votre demande ! Pour confirmer votre inscription, contactez-nous au :",
     "submitError": "Impossible d'envoyer la demande. Veuillez réessayer.",
     "modeLegend": "Mode souhaité",
@@ -1383,6 +1387,16 @@
     "editArticleTitle": "Modifier — {{title}}",
     "deleteArticleTitle": "Supprimer l'actualité",
     "confirmDeleteQuestion": "Voulez-vous vraiment supprimer"
+  },
+  "adminContactMessages": {
+    "title": "Messages du site",
+    "subtitle": "Messages envoyés depuis le formulaire de contact public.",
+    "count": "{{count}} message(s)",
+    "refresh": "Actualiser",
+    "loading": "Chargement des messages…",
+    "loadError": "Impossible de charger les messages.",
+    "empty": "Aucun message reçu pour le moment.",
+    "from": "Message reçu de"
   },
   "adminNewsletter": {
     "title": "Abonnés à la newsletter",

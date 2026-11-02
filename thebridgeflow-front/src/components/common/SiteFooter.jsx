@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,6 +15,14 @@ export default function SiteFooter() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const updateVisibility = () => setShowBackToTop(window.scrollY > 320);
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateVisibility);
+  }, []);
 
   const handleSectionClick = (sectionId) => (event) => {
     event.preventDefault();
@@ -70,7 +79,7 @@ export default function SiteFooter() {
           <h4>{t("nav.contact")}</h4>
           <a href="https://maps.app.goo.gl/R4JBunHzfqFemjNX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> <span>FIQR Coworking Space<br />24 Rue Mendes France, Ariana 2036</span></a>
           <a href="https://maps.app.goo.gl/fapcW6wn8dZgZaFX9" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> Lac 1, Tunis — Level 1</a>
-          <span><FiMapPin size={13} /> Sahloul, Sousse — Rockets</span>
+          <a href="https://maps.app.goo.gl/YJY6vKBw1RJJ9XEo7" target="_blank" rel="noopener noreferrer"><FiMapPin size={13} /> Sahloul, Sousse — Rockets</a>
           <span><FiPhone size={13} /> <span dir="ltr">{PHONE_NUMBER}</span></span>
           <span><FiMail size={13} /> contact@9antra.tn</span>
         </div>
@@ -79,7 +88,7 @@ export default function SiteFooter() {
       <div className="lp-footer__bottom">
         © 2026 TheBridgeFlow. {t("landing.copyright")}.
       </div>
-      <button
+      {showBackToTop && <button
         type="button"
         className="lp-footer__to-top"
         aria-label={t("landing.backToTop")}
@@ -87,7 +96,7 @@ export default function SiteFooter() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <FiArrowUp aria-hidden="true" />
-      </button>
+      </button>}
     </footer>
   );
 }
