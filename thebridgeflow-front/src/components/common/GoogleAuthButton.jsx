@@ -24,6 +24,10 @@ export default function GoogleAuthButton({ onError }) {
   const handleSuccess = async (credentialResponse) => {
     try {
       const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
+      if (data.needsVerify) {
+        navigate("/verify-email", { state: { email: data.email, from: location.state?.from } });
+        return;
+      }
       loginWithToken(data.token, data.user);
       const returnTo = location.state?.from;
       const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//");

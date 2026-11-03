@@ -1,6 +1,6 @@
 // src/components/profile/ProfileEditor.jsx
 import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
@@ -36,10 +36,10 @@ const emptyStringToNull = (value, originalValue) =>
 /* Les messages yup stockent une CLÉ i18n (pas le texte) : traduits au rendu via t(errors.x.message) */
 const experienceSchema = yup.object().shape({
   id: yup.string().nullable(),
-  company: yup.string().required("profileEditor.errors.companyRequired"),
-  position: yup.string().required("profileEditor.errors.positionRequired"),
+  company: yup.string().nullable(),
+  position: yup.string().nullable(),
   location: yup.string().nullable(),
-  startDate: yup.date().required("profileEditor.errors.startDateRequired"),
+  startDate: yup.date().nullable().transform(emptyStringToNull),
   endDate: yup.date().nullable().transform(emptyStringToNull),
   current: yup.boolean().default(false),
   description: yup.string().nullable(),
@@ -48,19 +48,15 @@ const experienceSchema = yup.object().shape({
 
 const skillSchema = yup.object().shape({
   id: yup.string().nullable(),
-  name: yup.string().required("profileEditor.errors.skillNameRequired"),
+  name: yup.string().nullable(),
   category: yup.string().nullable(),
-  level: yup.string()
-    .oneOf(["Débutant", "Intermédiaire", "Avancé", "Expert"])
-    .required("profileEditor.errors.levelRequired"),
+  level: yup.string().oneOf(["", "Débutant", "Intermédiaire", "Avancé", "Expert"]).nullable(),
 });
 
 const languageSchema = yup.object().shape({
   id: yup.string().nullable(),
-  name: yup.string().required("profileEditor.errors.languageNameRequired"),
-  level: yup.string()
-    .oneOf(["Débutant", "Intermédiaire", "Courant", "Natif"])
-    .required("profileEditor.errors.levelRequired"),
+  name: yup.string().nullable(),
+  level: yup.string().oneOf(["", "Débutant", "Intermédiaire", "Courant", "Natif"]).nullable(),
 });
 
 const studentProfileSchema = yup.object().shape({
@@ -83,10 +79,10 @@ const studentProfileSchema = yup.object().shape({
   role: yup.string().oneOf(["étudiant"]).default("étudiant"),
   bio: yup.string().nullable(),
   education: yup.object().shape({
-    institution: yup.string().required("profileEditor.errors.institutionRequired"),
-    degree: yup.string().required("profileEditor.errors.degreeRequired"),
-    fieldOfStudy: yup.string().required("profileEditor.errors.fieldOfStudyRequired"),
-    startDate: yup.date().required("profileEditor.errors.startDateRequired"),
+    institution: yup.string().nullable(),
+    degree: yup.string().nullable(),
+    fieldOfStudy: yup.string().nullable(),
+    startDate: yup.date().nullable().transform(emptyStringToNull),
     endDate: yup.date().nullable().transform(emptyStringToNull),
     current: yup.boolean().default(false),
     grade: yup.string().nullable(),
@@ -149,7 +145,6 @@ const ProfileEditor = ({
     control,
     handleSubmit,
     formState: { errors },
-    watch,
     setValue,
   } = useForm({
     resolver: yupResolver(studentProfileSchema),
@@ -160,6 +155,8 @@ const ProfileEditor = ({
   const experienceFields = useFieldArray({ control, name: "experience" });
   const skillsFields = useFieldArray({ control, name: "skills" });
   const languagesFields = useFieldArray({ control, name: "languages" });
+  const selectedGender = useWatch({ control, name: "gender" });
+  const currentCvFile = useWatch({ control, name: "cv.fileName" });
 
   const handleCVUpload = (file) => {
     if (!file) {
@@ -210,11 +207,11 @@ const ProfileEditor = ({
         <div className="form-group">
           <label className="label">{t("register.genderLabel")}</label>
           <div className="gender-toggle">
-            <button type="button" className={`gender-btn ${watch("gender") === "femme" ? "active" : ""}`}
+            <button type="button" className={`gender-btn ${selectedGender === "femme" ? "active" : ""}`}
               onClick={() => setValue("gender", "femme", { shouldDirty: true })}>
               {t("register.genderFemale")}
             </button>
-            <button type="button" className={`gender-btn ${watch("gender") === "homme" ? "active" : ""}`}
+            <button type="button" className={`gender-btn ${selectedGender === "homme" ? "active" : ""}`}
               onClick={() => setValue("gender", "homme", { shouldDirty: true })}>
               {t("register.genderMale")}
             </button>
@@ -411,8 +408,7 @@ const ProfileEditor = ({
         <SectionCard title={t("profileEditor.cv")} icon={<FiUpload size={18} />}>
           <FileUpload
             onUpload={handleCVUpload}
-            // eslint-disable-next-line react-hooks/incompatible-library
-            currentFile={watch("cv.fileName")}
+            currentFile={currentCvFile}
             accept=".pdf,.doc,.docx"
             maxSize={5 * 1024 * 1024}
           />

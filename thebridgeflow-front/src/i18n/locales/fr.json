@@ -325,6 +325,7 @@
   },
   "dashboard": {
     "student": {
+      "title": "Espace étudiant",
       "greeting": "Bonjour, {{name}}",
       "subtitle": "Voici un aperçu de votre activité",
       "statsApplications": "Candidatures",
@@ -1541,6 +1542,7 @@
     }
   },
   "adminCandidatures": {
+    "profile": { "title": "Détails de la candidature et de l’étudiant", "studentDetails": "Profil de l’étudiant", "applicationDetails": "Candidature", "name": "Nom complet", "email": "Email", "phone": "Téléphone", "university": "Université", "specialty": "Spécialité", "gender": "Genre", "bio": "À propos", "education": "Formation", "experience": "Expérience", "skills": "Compétences", "languages": "Langues", "socialLinks": "Liens professionnels", "offer": "Offre", "company": "Entreprise", "status": "Statut", "submitted": "Date de candidature", "cv": "CV", "coverLetter": "Lettre de motivation", "openDocument": "Ouvrir le document", "notProvided": "Non renseigné" },
     "pageSubtitle": "Gérer les candidatures reçues sur les offres de stage",
     "searchPlaceholder": "Rechercher un étudiant, une offre...",
     "filterStatusAll": "Tous les statuts",

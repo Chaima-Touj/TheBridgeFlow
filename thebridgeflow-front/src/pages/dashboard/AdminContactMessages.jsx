@@ -14,7 +14,6 @@ export default function AdminContactMessages() {
   const [search, setSearch] = useState("");
 
   const loadMessages = useCallback(() => {
-    setLoading(true);
     contactMessagesService.getAll()
       .then(({ data }) => {
         const messages = data.submissions || [];
@@ -27,6 +26,10 @@ export default function AdminContactMessages() {
   }, [t]);
 
   useEffect(() => { loadMessages(); }, [loadMessages]);
+  const refreshMessages = () => {
+    setLoading(true);
+    loadMessages();
+  };
 
   const openMessage = async (message) => {
     setActiveId(message._id);
@@ -53,7 +56,7 @@ export default function AdminContactMessages() {
             <span className="acm-summary__icon"><FiInbox aria-hidden="true" /></span>
             <div><strong>{t("adminContactMessages.count", { count: items.length })}</strong><span>{t("adminContactMessages.unread", { count: unreadCount })}</span></div>
           </div>
-          <button type="button" className="btn btn-ghost" onClick={loadMessages} disabled={loading}>
+          <button type="button" className="btn btn-ghost" onClick={refreshMessages} disabled={loading}>
             <FiRefreshCw aria-hidden="true" /> {t("adminContactMessages.refresh")}
           </button>
         </div>

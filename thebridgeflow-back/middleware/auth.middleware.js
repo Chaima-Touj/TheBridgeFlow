@@ -50,6 +50,16 @@ export const protect = asyncHandler(async (req, res, next) => {
     throw err;
   }
 
+  if (user.role === "étudiant" && user.isVerified !== true) {
+    if (user.isActive !== false) {
+      await User.updateOne({ _id: user._id, isVerified: { $ne: true } }, { $set: { isActive: false } });
+    }
+    const err = new Error("Votre adresse email doit être vérifiée avant d'utiliser la plateforme.");
+    err.statusCode = 403;
+    err.needsVerify = true;
+    throw err;
+  }
+
   // Révoque immédiatement l'accès si le compte a été désactivé après
   // l'émission du token (sinon un compte désactivé garde un accès complet
   // tant que son JWT n'a pas expiré — le login seul ne suffit pas).

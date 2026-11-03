@@ -539,11 +539,14 @@ export const getEventRegistrations = asyncHandler(async (req, res) => {
 
 export const getEventSessionLink = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) fail("Identifiant d'événement invalide.", 400);
-  const event = await Event.findOne({ _id: req.params.id, status: "published" })
-    .select("sessionUrl")
+    const event = await Event.findOne({ _id: req.params.id, status: "published" })
+      .select(`${publicProjection} sessionUrl`)
     .lean();
   if (!event) fail("Événement introuvable.", 404);
+    if (!isSessionLinkAvailable(event)) fail("L'enregistrement sera disponible après la fin de l'événement.", 403);
   if (!event.sessionUrl) fail("Le lien de séance n'est pas encore renseigné.", 404);
   if (!isSafeSessionUrl(event.sessionUrl)) fail("Le lien de séance configuré n'est pas sécurisé.", 500);
-  res.set("Cache-Control", "no-store").json({ sessionUrl: event.sessionUrl });
+    const sessionUrl = event.sessionUrl;
+    delete event.sessionUrl;
+    res.set("Cache-Control", "no-store").json({ sessionUrl, event });
 });

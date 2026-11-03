@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiFileText, FiAlertTriangle, FiCalendar,
-  FiChevronLeft, FiChevronRight, FiSend,
+  FiFileText, FiAlertTriangle,
+  FiChevronLeft, FiChevronRight, FiSend, FiEye,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
@@ -216,6 +216,7 @@ export default function AdminApplications() {
   const [actionId,       setActionId]       = useState(null);
   const [rowActionError, setRowActionError] = useState("");
   const [interviewTarget, setInterviewTarget] = useState(null);
+  const [profileTarget, setProfileTarget] = useState(null);
 
   const loadApplications = useCallback(() => {
     applicationsService.getAll()
@@ -357,7 +358,9 @@ export default function AdminApplications() {
                                 {app.studentId?.name?.[0]?.toUpperCase() || "?"}
                               </div>
                               <div className="au-user-cell">
-                                <span className="af-formation-title-text">{app.studentId?.name || "—"}</span>
+                                <button type="button" className="af-formation-title-text ac-profile-trigger" onClick={() => setProfileTarget(app)}>
+                                  {app.studentId?.name || "—"} <FiEye size={13} />
+                                </button>
                                 <span className="au-user-email">{app.studentId?.email || ""}</span>
                               </div>
                             </div>
@@ -448,6 +451,39 @@ export default function AdminApplications() {
             onSubmitted={handleInterviewSubmitted}
             t={t}
           />
+        </Modal>
+      )}
+      {profileTarget && (
+        <Modal title={t("adminCandidatures.profile.title")} onClose={() => setProfileTarget(null)} maxWidth={760}>
+          <div className="ac-profile-details">
+            <section>
+              <h3>{t("adminCandidatures.profile.studentDetails")}</h3>
+              <dl>
+                {[["name", profileTarget.studentId?.name], ["email", profileTarget.studentId?.email],
+                  ["phone", profileTarget.studentId?.phone], ["university", profileTarget.studentId?.university],
+                  ["specialty", profileTarget.studentId?.specialty], ["gender", profileTarget.studentId?.gender],
+                  ["bio", profileTarget.studentId?.bio]].map(([label, value]) => (
+                  <div key={label}><dt>{t(`adminCandidatures.profile.${label}`)}</dt><dd>{value || t("adminCandidatures.profile.notProvided")}</dd></div>
+                ))}
+                <div><dt>{t("adminCandidatures.profile.education")}</dt><dd>{[profileTarget.studentId?.education?.degree, profileTarget.studentId?.education?.fieldOfStudy, profileTarget.studentId?.education?.institution, profileTarget.studentId?.education?.grade, ...(profileTarget.studentId?.education?.courses || [])].filter(Boolean).join(" · ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.experience")}</dt><dd>{profileTarget.studentId?.experience?.map((item) => [item.position, item.company, item.location, item.description, ...(item.technologies || [])].filter(Boolean).join(" — ")).filter(Boolean).join("; ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.skills")}</dt><dd>{profileTarget.studentId?.skills?.map((skill) => [skill.name, skill.level].filter(Boolean).join(" — ")).filter(Boolean).join(", ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.languages")}</dt><dd>{profileTarget.studentId?.languages?.map((language) => [language.name, language.level].filter(Boolean).join(" — ")).filter(Boolean).join(", ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.socialLinks")}</dt><dd>{Object.entries(profileTarget.studentId?.socialLinks || {}).filter(([, url]) => url).map(([key, url]) => `${key}: ${url}`).join(" · ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+              </dl>
+            </section>
+            <section>
+              <h3>{t("adminCandidatures.profile.applicationDetails")}</h3>
+              <dl>
+                <div><dt>{t("adminCandidatures.profile.offer")}</dt><dd>{profileTarget.offerId?.title || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.company")}</dt><dd>{profileTarget.offerId?.companyName || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.status")}</dt><dd>{t(`status.${profileTarget.status}`)}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.submitted")}</dt><dd>{formatDate(profileTarget.createdAt)}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.cv")}</dt><dd>{profileTarget.cvUrl ? <a href={profileTarget.cvUrl} target="_blank" rel="noreferrer">{t("adminCandidatures.profile.openDocument")}</a> : profileTarget.studentId?.cv?.fileUrl ? <a href={profileTarget.studentId.cv.fileUrl} target="_blank" rel="noreferrer">{profileTarget.studentId.cv.fileName || "CV"}</a> : t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.coverLetter")}</dt><dd>{profileTarget.coverLetterUrl ? <a href={profileTarget.coverLetterUrl} target="_blank" rel="noreferrer">{profileTarget.coverLetterName || t("adminCandidatures.profile.openDocument")}</a> : profileTarget.coverLetter || t("adminCandidatures.profile.notProvided")}</dd></div>
+              </dl>
+            </section>
+          </div>
         </Modal>
       )}
     </DashboardLayout>

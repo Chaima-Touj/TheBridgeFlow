@@ -325,6 +325,7 @@
   },
   "dashboard": {
     "student": {
+      "title": "Student dashboard",
       "greeting": "Hello, {{name}}",
       "subtitle": "Here's an overview of your activity",
       "statsApplications": "Applications",
@@ -1541,6 +1542,7 @@
     }
   },
   "adminCandidatures": {
+    "profile": { "title": "Student and application details", "studentDetails": "Student profile", "applicationDetails": "Application", "name": "Full name", "email": "Email", "phone": "Phone", "university": "University", "specialty": "Specialty", "gender": "Gender", "bio": "About", "education": "Education", "experience": "Experience", "skills": "Skills", "languages": "Languages", "socialLinks": "Professional links", "offer": "Offer", "company": "Company", "status": "Status", "submitted": "Application date", "cv": "CV", "coverLetter": "Cover letter", "openDocument": "Open document", "notProvided": "Not provided" },
     "pageSubtitle": "Manage applications received on internship offers",
     "searchPlaceholder": "Search a student, an offer...",
     "filterStatusAll": "All statuses",

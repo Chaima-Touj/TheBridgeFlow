@@ -43,6 +43,7 @@ export default function EventDetailPage() {
     registrationDetails?.eventId === id &&
     registrationDetails?.studentId === user?._id;
   const meetingUrl = participationConfirmed ? registrationDetails.meetingUrl : "";
+  const eventEnded = Boolean(event && new Date(event.endsAt || event.startsAt) <= new Date());
   const capacityReached = Boolean(event && event.capacity !== null && event.capacity !== undefined &&
     event.registrationCount >= event.capacity);
 
@@ -173,7 +174,7 @@ export default function EventDetailPage() {
                       </div>
                     )}
                   </div>
-                  {event.sessionLinkAvailable && (
+                  {event.sessionLinkAvailable && eventEnded && (
                     <div className="ev-detail__session-link">
                       <button
                         className="btn btn-primary ev-session-recording-btn"
@@ -190,7 +191,7 @@ export default function EventDetailPage() {
                   </section>
                   {error && <p className="ev-form-error" role="alert">{error}</p>}
                   {event.status === "cancelled" && <p className="ev-form-error" role="status">{t("events.cancelledMessage")}</p>}
-                  {event.status === "published" && event.registrationRequired === true &&
+                  {event.status === "published" && event.registrationRequired === true && !eventEnded &&
                     (participationConfirmed || new Date(event.startsAt) > new Date()) &&
                     (!user || user.role === "étudiant") && (
                     <section className="ev-registration-card" aria-labelledby="ev-registration-title">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../services/api.js";
 import { loadFacebookSdk } from "../../utils/facebookSdk.js";
@@ -25,6 +25,7 @@ const FacebookIcon = () => (
 export default function FacebookAuthButton({ onError }) {
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
@@ -50,6 +51,10 @@ export default function FacebookAuthButton({ onError }) {
     }
     try {
       const { data } = await api.post("/auth/facebook", { accessToken: response.authResponse.accessToken });
+      if (data.needsVerify) {
+        navigate("/verify-email", { state: { email: data.email, from: location.state?.from } });
+        return;
+      }
       loginWithToken(data.token, data.user);
       navigate(ROUTES[data.user?.role] || "/dashboard/student");
     } catch (err) {

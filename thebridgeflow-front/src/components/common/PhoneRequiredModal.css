@@ -13,7 +13,7 @@
   padding: 1.5rem;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 1rem;
-  background: var(--surface, #fff);
+  background: var(--bg-card, #fff);
   color: var(--text, #0f172a);
   box-shadow: 0 24px 70px rgb(15 23 42 / 28%);
 }
@@ -44,9 +44,36 @@
   padding: 0.65rem 0.75rem;
   border: 1px solid var(--border, #cbd5e1);
   border-radius: 0.6rem;
-  background: var(--background, #fff);
-  color: inherit;
+  background: var(--bg, #fff);
+  color: var(--text, #0f172a);
+  -webkit-text-fill-color: var(--text, #0f172a);
+  caret-color: var(--primary, #2563eb);
   font: inherit;
+}
+
+.phone-required-modal input::placeholder {
+  color: var(--text-muted, #64748b);
+  -webkit-text-fill-color: var(--text-muted, #64748b);
+  opacity: 1;
+}
+
+.phone-required-modal input:focus {
+  border-color: var(--primary, #2563eb);
+  outline: 3px solid color-mix(in srgb, var(--primary, #2563eb) 22%, transparent);
+  outline-offset: 1px;
+}
+
+.phone-required-modal input:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.phone-required-modal input:-webkit-autofill,
+.phone-required-modal input:-webkit-autofill:hover,
+.phone-required-modal input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text, #0f172a);
+  box-shadow: 0 0 0 1000px var(--bg, #fff) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .phone-required-error {

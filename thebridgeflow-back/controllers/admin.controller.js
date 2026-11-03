@@ -274,6 +274,7 @@ export const createUser = asyncHandler(async (req, res) => {
     password: password || generatedPassword,
     role,
     isVerified: true,
+    isActive: true,
   });
 
   console.log(`📝 Utilisateur créé par l'admin : ${user.name} (${user.email}) — rôle: ${user.role}`);
@@ -301,6 +302,12 @@ export const createUser = asyncHandler(async (req, res) => {
    le volume actuel ne le justifie pas, le tri/filtre/pagination se fait côté
    client (cohérent avec AdminFormations.jsx).                                 */
 export const getUsers = asyncHandler(async (req, res) => {
+  // Répare aussi les anciens comptes qui étaient marqués actifs avant la
+  // vérification obligatoire de l'adresse email.
+  await User.updateMany(
+    { role: "étudiant", isVerified: { $ne: true }, isActive: true },
+    { $set: { isActive: false } }
+  );
   const users = await User.find()
     .select(USER_SELECT)
     .sort({ createdAt: -1 })
@@ -331,6 +338,12 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
   if (!isActive && String(req.params.id) === String(req.user._id)) {
     const err = new Error("Vous ne pouvez pas désactiver votre propre compte.");
     err.statusCode = 400;
+    throw err;
+  }
+
+  if (isActive && !(await User.exists({ _id: req.params.id, isVerified: true }))) {
+    const err = new Error("L'adresse email doit être vérifiée avant l'activation du compte.");
+    err.statusCode = 409;
     throw err;
   }
 

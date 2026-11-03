@@ -158,3 +158,14 @@
     gap: 2px;
   }
 }
+.ac-profile-trigger { display: inline-flex; align-items: center; gap: .35rem; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.ac-profile-trigger:hover { color: var(--primary); }
+.ac-profile-details { display: grid; gap: 1.25rem; max-height: 70vh; overflow: auto; }
+.ac-profile-details section { padding: 1rem; border: 1px solid var(--border); border-radius: .8rem; background: var(--bg-card); }
+.ac-profile-details h3 { margin: 0 0 .75rem; color: var(--text); }
+.ac-profile-details dl { display: grid; gap: .55rem; margin: 0; }
+.ac-profile-details dl > div { display: grid; grid-template-columns: minmax(120px, .35fr) 1fr; gap: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+.ac-profile-details dt { color: var(--text-muted); font-weight: 600; }
+.ac-profile-details dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+.ac-profile-details a { color: var(--primary); font-weight: 650; }
+@media (max-width: 540px) { .ac-profile-details dl > div { grid-template-columns: 1fr; gap: .15rem; } }

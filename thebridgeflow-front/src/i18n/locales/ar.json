@@ -329,6 +329,7 @@
   },
   "dashboard": {
     "student": {
+      "title": "لوحة الطالب",
       "greeting": "مرحباً، {{name}}",
       "subtitle": "هذه نظرة عامة على نشاطك",
       "statsApplications": "الطلبات",
@@ -1545,6 +1546,7 @@
     }
   },
   "adminCandidatures": {
+    "profile": { "title": "تفاصيل الطالب والترشح", "studentDetails": "ملف الطالب", "applicationDetails": "الترشح", "name": "الاسم الكامل", "email": "البريد الإلكتروني", "phone": "الهاتف", "university": "الجامعة", "specialty": "التخصص", "gender": "الجنس", "bio": "نبذة", "education": "التعليم", "experience": "الخبرة", "skills": "المهارات", "languages": "اللغات", "socialLinks": "روابط مهنية", "offer": "العرض", "company": "الشركة", "status": "الحالة", "submitted": "تاريخ الترشح", "cv": "السيرة الذاتية", "coverLetter": "رسالة التحفيز", "openDocument": "فتح المستند", "notProvided": "غير مذكور" },
     "pageSubtitle": "إدارة الترشحات الواردة على عروض التربص",
     "searchPlaceholder": "ابحث عن طالب أو عرض...",
     "filterStatusAll": "جميع الحالات",

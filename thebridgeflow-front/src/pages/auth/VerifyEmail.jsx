@@ -94,8 +94,11 @@ export default function VerifyEmail() {
 
       setTimeout(() => {
         const role = data.user?.role;
-        if (role === "étudiant") navigate("/dashboard/student", { replace: true });
-        else                     navigate("/dashboard",         { replace: true });
+        const returnTo = location.state?.from;
+        const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//");
+        if (safeReturnTo) navigate(returnTo, { replace: true });
+        else if (role === "étudiant") navigate("/dashboard/student", { replace: true });
+        else                          navigate("/dashboard/admin",   { replace: true });
       }, 1200);
 
     } catch (err) {

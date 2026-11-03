@@ -654,7 +654,7 @@ export default function MessagingPage() {
           <StatCard value={loadingList ? "—" : stats.conversations}  label={t("messages.statConversations")} icon={FiMessageSquare} color="#6366F1" />
           <StatCard value={loadingList ? "—" : stats.unread}         label={t("messages.statUnread")}        icon={FiUsers}         color="#F59E0B" />
           <StatCard value={loadingList ? "—" : stats.todayActive}    label={t("messages.statToday")}         icon={FiFileText}      color="#10B981" />
-          <StatCard value={loadingStudents ? "—" : stats.withStudents} label={t("messages.statStudents")}    icon={FiUserPlus}      color="#8B5CF6" />
+          <StatCard value={loadingStudents ? "—" : stats.withStudents} label={user?.role === "admin" ? t("messages.statStudents") : t("messages.statAdmins", "Administrators")} icon={FiUserPlus} color="#8B5CF6" />
         </div>
 
         {/* ── Chat shell ── */}
@@ -680,7 +680,7 @@ export default function MessagingPage() {
                 onClick={() => setActiveTab("students")}
               >
                 <FiUsers size={13} />
-                {t("messages.tabStudents")}
+                {user?.role === "admin" ? t("messages.tabStudents") : t("messages.tabAdmin", "Contact admin")}
               </button>
             </div>
 

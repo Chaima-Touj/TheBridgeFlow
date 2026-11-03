@@ -4,6 +4,7 @@ import Offer from "../models/offers.model.js";
 import User from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { notifyAdmins, notifyUser } from "../services/notification.service.js";
+import fs from "node:fs";
 
 // POST /api/applications — réservé aux étudiants
 export const createApplication = asyncHandler(async (req, res) => {
@@ -13,9 +14,11 @@ export const createApplication = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const { offerId, coverLetter } = req.body;
+  const { offerId } = req.body;
+  const removeUploadedFiles = () => Object.values(req.files || {}).flat().forEach((file) => fs.unlink(file.path, () => {}));
 
   if (!offerId) {
+    removeUploadedFiles();
     const err = new Error("offerId requis");
     err.statusCode = 400;
     throw err;
@@ -23,6 +26,7 @@ export const createApplication = asyncHandler(async (req, res) => {
 
   const existing = await Application.findOne({ offerId, studentId: req.user._id });
   if (existing) {
+    removeUploadedFiles();
     const err = new Error("Tu as déjà postulé à cette offre");
     err.statusCode = 409;
     throw err;
@@ -30,17 +34,22 @@ export const createApplication = asyncHandler(async (req, res) => {
 
   const offer = await Offer.findById(offerId);
   if (!offer) {
+    removeUploadedFiles();
     const err = new Error("Offre non trouvée");
     err.statusCode = 404;
     throw err;
   }
 
-  const cvUrl = req.file ? `/uploads/${req.file.filename}` : "";
+  const cvFile = req.files?.cv?.[0];
+  const coverLetterFile = req.files?.coverLetter?.[0];
+  const cvUrl = cvFile ? `/uploads/${cvFile.filename}` : "";
 
   const application = await Application.create({
     offerId,
     studentId: req.user._id,
-    coverLetter,
+    coverLetter: "",
+    coverLetterUrl: coverLetterFile ? `/uploads/${coverLetterFile.filename}` : "",
+    coverLetterName: coverLetterFile?.originalname || "",
     cvUrl,
   });
 
@@ -90,7 +99,9 @@ export const getApplications = asyncHandler(async (req, res) => {
 
   const applications = await Application.find(filter)
     .populate("offerId",   "title companyName location type companyId")
-    .populate("studentId", "name email university specialty")
+    .populate("studentId", req.user.role === "admin"
+      ? "name email phone university specialty bio gender avatarUrl education experience skills languages socialLinks cv"
+      : "name email university specialty")
     .sort({ createdAt: -1 })
     .lean();
 
@@ -99,9 +110,12 @@ export const getApplications = asyncHandler(async (req, res) => {
 
 // GET /api/applications/:id
 export const getApplication = asyncHandler(async (req, res) => {
+  const studentFields = req.user.role === "admin"
+    ? "name email phone university specialty bio gender avatarUrl education experience skills languages socialLinks cv"
+    : "name email phone university specialty";
   const application = await Application.findById(req.params.id)
     .populate("offerId")
-    .populate("studentId", "name email university specialty phone");
+    .populate("studentId", studentFields);
 
   if (!application) {
     const err = new Error("Candidature non trouvée");

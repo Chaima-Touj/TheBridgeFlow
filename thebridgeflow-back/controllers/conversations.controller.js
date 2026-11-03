@@ -4,6 +4,8 @@ import User         from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import fs           from "fs";
 
+const isAdminStudentPair = (users) => users?.length === 2 && users.some((user) => user?.role === "admin") && users.some((user) => user?.role === "étudiant");
+
 // GET /api/conversations
 export const getConversations = asyncHandler(async (req, res) => {
   const myId = req.user._id;
@@ -17,7 +19,7 @@ export const getConversations = asyncHandler(async (req, res) => {
     .sort({ lastMessageAt: -1 })
     .lean();
 
-  const result = conversations.map((conv) => {
+  const result = conversations.filter((conv) => isAdminStudentPair(conv.participants)).map((conv) => {
     const otherUser   = conv.participants.find((p) => String(p._id) !== String(myId));
     const unreadCount = conv.unreadCounts?.[String(myId)] || 0;
     return { ...conv, otherUser, unreadCount };
@@ -38,9 +40,9 @@ export const getConversationMessages = asyncHandler(async (req, res) => {
   const conv = await Conversation.findOne({
     _id: conversationId,
     participants: myId,
-  }).lean();
+  }).populate("participants", "name role avatarUrl").lean();
 
-  if (!conv) {
+  if (!conv || !isAdminStudentPair(conv.participants)) {
     const err = new Error("Conversation introuvable");
     err.statusCode = 404;
     throw err;
@@ -100,7 +102,7 @@ export const uploadFileMessage = asyncHandler(async (req, res) => {
 
   if (conversationId) {
     conv = await Conversation.findOne({ _id: conversationId, participants: myId });
-    if (!conv) {
+    if (!conv || conv.participants.length !== 2) {
       fs.unlink(req.file.path, () => {});
       const err = new Error("Conversation introuvable");
       err.statusCode = 404;
@@ -115,6 +117,17 @@ export const uploadFileMessage = asyncHandler(async (req, res) => {
     if (!conv) {
       conv = new Conversation({ participants: [myId, receiverId] });
     }
+  }
+
+  const [sender, receiver] = await Promise.all([
+    User.findById(myId).select("role").lean(),
+    User.findById(actualReceiverId).select("role").lean(),
+  ]);
+  if (!isAdminStudentPair([sender, receiver])) {
+    fs.unlink(req.file.path, () => {});
+    const err = new Error("La messagerie est réservée aux échanges entre un étudiant et un administrateur.");
+    err.statusCode = 403;
+    throw err;
   }
 
   const message = await Message.create({
@@ -147,14 +160,16 @@ export const uploadFileMessage = asyncHandler(async (req, res) => {
 
 // GET /api/conversations/students — liste des étudiants actifs (hors soi-même)
 export const getStudents = asyncHandler(async (req, res) => {
-  const myId = req.user._id;
-
-  const students = await User.find({
-    _id:      { $ne: myId },
-    role:     "étudiant",
-    isActive: true,
-  })
-    .select("_id name role avatarUrl university specialty bio skills")
+  const targetRole = req.user.role === "admin" ? "étudiant" : "admin";
+  if (!["admin", "étudiant"].includes(req.user.role)) {
+    const err = new Error("Accès interdit.");
+    err.statusCode = 403;
+    throw err;
+  }
+  const targetFilter = { role: targetRole, isActive: true };
+  if (targetRole === "étudiant") targetFilter.isVerified = true;
+  const students = await User.find(targetFilter)
+    .select("_id name role avatarUrl")
     .sort({ name: 1 })
     .lean();
 

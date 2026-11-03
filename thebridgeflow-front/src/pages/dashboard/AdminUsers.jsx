@@ -6,8 +6,6 @@ import {
   FiMoreVertical, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
   FiCheckCircle, FiXCircle, FiUserPlus, FiCopy, FiEye, FiEyeOff,
 } from "react-icons/fi";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
@@ -15,6 +13,7 @@ import ExportMenu from "../../components/common/ExportMenu.jsx";
 import Loader from "../../components/common/Loader.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { adminService } from "../../services/admin.service.js";
+import { exportUsersPDF } from "../../utils/exportUsersPDF.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 import "./AdminUsers.css";
@@ -44,6 +43,7 @@ function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("fr-FR");
 }
+const isAccountActive = (user) => user?.isVerified === true && user?.isActive !== false;
 
 function extractErrorMessage(err, fallback) {
   return err?.response?.data?.message || fallback;
@@ -61,7 +61,7 @@ function exportUsersCSV(rows, t) {
   ];
   const lines = rows.map((u) => [
     u.name, u.email, t(ROLE_LABEL_KEY[u.role] || u.role),
-    u.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
+    !u.isVerified ? t("adminUsers.verifiedNo") : u.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
     formatDate(u.createdAt),
   ].map(csvEscape).join(","));
   const csv = [headers.join(","), ...lines].join("\n");
@@ -74,43 +74,6 @@ function exportUsersCSV(rows, t) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function exportUsersPDF(rows, t) {
-  const head = [
-    t("adminUsers.csvColUser"), t("adminUsers.csvColEmail"), t("adminUsers.csvColRole"),
-    t("adminUsers.csvColStatus"), t("adminUsers.csvColJoined"),
-  ];
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-  const dateStr = new Date().toLocaleDateString("fr-FR");
-
-  doc.setFontSize(16);
-  doc.setTextColor(15, 23, 42);
-  doc.text(t("adminUsers.pdfTitle"), 14, 15);
-  doc.setFontSize(10);
-  doc.setTextColor(100, 116, 139);
-  doc.text(t("adminFormations.pdfExportedOn", { date: dateStr }), 14, 21);
-
-  const body = rows.map((u) => [
-    u.name || "",
-    u.email || "",
-    t(ROLE_LABEL_KEY[u.role] || u.role),
-    u.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
-    formatDate(u.createdAt),
-  ]);
-
-  autoTable(doc, {
-    head: [head],
-    body,
-    startY: 27,
-    theme: "striped",
-    styles: { fontSize: 9, cellPadding: 3.5, textColor: [15, 23, 42] },
-    headStyles: { fillColor: [226, 232, 240], textColor: [15, 23, 42], fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-  });
-
-  const fileDate = new Date().toISOString().slice(0, 10);
-  doc.save(`utilisateurs-stageflow-${fileDate}.pdf`);
 }
 
 function getPageNumbers(current, total) {
@@ -434,7 +397,7 @@ export default function AdminUsers() {
   const sortValue = (u, key) => {
     if (key === "name")      return u.name || "";
     if (key === "role")      return u.role || "";
-    if (key === "status")    return u.isActive === false ? 0 : 1;
+    if (key === "status")    return isAccountActive(u) ? 1 : 0;
     if (key === "createdAt") return u.createdAt || "";
     return "";
   };
@@ -450,7 +413,7 @@ export default function AdminUsers() {
     }
     if (roleFilter !== "all") rows = rows.filter((u) => u.role === roleFilter);
     if (statusFilter !== "all") {
-      rows = rows.filter((u) => (statusFilter === "active" ? u.isActive !== false : u.isActive === false));
+      rows = rows.filter((u) => (statusFilter === "active" ? isAccountActive(u) : !isAccountActive(u)));
     }
 
     if (sortKey) {
@@ -477,12 +440,24 @@ export default function AdminUsers() {
     setRowActionError("");
     setStatusActionId(u._id);
     try {
-      const { data } = await adminService.updateUserStatus(u._id, u.isActive === false);
+      const { data } = await adminService.updateUserStatus(u._id, !isAccountActive(u));
       setUsers((prev) => prev.map((x) => (x._id === u._id ? data.user : x)));
     } catch (err) {
       setRowActionError(extractErrorMessage(err, t("adminUsers.errors.statusUpdateFailed")));
     } finally {
       setStatusActionId(null);
+    }
+  };
+
+  const exportUsers = async (format) => {
+    setError("");
+    try {
+      const { data } = await adminService.getUsers();
+      const rows = Array.isArray(data) ? data : data?.users || [];
+      if (format === "pdf") exportUsersPDF(rows, t);
+      else exportUsersCSV(rows, t);
+    } catch (exportError) {
+      setError(extractErrorMessage(exportError, t("adminUsers.errors.generic", { defaultValue: "Export failed. Please try again." })));
     }
   };
 
@@ -576,8 +551,8 @@ export default function AdminUsers() {
               </div>
 
               <ExportMenu
-                onExportPDF={() => exportUsersPDF(filteredSorted, t)}
-                onExportCSV={() => exportUsersCSV(filteredSorted, t)}
+                onExportPDF={() => exportUsers("pdf")}
+                onExportCSV={() => exportUsers("csv")}
               />
 
               <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
@@ -652,15 +627,15 @@ export default function AdminUsers() {
                           </span>
                         </td>
                         <td>
-                          <span className={`badge ${u.isActive === false ? "badge-danger" : "badge-success"}`}>
-                            {u.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive")}
+                          <span className={`badge ${!u.isVerified ? "badge-warning" : isAccountActive(u) ? "badge-success" : "badge-danger"}`}>
+                            {!u.isVerified ? t("adminUsers.verifiedNo") : isAccountActive(u) ? t("adminUsers.statusActive") : t("adminUsers.statusInactive")}
                           </span>
                         </td>
                         <td>{formatDate(u.createdAt)}</td>
                         <td>
                           <RowActionsMenu
                             isSelf={isSelf(u)}
-                            isActive={u.isActive !== false}
+                            isActive={isAccountActive(u)}
                             statusUpdating={statusActionId === u._id}
                             onViewDetail={() => setDetailTarget(u)}
                             onToggleStatus={() => handleToggleStatus(u)}
@@ -738,8 +713,8 @@ export default function AdminUsers() {
               <span className={`badge ${ROLE_BADGE[detailTarget.role] || "badge-primary"}`}>
                 {t(ROLE_LABEL_KEY[detailTarget.role] || detailTarget.role)}
               </span>
-              <span className={`badge ${detailTarget.isActive === false ? "badge-danger" : "badge-success"}`}>
-                {detailTarget.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive")}
+              <span className={`badge ${!detailTarget.isVerified ? "badge-warning" : isAccountActive(detailTarget) ? "badge-success" : "badge-danger"}`}>
+                {!detailTarget.isVerified ? t("adminUsers.verifiedNo") : isAccountActive(detailTarget) ? t("adminUsers.statusActive") : t("adminUsers.statusInactive")}
               </span>
               <span className={`badge ${detailTarget.isVerified ? "badge-success" : "badge-warning"}`}>
                 {detailTarget.isVerified

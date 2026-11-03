@@ -9,6 +9,7 @@ const MESSAGES_ROUTE_BY_ROLE = {
   admin: "/dashboard/admin/messages",
   étudiant: "/dashboard/student/messages",
 };
+const isAdminStudentPair = (users) => users?.length === 2 && users.some((user) => user?.role === "admin") && users.some((user) => user?.role === "étudiant");
 
 // POST /api/messages
 export const sendMessage = asyncHandler(async (req, res) => {
@@ -27,11 +28,21 @@ export const sendMessage = asyncHandler(async (req, res) => {
     err.statusCode = 404;
     throw err;
   }
+  if (!isAdminStudentPair([req.user, receiver])) {
+    const err = new Error("La messagerie est réservée aux échanges entre un étudiant et un administrateur.");
+    err.statusCode = 403;
+    throw err;
+  }
 
   // Trouver ou créer la Conversation
   let conv;
   if (conversationId) {
     conv = await Conversation.findOne({ _id: conversationId, participants: senderId });
+    if (!conv || conv.participants.length !== 2 || !conv.participants.some((id) => String(id) === String(receiverId))) {
+      const err = new Error("Conversation introuvable ou destinataire invalide.");
+      err.statusCode = 404;
+      throw err;
+    }
   }
   if (!conv) {
     conv = await Conversation.findOne({
@@ -87,6 +98,12 @@ export const sendMessage = asyncHandler(async (req, res) => {
 export const getConversation = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   const myId = req.user._id;
+  const other = await User.findById(userId).select("role").lean();
+  if (!isAdminStudentPair([req.user, other])) {
+    const err = new Error("Vous ne pouvez consulter que votre conversation avec l'administrateur.");
+    err.statusCode = 403;
+    throw err;
+  }
 
   const messages = await Message.find({
     $or: [
@@ -119,5 +136,7 @@ export const getConversations = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  res.json({ messages });
+  const allowed = messages.filter((message) => isAdminStudentPair([message.senderId, message.receiverId]));
+
+  res.json({ messages: allowed });
 });

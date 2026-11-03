@@ -45,11 +45,15 @@ test("builds a paginated PDF and an explicit event filename", () => {
     "fr-FR",
   );
   const pdf = new Uint8Array(doc.output("arraybuffer"));
+  const pdfText = doc.output();
 
   assert.equal(emails.length, 100);
   assert.equal(filename, "participants-evenement-exemple.pdf");
   assert.equal(String.fromCharCode(...pdf.subarray(0, 5)), "%PDF-");
   assert.ok(doc.getNumberOfPages() > 1);
+  assert.match(pdfText, /participant0@example\.com/);
+  assert.match(pdfText, /participant99@example\.com/);
+  assert.doesNotMatch(pdfText, /Emails des participants|Adresse email|Événement Exemple/);
 });
 
 test("builds a valid PDF when no registered participant has an email", () => {

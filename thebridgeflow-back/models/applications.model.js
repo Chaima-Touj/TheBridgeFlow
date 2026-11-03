@@ -6,6 +6,8 @@ const applicationSchema = new mongoose.Schema(
     studentId:   { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     status:      { type: String, enum: ["en attente", "acceptée", "refusée", "en cours"], default: "en attente" },
     coverLetter: { type: String, default: "" },
+    coverLetterUrl: { type: String, default: "" },
+    coverLetterName: { type: String, default: "" },
     cvUrl:       { type: String, default: "" },
     note:        { type: String, default: "" },
   },

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMoon, FiSun } from "react-icons/fi";
-import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail, CalendarDays, Newspaper } from "lucide-react";
+import { Home, Briefcase, GraduationCap, Trophy, Info, MessageSquare, Mail, CalendarDays, Newspaper, BadgeDollarSign } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/langContext.js";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -13,23 +13,20 @@ import { useAdaptiveNav } from "../../hooks/useAdaptiveNav.js";
 import { scrollToSection } from "../../utils/scrollToSection.js";
 import "./SiteNavbar.css";
 
-/* Config canonique unique — remplace les 5 copies (une par page) qui
-   existaient avant. "to" est TOUJOURS une route réelle (React Router) ;
-   "anchorId" marque en plus les items qui ciblent une section de la Landing
-   Page : sur "/", ça scrolle sur place ; ailleurs, ça navigue vers "/" puis
-   scrolle après montage (voir l'effet "location.state.scrollTo" dans
-   LandingPage.jsx, qui reste propre à cette page puisque les sections n'y
-   existent que là). */
+/* Config canonique unique de navigation. Les entrées publiques principales
+   ont chacune une route réelle afin que les liens soient aussi accessibles
+   après actualisation ou ouverture directe de leur URL. */
 const NAV_ITEMS = [
   { key: "home",         icon: Home,          to: "/",           anchorId: "hero" },
   { key: "formations",   icon: GraduationCap, to: "/formations" },
   { key: "offers",       icon: Briefcase,     to: "/offers" },
   { key: "events",       icon: CalendarDays,  to: "/events" },
   { key: "ceremony",     icon: Trophy,        to: "/ceremonie" },
-  { key: "about",        icon: Info,          to: "/",           anchorId: "about" },
-  { key: "testimonials", icon: MessageSquare, to: "/",           anchorId: "testimonials" },
+  { key: "about",        icon: Info,          to: "/about" },
+  { key: "testimonials", icon: MessageSquare, to: "/testimonials" },
   { key: "news",         icon: Newspaper,     to: "/blog" },
-  { key: "contact",      icon: Mail,          to: "/",           anchorId: "contact" },
+  { key: "pricing",      icon: BadgeDollarSign,to: "/tarifs" },
+  { key: "contact",      icon: Mail,          to: "/contact" },
 ];
 const ANCHOR_ITEMS = NAV_ITEMS.filter((i) => i.anchorId);
 const AVATAR_COLORS = [
@@ -185,7 +182,7 @@ export default function SiteNavbar() {
             {user.email && <span>{user.email}</span>}
           </div>
           <Link to={dashboardRoute} onClick={() => setUserMenuOpen(false)}>
-            {t("nav.dashboard")}
+            {t(user.role === "admin" ? "dashboard.admin.title" : "dashboard.student.title")}
           </Link>
           <button type="button" onClick={handleLogout}>
             {t("sidebar.logout")}

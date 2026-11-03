@@ -33,6 +33,13 @@ export const uploadCV = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 }).single("cv");
 
+// CV et lettre de motivation facultatifs pour une candidature, mêmes limites.
+export const uploadApplicationFiles = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024, files: 2 },
+}).fields([{ name: "cv", maxCount: 1 }, { name: "coverLetter", maxCount: 1 }]);
+
 // ── Message file upload (PDF/DOC/DOCX/PNG/JPG, 10 MB) ───────────────────────
 const messageStorage = multer.diskStorage({
   destination: (req, file, cb) => {

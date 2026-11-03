@@ -16,8 +16,8 @@ const AVATAR_BY_GENDER = {
   femme: "/images/avatars/avatar-femme.png",
 };
 
-// Crée/relie/connecte un utilisateur à partir d'une identité tierce déjà vérifiée
-// (Google, Facebook…) et renvoie le JWT — logique commune aux deux providers.
+// Crée/relie un utilisateur OAuth. Même si le fournisseur a validé son adresse,
+// le compte reste en attente du code email obligatoire de TheBridgeFlow.
 const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, provider }) => {
   let user = await User.findOne({ [providerField]: providerId });
 
@@ -26,7 +26,6 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
     user = await User.findOne({ email });
     if (user) {
       user[providerField] = providerId;
-      if (!user.isVerified) user.isVerified = true;
       await user.save();
     }
   }
@@ -37,24 +36,14 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
       email,
       [providerField]: providerId,
       role:       "étudiant",
-      isVerified: true, // le provider a déjà vérifié l'email
+      isVerified: false,
+      isActive:   false,
     });
     console.log(`📝 Nouveau compte via ${provider} : ${user.name} (${user.email})`);
 
-    emailService.sendWelcome(user.email, { name: user.name, role: user.role });
-    User.findOne({ role: "admin" }).select("email").lean().then((admin) => {
-      if (admin?.email) {
-        emailService.sendNewUserAdmin(admin.email, {
-          userName:  user.name,
-          userEmail: user.email,
-          userPhone: user.phone,
-          userRole:  user.role,
-        });
-      }
-    });
   }
 
-  if (user.isActive === false) {
+  if (user.isVerified && user.isActive === false) {
     const err = new Error("Ce compte a été désactivé. Contactez un administrateur.");
     err.statusCode = 403;
     throw err;
@@ -65,6 +54,18 @@ const findOrCreateOAuthUser = async ({ providerField, providerId, email, name, p
 
 // Génère un code à 6 chiffres
 const generateCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+const issueOAuthVerificationCode = async (user) => {
+  const code = generateCode();
+  user.isVerified = false;
+  user.isActive = false;
+  user.verifyCode = code;
+  user.verifyCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
+  await user.save();
+  const result = await emailService.sendVerifyCode(user.email, { name: user.name, code });
+  if (!result.success) console.error(`⚠️  Code de vérification non envoyé à ${user.email} : ${result.error}`);
+  return result;
+};
 
 const sendVerificationSuccessEmails = async (user) => {
   if (!user || user.role !== "étudiant") return;
@@ -152,6 +153,7 @@ export const register = asyncHandler(async (req, res) => {
       role: "étudiant",
       termsAcceptedAt: new Date(),
       isVerified: false,
+      isActive: false,
       verifyCode: code,
       verifyCodeExpires: expires,
     });
@@ -227,16 +229,18 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
   // Marquer comme vérifié et effacer le code
   user.isVerified        = true;
+  user.isActive          = true;
   user.verifyCode        = undefined;
   user.verifyCodeExpires = undefined;
   await user.save();
 
   const token = signToken({ id: user._id });
+  const safeUser = await User.findById(user._id).select("-password -verifyCode -verifyCodeExpires").lean();
   console.log(`✅ Email vérifié : ${user.name} (${user.email})`);
 
   await sendVerificationSuccessEmails(user);
 
-  res.json({ token, user });
+  res.json({ token, user: safeUser });
 });
 
 // POST /api/auth/resend-code
@@ -406,13 +410,6 @@ export const login = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  // Bloquer si le compte a été désactivé par un admin
-  if (user.isActive === false) {
-    const err = new Error("Ce compte a été désactivé. Contactez un administrateur.");
-    err.statusCode = 403;
-    throw err;
-  }
-
   // Bloquer si email non vérifié (première connexion)
   if (!user.isVerified) {
     // Renvoyer un code frais automatiquement
@@ -435,6 +432,13 @@ export const login = asyncHandler(async (req, res) => {
       email:       user.email,
       emailSent:   codeResult.success,
     });
+  }
+
+  // Unverified accounts are handled above so they can receive a fresh code.
+  if (user.isActive === false) {
+    const err = new Error("Ce compte a été désactivé. Contactez un administrateur.");
+    err.statusCode = 403;
+    throw err;
   }
 
   // Mettre à jour la date de dernière connexion
@@ -502,6 +506,16 @@ export const googleAuth = asyncHandler(async (req, res) => {
     email, name,
     provider: "Google",
   });
+
+  if (!user.isVerified) {
+    const verification = await issueOAuthVerificationCode(user);
+    return res.json({
+      needsVerify: true,
+      email: user.email,
+      emailSent: verification.success,
+      message: "Saisissez le code envoyé par email pour activer votre compte.",
+    });
+  }
 
   // Mettre à jour la date de dernière connexion
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
@@ -595,6 +609,16 @@ export const facebookAuth = asyncHandler(async (req, res) => {
     provider: "Facebook",
   });
 
+  if (!user.isVerified) {
+    const verification = await issueOAuthVerificationCode(user);
+    return res.json({
+      needsVerify: true,
+      email: user.email,
+      emailSent: verification.success,
+      message: "Saisissez le code envoyé par email pour activer votre compte.",
+    });
+  }
+
   // Mettre à jour la date de dernière connexion
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
 
@@ -638,9 +662,20 @@ export const updateProfile = asyncHandler(async (req, res) => {
     }
   }
 
-  const updateData = {
-    name, university, specialty, bio, education, experience, skills, languages, socialLinks,
-  };
+  const updateData = {};
+  for (const field of ["name", "university", "specialty", "bio", "experience", "skills", "languages"]) {
+    if (Object.hasOwn(req.body, field)) updateData[field] = req.body[field];
+  }
+  for (const field of ["education", "socialLinks", "cv"]) {
+    const values = req.body[field];
+    if (values && typeof values === "object" && !Array.isArray(values)) {
+      for (const [key, value] of Object.entries(values)) {
+        if (["institution", "degree", "fieldOfStudy", "startDate", "endDate", "current", "grade", "courses", "linkedin", "github", "portfolio", "fileName", "fileUrl"].includes(key)) {
+          updateData[`${field}.${key}`] = value;
+        }
+      }
+    }
+  }
   if (normalizedPhone !== undefined) updateData.phone = normalizedPhone;
   if (cv !== undefined) updateData.cv = cv;
 

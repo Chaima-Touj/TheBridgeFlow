@@ -30,6 +30,7 @@ import PublicOfferDetail        from "./pages/PublicOfferDetail";
 import BlogPage                 from "./pages/BlogPage.jsx";
 import NewsDetailPage           from "./pages/NewsDetailPage.jsx";
 import PricingPage              from "./pages/PricingPage.jsx";
+import PublicInfoPage           from "./pages/PublicInfoPages.jsx";
 import PrivacyPolicy            from "./pages/legal/PrivacyPolicy.jsx";
 import TermsOfUse               from "./pages/legal/TermsOfUse.jsx";
 import LegalNotice              from "./pages/legal/LegalNotice.jsx";
@@ -213,7 +214,7 @@ export default function App() {
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
       <Route path="/events"            element={<EventsPage />} />
-      <Route path="/events/:id/session" element={<ProtectedRoute role="étudiant"><EventSessionAccessPage /></ProtectedRoute>} />
+      <Route path="/events/:id/session" element={<ProtectedRoute><EventSessionAccessPage /></ProtectedRoute>} />
       <Route path="/events/:id"        element={<EventDetailPage />} />
 
       <Route path="/ceremonie"                    element={<CeremonyPage />} />
@@ -225,6 +226,9 @@ export default function App() {
       <Route path="/blog/:id"             element={<NewsDetailPage />} />
       <Route path="/newsletter/unsubscribe/:token" element={<NewsletterUnsubscribePage />} />
       <Route path="/tarifs"               element={<PricingPage />} />
+      <Route path="/about"                element={<PublicInfoPage type="about" />} />
+      <Route path="/testimonials"         element={<PublicInfoPage type="testimonials" />} />
+      <Route path="/contact"              element={<PublicInfoPage type="contact" />} />
       <Route path="/guides"               element={<GuidesPage />} />
       <Route path="/aide"                 element={<HelpPage />} />
       <Route path="/mentions-legales"     element={<LegalNotice />} />

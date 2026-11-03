@@ -39,8 +39,6 @@ function getAvatarColor(name = "") {
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
 }
 
-const MAX_CHARS = 2000;
-const MIN_CHARS = 50;
 
 /* ── SkeletonSidebar ─────────────────────────────────────────────────────── */
 function SkeletonSidebar() {
@@ -138,11 +136,11 @@ export default function ApplyOffer() {
   const [submitting,     setSubmitting]    = useState(false);
   const [submitted,      setSubmitted]     = useState(false);
   const [alreadyApplied, setAlreadyApplied]= useState(false);
-  const [coverLetter,    setCoverLetter]   = useState("");
+  const [coverLetterFile, setCoverLetterFile] = useState(null);
   const [cvFile,         setCvFile]        = useState(null);
   const [error,          setError]         = useState("");
-  const [fieldErrors,    setFieldErrors]   = useState({});
   const fileInputRef = useRef(null);
+  const coverLetterInputRef = useRef(null);
 
   /* load ──────────────────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -176,18 +174,6 @@ export default function ApplyOffer() {
     return () => { active = false; };
   }, [id]);
 
-  /* validation ────────────────────────────────────────────────────────────── */
-  const validate = () => {
-    const errors = {};
-    if (!coverLetter.trim()) {
-      errors.coverLetter = t("apply.errorCoverLetter");
-    } else if (coverLetter.trim().length < MIN_CHARS) {
-      errors.coverLetter = t("apply.errorMinLength");
-    }
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   /* submit ─────────────────────────────────────────────────────────────────── */
   const submitApplication = async () => {
     setError("");
@@ -195,8 +181,8 @@ export default function ApplyOffer() {
     try {
       const formData = new FormData();
       formData.append("offerId", id);
-      formData.append("coverLetter", coverLetter.trim());
       if (cvFile) formData.append("cv", cvFile);
+      if (coverLetterFile) formData.append("coverLetter", coverLetterFile);
 
       await applicationsService.create(formData);
       setSubmitted(true);
@@ -216,7 +202,6 @@ export default function ApplyOffer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
     await runWithPhone(submitApplication);
   };
 
@@ -233,12 +218,6 @@ export default function ApplyOffer() {
   };
 
   /* char count color ──────────────────────────────────────────────────────── */
-  const charCount = coverLetter.length;
-  const charCountClass =
-    charCount > MAX_CHARS     ? "ao-char-count--over" :
-    charCount > MAX_CHARS * 0.9 ? "ao-char-count--warn" :
-    charCount >= MIN_CHARS    ? "ao-char-count--ok"   : "";
-
   /* derived ───────────────────────────────────────────────────────────────── */
   const offerLogo   = offer ? getLogoStyle(offer.companyName || "") : null;
   const profileName = profile?.name || user?.name || "";
@@ -483,41 +462,30 @@ export default function ApplyOffer() {
             <div className="ao-card ao-cl-card">
               <h3 className="ao-section-title">
                 <FiFileText size={16} /> {t("apply.coverLetterLabel")}
-                <span className="ao-required">*</span>
               </h3>
-
-              <div className={`ao-cl-hint`}>
-                {t("apply.coverLetterHint")}
-              </div>
-
-              <div className={`ao-textarea-wrap ${fieldErrors.coverLetter ? "ao-textarea-wrap--error" : ""}`}>
-                <textarea
-                  className="ao-textarea"
-                  placeholder={t("apply.coverLetterPlaceholder")}
-                  value={coverLetter}
-                  onChange={(e) => {
-                    if (e.target.value.length <= MAX_CHARS) setCoverLetter(e.target.value);
-                    if (fieldErrors.coverLetter) setFieldErrors({});
-                  }}
-                  rows={10}
-                />
-              </div>
-
-              <div className="ao-cl-footer">
-                {fieldErrors.coverLetter ? (
-                  <span className="ao-field-error">
-                    <FiAlertCircle size={13} /> {fieldErrors.coverLetter}
-                  </span>
-                ) : (
-                  <span className="ao-cl-tip">
-                    {charCount >= MIN_CHARS && <FiCheckCircle size={13} className="ao-tip-check" />}
-                    {charCount < MIN_CHARS && `Minimum ${MIN_CHARS} caractères`}
-                  </span>
-                )}
-                <span className={`ao-char-count ${charCountClass}`}>
-                  {t("apply.charCount", { count: charCount })}
-                </span>
-              </div>
+              <p className="ao-cl-hint">{t("apply.coverLetterHint")} · {t("common.optional", "Facultatif")}</p>
+              {coverLetterFile ? (
+                <div className="ao-cv-selected">
+                  <FiFileText size={18} className="ao-cv-selected-icon" />
+                  <div className="ao-cv-selected-body">
+                    <div className="ao-cv-selected-label">{t("apply.coverLetterLabel")}</div>
+                    <div className="ao-cv-selected-name">{coverLetterFile.name}</div>
+                  </div>
+                  <button type="button" className="ao-cv-remove"
+                    onClick={() => { setCoverLetterFile(null); if (coverLetterInputRef.current) coverLetterInputRef.current.value = ""; }}
+                    aria-label={t("fileUpload.removeFile")}><FiX size={16} /></button>
+                </div>
+              ) : (
+                <div className="ao-cv-dropzone" role="button" tabIndex={0}
+                  onClick={() => coverLetterInputRef.current?.click()}
+                  onKeyDown={(e) => e.key === "Enter" && coverLetterInputRef.current?.click()}>
+                  <FiUpload size={22} className="ao-cv-dropzone-icon" />
+                  <span className="ao-cv-dropzone-text">{t("apply.cvAdd")}</span>
+                  <span className="ao-cv-dropzone-hint">PDF, DOC ou DOCX · 5 Mo max</span>
+                </div>
+              )}
+              <input ref={coverLetterInputRef} type="file" accept=".pdf,.doc,.docx" hidden
+                onChange={(e) => setCoverLetterFile(e.target.files?.[0] || null)} />
             </div>
 
             {/* Submit section */}
@@ -532,7 +500,7 @@ export default function ApplyOffer() {
               <button
                 type="submit"
                 className="ao-btn-submit"
-                disabled={submitting || charCount > MAX_CHARS}
+                disabled={submitting}
               >
                 {submitting ? (
                   <>

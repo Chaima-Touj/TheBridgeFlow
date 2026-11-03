@@ -1,5 +1,4 @@
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 
 export function getEventParticipantEmails(registrations) {
   const emailByNormalizedAddress = new Map();
@@ -15,34 +14,23 @@ export function getEventParticipantEmails(registrations) {
   return [...emailByNormalizedAddress.values()];
 }
 
-export function buildEventParticipantEmailsPdf(event, registrations, t, language) {
+export function buildEventParticipantEmailsPdf(event, registrations) {
   const emails = getEventParticipantEmails(registrations);
-  const exportedAt = new Date();
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-
-  doc.setFontSize(16);
-  doc.text(t("events.emailsPdfTitle"), 14, 16);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  const titleLines = doc.splitTextToSize(event.title || "", 180);
-  doc.text(titleLines, 14, 24);
-  doc.setFontSize(9);
-  const metadataY = 24 + titleLines.length * 5 + 2;
-  doc.text(t("events.emailsPdfExportedOn", { date: exportedAt.toLocaleDateString(language) }), 14, metadataY);
-  doc.text(t("events.emailsPdfCount", { count: emails.length }), 14, metadataY + 6);
-
-  if (emails.length > 0) {
-    autoTable(doc, {
-      head: [[t("events.emailsPdfEmailColumn")]],
-      body: emails.map((email) => [email]),
-      startY: metadataY + 12,
-      theme: "striped",
-      styles: { fontSize: 10, cellPadding: 3, overflow: "linebreak" },
-      headStyles: { fillColor: [30, 64, 175] },
-      margin: { left: 14, right: 14 },
-    });
-  } else {
-    doc.text(t("events.emailsPdfNoEmails"), 14, metadataY + 16, { maxWidth: 180 });
-  }
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let y = 16;
+  emails.forEach((email) => {
+    const lines = doc.splitTextToSize(email, 182);
+    const lineHeight = 5;
+    if (y + lines.length * lineHeight > pageHeight - 10) {
+      doc.addPage();
+      y = 16;
+    }
+    doc.text(lines, 14, y);
+    y += lines.length * lineHeight + 2;
+  });
 
   const safeName = (event.title || "evenement")
     .normalize("NFD")

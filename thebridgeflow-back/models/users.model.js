@@ -14,13 +14,13 @@ const experienceSchema = new mongoose.Schema({
 // Définition du schéma principal pour l'utilisateur
 const skillSchema = new mongoose.Schema({
   name:     { type: String, default: "" },
-  level:    { type: String, enum: ["Débutant", "Intermédiaire", "Avancé", "Expert"], default: "Débutant" },
+  level:    { type: String, enum: ["", "Débutant", "Intermédiaire", "Avancé", "Expert"], default: "Débutant" },
   category: { type: String, default: "" },
 }, { _id: false });
 
 const languageSchema = new mongoose.Schema({
   name:  { type: String, default: "" },
-  level: { type: String, enum: ["Débutant", "Intermédiaire", "Courant", "Natif"], default: "Débutant" },
+  level: { type: String, enum: ["", "Débutant", "Intermédiaire", "Courant", "Natif"], default: "Débutant" },
 }, { _id: false });
 
 const userSchema = new mongoose.Schema(
@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
     specialty:      { type: String, default: "" },
     supervisorId:   { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     supervisorName: { type: String, default: "" },
-    isActive:       { type: Boolean, default: true },
+    isActive:       { type: Boolean, default: false },
     favorites:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Offer" }],
 
     // ─── Vérification email (première connexion uniquement) ───────────────

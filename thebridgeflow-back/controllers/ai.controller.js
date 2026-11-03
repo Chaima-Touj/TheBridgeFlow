@@ -12,6 +12,7 @@ import Notification from "../models/notification.model.js";
 import Conversation from "../models/conversation.model.js";
 import Formation from "../models/formation.model.js";
 import Offer from "../models/offers.model.js";
+import Event from "../models/event.model.js";
 import { autoCompletePastInterviews } from "../utils/interviewStatus.js";
 import { isPersonaJailbreakAttempt, SAGE_IDENTITY_REFUSAL } from "../utils/jailbreakDetection.js";
 
@@ -24,10 +25,16 @@ const MAX_USER_MESSAGES_PER_CONVERSATION = 40;
 
 // ─── Context builder ────────────────────────────────────────────────────────
 
-async function buildUserContext(userId) {
+async function buildUserContext(userId, question = "") {
   await autoCompletePastInterviews({ studentId: userId });
 
-  const [user, applications, interviews, unreadCount, conversationCount, formations] =
+  const queryWords = String(question).toLocaleLowerCase("fr").match(/[\p{L}\p{N}]{4,}/gu) || [];
+  const escapedTerms = [...new Set(queryWords)].slice(0, 4).map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const asksFormationCatalog = /tarif|prix|formation|catalogue|modalit|dur[eé]e/i.test(question);
+  const formationFilter = !asksFormationCatalog && escapedTerms.length
+    ? { $or: escapedTerms.map((word) => ({ title: { $regex: word, $options: "i" } })) }
+    : {};
+  const [user, applications, interviews, unreadCount, conversationCount, formations, offers, events] =
     await Promise.all([
       User.findById(userId).select("-password -verifyCode -verifyCodeExpires").lean(),
       Application.find({ studentId: userId })
@@ -42,7 +49,13 @@ async function buildUserContext(userId) {
         .lean(),
       Notification.countDocuments({ userId, isRead: false }),
       Conversation.countDocuments({ participants: userId }),
-      Formation.find({}).select("title level duration domain").limit(8).lean(),
+      Formation.find(formationFilter).select("title level duration domain price mode features").sort({ title: 1 }).limit(20).lean(),
+      Offer.find({ isActive: true, type: { $in: ["stage", "PFE", "alternance"] } })
+        .select("title companyName domain type location duration salary deadline skills description")
+        .sort({ createdAt: -1 }).limit(8).lean(),
+      Event.find({ status: "published" })
+        .select("title description category startsAt endsAt timezone mode location")
+        .sort({ startsAt: 1 }).limit(8).lean(),
     ]);
 
   let favorites = [];
@@ -82,6 +95,8 @@ async function buildUserContext(userId) {
     conversationCount,
     favorites,
     formations,
+    offers,
+    events,
     profileCompletion,
   };
 }
@@ -89,7 +104,7 @@ async function buildUserContext(userId) {
 // ─── System prompt builder ───────────────────────────────────────────────────
 
 function buildSystemPrompt(ctx) {
-  const { user, applications, appStats, interviews, unreadCount, conversationCount, favorites, formations, profileCompletion } = ctx;
+  const { user, applications, appStats, interviews, unreadCount, conversationCount, favorites, formations, offers, events, profileCompletion } = ctx;
 
   const skills = user.skills?.map((s) => `${s.name} (${s.level})`).join(", ") || "Aucune compétence renseignée";
   const languages = user.languages?.map((l) => `${l.name} (${l.level})`).join(", ") || "Non renseignées";
@@ -121,7 +136,13 @@ function buildSystemPrompt(ctx) {
   const formationsText =
     formations.length === 0
       ? "  Aucune formation disponible."
-      : formations.map((f) => `  • ${f.title} — Niveau: ${f.level || "?"} — Durée: ${f.duration || "?"}`).join("\n");
+      : formations.map((f) => `  • ${f.title} — Niveau: ${f.level || "Non renseigné"} — Durée: ${f.duration || "Non renseignée"} — Modalité: ${f.mode || "Non renseignée"} — Prix selon MongoDB: présentiel ${f.price?.onsite || "non renseigné"}; en ligne ${f.price?.online || "non renseigné"}; enregistrements ${f.price?.recordings || "non renseigné"} — Points clés: ${(f.features || []).slice(0, 5).join(", ") || "non renseignés"}`).join("\n");
+  const offersText = offers.length
+    ? offers.map((offer) => `• ${offer.title} — ${offer.companyName || "Entreprise non renseignée"} — Domaine: ${offer.domain || "non renseigné"} — Type: ${offer.type} — Lieu: ${offer.location || "non renseigné"} — Durée: ${offer.duration || "non renseignée"} — Rémunération: ${offer.salary ? `${offer.salary} DT` : "non renseignée"} — Échéance: ${offer.deadline ? new Date(offer.deadline).toLocaleDateString("fr-FR") : "non renseignée"} — Compétences: ${(offer.skills || []).join(", ") || "non renseignées"} — Description: ${offer.description || "non renseignée"}`).join("\n")
+    : "Aucune offre active disponible.";
+  const eventsText = events.length
+    ? events.map((event) => `• ${event.title} — ${event.category} — ${event.startsAt ? new Date(event.startsAt).toLocaleString("fr-FR", { timeZone: event.timezone || "Africa/Tunis" }) : "date non renseignée"} — ${event.mode} — ${event.location || "en ligne / lieu non renseigné"} — ${event.description}`).join("\n")
+    : "Aucun événement public disponible.";
 //  Return the system prompt string
   return `Tu es SAGE, l'assistant IA officiel de TheBridgeFlow — la plateforme tunisienne de stages, PFE et formations pour étudiants.
 
@@ -257,6 +278,21 @@ ${favText}
 📚 FORMATIONS DISPONIBLES SUR THEBRIDGEFLOW:
 ${formationsText}
 
+💳 TARIFS PUBLICS AFFICHÉS SUR LA PAGE TARIFS:
+- Formule en ligne : 390 DT/mois.
+- Formule présentiel : 490 DT/mois.
+- Accès aux enregistrements : 150 DT/mois.
+Pour un tarif spécifique à une formation, utilise le prix de cette formation dans la base ci-dessus. Si le tarif précis n'est pas renseigné, indique-le sans l'inventer.
+
+📝 CANDIDATURE:
+L'étudiant consulte une offre puis envoie sa candidature depuis la plateforme. Un numéro de téléphone tunisien valide est requis par le parcours de candidature. Le CV est facultatif et la lettre de motivation est facultative sous forme de fichier PDF, DOC ou DOCX. Les candidatures suivent les statuts « en attente », « en cours », « acceptée » ou « refusée ». Ne révèle que les candidatures propres à l'utilisateur connecté qui figurent dans son contexte.
+
+💼 OFFRES ACTIVES DE STAGE/PFE:
+${offersText}
+
+📅 ÉVÉNEMENTS PUBLICS:
+${eventsText}
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Ce contexte est reconstruit depuis MongoDB à chaque requête. Il est unique à l'utilisateur connecté.`;
@@ -291,7 +327,7 @@ export const chat = asyncHandler(async (req, res) => {
     return res.json({ result: { text: SAGE_IDENTITY_REFUSAL } });
   }
 
-  const ctx = await buildUserContext(req.user._id);
+  const ctx = await buildUserContext(req.user._id, lastUserMessage?.content || "");
   const systemPrompt = buildSystemPrompt(ctx);
 
   const allMessages = [{ role: "system", content: systemPrompt }, ...messages];
