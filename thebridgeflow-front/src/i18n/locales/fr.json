@@ -1502,6 +1502,8 @@
     "cannotDisableSelf": "Vous ne pouvez pas désactiver votre propre compte.",
     "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte.",
     "emptyState": "Aucun utilisateur ne correspond à ces critères.",
+    "backToUsers": "Retour aux utilisateurs",
+    "userNotFound": "Utilisateur introuvable.",
     "detailModalTitle": "Détail de l'utilisateur",
     "detailFieldPhone": "Téléphone",
     "detailFieldUniversity": "Université",

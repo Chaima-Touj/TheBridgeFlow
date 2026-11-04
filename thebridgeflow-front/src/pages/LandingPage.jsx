@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   FiArrowRight, FiPlay, FiX, FiExternalLink,
-  FiMapPin, FiPhone, FiMail, FiSend,
+  FiMapPin, FiPhone, FiMail, FiSend, FiUser, FiEdit3,
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
   FiUsers, FiAward, FiTarget, FiBookOpen,
   FiClock, FiCheckCircle, FiTrendingUp, FiMessageCircle,
@@ -754,7 +754,7 @@ export default function LandingPage() {
 
             {sent && (
               <div className="lp-contact__success">
-                ✅ {t("landing.contactSuccess")}
+                <FiCheckCircle aria-hidden="true" /> {t("landing.contactSuccess")}
               </div>
             )}
             {contactError && <div className="lp-contact__success lp-contact__error" role="alert">{contactError}</div>}
@@ -762,7 +762,7 @@ export default function LandingPage() {
             <form className="lp-contact__form" onSubmit={handleContact}>
               <div className="lp-form-row">
                 <div className="lp-input-wrap">
-                  <span className="lp-input-icon">👤</span>
+                  <span className="lp-input-icon"><FiUser aria-hidden="true" /></span>
                   <input
                     required
                     value={form.name}
@@ -772,7 +772,7 @@ export default function LandingPage() {
                   />
                 </div>
                 <div className="lp-input-wrap">
-                  <span className="lp-input-icon">✉️</span>
+                  <span className="lp-input-icon"><FiMail aria-hidden="true" /></span>
                   <input
                     required
                     type="email"
@@ -784,7 +784,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="lp-input-wrap">
-                <span className="lp-input-icon">📌</span>
+                <span className="lp-input-icon"><FiMapPin aria-hidden="true" /></span>
                 <input
                   required
                   value={form.subject}
@@ -794,7 +794,7 @@ export default function LandingPage() {
                 />
               </div>
               <div className="lp-input-wrap lp-input-wrap--textarea">
-                <span className="lp-input-icon lp-input-icon--top">✏️</span>
+                <span className="lp-input-icon lp-input-icon--top"><FiEdit3 aria-hidden="true" /></span>
                 <textarea
                   required
                   rows={5}

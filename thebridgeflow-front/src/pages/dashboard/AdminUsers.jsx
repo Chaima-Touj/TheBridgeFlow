@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiUsers, FiAlertTriangle,
   FiMoreVertical, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
-  FiCheckCircle, FiXCircle, FiUserPlus, FiCopy, FiEye, FiEyeOff,
+  FiCheckCircle, FiUserPlus, FiCopy, FiEye, FiEyeOff,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
@@ -321,6 +321,7 @@ function CreateUserSuccess({ result, onClose, t }) {
 export default function AdminUsers() {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [users,   setUsers]   = useState([]);
@@ -351,9 +352,6 @@ export default function AdminUsers() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Modale détail (lecture seule)
-  const [detailTarget, setDetailTarget] = useState(null);
 
   // Modale changement de rôle
   const [roleTarget,     setRoleTarget]     = useState(null);
@@ -618,7 +616,13 @@ export default function AdminUsers() {
                                 </div>
                               )}
                             <div className="au-user-cell">
-                              <span className="af-formation-title-text">{u.name}</span>
+                              <button
+                                type="button"
+                                className="au-user-link af-formation-title-text"
+                                onClick={() => navigate(`/dashboard/admin/users/${u._id}`)}
+                              >
+                                {u.name}
+                              </button>
                               <span className="au-user-email">{u.email}</span>
                             </div>
                           </div>
@@ -639,7 +643,7 @@ export default function AdminUsers() {
                             isSelf={isSelf(u)}
                             isActive={isAccountActive(u)}
                             statusUpdating={statusActionId === u._id}
-                            onViewDetail={() => setDetailTarget(u)}
+                            onViewDetail={() => navigate(`/dashboard/admin/users/${u._id}`)}
                             onToggleStatus={() => handleToggleStatus(u)}
                             onChangeRole={() => openRoleModal(u)}
                             onDelete={() => openDelete(u)}
@@ -692,64 +696,6 @@ export default function AdminUsers() {
           )}
         </div>
       </div>
-
-      {/* ── Modale détail (lecture seule) ───────────────────────────────── */}
-      {detailTarget && (
-        <Modal title={t("adminUsers.detailModalTitle")} onClose={() => setDetailTarget(null)} maxWidth={480}>
-          <div className="au-detail">
-            <div className="au-detail-head">
-              {detailTarget.avatarUrl
-                ? <img src={detailTarget.avatarUrl} alt="" className="af-avatar au-detail-avatar" />
-                : (
-                  <div className="af-avatar af-avatar--placeholder au-detail-avatar" style={{ background: avatarColor(detailTarget.name) }}>
-                    {detailTarget.name?.[0]?.toUpperCase() || "?"}
-                  </div>
-                )}
-              <div>
-                <div className="au-detail-name">{detailTarget.name}</div>
-                <div className="au-user-email">{detailTarget.email}</div>
-              </div>
-            </div>
-
-            <div className="au-detail-badges">
-              <span className={`badge ${ROLE_BADGE[detailTarget.role] || "badge-primary"}`}>
-                {t(ROLE_LABEL_KEY[detailTarget.role] || detailTarget.role)}
-              </span>
-              <span className={`badge ${!detailTarget.isVerified ? "badge-warning" : isAccountActive(detailTarget) ? "badge-success" : "badge-danger"}`}>
-                {!detailTarget.isVerified ? t("adminUsers.verifiedNo") : isAccountActive(detailTarget) ? t("adminUsers.statusActive") : t("adminUsers.statusInactive")}
-              </span>
-              <span className={`badge ${detailTarget.isVerified ? "badge-success" : "badge-warning"}`}>
-                {detailTarget.isVerified
-                  ? <><FiCheckCircle size={12} /> {t("adminUsers.verifiedYes")}</>
-                  : <><FiXCircle size={12} /> {t("adminUsers.verifiedNo")}</>}
-              </span>
-            </div>
-
-            <dl className="au-detail-list">
-              <div className="au-detail-row">
-                <dt>{t("adminUsers.detailFieldPhone")}</dt>
-                <dd>{detailTarget.phone || "—"}</dd>
-              </div>
-              {detailTarget.role === "étudiant" && (
-                <>
-                  <div className="au-detail-row">
-                    <dt>{t("adminUsers.detailFieldUniversity")}</dt>
-                    <dd>{detailTarget.university || "—"}</dd>
-                  </div>
-                  <div className="au-detail-row">
-                    <dt>{t("adminUsers.detailFieldSpecialty")}</dt>
-                    <dd>{detailTarget.specialty || "—"}</dd>
-                  </div>
-                </>
-              )}
-              <div className="au-detail-row">
-                <dt>{t("adminUsers.detailFieldJoined")}</dt>
-                <dd>{formatDate(detailTarget.createdAt)}</dd>
-              </div>
-            </dl>
-          </div>
-        </Modal>
-      )}
 
       {/* ── Modale changement de rôle ────────────────────────────────────── */}
       {roleTarget && (

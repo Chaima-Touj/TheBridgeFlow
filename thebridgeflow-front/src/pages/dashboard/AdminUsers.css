@@ -33,6 +33,18 @@
   word-break: break-word;
   line-height: 1.3;
 }
+.au-user-link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+}
+.au-user-link:hover { color: var(--primary); }
 
 /* ── Modale détail (lecture seule) ───────────────────────────────────────── */
 .au-detail {

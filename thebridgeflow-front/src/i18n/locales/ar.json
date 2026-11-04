@@ -1506,6 +1506,8 @@
     "cannotDisableSelf": "لا يمكنك تعطيل حسابك الخاص.",
     "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص.",
     "emptyState": "لا يوجد مستخدمون مطابقون لهذه المعايير.",
+    "backToUsers": "العودة إلى المستخدمين",
+    "userNotFound": "لم يتم العثور على المستخدم.",
     "detailModalTitle": "تفاصيل المستخدم",
     "detailFieldPhone": "الهاتف",
     "detailFieldUniversity": "الجامعة",

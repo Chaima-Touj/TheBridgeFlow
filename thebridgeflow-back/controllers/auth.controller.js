@@ -199,7 +199,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email })
-    .select("+verifyCode +verifyCodeExpires +password");
+    .select("+verifyCode +verifyCodeExpires +googleId +facebookId");
 
   if (!user) {
     const err = new Error("Utilisateur introuvable");
@@ -227,12 +227,25 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  // Marquer comme vérifié et effacer le code
-  user.isVerified        = true;
-  user.isActive          = true;
-  user.verifyCode        = undefined;
-  user.verifyCodeExpires = undefined;
-  await user.save();
+  // Avoid re-validating unrelated required fields (notably OAuth passwords).
+  const verificationTime = new Date();
+  const verificationUpdate = await User.updateOne(
+    {
+      _id: user._id,
+      isVerified: { $ne: true },
+      verifyCode: String(code).trim(),
+      verifyCodeExpires: { $gt: verificationTime },
+    },
+    {
+      $set: { isVerified: true, isActive: true },
+      $unset: { verifyCode: "", verifyCodeExpires: "" },
+    }
+  );
+  if (verificationUpdate.modifiedCount !== 1) {
+    const err = new Error("Code incorrect ou expiré. Demandez un nouveau code.");
+    err.statusCode = 400;
+    throw err;
+  }
 
   const token = signToken({ id: user._id });
   const safeUser = await User.findById(user._id).select("-password -verifyCode -verifyCodeExpires").lean();

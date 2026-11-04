@@ -59,6 +59,7 @@ import AdminNews                from "./pages/dashboard/AdminNews.jsx";
 import AdminCeremony            from "./pages/dashboard/AdminCeremony.jsx";
 import AdminFeedbacks           from "./pages/dashboard/AdminFeedbacks.jsx";
 import AdminUsers               from "./pages/dashboard/AdminUsers.jsx";
+import AdminUserDetail          from "./pages/dashboard/AdminUserDetail.jsx";
 import AdminApplications        from "./pages/dashboard/AdminApplications.jsx";
 import AdminEnrollmentRequests  from "./pages/dashboard/AdminEnrollmentRequests.jsx";
 import AdminEnrollments         from "./pages/dashboard/AdminEnrollments.jsx";
@@ -159,6 +160,9 @@ export default function App() {
       }/>
       <Route path="/dashboard/admin/users" element={
         <ProtectedRoute role="admin"><AdminUsers/></ProtectedRoute>
+      }/>
+      <Route path="/dashboard/admin/users/:userId" element={
+        <ProtectedRoute role="admin"><AdminUserDetail/></ProtectedRoute>
       }/>
       <Route path="/dashboard/admin/formations" element={
         <ProtectedRoute role="admin"><AdminFormations/></ProtectedRoute>
