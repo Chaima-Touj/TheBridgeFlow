@@ -317,7 +317,7 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
    Dans les deux cas, un seul <video> lit à la fois — voir l'effet de lecture
    plus bas qui pause tout sauf items[activeIndex].
 ═══════════════════════════════════════════════════════════════════════════ */
-export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLabel, ctaHref, sectionId }) {
+export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLabel, ctaHref, sectionId, hideHeader = false }) {
   const { t } = useTranslation();
   const [modalIndex, setModalIndex] = useState(null); // null | index dans `items`
 
@@ -474,11 +474,11 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
   return (
     <section id={sectionId} className="vtc-section" ref={sectionRef}>
       <div className="vtc-section__inner">
-        <div className="vtc-header">
+        {!hideHeader && <div className="vtc-header">
           <span className="vtc-header__badge">🎬 {t("testimonials.eyebrow")}</span>
           <h2 className="vtc-header__title">{title}</h2>
           {subtitle && <p className="vtc-header__sub">{subtitle}</p>}
-        </div>
+        </div>}
 
         <div
           className="vtc-carousel"

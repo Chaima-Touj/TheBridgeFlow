@@ -46,6 +46,8 @@ import EventDetailPage          from "./pages/EventDetailPage.jsx";
 import EventSessionAccessPage   from "./pages/EventSessionAccessPage.jsx";
 import NewsletterUnsubscribePage from "./pages/NewsletterUnsubscribePage.jsx";
 import AdminNewsletter from "./pages/dashboard/AdminNewsletter.jsx";
+import PfePackPage from "./pages/PfePackPage.jsx";
+import AdminPfePack from "./pages/dashboard/AdminPfePack.jsx";
 import AdminEvents              from "./pages/dashboard/AdminEvents.jsx";
 import MyEvents                 from "./pages/dashboard/MyEvents.jsx";
 import MyCeremonyProjects       from "./pages/dashboard/MyCeremonyProjects.jsx";
@@ -191,6 +193,9 @@ export default function App() {
       <Route path="/dashboard/admin/contact-messages" element={
         <ProtectedRoute role="admin"><AdminContactMessages/></ProtectedRoute>
       }/>
+      <Route path="/dashboard/admin/pack-pfe" element={
+        <ProtectedRoute role="admin"><AdminPfePack/></ProtectedRoute>
+      }/>
       <Route path="/dashboard/admin/notifications" element={
         <ProtectedRoute role="admin"><NotificationsPage/></ProtectedRoute>
       }/>
@@ -214,6 +219,7 @@ export default function App() {
       }/>
 
       <Route path="/formations"        element={<FormationsPage />} />
+      <Route path="/pack-pfe"          element={<PfePackPage />} />
       <Route path="/formations/:slug"  element={<FormationDetail />} />
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
