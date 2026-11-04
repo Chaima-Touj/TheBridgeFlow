@@ -503,6 +503,7 @@
 .lp-input-wrap {
   position: relative;
   display: flex;
+  min-width: 0;
   align-items: center;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -516,6 +517,7 @@
 .lp-input-icon--top{ margin-top: 0.25rem; }
 .lp-input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
   background: transparent;
@@ -802,6 +804,9 @@
   gap: 3rem;
   align-items: start;
 }
+.lp-contact__form-wrap,
+.lp-contact__info-wrap,
+.lp-contact__info-card--full { min-width: 0; }
 .lp-contact__sub   { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
 .lp-form-row       { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .lp-contact__socials { display: flex; gap: 0.6rem; margin-top: 0.75rem; }
@@ -869,7 +874,7 @@
 @media (max-width: 1024px) {
   .lp-features__grid     { grid-template-columns: repeat(2, 1fr); }
   .lp-about__inner       { grid-template-columns: 1fr; gap: 2.5rem; }
-  .lp-contact__inner     { grid-template-columns: 1fr; }
+  .lp-contact__inner     { grid-template-columns: minmax(0, 1fr); }
   .lp-form-row           { grid-template-columns: 1fr; }
 }
 /* Le Hero décroche du 2 colonnes un peu plus tôt (900px) que le reste de la

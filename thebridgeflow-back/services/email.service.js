@@ -567,6 +567,16 @@ const eventUpdatedTemplate = (data) => ({
   }),
 });
 
+const eventReminderTemplate = (data) => ({
+  subject: `Rappel : ${data.event.eventTitle} approche`,
+  html: eventEmailBody({
+    heading: "Rappel de votre événement",
+    intro: "nous vous rappelons que vous participez à l'événement suivant, prévu dans environ 24 heures.",
+    recipientName: data.recipientName,
+    event: data.event,
+  }),
+});
+
 // 7. Nouveau message reçu
 const newMessageTemplate = ({
   recipientName,
@@ -1002,6 +1012,7 @@ const emailService = {
   sendEventRegistrationReceived: (to, data) => sendEmail({ to, ...eventRegistrationReceivedTemplate(data) }),
   sendEventRegistrationCancelled: (to, data) => sendEmail({ to, ...eventRegistrationCancelledTemplate(data) }),
   sendEventUpdated:        (to, data) => sendEmail({ to, ...eventUpdatedTemplate(data) }),
+  sendEventReminder:       (to, data) => sendEmail({ to, ...eventReminderTemplate(data) }),
   sendNewMessage:          (to, data) => sendEmail({ to, ...newMessageTemplate(data) }),
   sendNewUserAdmin:        (to, data) => sendEmail({ to, ...newUserAdminTemplate(data) }),
   sendAccountCreatedByAdmin: (to, data) => sendEmail({ to, ...accountCreatedByAdminTemplate(data) }),

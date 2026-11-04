@@ -40,6 +40,7 @@ import eventsRoutes                from "./routes/events.routes.js";
 import newsletterRoutes            from "./routes/newsletter.routes.js";
 import contactMessagesRoutes       from "./routes/contactMessages.routes.js";
 import { startNewsletterWorker } from "./services/newsletter.service.js";
+import { startEventReminderWorker } from "./services/eventReminder.service.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -204,6 +205,7 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   startNewsletterWorker();
+  startEventReminderWorker();
   app.listen(PORT, () => {
     console.log("─────────────────────────────────────");
     console.log(`🚀 Server running on port ${PORT}`);

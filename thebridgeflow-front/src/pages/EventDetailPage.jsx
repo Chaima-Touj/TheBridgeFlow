@@ -10,6 +10,7 @@ import { eventsService } from "../services/events.service.js";
 import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
+import { getEventVideoSource } from "../utils/eventVideoSource.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
@@ -37,6 +38,9 @@ export default function EventDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [participationModal, setParticipationModal] = useState("");
   const [registrationDetails, setRegistrationDetails] = useState(null);
+  const [sessionUrl, setSessionUrl] = useState("");
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState("");
   const registrationLock = useRef(false);
   const participationConfirmed = user?.role === "étudiant" &&
     event?.registrationRequired &&
@@ -122,12 +126,22 @@ export default function EventDetailPage() {
     await runWithPhone(submitRegistration);
   };
 
-  const openSessionRecording = () => {
+  const openSessionRecording = async () => {
     if (!user) {
       setParticipationModal("sessionLogin");
       return;
     }
-    navigate(`/events/${encodeURIComponent(id)}/session`);
+    if (sessionLoading || sessionUrl) return;
+    setSessionError("");
+    setSessionLoading(true);
+    try {
+      const { data } = await eventsService.getSessionLink(id);
+      setSessionUrl(data.sessionUrl);
+    } catch (requestError) {
+      setSessionError(requestError.response?.data?.message || t("events.sessionLinkError"));
+    } finally {
+      setSessionLoading(false);
+    }
   };
 
   return (
@@ -180,9 +194,23 @@ export default function EventDetailPage() {
                         className="btn btn-primary ev-session-recording-btn"
                         type="button"
                         onClick={openSessionRecording}
+                        disabled={sessionLoading}
                       >
-                        {t("events.openSessionLink")}
+                        {sessionLoading ? t("events.sessionLoading") : t("events.openSessionLink")}
                       </button>
+                      {sessionError && <p className="ev-error" role="alert">{sessionError}</p>}
+                      {sessionUrl && (() => {
+                        const source = getEventVideoSource(sessionUrl);
+                        return (
+                          <div className="ev-detail__recording" aria-label={t("events.sessionLinkTitle")}>
+                            <div className="ev-recording__player">
+                              {source.type === "video"
+                                ? <video src={source.src} controls playsInline preload="metadata" />
+                                : <iframe src={source.src} title={event.title} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                   <section className="ev-detail__description-section">
@@ -229,7 +257,7 @@ export default function EventDetailPage() {
           onClose={() => setParticipationModal("")}
           footer={<>
             <button type="button" className="btn btn-ghost" onClick={() => setParticipationModal("")}>{t("common.cancel")}</button>
-            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: participationModal === "sessionLogin" ? `/events/${id}/session` : `/events/${id}` } })}>{t("events.signIn")}</button>
+            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: `/events/${id}` } })}>{t("events.signIn")}</button>
           </>}
         >
           <p>{t(participationModal === "sessionLogin" ? "events.sessionLoginMessage" : "events.loginRequiredMessage")}</p>

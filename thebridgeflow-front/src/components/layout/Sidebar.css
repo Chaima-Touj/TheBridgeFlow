@@ -208,7 +208,7 @@
 /* ── Spacer ──────────────────────────────────────────────────────────────── */
 .msb__spacer { flex: 1; min-height: 0.5rem; }
 
-/* ── Section (Actions rapides, Compte) ───────────────────────────────────── */
+/* ── Section Compte ─────────────────────────────────────────────────────── */
 .msb__section {
   display:        flex;
   flex-direction: column;
@@ -227,38 +227,6 @@
   margin-bottom:  0.25rem;
   text-transform: uppercase;
 }
-
-/* ── Actions rapides ────────────────────────────────────────────────────── */
-.msb__action {
-  display:       flex;
-  align-items:   center;
-  gap:           0.75rem;
-  padding:       0.475rem 0.75rem;
-  border-radius: 10px;
-  border:        none;
-  background:    transparent;
-  cursor:        pointer;
-  font-size:     0.85rem;
-  font-weight:   500;
-  color:         var(--text-secondary);
-  transition:    background 0.15s, color 0.15s;
-  width:         100%;
-  text-align:    left;
-  white-space:   nowrap;
-}
-.msb__action:hover { background: var(--bg); color: var(--text); }
-
-.msb__action-ico {
-  width:           28px;
-  height:          28px;
-  border-radius:   8px;
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  flex-shrink:     0;
-}
-
-.msb__action-lbl { font-size: 0.85rem; }
 
 /* ── Profil utilisateur (expanded) ───────────────────────────────────────── */
 .msb__profile {

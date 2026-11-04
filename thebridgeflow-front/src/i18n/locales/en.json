@@ -143,6 +143,7 @@
     "openSessionLink": "Open session link",
     "sessionLinkTitle": "Session link",
     "sessionLinkError": "Unable to load the session link.",
+    "sessionLoading": "Loading session…",
     "capacity": "Maximum capacity",
     "unlimited": "Unlimited",
     "registrationRequired": "Registration required",
@@ -235,7 +236,7 @@
     "faq": "Frequently asked questions"
   },
   "formations": {
-    "pageTitle": "Training courses in Tunisia",
+    "pageTitle": "Our training courses",
     "viewDetails": "View details",
     "seoTitle": "Develop your skills with our training programs | TheBridge",
     "seoDescription": "Discover training programs in Tunisia and develop practical skills suited to the market. Choose your path and prepare for your future.",
@@ -444,7 +445,7 @@
     "offerNotFound": "Offer not found.",
     "applyPrompt": "Send your application in just a few clicks.",
     "filterLabel": "Filters",
-    "hero_title": "Internship offers in Tunisia",
+    "hero_title": "Our internship offers",
     "hero_subtitle": "Discover internship offers available in Tunisia and find an opportunity that matches your field of study, profile, and professional goals.",
     "seoTitle": "Find an internship offer in Tunisia | TheBridge",
     "seoDescription": "Explore internship offers in Tunisia on TheBridge and find an opportunity suited to your profile. Browse listings and apply.",

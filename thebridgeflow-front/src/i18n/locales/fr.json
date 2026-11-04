@@ -143,6 +143,7 @@
     "openSessionLink": "Accéder au lien de séance",
     "sessionLinkTitle": "Lien de séance",
     "sessionLinkError": "Impossible de charger le lien de séance.",
+    "sessionLoading": "Chargement de la séance…",
     "capacity": "Capacité maximale",
     "unlimited": "Illimitée",
     "registrationRequired": "Inscription requise",
@@ -235,7 +236,7 @@
     "faq": "Questions fréquentes"
   },
   "formations": {
-    "pageTitle": "Formations en Tunisie",
+    "pageTitle": "Nos formations",
     "viewDetails": "Voir les détails",
     "seoTitle": "Développez vos compétences avec nos formations | TheBridge",
     "seoDescription": "Découvrez nos formations en Tunisie et développez des compétences pratiques adaptées au marché. Choisissez votre parcours et préparez votre avenir.",
@@ -444,7 +445,7 @@
     "offerNotFound": "Offre introuvable.",
     "applyPrompt": "Envoyez votre candidature en quelques clics.",
     "filterLabel": "Filtres",
-    "hero_title": "Offres de stage en Tunisie",
+    "hero_title": "Nos offres de stage",
     "hero_subtitle": "Découvrez les offres de stage disponibles en Tunisie et trouvez une opportunité correspondant à votre domaine d’études, votre profil et vos objectifs professionnels.",
     "seoTitle": "Trouvez votre offre de stage en Tunisie | TheBridge",
     "seoDescription": "Découvrez les offres de stage en Tunisie sur TheBridge et trouvez une opportunité adaptée à votre profil. Consultez les annonces et postulez.",

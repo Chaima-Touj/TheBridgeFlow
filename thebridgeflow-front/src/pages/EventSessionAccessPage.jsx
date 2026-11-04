@@ -5,26 +5,8 @@ import { CalendarDays, Clock3, MapPin, Video } from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { eventsService } from "../services/events.service.js";
-import { resolveDriveUrl } from "../constants/videoUrls.js";
+import { getEventVideoSource } from "../utils/eventVideoSource.js";
 import "./Events.css";
-
-function videoSource(url) {
-  try {
-    const parsed = new URL(url);
-    const youtubeId = parsed.hostname.includes("youtu.be")
-      ? parsed.pathname.slice(1)
-      : parsed.hostname.includes("youtube.com") ? parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).at(-1) : null;
-    if (youtubeId) return { type: "embed", src: `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}` };
-    if (parsed.hostname === "vimeo.com" || parsed.hostname === "www.vimeo.com") {
-      const vimeoId = parsed.pathname.split("/").filter(Boolean).at(-1);
-      if (vimeoId) return { type: "embed", src: `https://player.vimeo.com/video/${encodeURIComponent(vimeoId)}` };
-    }
-    if (/\.(mp4|webm|ogg)(?:$|\?)/i.test(url)) return { type: "video", src: url };
-    return { type: "embed", src: resolveDriveUrl(url, "video") };
-  } catch {
-    return { type: "embed", src: url };
-  }
-}
 
 export default function EventSessionAccessPage() {
   const { id } = useParams();
@@ -52,6 +34,8 @@ export default function EventSessionAccessPage() {
     return () => { active = false; };
   }, [id, t]);
 
+  const video = sessionUrl ? getEventVideoSource(sessionUrl) : null;
+
   return (
     <div className="ev-public-page">
       <SiteNavbar />
@@ -65,9 +49,9 @@ export default function EventSessionAccessPage() {
                   <span className="ev-category">{event?.category || t("events.sessionLinkTitle")}</span>
                   <h1>{event?.title || t("events.sessionLinkTitle")}</h1>
                   <div className="ev-recording__player">
-                    {videoSource(sessionUrl).type === "video"
-                      ? <video src={videoSource(sessionUrl).src} controls playsInline preload="metadata" />
-                      : <iframe src={videoSource(sessionUrl).src} title={event?.title || t("events.sessionLinkTitle")} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
+                    {video.type === "video"
+                      ? <video src={video.src} controls playsInline preload="metadata" />
+                      : <iframe src={video.src} title={event?.title || t("events.sessionLinkTitle")} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
                   </div>
                   <a className="ev-recording__external" href={sessionUrl} target="_blank" rel="noopener noreferrer">{t("events.openSessionLink")}</a>
                   <section className="ev-recording__details">

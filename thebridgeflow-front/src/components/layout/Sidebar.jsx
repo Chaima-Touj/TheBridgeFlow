@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   FiHome, FiBriefcase, FiBookOpen, FiCpu, FiFileText, FiMail,
   FiCalendar, FiMessageSquare, FiBell, FiUser,
-  FiSettings, FiLogOut, FiPlus, FiUpload,
+  FiSettings, FiLogOut,
   FiUsers, FiPieChart, FiCheckSquare, FiChevronLeft, FiMenu, FiX,
   FiClipboard, FiRss, FiStar, FiAward,
 } from "react-icons/fi";
@@ -47,14 +47,6 @@ const MENUS = {
   ],
 };
 
-const QUICK_ACTIONS = {
-  étudiant: [
-    { Icon: FiPlus,    labelKey: "sidebar.student.applications", iconBg: "var(--primary-light)", iconColor: "var(--primary)", to: "/dashboard/student/applications" },
-    { Icon: FiUpload,  labelKey: "sidebar.student.documents",    iconBg: "#DCFCE7",              iconColor: "#16A34A",        to: "/dashboard/student/profile" },
-    { Icon: FiCalendar,labelKey: "sidebar.student.interviews",   iconBg: "#FEF3C7",              iconColor: "#D97706",        to: "/dashboard/student/interviews" },
-  ],
-};
-
 const COMPTE_ROUTES = {
   étudiant: { profile: "/dashboard/student/profile", settings: "/dashboard/student/settings" },
   admin:    { profile: "/dashboard/admin/profile",   settings: "/dashboard/admin/settings" },
@@ -68,7 +60,6 @@ export default function Sidebar({ isOpen, onToggle, onNavigate, unreadNotifCount
 
   const role    = user?.role || "étudiant";
   const rawItems = MENUS[role] || MENUS.étudiant;
-  const actions  = QUICK_ACTIONS[role] || [];
   const compte   = COMPTE_ROUTES[role]  || COMPTE_ROUTES.étudiant;
 
   /* Injecte le badge de notifications réel */
@@ -161,24 +152,6 @@ export default function Sidebar({ isOpen, onToggle, onNavigate, unreadNotifCount
 
       {/* ── Séparateur ──────────────────────────────────────────────────── */}
       {isOpen && role === "étudiant" && <div className="msb__sep"/>}
-
-      {/* ── Actions rapides ─────────────────────────────────────────────── */}
-      {isOpen && role === "étudiant" && (
-        <div className="msb__section">
-          <p className="msb__section-ttl">{t("sidebar.quickActionsHeading")}</p>
-          {actions.map((a, i) => {
-            const aLabel = a.labelKey ? t(a.labelKey) : a.label;
-            return (
-              <button key={i} className="msb__action" onClick={() => { navigate(a.to); onNavigate?.(); }} title={aLabel}>
-                <span className="msb__action-ico" style={{ background: a.iconBg, color: a.iconColor }}>
-                  <a.Icon size={14}/>
-                </span>
-                <span className="msb__action-lbl">{aLabel}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {/* ── Spacer (pousse le profil vers le bas) ───────────────────────── */}
       <div className="msb__spacer"/>

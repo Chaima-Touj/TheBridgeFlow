@@ -211,7 +211,7 @@ export default function SiteNavbar() {
             {theme === "light" ? <FiMoon size={16} /> : <FiSun size={16} />}
           </button>
 
-          {user ? userMenu : (
+          {user ? (menuOpen ? null : userMenu) : (
             <>
               <Link to="/login"    className="btn btn-ghost   lp-btn-sm">{t("nav.signIn")}</Link>
               <Link to="/register" className="btn btn-primary lp-btn-sm">{t("nav.signUp")}</Link>
@@ -221,7 +221,11 @@ export default function SiteNavbar() {
           <button
             className="fp-hamburger"
             aria-label={t("landing.menuAriaLabel")}
-            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            onClick={() => {
+              setUserMenuOpen(false);
+              setMenuOpen((v) => !v);
+            }}
           >
             <span /><span /><span />
           </button>

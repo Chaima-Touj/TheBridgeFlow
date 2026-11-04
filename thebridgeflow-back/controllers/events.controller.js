@@ -5,6 +5,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { getActiveStudents, notifyAdmins, notifyUser, notifyUsers } from "../services/notification.service.js";
 import { processNewsletterJobs } from "../services/newsletter.service.js";
 import { isSafeSessionUrl, isSessionLinkAvailable } from "../utils/eventSessionAccess.js";
+import { getEventPeriodFilter } from "../utils/eventPeriodFilter.js";
 
 const EVENT_FIELDS = [
   "title", "description", "image", "category", "startsAt", "endsAt",
@@ -217,9 +218,7 @@ const publicProjection = [
 // GET /api/events?period=upcoming|past
 export const getPublicEvents = asyncHandler(async (req, res) => {
   const now = new Date();
-  const filter = { status: "published" };
-  if (req.query.period === "upcoming") filter.startsAt = { $gte: now };
-  if (req.query.period === "past") filter.startsAt = { $lt: now };
+  const filter = { status: "published", ...getEventPeriodFilter(req.query.period, now) };
   const sortDirection = req.query.period === "past" ? -1 : 1;
   const events = await Event.find(filter).select(`${publicProjection} sessionUrl`).sort({ startsAt: sortDirection }).lean();
   for (const event of events) {
