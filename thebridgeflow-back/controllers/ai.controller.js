@@ -14,6 +14,7 @@ import Formation from "../models/formation.model.js";
 import Offer from "../models/offers.model.js";
 import Event from "../models/event.model.js";
 import { autoCompletePastInterviews } from "../utils/interviewStatus.js";
+import { buildFieldSearch, getContextSearchTerms } from "../utils/aiContextSearch.js";
 import { isPersonaJailbreakAttempt, SAGE_IDENTITY_REFUSAL } from "../utils/jailbreakDetection.js";
 
 // L'assistant IA est stateless côté serveur : le frontend renvoie l'historique
@@ -22,18 +23,37 @@ import { isPersonaJailbreakAttempt, SAGE_IDENTITY_REFUSAL } from "../utils/jailb
 // "user" du tableau reçu est donc la façon la plus simple de limiter une
 // conversation active sans ajouter de nouveau schéma ni de champ de compteur.
 const MAX_USER_MESSAGES_PER_CONVERSATION = 40;
-
 // ─── Context builder ────────────────────────────────────────────────────────
 
 async function buildUserContext(userId, question = "") {
   await autoCompletePastInterviews({ studentId: userId });
 
-  const queryWords = String(question).toLocaleLowerCase("fr").match(/[\p{L}\p{N}]{4,}/gu) || [];
-  const escapedTerms = [...new Set(queryWords)].slice(0, 4).map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const asksFormationCatalog = /tarif|prix|formation|catalogue|modalit|dur[eé]e/i.test(question);
-  const formationFilter = !asksFormationCatalog && escapedTerms.length
-    ? { $or: escapedTerms.map((word) => ({ title: { $regex: word, $options: "i" } })) }
-    : {};
+  const searchTerms = getContextSearchTerms(question);
+  const formationFilter = searchTerms.length ? buildFieldSearch(searchTerms, ["title", "domain", "description"]) : {};
+  const baseOfferFilter = { isActive: true, type: { $in: ["stage", "PFE", "alternance"] } };
+  const offerSearchFilter = searchTerms.length
+    ? { ...baseOfferFilter, ...buildFieldSearch(searchTerms, ["title", "companyName", "domain", "location", "skills", "description"]) }
+    : baseOfferFilter;
+  const baseEventFilter = { status: "published" };
+  const eventSearchFilter = searchTerms.length
+    ? { ...baseEventFilter, ...buildFieldSearch(searchTerms, ["title", "category", "location", "description"]) }
+    : baseEventFilter;
+  const fetchContextOffers = async () => {
+    const matches = await Offer.find(offerSearchFilter)
+      .select("title companyName domain type location duration salary deadline skills description")
+      .sort({ createdAt: -1 }).limit(8).lean();
+    return matches.length || !searchTerms.length
+      ? matches
+      : Offer.find(baseOfferFilter).select("title companyName domain type location duration salary deadline skills description").sort({ createdAt: -1 }).limit(8).lean();
+  };
+  const fetchContextEvents = async () => {
+    const matches = await Event.find(eventSearchFilter)
+      .select("title description category startsAt endsAt timezone mode location")
+      .sort({ startsAt: 1 }).limit(8).lean();
+    return matches.length || !searchTerms.length
+      ? matches
+      : Event.find(baseEventFilter).select("title description category startsAt endsAt timezone mode location").sort({ startsAt: 1 }).limit(8).lean();
+  };
   const [user, applications, interviews, unreadCount, conversationCount, formations, offers, events] =
     await Promise.all([
       User.findById(userId).select("-password -verifyCode -verifyCodeExpires").lean(),
@@ -50,12 +70,8 @@ async function buildUserContext(userId, question = "") {
       Notification.countDocuments({ userId, isRead: false }),
       Conversation.countDocuments({ participants: userId }),
       Formation.find(formationFilter).select("title level duration domain price mode features").sort({ title: 1 }).limit(20).lean(),
-      Offer.find({ isActive: true, type: { $in: ["stage", "PFE", "alternance"] } })
-        .select("title companyName domain type location duration salary deadline skills description")
-        .sort({ createdAt: -1 }).limit(8).lean(),
-      Event.find({ status: "published" })
-        .select("title description category startsAt endsAt timezone mode location")
-        .sort({ startsAt: 1 }).limit(8).lean(),
+      fetchContextOffers(),
+      fetchContextEvents(),
     ]);
 
   let favorites = [];

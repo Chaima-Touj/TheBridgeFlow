@@ -465,8 +465,21 @@ export default function AdminApplications() {
                   ["bio", profileTarget.studentId?.bio]].map(([label, value]) => (
                   <div key={label}><dt>{t(`adminCandidatures.profile.${label}`)}</dt><dd>{value || t("adminCandidatures.profile.notProvided")}</dd></div>
                 ))}
-                <div><dt>{t("adminCandidatures.profile.education")}</dt><dd>{[profileTarget.studentId?.education?.degree, profileTarget.studentId?.education?.fieldOfStudy, profileTarget.studentId?.education?.institution, profileTarget.studentId?.education?.grade, ...(profileTarget.studentId?.education?.courses || [])].filter(Boolean).join(" · ") || t("adminCandidatures.profile.notProvided")}</dd></div>
-                <div><dt>{t("adminCandidatures.profile.experience")}</dt><dd>{profileTarget.studentId?.experience?.map((item) => [item.position, item.company, item.location, item.description, ...(item.technologies || [])].filter(Boolean).join(" — ")).filter(Boolean).join("; ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.education")}</dt><dd>{[
+                  profileTarget.studentId?.education?.degree,
+                  profileTarget.studentId?.education?.fieldOfStudy,
+                  profileTarget.studentId?.education?.institution,
+                  profileTarget.studentId?.education?.grade,
+                  profileTarget.studentId?.education?.startDate && formatDate(profileTarget.studentId.education.startDate),
+                  profileTarget.studentId?.education?.endDate && formatDate(profileTarget.studentId.education.endDate),
+                  profileTarget.studentId?.education?.current && t("profileEditor.current"),
+                  ...(profileTarget.studentId?.education?.courses || []),
+                ].filter(Boolean).join(" · ") || t("adminCandidatures.profile.notProvided")}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.experience")}</dt><dd>{profileTarget.studentId?.experience?.map((item) => [
+                  item.position, item.company, item.location,
+                  [item.startDate && formatDate(item.startDate), item.current ? t("profileEditor.current") : item.endDate && formatDate(item.endDate)].filter(Boolean).join(" – "),
+                  item.description, ...(item.technologies || []),
+                ].filter(Boolean).join(" — ")).filter(Boolean).join("; ") || t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.skills")}</dt><dd>{profileTarget.studentId?.skills?.map((skill) => [skill.name, skill.level].filter(Boolean).join(" — ")).filter(Boolean).join(", ") || t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.languages")}</dt><dd>{profileTarget.studentId?.languages?.map((language) => [language.name, language.level].filter(Boolean).join(" — ")).filter(Boolean).join(", ") || t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.socialLinks")}</dt><dd>{Object.entries(profileTarget.studentId?.socialLinks || {}).filter(([, url]) => url).map(([key, url]) => `${key}: ${url}`).join(" · ") || t("adminCandidatures.profile.notProvided")}</dd></div>
@@ -479,6 +492,7 @@ export default function AdminApplications() {
                 <div><dt>{t("adminCandidatures.profile.company")}</dt><dd>{profileTarget.offerId?.companyName || t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.status")}</dt><dd>{t(`status.${profileTarget.status}`)}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.submitted")}</dt><dd>{formatDate(profileTarget.createdAt)}</dd></div>
+                <div><dt>{t("adminCandidatures.profile.applicationNote")}</dt><dd>{profileTarget.note || t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.cv")}</dt><dd>{profileTarget.cvUrl ? <a href={profileTarget.cvUrl} target="_blank" rel="noreferrer">{t("adminCandidatures.profile.openDocument")}</a> : profileTarget.studentId?.cv?.fileUrl ? <a href={profileTarget.studentId.cv.fileUrl} target="_blank" rel="noreferrer">{profileTarget.studentId.cv.fileName || "CV"}</a> : t("adminCandidatures.profile.notProvided")}</dd></div>
                 <div><dt>{t("adminCandidatures.profile.coverLetter")}</dt><dd>{profileTarget.coverLetterUrl ? <a href={profileTarget.coverLetterUrl} target="_blank" rel="noreferrer">{profileTarget.coverLetterName || t("adminCandidatures.profile.openDocument")}</a> : profileTarget.coverLetter || t("adminCandidatures.profile.notProvided")}</dd></div>
               </dl>

@@ -294,13 +294,19 @@ function CreateUserSuccess({ result, onClose, t }) {
               </button>
             </div>
           </div>
-          <p className="au-user-email" style={{ marginTop: 8 }}>
-            {result.emailSent
-              ? t("adminUsers.createSuccessEmailSent", { email: result.user.email })
-              : t("adminUsers.createSuccessEmailFailed")}
-          </p>
         </>
       )}
+
+      <p className="au-user-email" style={{ marginTop: 8 }}>
+        {result.emailSent
+          ? t("adminUsers.createSuccessEmailSent", { email: result.user.email })
+          : t("adminUsers.createSuccessEmailFailed")}
+      </p>
+      <p className="au-user-email">
+        {result.verificationEmailSent
+          ? t("adminUsers.verificationEmailSent", { email: result.user.email })
+          : t("adminUsers.verificationEmailFailed")}
+      </p>
 
       <div className="modal-footer" style={{ padding: "16px 0 0", borderTop: "none" }}>
         <button type="button" className="btn btn-primary" onClick={onClose}>
@@ -376,11 +382,7 @@ export default function AdminUsers() {
   /* ── Créer un utilisateur ─────────────────────────────────────────────── */
   const handleUserCreated = (result) => {
     setUsers((prev) => [result.user, ...prev]);
-    if (result.generatedPassword) {
-      setCreateResult(result);
-    } else {
-      setShowCreateModal(false);
-    }
+    setCreateResult(result);
   };
   const closeCreateModal = () => { setShowCreateModal(false); setCreateResult(null); };
 

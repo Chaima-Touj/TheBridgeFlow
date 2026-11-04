@@ -1,6 +1,8 @@
 /**
- * Script one-off — crée le premier compte admin en base.
+ * Script one-off — crée le premier compte admin en base, en attente de
+ * vérification email.
  * Usage : node thebridgeflow-back/scripts/createAdmin.js
+ * Requiert ADMIN_EMAIL et ADMIN_PASSWORD dans thebridgeflow-back/.env.
  *
  * Ne pas appeler depuis server.js — script à lancer manuellement une seule fois.
  */
@@ -15,10 +17,17 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 const connectDB = (await import("../config/db.js")).default;
 const User      = (await import("../models/users.model.js")).default;
 
-const ADMIN_EMAIL    = "admin@thebridgeflow.local";
-const ADMIN_PASSWORD = "Admin123!"; // hashé par le hook pre("save") du modèle User, comme pour tout autre compte
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function main() {
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    throw new Error("Définissez ADMIN_EMAIL et ADMIN_PASSWORD dans thebridgeflow-back/.env.");
+  }
+  if (ADMIN_PASSWORD.length < 8) {
+    throw new Error("ADMIN_PASSWORD doit contenir au moins 8 caractères.");
+  }
+
   await connectDB();
 
   const existing = await User.findOne({ email: ADMIN_EMAIL });
@@ -28,18 +37,22 @@ async function main() {
     return;
   }
 
-  // La création via User.create() déclenche le hook pre("save") du modèle,
-  // qui hashe le mot de passe exactement comme pour une inscription classique.
+  const verificationCode = String((await import("node:crypto")).randomInt(100000, 1000000));
   const admin = await User.create({
     name:       "Admin",
     email:      ADMIN_EMAIL,
     password:   ADMIN_PASSWORD,
     role:       "admin",
-    isActive:   true,
-    isVerified: true, // pas de flux de vérification email pour un compte créé directement en base
+    isActive:   false,
+    isVerified: false,
+    verifyCode: verificationCode,
+    verifyCodeExpires: new Date(Date.now() + 15 * 60 * 1000),
   });
 
-  console.log(`✅ Compte admin créé : ${admin.email} (_id: ${admin._id})`);
+  const emailService = (await import("../services/email.service.js")).default;
+  const result = await emailService.sendVerifyCode(admin.email, { name: admin.name, code: verificationCode });
+  console.log(`✅ Compte admin créé en attente de vérification : ${admin.email} (_id: ${admin._id})`);
+  if (!result.success) console.error(`⚠️  Email de vérification non envoyé : ${result.error}. Connectez-vous pour demander un nouveau code.`);
   await mongoose.disconnect();
 }
 

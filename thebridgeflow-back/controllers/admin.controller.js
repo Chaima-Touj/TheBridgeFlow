@@ -267,14 +267,17 @@ export const createUser = asyncHandler(async (req, res) => {
   }
 
   const generatedPassword = password ? null : generateTempPassword();
+  const verificationCode = String(crypto.randomInt(100000, 1000000));
 
   const user = await User.create({
     name,
     email,
     password: password || generatedPassword,
     role,
-    isVerified: true,
-    isActive: true,
+    isVerified: false,
+    isActive: false,
+    verifyCode: verificationCode,
+    verifyCodeExpires: new Date(Date.now() + 15 * 60 * 1000),
   });
 
   console.log(`📝 Utilisateur créé par l'admin : ${user.name} (${user.email}) — rôle: ${user.role}`);
@@ -285,8 +288,15 @@ export const createUser = asyncHandler(async (req, res) => {
     password: password || generatedPassword,
     role: user.role,
   });
+  const verificationEmailResult = await emailService.sendVerifyCode(user.email, {
+    name: user.name,
+    code: verificationCode,
+  });
   if (!emailResult.success) {
     console.error(`⚠️  Email d'identifiants non envoyé à ${user.email} : ${emailResult.error}`);
+  }
+  if (!verificationEmailResult.success) {
+    console.error(`⚠️  Code de vérification non envoyé à ${user.email} : ${verificationEmailResult.error}`);
   }
 
   const safeUser = await User.findById(user._id).select(USER_SELECT).lean();
@@ -294,6 +304,7 @@ export const createUser = asyncHandler(async (req, res) => {
     user: safeUser,
     generatedPassword,
     emailSent: emailResult.success,
+    verificationEmailSent: verificationEmailResult.success,
   });
 });
 

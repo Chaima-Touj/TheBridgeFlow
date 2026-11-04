@@ -1526,6 +1526,8 @@
     "createSuccessGeneratedPassword": "Temporary password:",
     "createSuccessEmailSent": "These credentials were emailed to {{email}}.",
     "createSuccessEmailFailed": "The email couldn't be sent — share this password manually.",
+    "verificationEmailSent": "A verification code was sent to {{email}}.",
+    "verificationEmailFailed": "The verification code could not be sent. The user will need to request a new one.",
     "createSuccessClose": "Close",
     "copyPassword": "Copy",
     "copiedPassword": "Copied!",
@@ -1542,7 +1544,7 @@
     }
   },
   "adminCandidatures": {
-    "profile": { "title": "Student and application details", "studentDetails": "Student profile", "applicationDetails": "Application", "name": "Full name", "email": "Email", "phone": "Phone", "university": "University", "specialty": "Specialty", "gender": "Gender", "bio": "About", "education": "Education", "experience": "Experience", "skills": "Skills", "languages": "Languages", "socialLinks": "Professional links", "offer": "Offer", "company": "Company", "status": "Status", "submitted": "Application date", "cv": "CV", "coverLetter": "Cover letter", "openDocument": "Open document", "notProvided": "Not provided" },
+    "profile": { "title": "Student and application details", "studentDetails": "Student profile", "applicationDetails": "Application", "name": "Full name", "email": "Email", "phone": "Phone", "university": "University", "specialty": "Specialty", "gender": "Gender", "bio": "About", "education": "Education", "experience": "Experience", "skills": "Skills", "languages": "Languages", "socialLinks": "Professional links", "offer": "Offer", "company": "Company", "status": "Status", "submitted": "Application date", "applicationNote": "Application note", "cv": "CV", "coverLetter": "Cover letter", "openDocument": "Open document", "notProvided": "Not provided" },
     "pageSubtitle": "Manage applications received on internship offers",
     "searchPlaceholder": "Search a student, an offer...",
     "filterStatusAll": "All statuses",

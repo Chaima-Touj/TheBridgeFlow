@@ -1530,6 +1530,8 @@
     "createSuccessGeneratedPassword": "كلمة المرور المؤقتة:",
     "createSuccessEmailSent": "تم إرسال بيانات الدخول هذه بالبريد الإلكتروني إلى {{email}}.",
     "createSuccessEmailFailed": "تعذّر إرسال البريد الإلكتروني — يرجى تبليغ كلمة المرور هذه يدويًا.",
+    "verificationEmailSent": "تم إرسال رمز التحقق إلى {{email}}.",
+    "verificationEmailFailed": "تعذر إرسال رمز التحقق. يجب على المستخدم طلب رمز جديد.",
     "createSuccessClose": "إغلاق",
     "copyPassword": "نسخ",
     "copiedPassword": "تم النسخ!",
@@ -1546,7 +1548,7 @@
     }
   },
   "adminCandidatures": {
-    "profile": { "title": "تفاصيل الطالب والترشح", "studentDetails": "ملف الطالب", "applicationDetails": "الترشح", "name": "الاسم الكامل", "email": "البريد الإلكتروني", "phone": "الهاتف", "university": "الجامعة", "specialty": "التخصص", "gender": "الجنس", "bio": "نبذة", "education": "التعليم", "experience": "الخبرة", "skills": "المهارات", "languages": "اللغات", "socialLinks": "روابط مهنية", "offer": "العرض", "company": "الشركة", "status": "الحالة", "submitted": "تاريخ الترشح", "cv": "السيرة الذاتية", "coverLetter": "رسالة التحفيز", "openDocument": "فتح المستند", "notProvided": "غير مذكور" },
+    "profile": { "title": "تفاصيل الطالب والترشح", "studentDetails": "ملف الطالب", "applicationDetails": "الترشح", "name": "الاسم الكامل", "email": "البريد الإلكتروني", "phone": "الهاتف", "university": "الجامعة", "specialty": "التخصص", "gender": "الجنس", "bio": "نبذة", "education": "التعليم", "experience": "الخبرة", "skills": "المهارات", "languages": "اللغات", "socialLinks": "روابط مهنية", "offer": "العرض", "company": "الشركة", "status": "الحالة", "submitted": "تاريخ الترشح", "applicationNote": "ملاحظة الترشح", "cv": "السيرة الذاتية", "coverLetter": "رسالة التحفيز", "openDocument": "فتح المستند", "notProvided": "غير مذكور" },
     "pageSubtitle": "إدارة الترشحات الواردة على عروض التربص",
     "searchPlaceholder": "ابحث عن طالب أو عرض...",
     "filterStatusAll": "جميع الحالات",

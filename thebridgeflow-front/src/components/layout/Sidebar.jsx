@@ -53,10 +53,6 @@ const QUICK_ACTIONS = {
     { Icon: FiUpload,  labelKey: "sidebar.student.documents",    iconBg: "#DCFCE7",              iconColor: "#16A34A",        to: "/dashboard/student/profile" },
     { Icon: FiCalendar,labelKey: "sidebar.student.interviews",   iconBg: "#FEF3C7",              iconColor: "#D97706",        to: "/dashboard/student/interviews" },
   ],
-  admin: [
-    { Icon: FiPlus,   labelKey: "sidebar.admin.quickNewUser",    iconBg: "var(--primary-light)", iconColor: "var(--primary)", to: "/dashboard/admin/users?new=1" },
-    { Icon: FiUpload, labelKey: "sidebar.admin.quickImportData", iconBg: "#DCFCE7",              iconColor: "#16A34A",        to: "/dashboard/admin/users" },
-  ],
 };
 
 const COMPTE_ROUTES = {
@@ -72,7 +68,7 @@ export default function Sidebar({ isOpen, onToggle, onNavigate, unreadNotifCount
 
   const role    = user?.role || "étudiant";
   const rawItems = MENUS[role] || MENUS.étudiant;
-  const actions  = QUICK_ACTIONS[role] || QUICK_ACTIONS.étudiant;
+  const actions  = QUICK_ACTIONS[role] || [];
   const compte   = COMPTE_ROUTES[role]  || COMPTE_ROUTES.étudiant;
 
   /* Injecte le badge de notifications réel */
@@ -164,10 +160,10 @@ export default function Sidebar({ isOpen, onToggle, onNavigate, unreadNotifCount
       </nav>
 
       {/* ── Séparateur ──────────────────────────────────────────────────── */}
-      {isOpen && <div className="msb__sep"/>}
+      {isOpen && role === "étudiant" && <div className="msb__sep"/>}
 
       {/* ── Actions rapides ─────────────────────────────────────────────── */}
-      {isOpen && (
+      {isOpen && role === "étudiant" && (
         <div className="msb__section">
           <p className="msb__section-ttl">{t("sidebar.quickActionsHeading")}</p>
           {actions.map((a, i) => {

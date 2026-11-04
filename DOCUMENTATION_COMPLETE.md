@@ -1320,7 +1320,7 @@ Toutes ces fonctions délèguent à la fonction interne `sendEmail({to, subject,
 > 16 fichiers (7 à la racine + 9 dans `scripts/drive/`). La plupart supportent un mode dry-run par défaut et n'écrivent réellement qu'avec le flag `--confirm` (`process.argv.includes("--confirm")`).
 
 #### `scripts/createAdmin.js`
-Crée le tout premier compte admin (`admin@thebridgeflow.local` / `Admin123!`, à changer après création). Idempotent (ne recrée pas s'il existe déjà). `node scripts/createAdmin.js`.
+Crée le premier compte admin à partir de `ADMIN_EMAIL` et `ADMIN_PASSWORD` configurés dans `thebridgeflow-back/.env`. Le compte reste inactif jusqu'à la validation du code envoyé par email. Idempotent (ne recrée pas s'il existe déjà). `node scripts/createAdmin.js`.
 
 #### `scripts/migrateScreenshotTestimonials.js`
 Migration one-off : importe en base (`TestimonialScreenshot`) les 29 captures jusque-là codées en dur côté frontend (`screenshotTestimonials.js`). Idempotent (`countDocuments()` avant insertion).
