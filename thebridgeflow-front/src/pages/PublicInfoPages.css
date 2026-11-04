@@ -6,7 +6,8 @@
 .public-info-hero--contact h1 { position: relative; z-index: 1; color: #fff; }
 .public-info-hero--contact p { position: relative; z-index: 1; max-width: 650px; margin: 1rem auto 0; color: #dbeafe; font-size: 1.05rem; line-height: 1.7; }
 .public-info-content { width: min(100% - 2rem, 1180px); margin: 2.5rem auto 5rem; }
-.pi-testimonials { display: grid; gap: 2rem; }
+.pi-testimonials { display: grid; min-width: 0; gap: 2rem; }
+.pi-testimonials > * { min-width: 0; }
 .pi-contact { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); overflow: hidden; margin-top: -5.5rem; border: 1px solid var(--border); border-radius: 1.35rem; background: var(--bg-card); box-shadow: 0 24px 70px rgb(15 23 42 / 14%); }
 .pi-contact__details { padding: clamp(1.5rem, 4vw, 2.75rem); color: #fff; background: linear-gradient(155deg, #0b2447, #123b75 65%, #1757a6); }
 .pi-contact__eyebrow, .pi-contact__form-heading > span { color: #93c5fd; font-size: .78rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
