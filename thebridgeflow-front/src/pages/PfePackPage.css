@@ -92,6 +92,16 @@
 .pfe-form__wide { grid-column: 1 / -1; }
 .pfe-form__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .pfe-form-success { display: grid; justify-items: center; padding: 30px 12px; text-align: center; }.pfe-form-success svg { color: #10a676; }.pfe-form-success h3 { margin: 14px 0 6px; color: var(--text); }.pfe-form-success p { max-width: 420px; margin: 0; color: var(--text-muted); line-height: 1.65; }
+[data-theme="dark"] .pfe-page { --pfe-ink: #f1f5f9; --pfe-muted: #a8b7cc; --pfe-blue: #8ba5ff; }
+[data-theme="dark"] .pfe-hero { background: radial-gradient(ellipse at 82% 40%, rgba(84, 121, 255, .18), transparent 34%), linear-gradient(135deg, #111a31 0%, #17213d 55%, #1b1935 100%); }
+[data-theme="dark"] .pfe-hero__content > .pfe-eyebrow { border-color: rgba(139, 165, 255, .24); background: rgba(30, 41, 59, .78); }
+[data-theme="dark"] .pfe-hero__content > p { color: var(--text-secondary); }
+[data-theme="dark"] .pfe-button--secondary { border-color: var(--border); background: rgba(30, 41, 59, .88); color: var(--text); }
+[data-theme="dark"] .pfe-hero__notice { color: var(--text-secondary) !important; }
+[data-theme="dark"] .pfe-step { background: color-mix(in srgb, var(--bg-card) 94%, #263451); }
+[data-theme="dark"] .pfe-step__number { color: #94a3b8; }
+[data-theme="dark"] .pfe-testimonials { background: radial-gradient(ellipse at 8% 30%, rgba(113, 142, 255, .12), transparent 35%), color-mix(in srgb, var(--bg) 75%, #172554); }
+[data-theme="dark"] .pfe-form__notice { background: #1e293b; color: #cbd5e1; }
 @keyframes pfe-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @media (prefers-reduced-motion: reduce) { .pfe-hero__visual { animation: none; }.pfe-button, .pfe-step, .pfe-training-card, .pfe-training-card__media img { transition: none; }.pfe-whatsapp-float { animation: none; } }
 @media (max-width: 560px) { .pfe-whatsapp-float { width: 54px; height: 54px; } }

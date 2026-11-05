@@ -46,7 +46,7 @@ const Profile = () => {
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, []);
+  }, [t]);
 
   const handleEditSuccess = async () => {
     setIsEditing(false);

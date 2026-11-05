@@ -376,7 +376,7 @@ export default function StudentDashboard() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   /* ─── Computed values ────────────────────────────────────────────────── */
   const counts = {
