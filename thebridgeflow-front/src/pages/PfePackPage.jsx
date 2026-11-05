@@ -6,6 +6,9 @@ import Modal from "../components/common/Modal.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
 import { getFeaturedPfeTestimonials } from "../constants/testimonials.js";
+import { getFormationImage } from "../constants/formationImages.js";
+import { buildWhatsAppLink } from "../utils/whatsapp.js";
+import { TbBrandWhatsapp } from "react-icons/tb";
 import { formationsService } from "../services/formations.service.js";
 import { pfePackService } from "../services/pfePack.service.js";
 import "./PfePackPage.css";
@@ -161,14 +164,23 @@ export default function PfePackPage() {
           </div>
           {formationsError ? <p className="pfe-inline-error">{t("pfePack.trainingsError")}</p>
             : formations.length === 0 ? <p className="pfe-inline-empty">{t("pfePack.trainingsEmpty")}</p>
-              : <div className="pfe-training-grid">{formations.slice(0, 6).map((formation) => (
-                <article className="pfe-training-card" key={formation._id || formation.slug}>
-                  <span><BookOpen size={18} aria-hidden="true" /></span>
-                  <h3>{formation.title}</h3>
-                  <p>{formation.description}</p>
-                  {formation.slug && <Link to={`/formations/${formation.slug}`}>{t("pfePack.discoverTraining")} <ArrowRight size={16} /></Link>}
-                </article>
-              ))}</div>}
+              : <div className="pfe-training-grid">{formations.slice(0, 6).map((formation) => {
+                const image = getFormationImage(formation.slug);
+                return (
+                  <article className="pfe-training-card" key={formation._id || formation.slug}>
+                    <div className="pfe-training-card__media">
+                      {image
+                        ? <img src={image} alt="" loading="lazy" decoding="async" width="800" height="500" />
+                        : <span className="pfe-training-card__fallback"><BookOpen size={28} aria-hidden="true" /></span>}
+                    </div>
+                    <div className="pfe-training-card__body">
+                      <h3>{formation.title}</h3>
+                      <p>{formation.description}</p>
+                      {formation.slug && <Link to={`/formations/${formation.slug}`}>{t("pfePack.discoverTraining")} <ArrowRight size={16} aria-hidden="true" /></Link>}
+                    </div>
+                  </article>
+                );
+              })}</div>}
         </div>
       </section>
 
@@ -178,6 +190,17 @@ export default function PfePackPage() {
           <button type="button" className="pfe-button pfe-button--light" onClick={openForm}>{t("pfePack.register")} <ArrowRight size={18} /></button>
         </div>
       </section>
+
+      <a
+        className="pfe-whatsapp-float"
+        href={buildWhatsAppLink(t("pfePack.whatsappPrefill"))}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t("pfePack.whatsappLabel")}
+        title={t("pfePack.whatsappLabel")}
+      >
+        <TbBrandWhatsapp size={30} aria-hidden="true" />
+      </a>
 
       {isFormOpen && <Modal title={t("pfePack.formTitle")} onClose={() => setIsFormOpen(false)} maxWidth={620} className="pfe-form-modal">
         {submitted ? <div className="pfe-form-success" role="status"><CheckCircle2 size={36} /><h3>{t("pfePack.successTitle")}</h3><p>{t("pfePack.successDescription")}</p></div>

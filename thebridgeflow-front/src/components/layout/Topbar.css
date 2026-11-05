@@ -13,8 +13,12 @@
   position:         sticky;
   top:              0;
   z-index:          80;
-  backdrop-filter:  blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* No backdrop-filter here: the background is opaque, so the blur was never
+     visible — but it made .topbar the containing block of every
+     position:fixed descendant (Modal overlay of the notification-delete
+     confirm, LangFlags dialog backdrop, .np on phones). Those overlays were
+     clamped to this 56–62px strip, pushing the modal card off-screen above
+     y:0 (bottom-sheet on phones → whole card hidden except its last ~56px). */
   gap:              1rem;
   flex-shrink:      0;
   min-width:        0;

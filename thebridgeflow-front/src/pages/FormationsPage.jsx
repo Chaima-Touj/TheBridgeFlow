@@ -11,6 +11,7 @@ import Loader from "../components/common/Loader.jsx";
 import EnrollmentRequestModal, { EnrollmentRequestToast } from "../components/common/EnrollmentRequestModal.jsx";
 import api from "../services/api.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { getFormationImage } from "../constants/formationImages.js";
 import "./FormationsPage.css";
 
 // ─── Icon map (keyed by slug for exact matching) ──────────────────────────────
@@ -136,6 +137,7 @@ const FormationsPage = () => {
           >
             {formations.map((f, index) => {
               const icons = getIconEntry(f.slug);
+              const image = getFormationImage(f.slug);
               return (
                 <motion.article
                   key={f._id}
@@ -143,7 +145,16 @@ const FormationsPage = () => {
                   variants={cardVariants}
                   className="fp-card"
                 >
-                  {/* Icons */}
+                  {/* Illustration (ou icônes tech en repli) */}
+                  {image ? (
+                    <Link
+                      to={`/formations/${f.slug}`}
+                      className="fp-card__media"
+                      aria-label={`${t("formations.viewDetails")}: ${f.title}`}
+                    >
+                      <img src={image} alt="" loading="lazy" decoding="async" width="800" height="500" />
+                    </Link>
+                  ) : (
                   <Link
                     to={`/formations/${f.slug}`}
                     className="fp-card__icon-link"
@@ -165,6 +176,7 @@ const FormationsPage = () => {
                       ))}
                     </div>
                   </Link>
+                  )}
 
                   {/* Title */}
                   <h2 className="fp-card__title">

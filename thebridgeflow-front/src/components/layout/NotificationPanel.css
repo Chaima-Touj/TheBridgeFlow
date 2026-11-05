@@ -248,7 +248,19 @@
     right:    0.75rem;
     left:     0.75rem;
     width:    auto;
+    /* 60px top + 480px overflowed short phones (e.g. 320×568 ≈ 460px visible
+       in Safari) — keep the whole panel, and its scrollable list, on screen. */
+    max-height: min(480px, calc(100vh - 72px));
+    max-height: min(480px, calc(100dvh - 72px));
   }
+  /* The global [dir="rtl"] .np { right:auto; left:0 } rule above is more
+     specific than .np here, so in Arabic it collapsed the panel to a
+     shrink-to-fit box glued to the left edge with no gutter. */
+  [dir="rtl"] .np { right: 0.75rem; left: 0.75rem; }
+  /* Title + badge + "Mark all read" + close no longer fit on one line at
+     ~320px (English): the close button was clipped by .np overflow:hidden. */
+  .np__header         { flex-wrap: wrap; gap: 0.5rem; }
+  .np__header-actions { margin-inline-start: auto; }
   /* No hover on touch devices — this was permanently invisible (opacity:0)
      and therefore unreachable; reveal it like NotificationsPage already does
      for its own per-card actions. */

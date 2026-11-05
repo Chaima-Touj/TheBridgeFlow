@@ -6,7 +6,8 @@
   background: var(--bg);
   padding: 5.5rem 2rem;
 }
-.news-section--standalone { padding-top: 3.5rem; }
+/* +64px : compense la navbar fixe (SiteNavbar) sur /blog. */
+.news-section--standalone { padding-top: calc(64px + 3rem); }
 .news-section__inner {
   max-width: 1280px;
   margin: 0 auto;
@@ -235,7 +236,7 @@
 
 @media (max-width: 640px) {
   .news-section { padding: 3.5rem 1.25rem; }
-  .news-section--standalone { padding-top: 2rem; }
+  .news-section--standalone { padding-top: calc(64px + 1.5rem); }
   .news-header { margin-bottom: 2rem; }
   .news-card__body { padding: 1.1rem 1.15rem 1.25rem; }
 }

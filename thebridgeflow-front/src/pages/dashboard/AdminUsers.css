@@ -160,7 +160,10 @@
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .au-search { width: 100%; flex: 1 1 100%; }
+  /* min-width: 0 — the desktop 280px floor is wider than the toolbar at
+     320px (292px content − 40px toolbar padding = 252px), so the input
+     overflowed and got clipped by .af-card's overflow:hidden. */
+  .au-search { width: 100%; flex: 1 1 100%; min-width: 0; }
 }
 
 @media (max-width: 480px) {

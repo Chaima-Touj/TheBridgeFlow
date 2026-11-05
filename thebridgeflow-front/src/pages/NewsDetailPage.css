@@ -7,7 +7,8 @@
 .news-detail-main {
   width: min(1000px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3rem) 0 5rem;
+  /* +64px : compense la navbar fixe (SiteNavbar). */
+  padding: calc(64px + clamp(1.5rem, 4vw, 3rem)) 0 5rem;
 }
 
 .news-detail {
@@ -186,7 +187,7 @@
 @media (max-width: 640px) {
   .news-detail-main {
     width: min(100% - 1.5rem, 1000px);
-    padding-top: 1rem;
+    padding-top: calc(64px + 1rem);
   }
 
   .news-detail {

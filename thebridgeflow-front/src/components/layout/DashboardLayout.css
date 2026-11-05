@@ -6,6 +6,7 @@
 .dl-shell {
   display:     flex;
   height:      100vh;
+  height:      100dvh;
   overflow:    hidden;
   background:  var(--bg);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -53,7 +54,7 @@
 
 /* ── Responsive mobile (≤900px) ───────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .dl-shell   { height: auto; min-height: 100vh; overflow: visible; }
+  .dl-shell   { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
   .dl-content { padding: 1.25rem 1rem; }
 
   .dl-overlay { display: block; }

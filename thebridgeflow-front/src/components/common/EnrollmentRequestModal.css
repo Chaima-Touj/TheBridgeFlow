@@ -28,6 +28,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* No cap before: ~490px of content (+ error box) inside a centered fixed
+     overlay overflowed short phones (e.g. 320×568, landscape) on BOTH ends —
+     close button and submit button unreachable, overlay doesn't scroll.
+     No-op whenever the content fits (i.e. on desktop). */
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .dfd-modal__header {

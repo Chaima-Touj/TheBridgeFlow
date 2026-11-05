@@ -493,6 +493,10 @@
     width:         100%;
     max-width:     100%;
     max-height:    92vh;
+    /* Visible height, not the large viewport: otherwise the bottom-aligned
+       sheet's header/close button slid above the screen top on small iPhones
+       with the Safari toolbar shown. */
+    max-height:    92dvh;
     border-radius: 16px 16px 0 0;
   }
   /* .cpm-modal--trailer réaffirme sa propre largeur ici : la règle plus haut
@@ -507,6 +511,10 @@
   .cpm-modal--trailer {
     width:     min(100%, calc((92vh - 75px) * 9 / 16));
     max-width: min(100%, calc((92vh - 75px) * 9 / 16));
+    /* Same dvh basis as max-height above, or the 9:16 player would be taller
+       than the (dvh-capped) sheet and get its controls clipped. */
+    width:     min(100%, calc((92dvh - 75px) * 9 / 16));
+    max-width: min(100%, calc((92dvh - 75px) * 9 / 16));
   }
   /* Format vidéo 16:9 dérivé de la largeur, pas de 52% d'une hauteur elle-même
      dérivée de vh (base .cpm-player-wrap plus haut) — sur un écran étroit et

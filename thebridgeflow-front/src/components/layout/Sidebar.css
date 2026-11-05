@@ -7,6 +7,7 @@
   display:        flex;
   flex-direction: column;
   height:         100vh;
+  height:         100dvh;
   background:     var(--bg-card);
   border-right:   1px solid var(--border);
   overflow:       hidden auto;
@@ -355,6 +356,10 @@
     left:      0;
     top:       0;
     height:    100vh;
+    /* 100vh = the *large* viewport on mobile browsers: the drawer's bottom
+       (profile card + logout) sat behind the browser toolbar, unreachable
+       even by scrolling the drawer. */
+    height:    100dvh;
     transform: translateX(-100%);
     transition:transform 0.26s cubic-bezier(.4,0,.2,1), width 0.26s cubic-bezier(.4,0,.2,1);
     box-shadow:4px 0 32px rgba(0,0,0,.14);
@@ -366,6 +371,11 @@
   }
   .msb--open   { transform: translateX(0); }
   .msb--closed { transform: translateX(-100%); }
+
+  /* RTL: the rail sits on the right on desktop and the hamburger is on the
+     right of the topbar, so the drawer must slide in from the right too. */
+  [dir="rtl"] .msb         { left: auto; right: 0; box-shadow: -4px 0 32px rgba(0,0,0,.14); }
+  [dir="rtl"] .msb--closed { transform: translateX(100%); }
 
   .msb__toggle-icon--desktop { display: none; }
   .msb__toggle-icon--mobile  { display: inline-flex; }

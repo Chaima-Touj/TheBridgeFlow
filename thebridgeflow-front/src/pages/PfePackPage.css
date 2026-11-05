@@ -56,12 +56,23 @@
 .pfe-testimonials::before { position: absolute; inset: 0; border-block: 1px solid color-mix(in srgb, var(--border) 75%, #aab8f3); content: ""; pointer-events: none; }
 .pfe-testimonials .vtc-section { padding: 0; }
 .pfe-trainings { background: var(--bg-card); }
-.pfe-training-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.pfe-training-card { min-width: 0; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); box-shadow: 0 8px 25px rgba(20,40,80,.035); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
-.pfe-training-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--primary) 34%, var(--border)); box-shadow: 0 16px 32px rgba(20,40,80,.09); }
-.pfe-training-card h3 { margin-top: 16px; }
-.pfe-training-card p { display: -webkit-box; min-height: 3.3em; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.pfe-training-card a { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; color: var(--pfe-blue); font-size: .85rem; font-weight: 750; text-decoration: none; }
+.pfe-training-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.pfe-training-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); box-shadow: 0 8px 25px rgba(20,40,80,.05); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.pfe-training-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--primary) 34%, var(--border)); box-shadow: 0 16px 32px rgba(20,40,80,.12); }
+.pfe-training-card__media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: linear-gradient(135deg, #0b1440, #2d2a8c); }
+.pfe-training-card__media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
+.pfe-training-card:hover .pfe-training-card__media img { transform: scale(1.05); }
+.pfe-training-card__fallback { display: grid; width: 100%; height: 100%; place-items: center; color: #c7d2fe; }
+.pfe-training-card__body { display: flex; flex: 1; flex-direction: column; padding: 18px 20px 20px; }
+.pfe-training-card h3 { margin: 0 0 8px; font-size: 1.02rem; line-height: 1.35; }
+.pfe-training-card p { display: -webkit-box; min-height: 3.3em; overflow: hidden; font-size: .88rem; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.pfe-training-card a { display: inline-flex; align-self: flex-start; align-items: center; gap: 7px; margin-top: auto; padding-top: 16px; color: var(--pfe-blue); font-size: .85rem; font-weight: 750; text-decoration: none; }
+/* Bouton WhatsApp flottant (Pack PFE) — message pré-rempli via buildWhatsAppLink. */
+.pfe-whatsapp-float { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, calc(env(safe-area-inset-bottom) + 12px)); z-index: 990; display: grid; width: 58px; height: 58px; place-items: center; border-radius: 50%; background: #25d366; color: #fff; box-shadow: 0 10px 26px rgba(37, 211, 102, .45), 0 2px 6px rgba(0,0,0,.18); text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; animation: pfe-wa-pulse 2.6s ease-out infinite; }
+.pfe-whatsapp-float:hover { transform: scale(1.08); box-shadow: 0 14px 32px rgba(37, 211, 102, .55), 0 2px 6px rgba(0,0,0,.2); }
+.pfe-whatsapp-float:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+[dir="rtl"] .pfe-whatsapp-float { right: auto; left: max(18px, env(safe-area-inset-left)); }
+@keyframes pfe-wa-pulse { 0% { box-shadow: 0 10px 26px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,.5); } 70% { box-shadow: 0 10px 26px rgba(37,211,102,.45), 0 0 0 16px rgba(37,211,102,0); } 100% { box-shadow: 0 10px 26px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0); } }
 .pfe-inline-empty, .pfe-inline-error { padding: 24px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text-muted); text-align: center; }
 .pfe-inline-error { color: #b42318; }
 .pfe-cta { position: relative; isolation: isolate; overflow: hidden; padding: 64px 0; background: linear-gradient(115deg, #1d2b73 0%, #334cb6 54%, #6449d5 100%); }
@@ -82,6 +93,7 @@
 .pfe-form__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .pfe-form-success { display: grid; justify-items: center; padding: 30px 12px; text-align: center; }.pfe-form-success svg { color: #10a676; }.pfe-form-success h3 { margin: 14px 0 6px; color: var(--text); }.pfe-form-success p { max-width: 420px; margin: 0; color: var(--text-muted); line-height: 1.65; }
 @keyframes pfe-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-@media (prefers-reduced-motion: reduce) { .pfe-hero__visual { animation: none; }.pfe-button, .pfe-step, .pfe-training-card { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pfe-hero__visual { animation: none; }.pfe-button, .pfe-step, .pfe-training-card, .pfe-training-card__media img { transition: none; }.pfe-whatsapp-float { animation: none; } }
+@media (max-width: 560px) { .pfe-whatsapp-float { width: 54px; height: 54px; } }
 @media (max-width: 820px) { .pfe-hero__grid { grid-template-columns: minmax(0, 1fr); }.pfe-hero__content { min-width: 0; }.pfe-hero__visual { min-height: 0; }.pfe-code-card__code p { font-size: clamp(.78rem, 1.8vw, 1rem); }.pfe-steps, .pfe-training-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .pfe-container { width: min(100% - 28px, 1160px); }.pfe-hero { padding: calc(58px + 64px) 0 66px; }.pfe-hero h1 { font-size: clamp(1.9rem, 9.5vw, 2.5rem); letter-spacing: -.045em; }.pfe-hero__visual { padding: 5px; border-radius: 20px; }.pfe-code-card { border-radius: 16px; }.pfe-code-card__header { height: 52px; gap: 16px; padding-inline: 14px; }.pfe-code-card__dots { gap: 7px; }.pfe-code-card__dots i { width: 10px; height: 10px; }.pfe-code-card__tab { height: 42px; gap: 7px; padding-inline: 12px; font-size: .9rem; }.pfe-code-card__tab span { width: 23px; height: 23px; font-size: .72rem; }.pfe-code-card__code { gap: 2px; padding: 20px 11px 22px; }.pfe-code-card__code p { grid-template-columns: 2.6ch minmax(0, 1fr); gap: 8px; font-size: clamp(.62rem, 3vw, .82rem); line-height: 1.8; }.pfe-code-card__line--indent { padding-inline-start: 10px; }.pfe-steps, .pfe-training-grid { grid-template-columns: 1fr; }.pfe-step { padding: 22px; }.pfe-cta__inner { align-items: flex-start; flex-direction: column; }.pfe-form__grid { grid-template-columns: 1fr; }.pfe-form__wide { grid-column: auto; }.pfe-form__actions { flex-direction: column-reverse; }.pfe-form__actions .pfe-button { width: 100%; }.pfe-hero__actions { align-items: stretch; flex-direction: column; }.pfe-hero__actions .pfe-button { width: 100%; } }

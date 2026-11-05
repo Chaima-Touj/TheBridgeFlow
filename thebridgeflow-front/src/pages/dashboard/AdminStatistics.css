@@ -419,7 +419,37 @@
   }
 }
 
+/* 961–1100px: with the 268px sidebar rail open, a 1024px viewport leaves
+   ~690px of content, i.e. ~158px inside each of the 3 cards — the bar
+   chart's fixed 130px YAxis + 24px margin left the bars ~0px, the 140px
+   donut sat in a ~76px box (clipped on both sides) and the "top X" titles
+   ellipsized to ~30px. Use the same single column as tablets. */
+@media (max-width: 1100px) {
+  .sd-split-grid.sd-split-grid--3col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* The donut has a fixed outerRadius (70px → 150px with recharts' default
+     5px margins) but its box is width="48%": at 320px that's ~120px and the
+     donut is clipped by the SVG. Keep the box at least 150px (!important:
+     recharts writes min-width:0 inline) and let the legend drop below it
+     when both no longer fit side by side. Wide cards are unaffected. */
+  .sd-pie-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sd-pie-row > .recharts-responsive-container {
+    min-width: 150px !important;
+  }
+}
+
 @media (max-width: 640px) {
+  /* 2-col KPI grid at 401–640px: ~141px inside a card at 414px, but icon
+     (36px) + a nowrap trend badge like "— 12 inscriptions" (~130px) is
+     ~166px and spilled out of the card. Let the badge wrap below. */
+  .sd-stat-top {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
   .sd-stat-card {
     padding: 1.25rem;
   }

@@ -1,3 +1,5 @@
+/* +64px : compense la navbar fixe (SiteNavbar) — sinon le titre du hero passe dessous sur mobile. */
+.public-info-page { padding-top: 64px; }
 .public-info-hero { padding: clamp(3rem, 8vw, 6rem) 1.25rem 2.5rem; text-align: center; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--bg)), var(--bg)); }
 .public-info-hero > span { color: var(--primary); font-weight: 750; letter-spacing: .04em; }
 .public-info-hero h1 { margin: .7rem auto 0; max-width: 900px; color: var(--text); font-size: clamp(2rem, 5vw, 3.5rem); }
