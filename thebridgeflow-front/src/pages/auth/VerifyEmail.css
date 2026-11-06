@@ -50,12 +50,16 @@
 
 /* ─── Alertes ────────────────────────────────────────────────────────────── */
 .verify-alert {
+  display:         flex;
+  align-items:     flex-start;
+  gap:             0.5rem;
   padding:       0.75rem 1rem;
   border-radius: var(--radius-sm);
   font-size:     0.875rem;
   margin-bottom: 1.25rem;
   text-align:    left;
 }
+.verify-alert svg { flex: 0 0 auto; margin-top: 1px; }
 .verify-alert--error   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
 .verify-alert--success { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
 

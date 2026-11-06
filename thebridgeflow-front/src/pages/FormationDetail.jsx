@@ -229,7 +229,7 @@ const FormationDetail = () => {
     .map(slug => ({ slug, logo: getTechLogo(slug) }))
     .filter(t => t.logo);
   const waMessage = formation
-    ? `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+    ? `Bonjour, je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
     : "";
   // Vignette de l'aside : priorité à trailerThumbnail (image dédiée choisie
   // par l'admin) via le proxy Drive, sinon dérivée de trailerVideoUrl.
@@ -739,7 +739,7 @@ const FormationDetail = () => {
 
                   <a
                     href={`https://wa.me/21658840064?text=${encodeURIComponent(
-                      `Bonjour 👋 Je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+                      `Bonjour, je suis intéressé(e) par la formation ${formation.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

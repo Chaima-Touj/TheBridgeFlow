@@ -3,14 +3,22 @@ import User from "../models/users.model.js";
 import emailService from "./email.service.js";
 
 async function sendEmailSafely(method, email, data) {
-  if (!email || !method || typeof emailService[method] !== "function") return;
+  if (!email || !method || typeof emailService[method] !== "function") return { success: false };
   try {
-    await emailService[method](email, data);
+    const result = await emailService[method](email, data);
+    if (result?.success === false) {
+      console.error("[notification] Email dispatch failed", {
+        method,
+        message: result.error,
+      });
+    }
+    return result;
   } catch (error) {
     console.error("[notification] Email dispatch failed", {
       method,
       message: error.message,
     });
+    return { success: false, error: error.message };
   }
 }
 
@@ -30,12 +38,12 @@ export async function notifyUser({
     });
   }
 
-  await sendEmailSafely(emailMethod, email, emailData);
+  return sendEmailSafely(emailMethod, email, emailData);
 }
 
 export async function notifyUsers(users, options) {
   const uniqueUsers = [...new Map(users.map((user) => [String(user._id), user])).values()];
-  await Promise.all(uniqueUsers.map((user) => notifyUser({
+  return Promise.all(uniqueUsers.map((user) => notifyUser({
     userId: user._id,
     email: user.email,
     ...options(user),

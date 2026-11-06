@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FiAlertCircle, FiCheckCircle, FiClock, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
@@ -143,7 +144,7 @@ export default function VerifyEmail() {
         </Link>
 
         {/* Icône */}
-        <div className="verify-icon">🔐</div>
+        <div className="verify-icon"><FiShield aria-hidden="true" /></div>
 
         <h1 className="verify-title">{t("verifyEmail.title")}</h1>
         <p className="verify-desc">
@@ -152,8 +153,8 @@ export default function VerifyEmail() {
         </p>
 
         {/* Messages */}
-        {error   && <div className="verify-alert verify-alert--error">❌ {error}</div>}
-        {success && <div className="verify-alert verify-alert--success">✅ {success}</div>}
+        {error && <div className="verify-alert verify-alert--error"><FiAlertCircle aria-hidden="true" /> {error}</div>}
+        {success && <div className="verify-alert verify-alert--success"><FiCheckCircle aria-hidden="true" /> {success}</div>}
 
         {/* Champs code */}
         <div className="verify-inputs" onPaste={handlePaste}>
@@ -174,7 +175,7 @@ export default function VerifyEmail() {
           ))}
         </div>
 
-        <p className="verify-expire">⏱️ {t("verifyEmail.expireNotice")}</p>
+        <p className="verify-expire"><FiClock aria-hidden="true" /> {t("verifyEmail.expireNotice")}</p>
 
         {/* Bouton vérifier */}
         <button

@@ -43,6 +43,7 @@ import CeremonyArchives         from "./pages/CeremonyArchives.jsx";
 import CeremonyArchiveDetail    from "./pages/CeremonyArchiveDetail.jsx";
 import EventsPage               from "./pages/EventsPage.jsx";
 import EventDetailPage          from "./pages/EventDetailPage.jsx";
+import EventFeedbackPreviewPage from "./pages/EventFeedbackPreviewPage.jsx";
 import EventSessionAccessPage   from "./pages/EventSessionAccessPage.jsx";
 import NewsletterUnsubscribePage from "./pages/NewsletterUnsubscribePage.jsx";
 import AdminNewsletter from "./pages/dashboard/AdminNewsletter.jsx";
@@ -91,6 +92,7 @@ export default function App() {
 
   // Tracking de page à chaque changement de route
   useEffect(() => {
+    if (location.pathname.startsWith("/preview/")) return;
     trackPageView(location.pathname);
     trackPageVisit(location.pathname);
   }, [location.pathname]);
@@ -224,6 +226,7 @@ export default function App() {
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />
       <Route path="/events"            element={<EventsPage />} />
+      <Route path="/preview/event-feedback" element={<EventFeedbackPreviewPage />} />
       <Route path="/events/:id/session" element={<ProtectedRoute><EventSessionAccessPage /></ProtectedRoute>} />
       <Route path="/events/:id"        element={<EventDetailPage />} />
 
@@ -255,7 +258,7 @@ export default function App() {
       <Route path="*" element={<NotFound />} />
 
     </Routes>
-    {location.pathname !== "/" && !location.pathname.startsWith("/dashboard/") && (
+    {location.pathname !== "/" && !location.pathname.startsWith("/dashboard/") && !location.pathname.startsWith("/preview/") && (
       <SiteFooter />
     )}
     </>

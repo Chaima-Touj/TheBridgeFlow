@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiPlus, FiAlertTriangle, FiImage,
-  FiExternalLink, FiVideo,
+  FiExternalLink, FiVideo, FiStar, FiEye, FiEyeOff, FiDownload,
+  FiCheckCircle, FiCalendar, FiMessageSquare, FiArrowLeft, FiChevronRight,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
@@ -10,7 +11,9 @@ import DestructiveActionModal from "../../components/common/DestructiveActionMod
 import AdminRowActions from "../../components/common/AdminRowActions.jsx";
 import { settingsService } from "../../services/settings.service.js";
 import { feedbacksService } from "../../services/feedbacks.service.js";
+import { eventsService } from "../../services/events.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
+import { downloadCSV } from "../../utils/exportTable.js";
 import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
@@ -23,6 +26,7 @@ const TABS = [
   { id: "pfe",          labelKey: "adminFeedbacks.tabs.pfe" },
   { id: "landing-video", labelKey: "adminFeedbacks.tabs.landingVideo" },
   { id: "screenshots",  labelKey: "adminFeedbacks.tabs.screenshots" },
+  { id: "events", labelKey: "adminFeedbacks.tabs.events" },
 ];
 
 // L'onglet "formations" gère SiteSettings.testimonialVideos dont
@@ -39,6 +43,286 @@ const TESTIMONIAL_TABS = ["formations", "summer-camp", "pfe"];
 
 function extractErrorMessage(err, fallback) {
   return err?.response?.data?.message || fallback;
+}
+
+function EventFeedbacksPanel() {
+  const { t, i18n } = useTranslation();
+  const [events, setEvents] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [publishingId, setPublishingId] = useState("");
+  const [publishingSelection, setPublishingSelection] = useState(false);
+
+  const loadFeedbacks = useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const { data } = await eventsService.getAdminFeedbacks();
+      setEvents(data.events || []);
+      setFeedbacks(data.feedbacks || []);
+    } catch (error) {
+      setLoadError(extractErrorMessage(error, t("adminFeedbacks.eventFeedbacks.loadFailed")));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    let active = true;
+    eventsService.getAdminFeedbacks()
+      .then(({ data }) => {
+        if (!active) return;
+        setEvents(data.events || []);
+        setFeedbacks(data.feedbacks || []);
+      })
+      .catch((error) => {
+        if (active) setLoadError(extractErrorMessage(error, t("adminFeedbacks.eventFeedbacks.loadFailed")));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [t]);
+
+  const selectedEvent = events.find((event) => event._id === selectedEventId);
+  const eventFeedbacks = feedbacks.filter((feedback) => feedback.event?._id === selectedEventId);
+  const selectedFeedbacks = eventFeedbacks.filter((feedback) => selectedIds.includes(feedback._id));
+  const canPublish = selectedEvent?.status === "published";
+  const allSelected = eventFeedbacks.length > 0 && selectedFeedbacks.length === eventFeedbacks.length;
+  const pendingSelected = selectedFeedbacks.some((feedback) => !feedback.isPublished);
+  const publishedSelected = selectedFeedbacks.some((feedback) => feedback.isPublished);
+
+  const toggleSelection = (id) => {
+    setSelectedIds((current) => current.includes(id)
+      ? current.filter((selectedId) => selectedId !== id)
+      : [...current, id]);
+  };
+
+  const toggleAll = () => {
+    setSelectedIds((current) => current.length === eventFeedbacks.length
+      ? []
+      : eventFeedbacks.map((feedback) => feedback._id));
+  };
+
+  const setPublication = async (feedback, isPublished) => {
+    setPublishingId(feedback._id);
+    setActionError("");
+    try {
+      await eventsService.setFeedbackPublished(feedback._id, isPublished);
+      setFeedbacks((current) => current.map((item) => item._id === feedback._id
+        ? { ...item, isPublished, publishedAt: isPublished ? new Date().toISOString() : null }
+        : item));
+    } catch (error) {
+      setActionError(extractErrorMessage(error, t("adminFeedbacks.eventFeedbacks.publishFailed")));
+    } finally {
+      setPublishingId("");
+    }
+  };
+
+  const setSelectedPublication = async (isPublished) => {
+    setPublishingSelection(true);
+    setActionError("");
+    try {
+      await Promise.all(selectedFeedbacks
+        .filter((feedback) => feedback.isPublished !== isPublished)
+        .map((feedback) => eventsService.setFeedbackPublished(feedback._id, isPublished)));
+      setFeedbacks((current) => current.map((feedback) => selectedIds.includes(feedback._id)
+        ? { ...feedback, isPublished, publishedAt: isPublished ? new Date().toISOString() : null }
+        : feedback));
+    } catch (error) {
+      setActionError(extractErrorMessage(error, t("adminFeedbacks.eventFeedbacks.publishFailed")));
+      await loadFeedbacks();
+    } finally {
+      setPublishingSelection(false);
+    }
+  };
+
+  const downloadSelected = () => {
+    downloadCSV(
+      "feedback-evenements.csv",
+      [
+        t("adminFeedbacks.eventFeedbacks.event"),
+        t("adminFeedbacks.eventFeedbacks.participant"),
+        t("adminFeedbacks.eventFeedbacks.rating"),
+        t("adminFeedbacks.eventFeedbacks.comment"),
+        t("adminFeedbacks.eventFeedbacks.receivedAt"),
+        t("adminFeedbacks.eventFeedbacks.published"),
+      ],
+      selectedFeedbacks.map((feedback) => [
+        feedback.event?.title || "",
+        `${feedback.firstName} ${feedback.lastName}`,
+        feedback.rating,
+        feedback.comment,
+        new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(feedback.createdAt)),
+        feedback.isPublished ? t("adminFeedbacks.eventFeedbacks.published") : t("adminFeedbacks.eventFeedbacks.unpublished"),
+      ]),
+    );
+  };
+
+  if (loading) {
+    return <div className="sd-skeleton afd-event-feedback__loading" role="status">{t("adminFeedbacks.eventFeedbacks.loading")}</div>;
+  }
+  if (loadError) {
+    return (
+      <div className="sd-empty-box afd-event-feedback__empty" role="alert">
+        <p>{loadError}</p>
+        <button type="button" className="btn btn-primary" onClick={loadFeedbacks}>{t("common.retry")}</button>
+      </div>
+    );
+  }
+
+  if (!selectedEventId) {
+    return (
+      <section className="afd-event-feedback" aria-label={t("adminFeedbacks.tabs.events")}>
+        <div className="afd-event-feedback__intro">
+          <p>{t("adminFeedbacks.eventFeedbacks.description")}</p>
+        </div>
+        {events.length === 0 ? (
+          <div className="sd-empty-box afd-event-feedback__empty">
+            <FiCalendar size={26} />
+            <p>{t("adminFeedbacks.eventFeedbacks.noPastEvents")}</p>
+          </div>
+        ) : (
+          <div className="afd-event-feedback__events">
+            {events.map((event) => {
+              const reviewCount = feedbacks.filter((feedback) => feedback.event?._id === event._id).length;
+              return (
+                <button
+                  type="button"
+                  className="afd-event-feedback__event-card"
+                  key={event._id}
+                  onClick={() => {
+                    setSelectedIds([]);
+                    setSelectedEventId(event._id);
+                  }}
+                >
+                  <span className="afd-event-feedback__event-icon"><FiCalendar size={19} /></span>
+                  <span className="afd-event-feedback__event-info">
+                    <strong>{event.title}</strong>
+                    <small>{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium", timeZone: event.timezone || "Africa/Tunis" }).format(new Date(event.endsAt || event.startsAt))}</small>
+                  </span>
+                  <span className="afd-event-feedback__event-count">
+                    {t("adminFeedbacks.eventFeedbacks.reviewsCount", { count: reviewCount })}
+                  </span>
+                  <FiChevronRight className="afd-event-feedback__event-arrow" size={18} aria-hidden="true" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  return (
+    <section className="afd-event-feedback" aria-label={t("adminFeedbacks.tabs.events")}>
+      <div className="afd-event-feedback__selected-header">
+        <button type="button" className="btn btn-ghost" onClick={() => { setSelectedEventId(""); setSelectedIds([]); }}>
+          <FiArrowLeft size={16} /> {t("adminFeedbacks.eventFeedbacks.backToEvents")}
+        </button>
+        <div>
+          <h2>{selectedEvent?.title}</h2>
+          {selectedEvent && (
+            <small>{new Intl.DateTimeFormat(i18n.language, { dateStyle: "full", timeZone: selectedEvent.timezone || "Africa/Tunis" }).format(new Date(selectedEvent.endsAt || selectedEvent.startsAt))}</small>
+          )}
+        </div>
+      </div>
+      {selectedEvent && !canPublish && (
+        <p className="afd-event-feedback__archived-note" role="note">
+          {t("adminFeedbacks.eventFeedbacks.cannotPublish")}
+        </p>
+      )}
+      <div className="afd-event-feedback__intro">
+        <p>{t("adminFeedbacks.eventFeedbacks.description")}</p>
+        <div className="afd-event-feedback__actions">
+          {pendingSelected && canPublish && (
+            <button type="button" className="btn btn-primary" onClick={() => setSelectedPublication(true)} disabled={publishingSelection}>
+              <FiEye size={16} /> {t("adminFeedbacks.eventFeedbacks.publishSelected", { count: selectedFeedbacks.length })}
+            </button>
+          )}
+          {publishedSelected && (
+            <button type="button" className="btn btn-outline" onClick={() => setSelectedPublication(false)} disabled={publishingSelection}>
+              <FiEyeOff size={16} /> {t("adminFeedbacks.eventFeedbacks.unpublishSelected", { count: selectedFeedbacks.length })}
+            </button>
+          )}
+          <button type="button" className="btn btn-outline" onClick={downloadSelected} disabled={!selectedFeedbacks.length}>
+            <FiDownload size={16} /> {t("adminFeedbacks.eventFeedbacks.downloadSelected", { count: selectedFeedbacks.length })}
+          </button>
+        </div>
+      </div>
+      {actionError && <p className="af-form-error" role="alert">{actionError}</p>}
+      {eventFeedbacks.length === 0 ? (
+        <div className="sd-empty-box afd-event-feedback__empty">
+          <FiMessageSquare size={26} />
+          <p>{t("adminFeedbacks.eventFeedbacks.empty")}</p>
+        </div>
+      ) : (
+        <>
+          <label className="afd-event-feedback__select-all">
+            <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+            {t("adminFeedbacks.eventFeedbacks.selectAll")}
+            <span>{eventFeedbacks.length}</span>
+          </label>
+          <div className="afd-event-feedback__grid">
+            {eventFeedbacks.map((feedback) => (
+              <article className={`afd-event-feedback__card${selectedIds.includes(feedback._id) ? " is-selected" : ""}`} key={feedback._id}>
+                <label className="afd-event-feedback__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(feedback._id)}
+                    onChange={() => toggleSelection(feedback._id)}
+                    aria-label={`${t("adminFeedbacks.eventFeedbacks.selectAll")} ${feedback.firstName} ${feedback.lastName}`}
+                  />
+                </label>
+                <div className="afd-event-feedback__person">
+                  {feedback.image
+                    ? <img src={feedback.image} alt="" />
+                    : <span aria-hidden="true">{feedback.firstName?.charAt(0) || ""}</span>}
+                  <div>
+                    <strong>{feedback.firstName} {feedback.lastName}</strong>
+                    <small>{feedback.student?.name || t("adminFeedbacks.eventFeedbacks.verified")}</small>
+                  </div>
+                </div>
+                <div className="afd-event-feedback__event">
+                  <FiCalendar size={14} />
+                  <span>{feedback.event?.title || t("adminFeedbacks.eventFeedbacks.event")}</span>
+                </div>
+                <div className="afd-event-feedback__rating" aria-label={t("events.feedback.ratingLabel", { rating: feedback.rating })}>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <FiStar key={index} className={index < feedback.rating ? "is-filled" : ""} aria-hidden="true" />
+                  ))}
+                  <span>{feedback.rating}/5</span>
+                </div>
+                <p className="afd-event-feedback__comment">{feedback.comment}</p>
+                <div className="afd-event-feedback__footer">
+                  <span className={feedback.isPublished ? "is-published" : ""}>
+                    <FiCheckCircle size={14} />
+                    {t(feedback.isPublished ? "adminFeedbacks.eventFeedbacks.published" : "adminFeedbacks.eventFeedbacks.unpublished")}
+                  </span>
+                  <small>{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(feedback.createdAt))}</small>
+                </div>
+                <button
+                  type="button"
+                  className={`afd-event-feedback__publish${feedback.isPublished ? " is-published" : ""}`}
+                  onClick={() => setPublication(feedback, !feedback.isPublished)}
+                  disabled={publishingId === feedback._id || (!feedback.isPublished && !canPublish)}
+                  aria-pressed={feedback.isPublished}
+                  title={!feedback.isPublished && !canPublish ? t("adminFeedbacks.eventFeedbacks.cannotPublish") : undefined}
+                >
+                  {feedback.isPublished ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+                  {t(feedback.isPublished ? "adminFeedbacks.eventFeedbacks.unpublish" : "adminFeedbacks.eventFeedbacks.publish")}
+                </button>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
 }
 
 /* ─── Champ image réutilisable — bascule lien Google Drive / upload local
@@ -453,7 +737,7 @@ export default function AdminFeedbacks() {
           {/* ── Barre d'outils ─────────────────────────────────────────── */}
           <div className="af-toolbar">
             <h1 className="af-toolbar-title">{t(TABS.find((tb) => tb.id === activeTab).labelKey)}</h1>
-            {activeTab !== "landing-video" && <div className="af-toolbar-actions">
+            {activeTab !== "landing-video" && activeTab !== "events" && <div className="af-toolbar-actions">
               <button type="button" className="btn btn-primary" onClick={handleAddClick}>
                 <FiPlus size={15} /> {addLabel}
               </button>
@@ -562,6 +846,8 @@ export default function AdminFeedbacks() {
               </div>
             )
           )}
+
+          {activeTab === "events" && <EventFeedbacksPanel />}
         </div>
       </div>
 

@@ -26,7 +26,7 @@ export default function GuidesPage() {
       <SiteNavbar />
       <section className="fp-hero">
         <div className="fp-hero__inner">
-          <span className="fp-hero__badge">📘 {t("guides.badge")}</span>
+          <span className="fp-hero__badge"><FiBookOpen aria-hidden="true" /> {t("guides.badge")}</span>
           <h1 className="fp-hero__title">{t("guides.title")}</h1>
           <p className="fp-hero__subtitle">{t("guides.subtitle")}</p>
         </div>

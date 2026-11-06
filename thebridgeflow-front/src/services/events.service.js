@@ -12,4 +12,12 @@ export const eventsService = {
   register: (id) => api.post(`/events/${id}/registrations`),
   getMyRegistrations: () => api.get("/events/my-registrations"),
   cancelRegistration: (id) => api.delete(`/events/${id}/registrations`),
+  getPublishedFeedbacks: (id) => api.get(`/events/${id}/feedbacks`),
+  getMyFeedback: (id) => api.get(`/events/${id}/my-feedback`),
+  submitFeedback: (id, feedback) => api.post(`/events/${id}/feedbacks`, feedback),
+  getAdminFeedbacks: () => api.get("/events/feedbacks/admin"),
+  setFeedbackPublished: (feedbackId, isPublished) => api.patch(
+    `/events/feedbacks/${feedbackId}/publication`,
+    { isPublished },
+  ),
 };

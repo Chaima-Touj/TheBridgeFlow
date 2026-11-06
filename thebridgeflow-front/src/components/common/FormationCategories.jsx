@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiStar } from "react-icons/fi";
 import { FORMATION_CATEGORIES } from "../../constants/formationCategories.js";
 import "./FormationCategories.css";
 
@@ -84,8 +84,8 @@ export default function FormationCategories({ formations }) {
                   className="fcat-item"
                   aria-label={t(cat.labelKey)}
                 >
-                  <span className="fcat-item__sparkle fcat-item__sparkle--1" aria-hidden="true">✦</span>
-                  <span className="fcat-item__sparkle fcat-item__sparkle--2" aria-hidden="true">✦</span>
+                  <span className="fcat-item__sparkle fcat-item__sparkle--1" aria-hidden="true"><FiStar /></span>
+                  <span className="fcat-item__sparkle fcat-item__sparkle--2" aria-hidden="true"><FiStar /></span>
                   <span className="fcat-item__circle">
                     <Icon size={34} />
                   </span>

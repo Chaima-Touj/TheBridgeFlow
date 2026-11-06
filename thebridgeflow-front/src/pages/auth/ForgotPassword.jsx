@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FiAlertCircle, FiCheckCircle, FiKey } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
 import "./VerifyEmail.css";
@@ -43,14 +44,14 @@ export default function ForgotPassword() {
           <span>TheBridge<span className="verify-logo__accent">Flow</span></span>
         </Link>
 
-        <div className="verify-icon">🔑</div>
+        <div className="verify-icon"><FiKey aria-hidden="true" /></div>
 
         <h1 className="verify-title">{t("forgotPassword.title")}</h1>
         <p className="verify-desc">{t("forgotPassword.desc")}</p>
 
-        {error && <div className="verify-alert verify-alert--error">❌ {error}</div>}
+        {error && <div className="verify-alert verify-alert--error"><FiAlertCircle aria-hidden="true" /> {error}</div>}
         {success && (
-          <div className="verify-alert verify-alert--success">✅ {t("forgotPassword.successMessage")}</div>
+          <div className="verify-alert verify-alert--success"><FiCheckCircle aria-hidden="true" /> {t("forgotPassword.successMessage")}</div>
         )}
 
         {!success && (

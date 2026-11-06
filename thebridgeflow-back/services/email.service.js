@@ -161,7 +161,7 @@ const studentInfoSection = ({ studentName, studentEmail, studentPhone } = {}) =>
     </table>
   </div>`;
 
-const eventEmailData = ({ eventTitle, startsAt, timezone = "Africa/Tunis", location, description, eventId }) => {
+const eventEmailData = ({ eventTitle, startsAt, timezone = "Africa/Tunis", location, description, mode, meetingUrl, eventId }) => {
   const date = new Date(startsAt);
   const dateLabel = new Intl.DateTimeFormat("fr-FR", {
     weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: timezone,
@@ -175,7 +175,13 @@ const eventEmailData = ({ eventTitle, startsAt, timezone = "Africa/Tunis", locat
     dateLabel: escapeHtml(dateLabel),
     timeLabel: escapeHtml(timeLabel),
     location: location ? escapeHtml(location) : "",
+    modeLabel: ({
+      onsite: "Présentiel",
+      online: "En ligne",
+      hybrid: "Hybride",
+    })[mode] || "",
     description: description ? escapeHtml(String(description).slice(0, 600)) : "",
+    meetingUrl: meetingUrl ? escapeHtml(meetingUrl) : "",
     eventUrl: `${baseUrl}/events/${encodeURIComponent(eventId)}`,
   };
 };
@@ -486,7 +492,15 @@ const enrollmentRequestStatusTemplate = ({ studentName, formationTitle, status, 
   };
 };
 
-const eventEmailBody = ({ heading, intro, recipientName, event, studentContact }) => {
+const eventEmailBody = ({
+  heading,
+  intro,
+  recipientName,
+  event,
+  studentContact,
+  actionLabel = "Voir l'événement",
+  actionUrl,
+}) => {
   const details = eventEmailData(event);
   return layout(heading, `
     <h1 style="font-size:24px;color:#0F172A;">${escapeHtml(heading)}</h1>
@@ -496,12 +510,14 @@ const eventEmailBody = ({ heading, intro, recipientName, event, studentContact }
       <table width="100%" cellpadding="0" cellspacing="0">
         ${infoRow("Date", details.dateLabel)}
         ${infoRow("Heure", details.timeLabel)}
+        ${details.modeLabel ? infoRow("Format", details.modeLabel) : ""}
         ${details.location ? infoRow("Lieu", details.location) : ""}
+        ${details.meetingUrl ? infoRow("Lien de réunion", `<a href="${details.meetingUrl}" style="color:#2563EB;">Rejoindre l'événement en ligne</a>`) : ""}
       </table>
       ${details.description ? `<p style="margin:16px 0 0;color:#475569;line-height:1.6;">${details.description}</p>` : ""}
     </div>
     ${studentContact ? studentContactSection(studentContact) : ""}
-    <div style="text-align:center;">${button("Voir l'événement", details.eventUrl)}</div>
+    <div style="text-align:center;">${button(actionLabel, actionUrl || details.eventUrl)}</div>
   `);
 };
 
@@ -568,14 +584,39 @@ const eventUpdatedTemplate = (data) => ({
 });
 
 const eventReminderTemplate = (data) => ({
-  subject: `Rappel : ${data.event.eventTitle} approche`,
+  subject: `Rappel : ${data.event.eventTitle} dans ${data.reminderHours} heures`,
   html: eventEmailBody({
-    heading: "Rappel de votre événement",
-    intro: "nous vous rappelons que vous participez à l'événement suivant, prévu dans environ 24 heures.",
+    heading: `Votre événement commence dans ${data.reminderHours} heures`,
+    intro: `voici un rappel pour l'événement auquel vous participez, prévu dans environ ${data.reminderHours} heures.`,
     recipientName: data.recipientName,
     event: data.event,
   }),
 });
+
+const eventFeedbackRequestTemplate = ({ recipientName, event, feedbackUrl }) => ({
+  subject: `Votre avis sur l'événement — ${event.eventTitle}`,
+  html: eventEmailBody({
+    heading: "Merci d'avoir participé",
+    intro: "votre retour nous aidera à améliorer les prochains événements.",
+    recipientName,
+    event,
+    actionLabel: "Partager mon avis",
+    actionUrl: feedbackUrl,
+  }),
+});
+
+const eventRecordingAvailableTemplate = ({ recipientName, eventTitle, recordingUrl }) => {
+  const baseUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+  return {
+    subject: `Enregistrement disponible — ${eventTitle}`,
+    html: layout("Enregistrement disponible", `
+      <h1 style="font-size:24px;color:#0F172A;">L'enregistrement est disponible</h1>
+      <p style="color:#475569;line-height:1.7;">Bonjour <strong>${escapeHtml(recipientName || "Étudiant")}</strong>, l'enregistrement de l'événement <strong>${escapeHtml(eventTitle)}</strong> est maintenant disponible sur TheBridgeFlow.</p>
+      <p style="color:#475569;line-height:1.7;">Connectez-vous à votre compte pour le visionner.</p>
+      <div style="text-align:center;">${button("Voir l'enregistrement", `${baseUrl}${recordingUrl}`)}</div>
+    `),
+  };
+};
 
 // 7. Nouveau message reçu
 const newMessageTemplate = ({
@@ -1013,6 +1054,8 @@ const emailService = {
   sendEventRegistrationCancelled: (to, data) => sendEmail({ to, ...eventRegistrationCancelledTemplate(data) }),
   sendEventUpdated:        (to, data) => sendEmail({ to, ...eventUpdatedTemplate(data) }),
   sendEventReminder:       (to, data) => sendEmail({ to, ...eventReminderTemplate(data) }),
+  sendEventFeedbackRequest: (to, data) => sendEmail({ to, ...eventFeedbackRequestTemplate(data) }),
+  sendEventRecordingAvailable: (to, data) => sendEmail({ to, ...eventRecordingAvailableTemplate(data) }),
   sendNewMessage:          (to, data) => sendEmail({ to, ...newMessageTemplate(data) }),
   sendNewUserAdmin:        (to, data) => sendEmail({ to, ...newUserAdminTemplate(data) }),
   sendAccountCreatedByAdmin: (to, data) => sendEmail({ to, ...accountCreatedByAdminTemplate(data) }),

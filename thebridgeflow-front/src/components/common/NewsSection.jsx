@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, ImageOff, UserRound } from "lucide-react";
+import { ArrowRight, CalendarDays, ImageOff, Newspaper, UserRound } from "lucide-react";
 import { newsService } from "../../services/news.service.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../../constants/videoUrls.js";
 import "./NewsSection.css";
@@ -88,7 +88,7 @@ export default function NewsSection({ lang = "fr", standalone = false, limit }) 
     <section id="news" className={`news-section${standalone ? " news-section--standalone" : ""}`}>
       <div className="news-section__inner">
         <div className="news-header">
-          <span className="news-header__badge">📰 {t("news.badge")}</span>
+          <span className="news-header__badge"><Newspaper size={16} aria-hidden="true" /> {t("news.badge")}</span>
           {standalone
             ? <h1 className="news-header__title">{t("news.title")}</h1>
             : <h2 className="news-header__title">{t("news.title")}</h2>}

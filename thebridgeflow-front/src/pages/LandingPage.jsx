@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  FiArrowRight, FiPlay, FiX, FiExternalLink,
+  FiArrowRight, FiPlay, FiVideo, FiX, FiExternalLink,
   FiMapPin, FiPhone, FiMail, FiSend, FiUser, FiEdit3,
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
   FiUsers, FiAward, FiTarget, FiBookOpen,
@@ -495,7 +495,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <span className="lp-badge">🎥 {t("landing.promoBadge")}</span>
+            <span className="lp-badge"><FiVideo aria-hidden="true" /> {t("landing.promoBadge")}</span>
             <h2 className="lp-section-title" style={{ marginTop: "1rem" }}>{t("landing.promoTitle")}</h2>
             <p className="lp-section-sub">
               {t("landing.promoSub")}
@@ -874,7 +874,7 @@ export default function LandingPage() {
       <section className="lp-newsletter">
         <div className="lp-newsletter__inner">
           <div>
-            <div className="lp-newsletter__icon">✈️</div>
+            <div className="lp-newsletter__icon"><FiSend aria-hidden="true" /></div>
             <h3 className="lp-newsletter__title">{t("landing.newsletterTitle")}</h3>
             <p className="lp-newsletter__sub">{t("landing.newsletterSub")}</p>
           </div>

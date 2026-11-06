@@ -240,7 +240,7 @@ const FormationsPage = () => {
                     </button>
                     <a
                       href={`https://wa.me/21658840064?text=${encodeURIComponent(
-                        `Bonjour 👋 Je suis intéressé(e) par la formation ${f.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
+                        `Bonjour, je suis intéressé(e) par la formation ${f.title}.\nJ'aimerais savoir :\n- En quoi consiste exactement cette formation ?\n- Comment puis-je m'inscrire ?\n- Quel est le tarif et la durée ?`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"

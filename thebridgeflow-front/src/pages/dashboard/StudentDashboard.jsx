@@ -229,7 +229,7 @@ function AIChatbot({ user }) {
             <div className="ai-panel__header-left">
               <AnimatedRobot size={52} />
               <div>
-                <div className="ai-panel__name">{t("dashboard.student.aiWidget.panelName")} ✨</div>
+                <div className="ai-panel__name">{t("dashboard.student.aiWidget.panelName")}</div>
                 <div className="ai-panel__status">
                   <span className="ai-panel__dot" /> {t("dashboard.student.online")}
                 </div>
@@ -243,7 +243,7 @@ function AIChatbot({ user }) {
           <div className="ai-panel__messages">
             {messages.map((m, i) => (
               <div key={i} className={`ai-msg ai-msg--${m.role}`}>
-                {m.role === "assistant" && <div className="ai-msg__bot-icon">🤖</div>}
+                {m.role === "assistant" && <div className="ai-msg__bot-icon" aria-hidden="true"><FaRobot size={20} /></div>}
                 <div className="ai-msg__bubble">
                   {m.content.split("\n").map((line, j) => (
                     <p key={j} style={{ margin: "0 0 2px" }}>{line}</p>
@@ -281,7 +281,7 @@ function AIChatbot({ user }) {
 
             {loading && (
               <div className="ai-msg ai-msg--assistant">
-                <div className="ai-msg__bot-icon">🤖</div>
+                <div className="ai-msg__bot-icon" aria-hidden="true"><FaRobot size={20} /></div>
                 <div className="ai-msg__bubble ai-typing">
                   <span /><span /><span />
                 </div>
@@ -310,7 +310,7 @@ function AIChatbot({ user }) {
                 <AnimatedRobot size={36} />
               </div>
               <p className="ai-suggestion-text">
-                💡 {t("dashboard.student.aiWidget.suggestionText")}
+                <FiTarget size={16} aria-hidden="true" /> {t("dashboard.student.aiWidget.suggestionText")}
               </p>
             </div>
           )}
@@ -499,7 +499,7 @@ export default function StudentDashboard() {
               : firstName[0]?.toUpperCase()}
           </div>
           <div className="sd-hero__body">
-            <p className="sd-hero__greeting">{greeting} 👋</p>
+            <p className="sd-hero__greeting">{greeting}</p>
             <h1 className="sd-hero__name">{user?.name || firstName}</h1>
             <div className="sd-hero__meta">
               {user?.specialty && <span>{user.specialty}</span>}
@@ -900,7 +900,11 @@ export default function StudentDashboard() {
                   }}
                 />
               </div>
-              <p className="sd-goal-desc">{completionPct < 100 ? t("dashboard.student.profileCompleteAction") : "✓ Complet"}</p>
+              <p className="sd-goal-desc">
+                {completionPct < 100
+                  ? t("dashboard.student.profileCompleteAction")
+                  : <><FiCheckCircle size={14} aria-hidden="true" /> Complet</>}
+              </p>
             </div>
 
             {/* Success rate */}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { FiX } from "react-icons/fi";
+import { FiMessageSquare, FiX } from "react-icons/fi";
 import { SCREENSHOT_FEEDBACKS } from "../../constants/screenshotTestimonials.js";
 import "./TestimonialsScreenshotCarousel.css";
 
@@ -49,7 +49,7 @@ export default function TestimonialsScreenshotCarousel({ title, subtitle, items 
     <section id="screenshot-testimonials" className="stc-section">
       <div className="stc-section__inner">
         <div className="stc-header">
-          <span className="stc-header__badge">💬 {t("testimonials.screenshotEyebrow")}</span>
+          <span className="stc-header__badge"><FiMessageSquare aria-hidden="true" /> {t("testimonials.screenshotEyebrow")}</span>
           <h2 className="stc-header__title">{title}</h2>
           {subtitle && <p className="stc-header__sub">{subtitle}</p>}
         </div>

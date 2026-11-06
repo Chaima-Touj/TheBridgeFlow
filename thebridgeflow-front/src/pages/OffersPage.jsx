@@ -305,7 +305,7 @@ const OffersPage = () => {
           </div>
         ) : offers.length === 0 ? (
           <div className="op-empty">
-            <div className="op-empty__icon">🔍</div>
+            <div className="op-empty__icon"><FiSearch size={36} aria-hidden="true" /></div>
             <h3 className="op-empty__title">{t("offers.noResults")}</h3>
             {hasActiveFilters && (
               <button className="op-btn op-btn--outline" onClick={handleReset}>

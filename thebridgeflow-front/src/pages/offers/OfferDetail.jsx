@@ -284,7 +284,7 @@ export default function OfferDetail() {
                   <h1 className="od-title">{offer.title}</h1>
                   <div className="od-company-row">
                     <span className="od-company-label">{offer.companyName}</span>
-                    <span className="od-verified">✓</span>
+                    <span className="od-verified"><FiCheckCircle size={13} aria-hidden="true" /></span>
                   </div>
                   <div className="od-badges">
                     {offer.location && (
@@ -633,7 +633,7 @@ export default function OfferDetail() {
                 <div>
                   <div className="od-company-name">
                     {offer.companyName}
-                    <span className="od-verified" style={{ marginLeft: 4 }}>✓</span>
+                    <span className="od-verified" style={{ marginLeft: 4 }}><FiCheckCircle size={13} aria-hidden="true" /></span>
                   </div>
                   <div className="od-company-type">
                     {offer.companyType || offer.sector || offer.domain || ""}

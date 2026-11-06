@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiCheck } from "react-icons/fi";
+import { FiCheck, FiCreditCard } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./FormationsPage.css";
@@ -29,7 +29,7 @@ export default function PricingPage() {
 
       <section className="fp-hero">
         <div className="fp-hero__inner">
-          <span className="fp-hero__badge">💳 {t("tarifs.badge")}</span>
+          <span className="fp-hero__badge"><FiCreditCard aria-hidden="true" /> {t("tarifs.badge")}</span>
           <h1 className="fp-hero__title">{t("tarifs.title")}</h1>
           <p className="fp-hero__subtitle">{t("tarifs.subtitle")}</p>
         </div>

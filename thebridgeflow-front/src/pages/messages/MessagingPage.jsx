@@ -143,11 +143,8 @@ function ConvItem({ conv, isActive, myId, onClick, t }) {
   const isMine = lastMessage
     ? String(lastMessage.senderId?._id ?? lastMessage.senderId) === String(myId)
     : false;
-  const rawPreview = lastMessage
-    ? (lastMessage.content || (lastMessage.fileName ? `📎 ${lastMessage.fileName}` : "📎 Fichier"))
-    : "";
   const preview = lastMessage
-    ? isMine ? `${t("messages.you")}: ${rawPreview}` : rawPreview
+    ? (lastMessage.content || lastMessage.fileName || "Fichier")
     : t("messages.noConversations");
 
   return (
@@ -169,7 +166,15 @@ function ConvItem({ conv, isActive, myId, onClick, t }) {
           <span className="msg-conv-time">{timeAgo(conv.lastMessageAt)}</span>
         </div>
         <div className="msg-conv-footer">
-          <span className="msg-conv-preview">{preview}</span>
+          <span className="msg-conv-preview">
+            {lastMessage ? (
+              <>
+                {isMine && `${t("messages.you")}: `}
+                {!lastMessage.content && <FiPaperclip size={13} aria-hidden="true" />}
+                {preview}
+              </>
+            ) : preview}
+          </span>
           {unreadCount > 0 && (
             <span className="msg-conv-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
           )}

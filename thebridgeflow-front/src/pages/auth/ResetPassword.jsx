@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiAlertCircle, FiCheckCircle, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
 import "./VerifyEmail.css";
@@ -56,14 +56,14 @@ export default function ResetPassword() {
           <span>TheBridge<span className="verify-logo__accent">Flow</span></span>
         </Link>
 
-        <div className="verify-icon">🔒</div>
+        <div className="verify-icon"><FiLock aria-hidden="true" /></div>
 
         <h1 className="verify-title">{t("resetPassword.title")}</h1>
         <p className="verify-desc">{t("resetPassword.desc")}</p>
 
-        {error && <div className="verify-alert verify-alert--error">❌ {error}</div>}
+        {error && <div className="verify-alert verify-alert--error"><FiAlertCircle aria-hidden="true" /> {error}</div>}
         {success && (
-          <div className="verify-alert verify-alert--success">✅ {t("resetPassword.successMessage")}</div>
+          <div className="verify-alert verify-alert--success"><FiCheckCircle aria-hidden="true" /> {t("resetPassword.successMessage")}</div>
         )}
 
         {!success && (

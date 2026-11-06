@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Event from "../models/event.model.js";
+import EventFeedback from "../models/eventFeedback.model.js";
 import EventRegistration from "../models/eventRegistration.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getActiveStudents, notifyAdmins, notifyUser, notifyUsers } from "../services/notification.service.js";
@@ -114,6 +115,7 @@ function getEventEmailData(event) {
     startsAt: event.startsAt,
     timezone: event.timezone,
     location: event.location,
+    mode: event.mode,
     eventId: String(event._id),
   };
 }
@@ -203,6 +205,111 @@ async function announcePublishedEvent(event) {
     } catch (releaseError) {
       console.error("[events] Failed to release publication announcement claim", {
         eventId: String(event._id),
+        message: releaseError.message,
+      });
+    }
+  }
+}
+
+async function announceAvailableRecording(event) {
+  if (!isSessionLinkAvailable(event)) return;
+
+  const eventId = String(event._id);
+  const recordingUrl = event.sessionUrl;
+  const claimedAt = new Date();
+  const staleClaimBefore = new Date(claimedAt.getTime() - 10 * 60 * 1000);
+  let claim;
+  try {
+    claim = await Event.findOneAndUpdate(
+      {
+        _id: event._id,
+        status: "published",
+        sessionUrl: recordingUrl,
+        recordingAnnouncementSentForUrl: { $ne: recordingUrl },
+        $or: [
+          { recordingAnnouncementClaimedAt: null },
+          { recordingAnnouncementClaimedAt: { $lt: staleClaimBefore } },
+        ],
+      },
+      {
+        $set: {
+          recordingAnnouncementClaimedForUrl: recordingUrl,
+          recordingAnnouncementClaimedAt: claimedAt,
+        },
+      },
+      { new: true },
+    ).select("_id");
+  } catch (error) {
+    console.error("[events] Failed to claim recording announcement", {
+      eventId,
+      message: error.message,
+    });
+    return;
+  }
+  if (!claim) return;
+
+  try {
+    const students = await getActiveStudents();
+    const studentRecordingUrl = `/events/${eventId}/session`;
+    const emailResults = await notifyUsers(students, (student) => ({
+      notification: {
+        title: "Enregistrement disponible",
+        message: `L'enregistrement de l'événement "${event.title}" est maintenant disponible.`,
+        type: "info",
+        link: studentRecordingUrl,
+      },
+      emailMethod: "sendEventRecordingAvailable",
+      emailData: {
+        recipientName: student.name,
+        eventTitle: event.title,
+        recordingUrl: studentRecordingUrl,
+      },
+    }));
+    if (emailResults.some((result) => result?.success !== true)) {
+      throw new Error("Un ou plusieurs emails d'annonce n'ont pas pu être envoyés.");
+    }
+
+    const finalized = await Event.updateOne(
+      {
+        _id: event._id,
+        status: "published",
+        sessionUrl: recordingUrl,
+        recordingAnnouncementClaimedForUrl: recordingUrl,
+        recordingAnnouncementClaimedAt: claimedAt,
+      },
+      {
+        $set: { recordingAnnouncementSentForUrl: recordingUrl },
+        $unset: {
+          recordingAnnouncementClaimedForUrl: 1,
+          recordingAnnouncementClaimedAt: 1,
+        },
+      },
+    );
+    if (finalized.modifiedCount === 0) {
+      console.error("[events] Recording announcement claim was lost before finalization", { eventId });
+    }
+  } catch (error) {
+    console.error("[events] Failed to send recording announcement", {
+      eventId,
+      message: error.message,
+    });
+    try {
+      await Event.updateOne(
+        {
+          _id: event._id,
+          recordingAnnouncementClaimedForUrl: recordingUrl,
+          recordingAnnouncementClaimedAt: claimedAt,
+        },
+        {
+          $unset: {
+            recordingAnnouncementClaimedForUrl: 1,
+            recordingAnnouncementClaimedAt: 1,
+          },
+        },
+      );
+    } catch (releaseError) {
+      console.error("[events] Failed to release recording announcement claim", {
+        eventId,
         message: releaseError.message,
       });
     }
@@ -341,6 +448,40 @@ export const updateEvent = asyncHandler(async (req, res) => {
   }
   await event.save();
 
+  const reminderScheduleChanged = previous.startsAt !== event.startsAt?.getTime();
+  const previousEndAt = previous.endsAt ?? previous.startsAt;
+  const nextEndAt = event.endsAt?.getTime() ?? event.startsAt?.getTime();
+  const feedbackScheduleChanged = previousEndAt !== nextEndAt;
+  if (reminderScheduleChanged || feedbackScheduleChanged) {
+    const resetFields = {};
+    const removeFields = {};
+    if (reminderScheduleChanged) {
+      Object.assign(resetFields, { reminderAttempts: 0, reminder6hAttempts: 0 });
+      Object.assign(removeFields, {
+        reminderSentForStartAt: 1,
+        reminder6hSentForStartAt: 1,
+        reminderNextAttemptAt: 1,
+        reminder6hNextAttemptAt: 1,
+        reminderClaimedForStartAt: 1,
+        reminderClaimedAt: 1,
+        reminderClaimedKind: 1,
+      });
+    }
+    if (feedbackScheduleChanged) {
+      resetFields.feedbackEmailAttempts = 0;
+      Object.assign(removeFields, {
+        feedbackEmailSentForEndAt: 1,
+        feedbackEmailNextAttemptAt: 1,
+        feedbackEmailClaimedForEndAt: 1,
+        feedbackEmailClaimedAt: 1,
+      });
+    }
+    await EventRegistration.updateMany(
+      { event: event._id, status: "registered" },
+      { $set: resetFields, $unset: removeFields },
+    );
+  }
+
   const registrations = await EventRegistration.find({ event: event._id, status: "registered" })
     .populate("student", "name email")
     .lean();
@@ -384,6 +525,13 @@ export const updateEvent = asyncHandler(async (req, res) => {
       emailMethod: "sendEventUpdated",
       emailData: { recipientName: student.name, event: getEventEmailData(event) },
     }));
+  }
+  if (
+    event.status === "published" &&
+    event.sessionUrl &&
+    event.recordingAnnouncementSentForUrl !== event.sessionUrl
+  ) {
+    await announceAvailableRecording(event);
   }
   if (event.status === "published" && event.newsletterCampaignEligibleAt && !event.newsletterCampaignSentAt) {
     void processNewsletterJobs();
@@ -534,6 +682,127 @@ export const getEventRegistrations = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
   res.json({ registrations });
+});
+
+function getEventIdOrFail(value) {
+  if (!mongoose.Types.ObjectId.isValid(value)) fail("Identifiant d'événement invalide.", 400);
+}
+
+function feedbackImageOrFail(image) {
+  if (image === undefined || image === "") return "";
+  if (
+    typeof image !== "string" ||
+    image.length > 1_000_000 ||
+    !/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(image)
+  ) {
+    fail("La photo doit être une image valide de taille raisonnable.", 400);
+  }
+  return image;
+}
+
+// GET /api/events/:id/feedbacks — public feedbacks approved by an admin.
+export const getPublishedEventFeedbacks = asyncHandler(async (req, res) => {
+  getEventIdOrFail(req.params.id);
+  const event = await Event.findOne({ _id: req.params.id, status: "published" }).select("_id");
+  if (!event) fail("Événement introuvable.", 404);
+  const feedbacks = await EventFeedback.find({ event: event._id, isPublished: true })
+    .select("firstName lastName comment rating image createdAt publishedAt")
+    .sort({ publishedAt: -1, createdAt: -1 })
+    .lean();
+  res.json({ feedbacks });
+});
+
+// GET /api/events/:id/my-feedback — registration-scoped feedback status.
+export const getMyEventFeedback = asyncHandler(async (req, res) => {
+  getEventIdOrFail(req.params.id);
+  const registration = await EventRegistration.findOne({
+    event: req.params.id,
+    student: req.user._id,
+    status: "registered",
+  }).select("_id");
+  if (!registration) fail("Seuls les participants inscrits peuvent envoyer un avis.", 403);
+  const feedback = await EventFeedback.findOne({
+    event: req.params.id,
+    student: req.user._id,
+  }).select("_id isPublished");
+  res.json({ feedback });
+});
+
+// POST /api/events/:id/feedbacks — one review per registered student/event.
+export const createEventFeedback = asyncHandler(async (req, res) => {
+  getEventIdOrFail(req.params.id);
+  const event = await Event.findOne({ _id: req.params.id, status: "published" })
+    .select("_id startsAt endsAt");
+  if (!event) fail("Événement introuvable.", 404);
+  if (new Date(event.endsAt || event.startsAt) > new Date()) {
+    fail("Vous pourrez envoyer votre avis après la fin de l'événement.", 409);
+  }
+  const registration = await EventRegistration.findOne({
+    event: event._id,
+    student: req.user._id,
+    status: "registered",
+  }).select("_id");
+  if (!registration) fail("Seuls les participants inscrits peuvent envoyer un avis.", 403);
+
+  const firstName = typeof req.body.firstName === "string" ? req.body.firstName.trim() : "";
+  const lastName = typeof req.body.lastName === "string" ? req.body.lastName.trim() : "";
+  const comment = typeof req.body.comment === "string" ? req.body.comment.trim() : "";
+  const rating = Number(req.body.rating);
+  if (!firstName || firstName.length > 80) fail("Le prénom est requis (80 caractères maximum).", 400);
+  if (!lastName || lastName.length > 80) fail("Le nom est requis (80 caractères maximum).", 400);
+  if (!comment || comment.length > 2000) fail("Le commentaire est requis (2 000 caractères maximum).", 400);
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) fail("La note doit être comprise entre 1 et 5.", 400);
+
+  try {
+    const feedback = await EventFeedback.create({
+      event: event._id,
+      student: req.user._id,
+      firstName,
+      lastName,
+      comment,
+      rating,
+      image: feedbackImageOrFail(req.body.image),
+    });
+    res.status(201).json({ feedback });
+  } catch (error) {
+    if (error?.code === 11000) fail("Vous avez déjà envoyé votre avis pour cet événement.", 409);
+    throw error;
+  }
+});
+
+// GET /api/events/feedbacks/admin — completed events and their reviews.
+export const getAdminEventFeedbacks = asyncHandler(async (_req, res) => {
+  const now = new Date();
+  const events = await Event.find({
+    status: { $in: ["published", "archived"] },
+    $expr: { $lte: [{ $ifNull: ["$endsAt", "$startsAt"] }, now] },
+  })
+    .select("title startsAt endsAt timezone status mode location")
+    .sort({ startsAt: -1 })
+    .lean();
+  const eventIds = events.map((event) => event._id);
+  const feedbacks = eventIds.length ? await EventFeedback.find({ event: { $in: eventIds } })
+    .populate("event", "title startsAt endsAt status")
+    .populate("student", "name")
+    .sort({ createdAt: -1 })
+    .limit(500)
+    .lean() : [];
+  res.json({ events, feedbacks });
+});
+
+// PATCH /api/events/feedbacks/:feedbackId/publication — admin publication control.
+export const setEventFeedbackPublication = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.feedbackId)) fail("Identifiant d'avis invalide.", 400);
+  if (typeof req.body.isPublished !== "boolean") fail("isPublished doit être un booléen.", 400);
+  const feedback = await EventFeedback.findById(req.params.feedbackId).populate("event", "status");
+  if (!feedback) fail("Avis introuvable.", 404);
+  if (req.body.isPublished && feedback.event?.status !== "published") {
+    fail("Un avis ne peut pas être publié pour un événement indisponible.", 409);
+  }
+  feedback.isPublished = req.body.isPublished;
+  feedback.publishedAt = req.body.isPublished ? new Date() : null;
+  await feedback.save();
+  res.json({ feedback });
 });
 
 export const getEventSessionLink = asyncHandler(async (req, res) => {

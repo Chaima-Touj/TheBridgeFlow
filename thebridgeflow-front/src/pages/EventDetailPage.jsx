@@ -1,7 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, CalendarDays, Clock3, MapPin, Users, Video } from "lucide-react";
+import {
+  ArrowRight,
+  BellRing,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  Clock3,
+  ExternalLink,
+  MapPin,
+  MessageSquareText,
+  Ribbon,
+  Star,
+  Users,
+  Video,
+} from "lucide-react";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import Loader from "../components/common/Loader.jsx";
 import Modal from "../components/common/Modal.jsx";
@@ -11,6 +25,7 @@ import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import { getEventVideoSource } from "../utils/eventVideoSource.js";
+import { compressImageToBase64 } from "../utils/imageCompression.js";
 import "./Events.css";
 
 function formatDate(value, language, timezone) {
@@ -26,7 +41,22 @@ function getMapsUrl(location) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
 }
 
-export default function EventDetailPage() {
+function splitName(name) {
+  const parts = (name || "").trim().split(/\s+/);
+  return [parts[0] || "", parts.slice(1).join(" ")];
+}
+
+function createFeedbackForm(name) {
+  const [firstName, lastName] = splitName(name);
+  return { firstName, lastName, rating: 5, comment: "", image: "" };
+}
+
+export default function EventDetailPageRoute() {
+  const { id } = useParams();
+  return <EventDetailPage key={id} />;
+}
+
+function EventDetailPage() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -41,7 +71,27 @@ export default function EventDetailPage() {
   const [sessionUrl, setSessionUrl] = useState("");
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState("");
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
+  const [feedbackFileError, setFeedbackFileError] = useState("");
+  const [feedbackImageLoading, setFeedbackImageLoading] = useState(false);
+  const [feedbackStatusResult, setFeedbackStatusResult] = useState(null);
+  const [publishedFeedbacks, setPublishedFeedbacks] = useState([]);
+  const [publishedFeedbacksLoading, setPublishedFeedbacksLoading] = useState(true);
+  const [publishedFeedbacksError, setPublishedFeedbacksError] = useState("");
+  const [feedbackFormState, setFeedbackFormState] = useState(null);
+  const feedbackForm = feedbackFormState || createFeedbackForm(user?.name);
+  const setFeedbackForm = (update) => {
+    setFeedbackFormState((current) => {
+      const currentForm = current || createFeedbackForm(user?.name);
+      return typeof update === "function" ? update(currentForm) : update;
+    });
+  };
   const registrationLock = useRef(false);
+  const feedbackLock = useRef(false);
+  const feedbackPromptedForEvent = useRef("");
   const participationConfirmed = user?.role === "étudiant" &&
     event?.registrationRequired &&
     registrationDetails?.eventId === id &&
@@ -50,13 +100,25 @@ export default function EventDetailPage() {
   const eventEnded = Boolean(event && new Date(event.endsAt || event.startsAt) <= new Date());
   const capacityReached = Boolean(event && event.capacity !== null && event.capacity !== undefined &&
     event.registrationCount >= event.capacity);
+  const eventStatus = event?.status;
+  const shouldCheckFeedback = user?.role === "étudiant" && participationConfirmed && eventEnded;
+  const feedbackStatusLoading = shouldCheckFeedback && feedbackStatusResult?.eventId !== id;
+  const feedbackStatusError = feedbackStatusResult?.eventId === id ? feedbackStatusResult.error : "";
+  const hasSubmittedFeedback = feedbackStatusResult?.eventId === id && feedbackStatusResult.submitted;
 
   useDocumentMeta({ title: event ? `${event.title} — TheBridgeFlow` : t("events.title"), description: event?.description || t("events.description") });
 
   useEffect(() => {
     let active = true;
     eventsService.getOne(id)
-      .then(({ data }) => { if (active) setEvent(data.event); })
+      .then(({ data }) => {
+        if (!active) return;
+        setEvent(data.event);
+        if (data.event.status !== "published") {
+          setPublishedFeedbacks([]);
+          setPublishedFeedbacksLoading(false);
+        }
+      })
       .catch(() => { if (active) setError(t("events.notFound")); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
@@ -82,6 +144,51 @@ export default function EventDetailPage() {
       });
     return () => { active = false; };
   }, [event?.registrationRequired, id, user?._id, user?.role]);
+
+  useEffect(() => {
+    if (eventStatus !== "published") return undefined;
+    let active = true;
+    eventsService.getPublishedFeedbacks(id)
+      .then(({ data }) => {
+        if (!active) return;
+        setPublishedFeedbacks(data.feedbacks || []);
+        setPublishedFeedbacksError("");
+      })
+      .catch((requestError) => {
+        if (!active) return;
+        console.error("Failed to load published event feedback", requestError);
+        setPublishedFeedbacksError(t("events.feedback.loadError"));
+      })
+      .finally(() => {
+        if (active) setPublishedFeedbacksLoading(false);
+      });
+    return () => { active = false; };
+  }, [eventStatus, id, t]);
+
+  useEffect(() => {
+    if (!shouldCheckFeedback) return undefined;
+    let active = true;
+    eventsService.getMyFeedback(id)
+      .then(({ data }) => {
+        if (!active) return;
+        const submitted = Boolean(data.feedback);
+        setFeedbackStatusResult({ eventId: id, submitted, error: "" });
+        if (!submitted && feedbackPromptedForEvent.current !== id) {
+          feedbackPromptedForEvent.current = id;
+          setFeedbackOpen(true);
+        }
+      })
+      .catch((requestError) => {
+        if (!active) return;
+        console.error("Failed to check event feedback status", requestError);
+        setFeedbackStatusResult({
+          eventId: id,
+          submitted: false,
+          error: requestError.response?.data?.message || t("events.feedback.statusError"),
+        });
+      });
+    return () => { active = false; };
+  }, [id, shouldCheckFeedback, t]);
 
   const submitRegistration = async () => {
     registrationLock.current = true;
@@ -144,6 +251,40 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleFeedbackFile = async (changeEvent) => {
+    const file = changeEvent.target.files?.[0];
+    if (!file) return;
+    setFeedbackImageLoading(true);
+    setFeedbackFileError("");
+    try {
+      const image = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
+      setFeedbackForm((current) => ({ ...current, image }));
+    } catch (uploadError) {
+      setFeedbackFileError(uploadError.message || t("events.feedback.imageError"));
+    } finally {
+      setFeedbackImageLoading(false);
+      changeEvent.target.value = "";
+    }
+  };
+
+  const handleFeedbackSubmit = async (submitEvent) => {
+    submitEvent.preventDefault();
+    if (feedbackLock.current) return;
+    feedbackLock.current = true;
+    setFeedbackSubmitting(true);
+    setFeedbackError("");
+    try {
+      await eventsService.submitFeedback(id, feedbackForm);
+      setFeedbackStatusResult({ eventId: id, submitted: true, error: "" });
+      setFeedbackSent(true);
+    } catch (submitError) {
+      setFeedbackError(submitError.response?.data?.message || t("events.feedback.submitError"));
+    } finally {
+      feedbackLock.current = false;
+      setFeedbackSubmitting(false);
+    }
+  };
+
   return (
     <div className="ev-public-page">
       <SiteNavbar />
@@ -159,9 +300,24 @@ export default function EventDetailPage() {
                   </div>
                 )}
                 <div className="ev-detail__content">
-                  <Link to="/events" className="ev-back">{t("events.back")}</Link>
-                  <span className="ev-category">{event.category}</span>
-                  <h1>{event.title}</h1>
+                  <div className="ev-detail__header-row">
+                    <Link to="/events" className="ev-back">{t("events.back")}</Link>
+                    <span className="ev-category">{event.category}</span>
+                  </div>
+                  <div className="ev-detail__hero-banner">
+                    <div className="ev-detail__hero-copy">
+                      <span className="ev-detail__eyebrow">{t("events.registrationEyebrow")}</span>
+                      <h1>{event.title}</h1>
+                    </div>
+                    {participationConfirmed && !eventEnded && (
+                      <div className="ev-detail__hero-cta">
+                        <div className="ev-detail__reminder">
+                          <BellRing size={18} aria-hidden="true" />
+                          <span>{t("events.remindersScheduled")}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div className="ev-detail__facts">
                     <div className="ev-detail__fact">
                       <CalendarDays size={19} aria-hidden="true" />
@@ -217,8 +373,104 @@ export default function EventDetailPage() {
                     <h2>{t("events.descriptionLabel")}</h2>
                     <p className="ev-detail__description">{event.description}</p>
                   </section>
+                  <div className="ev-detail__feature-grid">
+                    <article className="ev-detail__feature-card">
+                      <div className="ev-detail__feature-icon"><CalendarDays size={18} aria-hidden="true" /></div>
+                      <div>
+                        <h3>{t("events.dateLabel")}</h3>
+                        <p>{formatDate(event.startsAt, i18n.language, event.timezone)}</p>
+                      </div>
+                    </article>
+                    <article className="ev-detail__feature-card">
+                      <div className="ev-detail__feature-icon"><MapPin size={18} aria-hidden="true" /></div>
+                      <div>
+                        <h3>{t("events.locationLabel")}</h3>
+                        <p>{event.location || t(`events.modes.${event.mode}`)}</p>
+                      </div>
+                    </article>
+                    <article className="ev-detail__feature-card">
+                      <div className="ev-detail__feature-icon"><Ribbon size={18} aria-hidden="true" /></div>
+                      <div>
+                        <h3>{t("events.modeLabel")}</h3>
+                        <p>{t(`events.modes.${event.mode}`)}</p>
+                      </div>
+                    </article>
+                  </div>
+                  {event.location && (
+                    <div className="ev-detail__map-card">
+                      <div className="ev-detail__map-header">
+                        <MapPin size={18} aria-hidden="true" />
+                        <span>{t("events.mapTitle")}</span>
+                      </div>
+                      <a href={getMapsUrl(event.location)} target="_blank" rel="noopener noreferrer" className="ev-detail__map-link">
+                        <span>{event.location}</span>
+                        <ExternalLink size={15} aria-hidden="true" />
+                      </a>
+                      <iframe
+                        className="ev-detail__map"
+                        title={t("events.mapTitle")}
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(event.location)}&output=embed`}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                    </div>
+                  )}
+                  {event.status === "published" && (
+                    <section className="ev-detail__feedback-list" aria-labelledby="ev-feedback-list-title">
+                      <div className="ev-detail__feedback-heading">
+                        <div>
+                          <span className="ev-detail__eyebrow">{t("events.feedback.eyebrow")}</span>
+                          <h2 id="ev-feedback-list-title">{t("events.feedback.publicTitle")}</h2>
+                        </div>
+                        {!publishedFeedbacksLoading && publishedFeedbacks.length > 0 && (
+                          <span className="ev-detail__feedback-count">
+                            {t("events.feedback.publishedCount", { count: publishedFeedbacks.length })}
+                          </span>
+                        )}
+                      </div>
+                      {publishedFeedbacksLoading ? (
+                        <div className="ev-detail__feedback-empty" role="status">{t("common.loading")}</div>
+                      ) : publishedFeedbacksError ? (
+                        <p className="ev-error" role="alert">{publishedFeedbacksError}</p>
+                      ) : publishedFeedbacks.length === 0 ? (
+                        <div className="ev-detail__feedback-empty">
+                          <MessageSquareText size={20} aria-hidden="true" />
+                          <span>{t("events.feedback.noPublished")}</span>
+                        </div>
+                      ) : (
+                        <div className="ev-detail__feedback-grid">
+                          {publishedFeedbacks.map((feedback) => (
+                            <article className="ev-detail__feedback-card" key={feedback._id}>
+                              <div className="ev-detail__feedback-stars" aria-label={t("events.feedback.ratingLabel", { rating: feedback.rating })}>
+                                {[1, 2, 3, 4, 5].map((value) => (
+                                  <Star
+                                    key={value}
+                                    size={16}
+                                    aria-hidden="true"
+                                    fill={feedback.rating >= value ? "currentColor" : "none"}
+                                  />
+                                ))}
+                              </div>
+                              <p>{feedback.comment}</p>
+                              <div className="ev-detail__feedback-author">
+                                {feedback.image
+                                  ? <img src={feedback.image} alt="" />
+                                  : <span aria-hidden="true">{feedback.firstName?.charAt(0) || ""}</span>}
+                                <span>
+                                  <strong>{feedback.firstName} {feedback.lastName}</strong>
+                                  <small>{t("events.feedback.verifiedParticipant")}</small>
+                                </span>
+                                <CheckCircle2 size={17} aria-label={t("events.feedback.verifiedParticipant")} />
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  )}
                   {error && <p className="ev-form-error" role="alert">{error}</p>}
                   {event.status === "cancelled" && <p className="ev-form-error" role="status">{t("events.cancelledMessage")}</p>}
+                  {feedbackStatusError && <p className="ev-form-error" role="alert">{feedbackStatusError}</p>}
                   {event.status === "published" && event.registrationRequired === true && !eventEnded &&
                     (participationConfirmed || new Date(event.startsAt) > new Date()) &&
                     (!user || user.role === "étudiant") && (
@@ -246,6 +498,22 @@ export default function EventDetailPage() {
                         </button>
                       )}
                     </section>
+                  )}
+                  {eventEnded && user?.role === "étudiant" && participationConfirmed && !hasSubmittedFeedback && (
+                    <button
+                      type="button"
+                      className="ev-feedback-trigger"
+                      onClick={() => { setFeedbackError(""); setFeedbackOpen(true); }}
+                      disabled={feedbackStatusLoading}
+                    >
+                      <MessageSquareText size={18} aria-hidden="true" />
+                      {feedbackStatusLoading ? t("events.feedback.checking") : t("events.feedback.openForm")}
+                    </button>
+                  )}
+                  {eventEnded && hasSubmittedFeedback && (
+                    <p className="ev-feedback-submitted" role="status">
+                      <CheckCircle2 size={18} aria-hidden="true" /> {t("events.feedback.submittedNotice")}
+                    </p>
                   )}
                 </div>
               </article>
@@ -279,6 +547,111 @@ export default function EventDetailPage() {
           footer={<button type="button" className="btn btn-primary" onClick={() => setParticipationModal("")}>{t("events.close")}</button>}
         >
           <p>{t("events.alreadyRegisteredMessage")}</p>
+        </Modal>
+      )}
+      {feedbackOpen && (
+        <Modal
+          title={feedbackSent ? t("events.feedback.thanksTitle") : t("events.feedback.title")}
+          onClose={() => {
+            if (!feedbackSubmitting) {
+              setFeedbackOpen(false);
+              setFeedbackSent(false);
+            }
+          }}
+          maxWidth={640}
+          className="ev-feedback-modal"
+        >
+          {feedbackSent ? (
+            <div className="ev-feedback-success" role="status">
+              <div className="ev-feedback-success__stars" aria-hidden="true">
+                <Star className="ev-feedback-success__star ev-feedback-success__star--one" size={22} fill="currentColor" />
+                <Star className="ev-feedback-success__star ev-feedback-success__star--two" size={30} fill="currentColor" />
+                <Star className="ev-feedback-success__star ev-feedback-success__star--three" size={19} fill="currentColor" />
+                <span><CheckCircle2 size={34} /></span>
+              </div>
+              <h3>{t("events.feedback.thanksTitle")}</h3>
+              <p>{t("events.feedback.thanksMessage")}</p>
+              <button type="button" className="btn btn-primary" onClick={() => { setFeedbackOpen(false); setFeedbackSent(false); }}>
+                {t("events.close")}
+              </button>
+            </div>
+          ) : (
+            <form className="ev-feedback-form" onSubmit={handleFeedbackSubmit}>
+              <div className="ev-feedback-form__grid">
+                <label>
+                  {t("events.feedback.firstName")}
+                  <input
+                    value={feedbackForm.firstName}
+                    onChange={(event) => setFeedbackForm((current) => ({ ...current, firstName: event.target.value }))}
+                    maxLength={80}
+                    autoComplete="given-name"
+                    required
+                  />
+                </label>
+                <label>
+                  {t("events.feedback.lastName")}
+                  <input
+                    value={feedbackForm.lastName}
+                    onChange={(event) => setFeedbackForm((current) => ({ ...current, lastName: event.target.value }))}
+                    maxLength={80}
+                    autoComplete="family-name"
+                    required
+                  />
+                </label>
+              </div>
+              <div className="ev-feedback-rating">
+                <span>{t("events.feedback.rating")}</span>
+                <div className="ev-feedback-stars" role="group" aria-label={t("events.feedback.rating")}>
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`ev-feedback-star${feedbackForm.rating >= value ? " is-active" : ""}`}
+                      onClick={() => setFeedbackForm((current) => ({ ...current, rating: value }))}
+                      aria-label={t("events.feedback.rateOutOfFive", { rating: value })}
+                      aria-pressed={feedbackForm.rating === value}
+                    >
+                      <Star size={20} aria-hidden="true" fill={feedbackForm.rating >= value ? "currentColor" : "none"} />
+                    </button>
+                  ))}
+                </div>
+                <span className="ev-feedback-rating__value">{feedbackForm.rating}/5</span>
+              </div>
+              <label>
+                {t("events.feedback.comment")}
+                <textarea
+                  rows={5}
+                  value={feedbackForm.comment}
+                  onChange={(event) => setFeedbackForm((current) => ({ ...current, comment: event.target.value }))}
+                  placeholder={t("events.feedback.commentPlaceholder")}
+                  maxLength={2000}
+                  required
+                />
+              </label>
+              <label className="ev-feedback-upload">
+                <span><Camera size={16} aria-hidden="true" /> {t("events.feedback.photo")} <small>{t("events.feedback.optional")}</small></span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleFeedbackFile}
+                  disabled={feedbackImageLoading}
+                />
+              </label>
+              {feedbackForm.image && <img className="ev-feedback-preview" src={feedbackForm.image} alt={t("events.feedback.photoPreview")} />}
+              {feedbackImageLoading && <p className="ev-feedback-hint" role="status">{t("events.feedback.imageLoading")}</p>}
+              {feedbackFileError && <p className="ev-form-error" role="alert">{feedbackFileError}</p>}
+              {feedbackError && <p className="ev-form-error" role="alert">{feedbackError}</p>}
+              <p className="ev-feedback-hint">{t("events.feedback.reviewVisibilityNotice")}</p>
+              <div className="ev-feedback-actions">
+                <button type="button" className="btn btn-ghost" onClick={() => setFeedbackOpen(false)} disabled={feedbackSubmitting}>
+                  {t("common.cancel")}
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={feedbackSubmitting || feedbackImageLoading}>
+                  {feedbackSubmitting ? t("events.working") : t("events.feedback.submit")}
+                </button>
+              </div>
+            </form>
+          )}
         </Modal>
       )}
     </div>

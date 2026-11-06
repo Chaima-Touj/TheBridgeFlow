@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   FiSend, FiBriefcase, FiFileText, FiUser, FiMic,
   FiBook, FiTrendingUp, FiSearch, FiAlertCircle,
-  FiCheckCircle, FiInfo, FiBell, FiShield,
+  FiCheckCircle, FiInfo, FiBell, FiShield, FiCpu,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -301,7 +301,7 @@ export default function AIAssistant() {
               <div className="ai-hero__orb ai-hero__orb--3" />
 
               <div className="ai-hero__text">
-                <p className="ai-hero__eyebrow">✦ {t("aiAssistant.eyebrow")}</p>
+                <p className="ai-hero__eyebrow"><FiCpu aria-hidden="true" /> {t("aiAssistant.eyebrow")}</p>
                 <h2 className="ai-hero__title">
                   {t("aiAssistant.greeting")} <span className="ai-hero__name">{firstName}</span> !
                 </h2>
@@ -349,14 +349,14 @@ export default function AIAssistant() {
               <div className="ai-chat-msgs" ref={chatRef}>
                 {messages.length === 0 && (
                   <div className="ai-chat-empty">
-                    <div className="ai-chat-empty__ico">✦</div>
+                    <div className="ai-chat-empty__ico"><FiCpu aria-hidden="true" /></div>
                     <p>{t("aiAssistant.chatEmptyText")}</p>
                   </div>
                 )}
                 {messages.map((m, i) => (
                   <div key={i} className={`ai-msg ai-msg--${m.role}`}>
                     {m.role === "assistant" && (
-                      <div className="ai-msg__av">✦</div>
+                      <div className="ai-msg__av"><FiCpu aria-hidden="true" /></div>
                     )}
                     <div className="ai-msg__bubble">
                       <MessageContent text={m.content} />
@@ -372,7 +372,7 @@ export default function AIAssistant() {
                 ))}
                 {loading && (
                   <div className="ai-msg ai-msg--assistant">
-                    <div className="ai-msg__av">✦</div>
+                    <div className="ai-msg__av"><FiCpu aria-hidden="true" /></div>
                     <div className="ai-msg__bubble ai-msg__bubble--typing">
                       <span /><span /><span />
                     </div>

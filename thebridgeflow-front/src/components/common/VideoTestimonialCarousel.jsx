@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight, FiExternalLink,
+  FiBriefcase, FiFilm,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
 import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl, extractDriveFileId } from "../../constants/videoUrls.js";
@@ -99,7 +100,7 @@ function TestimonialCard({ item, isActive, wrapRef, onOpen }) {
 
         <div className="vtc-card__top">
           {item.category === "pfe" && (
-            <span className="vtc-card__badge">🎓 {t("testimonials.badgeCompany")}</span>
+            <span className="vtc-card__badge"><FiBriefcase aria-hidden="true" /> {t("testimonials.badgeCompany")}</span>
           )}
         </div>
 
@@ -284,7 +285,7 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
 
           {item.category === "pfe" && (
             <div className="vtc-modal__info">
-              <span className="vtc-modal__badge">🎓 {t("testimonials.badgeCompany")}</span>
+              <span className="vtc-modal__badge"><FiBriefcase aria-hidden="true" /> {t("testimonials.badgeCompany")}</span>
             </div>
           )}
         </div>
@@ -475,7 +476,7 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
     <section id={sectionId} className="vtc-section" ref={sectionRef}>
       <div className="vtc-section__inner">
         {!hideHeader && <div className="vtc-header">
-          <span className="vtc-header__badge">🎬 {t("testimonials.eyebrow")}</span>
+          <span className="vtc-header__badge"><FiFilm aria-hidden="true" /> {t("testimonials.eyebrow")}</span>
           <h2 className="vtc-header__title">{title}</h2>
           {subtitle && <p className="vtc-header__sub">{subtitle}</p>}
         </div>}
