@@ -147,6 +147,7 @@
       "checking": "Vérification en cours…",
       "openForm": "Donner mon avis sur l'événement",
       "submittedNotice": "Votre avis a été envoyé à l'équipe et sera affiché après validation.",
+      "loginRequiredMessage": "Connectez-vous à votre compte étudiant pour donner votre avis sur cet événement.",
       "title": "Votre avis nous aide à nous améliorer",
       "firstName": "Prénom",
       "lastName": "Nom",

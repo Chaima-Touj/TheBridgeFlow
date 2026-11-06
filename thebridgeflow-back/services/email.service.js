@@ -595,14 +595,29 @@ const eventReminderTemplate = (data) => ({
 
 const eventFeedbackRequestTemplate = ({ recipientName, event, feedbackUrl }) => ({
   subject: `Votre avis sur l'événement — ${event.eventTitle}`,
-  html: eventEmailBody({
-    heading: "Merci d'avoir participé",
-    intro: "votre retour nous aidera à améliorer les prochains événements.",
-    recipientName,
-    event,
-    actionLabel: "Partager mon avis",
-    actionUrl: feedbackUrl,
-  }),
+  html: (() => {
+    const details = eventEmailData(event);
+    return layout("Votre avis compte", `
+      <div style="text-align:center;margin:0 0 28px;">
+        <span style="display:inline-block;padding:7px 12px;border-radius:999px;background:#EFF6FF;color:#2563EB;font-size:12px;font-weight:700;letter-spacing:.04em;">RETOUR D'EXPÉRIENCE</span>
+        <h1 style="margin:18px 0 10px;color:#0F172A;font-size:26px;line-height:1.25;">Votre avis compte</h1>
+        <p style="margin:0;color:#475569;font-size:15px;line-height:1.7;">Bonjour <strong>${escapeHtml(recipientName || "Étudiant")}</strong>, merci d'avoir participé. Partagez votre expérience en quelques instants.</p>
+      </div>
+      <div style="margin:0 0 24px;padding:22px;border:1px solid #E2E8F0;border-radius:16px;background:#F8FAFC;">
+        <p style="margin:0 0 8px;color:#2563EB;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Événement</p>
+        <h2 style="margin:0 0 16px;color:#0F172A;font-size:20px;line-height:1.35;">${details.eventTitle}</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow("Date", details.dateLabel)}
+          ${infoRow("Heure", details.timeLabel)}
+          ${details.modeLabel ? infoRow("Format", details.modeLabel) : ""}
+          ${details.location ? infoRow("Lieu", details.location) : ""}
+        </table>
+      </div>
+      <p style="margin:0 0 22px;color:#64748B;font-size:14px;line-height:1.7;text-align:center;">Votre retour aidera notre équipe à améliorer les prochains événements.</p>
+      <div style="text-align:center;">${button("Donner mon avis", feedbackUrl)}</div>
+      <p style="margin:22px 0 0;color:#94A3B8;font-size:12px;line-height:1.6;text-align:center;">Le lien ouvrira la page de l'événement et le formulaire de feedback. Connectez-vous à votre compte étudiant si nécessaire.</p>
+    `);
+  })(),
 });
 
 const eventRecordingAvailableTemplate = ({ recipientName, eventTitle, recordingUrl }) => {

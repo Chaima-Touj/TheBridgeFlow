@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
@@ -11,7 +11,6 @@ import {
   ExternalLink,
   MapPin,
   MessageSquareText,
-  Ribbon,
   Star,
   Users,
   Video,
@@ -41,6 +40,36 @@ function getMapsUrl(location) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
 }
 
+function getMapSearchLocation(location, description) {
+  const normalizedLocation = (location || "").replace(/\/+$/, "");
+  const knownMapLinks = {
+    "https://maps.app.goo.gl/R4JBunHzfqFemjNX9": "24 Rue Mendes France, Ariana 2036, Tunisia",
+    "https://maps.app.goo.gl/fapcW6wn8dZgZaFX9": "Lac 1, Tunis, Tunisia",
+    "https://maps.app.goo.gl/YJY6vKBw1RJJ9XEo7": "Sahloul, Sousse, Tunisia",
+  };
+  if (knownMapLinks[normalizedLocation]) return knownMapLinks[normalizedLocation];
+
+  if (/^https?:\/\//i.test(location || "")) {
+    try {
+      const url = new URL(location);
+      const query = url.searchParams.get("q") || url.searchParams.get("query") || url.searchParams.get("destination");
+      if (query) return query;
+      const place = url.pathname.match(/\/maps\/place\/([^/]+)/i)?.[1];
+      if (place) return decodeURIComponent(place.replace(/\+/g, " "));
+    } catch {
+      return "Tunisia";
+    }
+
+    const descriptionLocation = description?.match(/(?:location|lieu)\s*:\s*([^.\n\r]+)/i)?.[1]
+      ?.replace(/https?:\/\/\S+/gi, "")
+      .split(/\b(?:and online|et en ligne)\b/i)[0]
+      .trim();
+    return descriptionLocation || "Tunisia";
+  }
+
+  return location || "Tunisia";
+}
+
 function splitName(name) {
   const parts = (name || "").trim().split(/\s+/);
   return [parts[0] || "", parts.slice(1).join(" ")];
@@ -59,14 +88,16 @@ export default function EventDetailPageRoute() {
 function EventDetailPage() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
+  const location = useLocation();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [participationModal, setParticipationModal] = useState("");
+  const [feedbackLoginDismissed, setFeedbackLoginDismissed] = useState(false);
   const [registrationDetails, setRegistrationDetails] = useState(null);
   const [sessionUrl, setSessionUrl] = useState("");
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -105,6 +136,10 @@ function EventDetailPage() {
   const feedbackStatusLoading = shouldCheckFeedback && feedbackStatusResult?.eventId !== id;
   const feedbackStatusError = feedbackStatusResult?.eventId === id ? feedbackStatusResult.error : "";
   const hasSubmittedFeedback = feedbackStatusResult?.eventId === id && feedbackStatusResult.submitted;
+  const feedbackRequested = new URLSearchParams(location.search).get("feedback") === "1";
+  const activeParticipationModal = participationModal || (
+    feedbackRequested && !feedbackLoginDismissed && !authLoading && !user ? "feedbackLogin" : ""
+  );
 
   useDocumentMeta({ title: event ? `${event.title} — TheBridgeFlow` : t("events.title"), description: event?.description || t("events.description") });
 
@@ -294,29 +329,27 @@ function EventDetailPage() {
           : error && !event ? <p className="ev-state ev-error">{error}</p>
             : event && (
               <article className="ev-detail">
-                {event.image && (
-                  <div className="ev-detail__media">
-                    <img className="ev-detail__image" src={resolveDriveThumbnailProxyUrl(event.image) || resolveDriveUrl(event.image, "image")} alt={event.title} />
-                  </div>
-                )}
                 <div className="ev-detail__content">
                   <div className="ev-detail__header-row">
                     <Link to="/events" className="ev-back">{t("events.back")}</Link>
                     <span className="ev-category">{event.category}</span>
                   </div>
-                  <div className="ev-detail__hero-banner">
+                  <div className={`ev-detail__hero-banner${event.image ? " has-image" : ""}`}>
                     <div className="ev-detail__hero-copy">
                       <span className="ev-detail__eyebrow">{t("events.registrationEyebrow")}</span>
                       <h1>{event.title}</h1>
-                    </div>
-                    {participationConfirmed && !eventEnded && (
-                      <div className="ev-detail__hero-cta">
+                      {participationConfirmed && !eventEnded && (
                         <div className="ev-detail__reminder">
                           <BellRing size={18} aria-hidden="true" />
                           <span>{t("events.remindersScheduled")}</span>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                    {event.image
+                      ? <div className="ev-detail__media">
+                          <img className="ev-detail__image" src={resolveDriveThumbnailProxyUrl(event.image) || resolveDriveUrl(event.image, "image")} alt={event.title} />
+                        </div>
+                      : null}
                   </div>
                   <div className="ev-detail__facts">
                     <div className="ev-detail__fact">
@@ -373,29 +406,6 @@ function EventDetailPage() {
                     <h2>{t("events.descriptionLabel")}</h2>
                     <p className="ev-detail__description">{event.description}</p>
                   </section>
-                  <div className="ev-detail__feature-grid">
-                    <article className="ev-detail__feature-card">
-                      <div className="ev-detail__feature-icon"><CalendarDays size={18} aria-hidden="true" /></div>
-                      <div>
-                        <h3>{t("events.dateLabel")}</h3>
-                        <p>{formatDate(event.startsAt, i18n.language, event.timezone)}</p>
-                      </div>
-                    </article>
-                    <article className="ev-detail__feature-card">
-                      <div className="ev-detail__feature-icon"><MapPin size={18} aria-hidden="true" /></div>
-                      <div>
-                        <h3>{t("events.locationLabel")}</h3>
-                        <p>{event.location || t(`events.modes.${event.mode}`)}</p>
-                      </div>
-                    </article>
-                    <article className="ev-detail__feature-card">
-                      <div className="ev-detail__feature-icon"><Ribbon size={18} aria-hidden="true" /></div>
-                      <div>
-                        <h3>{t("events.modeLabel")}</h3>
-                        <p>{t(`events.modes.${event.mode}`)}</p>
-                      </div>
-                    </article>
-                  </div>
                   {event.location && (
                     <div className="ev-detail__map-card">
                       <div className="ev-detail__map-header">
@@ -409,7 +419,7 @@ function EventDetailPage() {
                       <iframe
                         className="ev-detail__map"
                         title={t("events.mapTitle")}
-                        src={`https://maps.google.com/maps?q=${encodeURIComponent(event.location)}&output=embed`}
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(getMapSearchLocation(event.location, event.description))}&z=15&output=embed`}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                       />
@@ -519,16 +529,29 @@ function EventDetailPage() {
               </article>
             )}
       </main>
-      {(participationModal === "login" || participationModal === "sessionLogin") && (
+      {(activeParticipationModal === "login" || activeParticipationModal === "sessionLogin" || activeParticipationModal === "feedbackLogin") && (
         <Modal
           title={t("events.loginRequiredTitle")}
-          onClose={() => setParticipationModal("")}
+          maxWidth={activeParticipationModal === "feedbackLogin" ? 400 : 520}
+          onClose={() => {
+            setParticipationModal("");
+            if (activeParticipationModal === "feedbackLogin") setFeedbackLoginDismissed(true);
+          }}
           footer={<>
-            <button type="button" className="btn btn-ghost" onClick={() => setParticipationModal("")}>{t("common.cancel")}</button>
-            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: `/events/${id}` } })}>{t("events.signIn")}</button>
+            <button type="button" className="btn btn-ghost" onClick={() => {
+              setParticipationModal("");
+              if (activeParticipationModal === "feedbackLogin") setFeedbackLoginDismissed(true);
+            }}>{t("common.cancel")}</button>
+            <button type="button" className="btn btn-primary" onClick={() => navigate("/login", { state: { from: `${location.pathname}${location.search}` } })}>{t("events.signIn")}</button>
           </>}
         >
-          <p>{t(participationModal === "sessionLogin" ? "events.sessionLoginMessage" : "events.loginRequiredMessage")}</p>
+          <p>{t(
+            activeParticipationModal === "sessionLogin"
+              ? "events.sessionLoginMessage"
+              : activeParticipationModal === "feedbackLogin"
+                ? "events.feedback.loginRequiredMessage"
+                : "events.loginRequiredMessage"
+          )}</p>
         </Modal>
       )}
       {participationModal === "success" && (

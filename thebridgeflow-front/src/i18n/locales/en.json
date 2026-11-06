@@ -147,6 +147,7 @@
       "checking": "Checking…",
       "openForm": "Review this event",
       "submittedNotice": "Your review was sent to the team and will appear after approval.",
+      "loginRequiredMessage": "Sign in to your student account to share your feedback about this event.",
       "title": "Your feedback helps us improve",
       "firstName": "First name",
       "lastName": "Last name",
