@@ -149,6 +149,7 @@
       "submittedNotice": "Votre avis a été envoyé à l'équipe et sera affiché après validation.",
       "loginRequiredMessage": "Connectez-vous à votre compte étudiant pour donner votre avis sur cet événement.",
       "title": "Votre avis nous aide à nous améliorer",
+      "formIntro": "Racontez-nous votre expérience. Votre avis aide notre équipe à faire encore mieux.",
       "firstName": "Prénom",
       "lastName": "Nom",
       "rating": "Votre note",
@@ -157,6 +158,8 @@
       "commentPlaceholder": "Partagez votre expérience de l'événement.",
       "photo": "Ajouter une photo",
       "optional": "(facultatif)",
+      "uploadHint": "JPG, PNG ou WEBP · facultatif",
+      "choosePhoto": "Choisir une photo",
       "photoPreview": "Aperçu de la photo choisie",
       "imageLoading": "Préparation de la photo…",
       "imageError": "Impossible de préparer cette image.",
@@ -1302,6 +1305,7 @@
     "left2": "commence ici",
     "leftSub": "Créez un compte pour rejoindre notre communauté",
     "title": "Bonjour ! Ravi de vous revoir",
+    "backHome": "Accueil",
     "emailPh": "Entrez votre adresse email",
     "passwordPh": "••••••••••••••",
     "remember": "Se souvenir de moi",
@@ -1605,7 +1609,10 @@
       "rating": "Note",
       "comment": "Commentaire",
       "receivedAt": "Reçu le",
-      "verified": "Participant inscrit"
+      "verified": "Participant inscrit",
+      "readReview": "Lire l'avis",
+      "reviewDetails": "Détail de l'avis",
+      "reviewImage": "Photo ajoutée à l'avis"
     }
   },
   "adminUsers": {

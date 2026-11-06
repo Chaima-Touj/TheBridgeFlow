@@ -1,6 +1,7 @@
 /* +64px : compense la navbar fixe (SiteNavbar) — sinon le titre du hero passe dessous sur mobile. */
 .public-info-page { padding-top: 64px; }
 .public-info-hero { padding: clamp(3rem, 8vw, 6rem) 1.25rem 2.5rem; text-align: center; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--bg)), var(--bg)); }
+.public-info-hero--testimonials { padding-bottom: 1rem; }
 .public-info-hero > span { color: var(--primary); font-weight: 750; letter-spacing: .04em; }
 .public-info-hero h1 { margin: .7rem auto 0; max-width: 900px; color: var(--text); font-size: clamp(2rem, 5vw, 3.5rem); }
 .public-info-hero--contact { position: relative; overflow: hidden; padding: clamp(4rem, 9vw, 7rem) 1.25rem 6rem; color: #fff; background: radial-gradient(ellipse at 75% 20%, rgb(96 165 250 / 42%), transparent 42%), linear-gradient(125deg, #071b3a, #123f80 58%, #2563eb); }
@@ -8,8 +9,12 @@
 .public-info-hero--contact h1 { position: relative; z-index: 1; color: #fff; }
 .public-info-hero--contact p { position: relative; z-index: 1; max-width: 650px; margin: 1rem auto 0; color: #dbeafe; font-size: 1.05rem; line-height: 1.7; }
 .public-info-content { width: min(100% - 2rem, 1180px); margin: 2.5rem auto 5rem; }
+.public-info-content--testimonials { margin-top: 0; }
 .pi-testimonials { display: grid; min-width: 0; gap: 2rem; }
 .pi-testimonials > * { min-width: 0; }
+.public-info-content--testimonials .pi-testimonials { gap: .75rem; }
+.public-info-content--testimonials .vtc-section,
+.public-info-content--testimonials .stc-section { padding-block: .75rem; }
 .pi-contact { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); overflow: hidden; margin-top: -5.5rem; border: 1px solid var(--border); border-radius: 1.35rem; background: var(--bg-card); box-shadow: 0 24px 70px rgb(15 23 42 / 14%); }
 .pi-contact__details { padding: clamp(1.5rem, 4vw, 2.75rem); color: #fff; background: linear-gradient(155deg, #0b2447, #123b75 65%, #1757a6); }
 .pi-contact__eyebrow, .pi-contact__form-heading > span { color: #93c5fd; font-size: .78rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }

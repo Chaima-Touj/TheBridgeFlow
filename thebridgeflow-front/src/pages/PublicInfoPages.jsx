@@ -46,12 +46,12 @@ export default function PublicInfoPage({ type }) {
   return <div className="public-info-page">
     <SiteNavbar />
     {type === "about" ? <AboutSection id="about-page" /> : <>
-      <header className={`public-info-hero${type === "contact" ? " public-info-hero--contact" : ""}`}>
+      <header className={`public-info-hero${type === "contact" ? " public-info-hero--contact" : ""}${type === "testimonials" ? " public-info-hero--testimonials" : ""}`}>
         <span>{type === "testimonials" ? title : t("landing.contactBadge")}</span>
         <h1>{title}</h1>
         {type === "contact" && <p>{t("landing.contactSub")}</p>}
       </header>
-      <main className="public-info-content">
+      <main className={`public-info-content${type === "testimonials" ? " public-info-content--testimonials" : ""}`}>
         {type === "testimonials" && <section className="pi-testimonials">
           {[["formation", t("landing.testiFormationTitle"), t("landing.testiFormationSub")], ["summer-camp", t("landing.testiSummerCampTitle"), t("landing.testiSummerCampSub")], ["pfe", t("landing.testiPfeTitle"), t("landing.testiPfeSub")]].map(([category, sectionTitle, subtitle]) => <VideoTestimonialCarousel key={category} sectionId={`public-testimonials-${category}`} items={videos.filter((item) => item.category === category).map((item) => ({ id: item._id, videoUrl: item.url, posterUrl: item.thumbnail, category }))} title={sectionTitle} subtitle={subtitle} ctaLabel={t("testimonials.ctaDefault")} ctaHref="/formations" />)}
           <TestimonialsScreenshotCarousel title={t("landing.screenshotTestiTitle")} subtitle={t("landing.screenshotTestiSub")} items={screenshots} />

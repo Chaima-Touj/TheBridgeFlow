@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiArrowLeft, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
@@ -84,6 +84,10 @@ export default function Login() {
 
       {/* ── Panneau droit ───────────────────────────────────────────────── */}
       <div className="auth-right">
+        <Link to="/" className="auth-home-link">
+          <FiArrowLeft size={17} aria-hidden="true" />
+          <span>{t("login.backHome")}</span>
+        </Link>
         <div className="auth-form-wrap">
 
           <div style={{ display:"flex", justifyContent:"flex-end" }}>

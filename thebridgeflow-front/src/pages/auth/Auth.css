@@ -66,12 +66,14 @@
 
 /* ─── Panneau droit formulaire ────────────────────────────────────────────── */
 .auth-right {
+  position:        relative;
   display:         flex;
   align-items:     center;
   justify-content: center;
   background:      #F8FAFF;
   padding:         2rem 2.5rem;
 }
+.auth-home-link { display: none; }
 
 [data-theme="dark"] .auth-right { background: var(--bg); }
 
@@ -583,11 +585,34 @@
 @media (max-width: 900px) {
   .auth-page { grid-template-columns: 1fr; }
   .auth-left { display: none; }
-  .auth-right { padding: 2rem 1.5rem; }
+  .auth-right { min-height: 100vh; padding: 4.5rem 1.5rem 2rem; }
+  .auth-home-link {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    z-index: 3;
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+    color: var(--text-secondary);
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, .07);
+    transition: color .18s ease, border-color .18s ease, transform .18s ease;
+  }
+  .auth-home-link:hover { transform: translateX(-2px); border-color: var(--primary); color: var(--primary); }
+  .auth-home-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 36%, transparent); outline-offset: 3px; }
 }
 
 @media (max-width: 480px) {
   .auth-form-wrap { max-width: 100%; }
+  .auth-right { padding-inline: 1.25rem; }
   .auth-left__title { font-size: 2.25rem; }
   .reg-grid2 { grid-template-columns: 1fr; }
   .reg-skill-row { grid-template-columns: 1fr; }

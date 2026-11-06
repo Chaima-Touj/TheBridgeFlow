@@ -146,7 +146,10 @@
 .afd-event-feedback__card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .afd-event-feedback__card.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent); }
 .afd-event-feedback__checkbox { position: absolute; top: 13px; right: 13px; display: grid; place-items: center; }
-.afd-event-feedback__person { display: flex; align-items: center; gap: .65rem; padding-right: 1.4rem; }
+.afd-event-feedback__read { position: absolute; top: 7px; right: 43px; display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--border); border-radius: 9px; background: var(--bg-card); color: var(--primary); cursor: pointer; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.afd-event-feedback__read:hover { transform: translateY(-1px); border-color: var(--primary); background: var(--primary-light); }
+.afd-event-feedback__read:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 36%, transparent); outline-offset: 2px; }
+.afd-event-feedback__person { display: flex; align-items: center; gap: .65rem; padding-right: 4.7rem; }
 .afd-event-feedback__person > img,
 .afd-event-feedback__person > span { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; overflow: hidden; border-radius: 50%; background: var(--primary-light); color: var(--primary); object-fit: cover; font-weight: 750; }
 .afd-event-feedback__person > div { display: grid; min-width: 0; gap: .1rem; }
@@ -168,6 +171,22 @@
 .afd-event-feedback__publish:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
 .afd-event-feedback__publish.is-published { border-color: #a7f3d0; background: #ecfdf5; color: #047857; }
 .afd-event-feedback__publish:disabled { opacity: .6; cursor: wait; }
+.afd-event-feedback__detail { display: grid; gap: 1rem; }
+.afd-event-feedback__detail-person { display: flex; align-items: center; gap: .75rem; }
+.afd-event-feedback__detail-person > img,
+.afd-event-feedback__detail-person > span { display: grid; width: 50px; height: 50px; flex: 0 0 50px; place-items: center; overflow: hidden; border-radius: 50%; background: var(--primary-light); color: var(--primary); object-fit: cover; font-size: 1.1rem; font-weight: 750; }
+.afd-event-feedback__detail-person > div { display: grid; gap: .2rem; }
+.afd-event-feedback__detail-person strong { color: var(--text); font-size: .95rem; }
+.afd-event-feedback__detail-person small { color: var(--text-muted); font-size: .78rem; }
+.afd-event-feedback__detail-meta { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem .9rem; border: 1px solid var(--border); border-radius: 11px; background: var(--bg); }
+.afd-event-feedback__detail-meta > span { display: inline-flex; min-width: 0; align-items: center; gap: .45rem; color: var(--text-secondary); font-size: .82rem; font-weight: 650; }
+.afd-event-feedback__detail-meta svg { flex: 0 0 auto; color: var(--primary); }
+.afd-event-feedback__detail-meta small { flex: 0 0 auto; color: var(--text-muted); font-size: .72rem; }
+.afd-event-feedback__detail .afd-event-feedback__rating { margin-top: 0; }
+.afd-event-feedback__detail-comment { margin: 0; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); color: var(--text); font-size: .92rem; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
+.afd-event-feedback__detail-image { display: block; width: 100%; max-height: 360px; border: 1px solid var(--border); border-radius: 12px; object-fit: contain; background: var(--bg); }
+.afd-event-feedback__detail-status { display: inline-flex; align-items: center; gap: .4rem; color: var(--text-muted); font-size: .78rem; font-weight: 650; }
+.afd-event-feedback__detail-status.is-published { color: #059669; }
 
 @media (max-width: 700px) {
   .afd-event-feedback { padding: 0 12px 16px; }
@@ -177,4 +196,5 @@
   .afd-event-feedback__selected-header { align-items: flex-start; flex-direction: column; gap: .5rem; }
   .afd-event-feedback__event-card { gap: .55rem; padding: 12px; }
   .afd-event-feedback__event-count { font-size: .62rem; }
+  .afd-event-feedback__detail-meta { align-items: flex-start; flex-direction: column; }
 }

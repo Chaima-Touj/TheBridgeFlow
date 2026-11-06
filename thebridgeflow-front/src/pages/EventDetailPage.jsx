@@ -11,7 +11,9 @@ import {
   ExternalLink,
   MapPin,
   MessageSquareText,
+  Sparkles,
   Star,
+  Upload,
   Users,
   Video,
 } from "lucide-react";
@@ -108,6 +110,7 @@ function EventDetailPage() {
   const [feedbackError, setFeedbackError] = useState("");
   const [feedbackFileError, setFeedbackFileError] = useState("");
   const [feedbackImageLoading, setFeedbackImageLoading] = useState(false);
+  const [feedbackFileName, setFeedbackFileName] = useState("");
   const [feedbackStatusResult, setFeedbackStatusResult] = useState(null);
   const [publishedFeedbacks, setPublishedFeedbacks] = useState([]);
   const [publishedFeedbacksLoading, setPublishedFeedbacksLoading] = useState(true);
@@ -294,6 +297,7 @@ function EventDetailPage() {
     try {
       const image = await compressImageToBase64(file, { maxWidth: 800, quality: 0.8 });
       setFeedbackForm((current) => ({ ...current, image }));
+      setFeedbackFileName(file.name);
     } catch (uploadError) {
       setFeedbackFileError(uploadError.message || t("events.feedback.imageError"));
     } finally {
@@ -516,8 +520,9 @@ function EventDetailPage() {
                       onClick={() => { setFeedbackError(""); setFeedbackOpen(true); }}
                       disabled={feedbackStatusLoading}
                     >
-                      <MessageSquareText size={18} aria-hidden="true" />
-                      {feedbackStatusLoading ? t("events.feedback.checking") : t("events.feedback.openForm")}
+                      <span className="ev-feedback-trigger__icon"><MessageSquareText size={18} aria-hidden="true" /></span>
+                      <span className="ev-feedback-trigger__label">{feedbackStatusLoading ? t("events.feedback.checking") : t("events.feedback.openForm")}</span>
+                      <span className="ev-feedback-trigger__arrow"><ArrowRight size={17} aria-hidden="true" /></span>
                     </button>
                   )}
                   {eventEnded && hasSubmittedFeedback && (
@@ -579,27 +584,50 @@ function EventDetailPage() {
             if (!feedbackSubmitting) {
               setFeedbackOpen(false);
               setFeedbackSent(false);
+              setFeedbackFileName("");
+              setFeedbackForm(createFeedbackForm(user?.name));
+              setFeedbackError("");
+              setFeedbackFileError("");
             }
           }}
-          maxWidth={640}
-          className="ev-feedback-modal"
+          maxWidth={feedbackSent ? 480 : 640}
+          className={`ev-feedback-modal${feedbackSent ? " ev-feedback-modal--success" : ""}`}
+          overlayClassName={feedbackSent ? "ev-feedback-success-overlay" : ""}
         >
           {feedbackSent ? (
             <div className="ev-feedback-success" role="status">
-              <div className="ev-feedback-success__stars" aria-hidden="true">
-                <Star className="ev-feedback-success__star ev-feedback-success__star--one" size={22} fill="currentColor" />
-                <Star className="ev-feedback-success__star ev-feedback-success__star--two" size={30} fill="currentColor" />
-                <Star className="ev-feedback-success__star ev-feedback-success__star--three" size={19} fill="currentColor" />
-                <span><CheckCircle2 size={34} /></span>
+              <div className="ev-feedback-success__celebration" aria-hidden="true">
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__confetti" />
+                <span className="ev-feedback-success__sparkle ev-feedback-success__sparkle--one"><Star size={20} fill="currentColor" /></span>
+                <span className="ev-feedback-success__sparkle ev-feedback-success__sparkle--two"><Sparkles size={24} /></span>
+                <span className="ev-feedback-success__check"><CheckCircle2 size={38} /></span>
               </div>
               <h3>{t("events.feedback.thanksTitle")}</h3>
               <p>{t("events.feedback.thanksMessage")}</p>
-              <button type="button" className="btn btn-primary" onClick={() => { setFeedbackOpen(false); setFeedbackSent(false); }}>
+              <button type="button" className="ev-feedback-success__close" onClick={() => {
+                setFeedbackOpen(false);
+                setFeedbackSent(false);
+                setFeedbackFileName("");
+                setFeedbackForm(createFeedbackForm(user?.name));
+                setFeedbackError("");
+                setFeedbackFileError("");
+              }}>
                 {t("events.close")}
               </button>
             </div>
           ) : (
             <form className="ev-feedback-form" onSubmit={handleFeedbackSubmit}>
+              <div className="ev-feedback-form__intro">
+                <span className="ev-feedback-form__intro-icon"><MessageSquareText size={19} aria-hidden="true" /></span>
+                <p>{t("events.feedback.formIntro")}</p>
+              </div>
               <div className="ev-feedback-form__grid">
                 <label>
                   {t("events.feedback.firstName")}
@@ -652,7 +680,14 @@ function EventDetailPage() {
                 />
               </label>
               <label className="ev-feedback-upload">
-                <span><Camera size={16} aria-hidden="true" /> {t("events.feedback.photo")} <small>{t("events.feedback.optional")}</small></span>
+                <span className="ev-feedback-upload__copy">
+                  <span className="ev-feedback-upload__icon"><Camera size={18} aria-hidden="true" /></span>
+                  <span>
+                    <strong>{t("events.feedback.photo")}</strong>
+                    <small>{feedbackFileName || t("events.feedback.uploadHint")}</small>
+                  </span>
+                </span>
+                <span className="ev-feedback-upload__action"><Upload size={16} aria-hidden="true" />{t("events.feedback.choosePhoto")}</span>
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/webp"
@@ -663,14 +698,15 @@ function EventDetailPage() {
               {feedbackForm.image && <img className="ev-feedback-preview" src={feedbackForm.image} alt={t("events.feedback.photoPreview")} />}
               {feedbackImageLoading && <p className="ev-feedback-hint" role="status">{t("events.feedback.imageLoading")}</p>}
               {feedbackFileError && <p className="ev-form-error" role="alert">{feedbackFileError}</p>}
-              {feedbackError && <p className="ev-form-error" role="alert">{feedbackError}</p>}
-              <p className="ev-feedback-hint">{t("events.feedback.reviewVisibilityNotice")}</p>
+              {feedbackError && <p className="ev-form-error ev-feedback-form__error" role="alert">{feedbackError}</p>}
+              <p className="ev-feedback-hint ev-feedback-form__notice"><CheckCircle2 size={16} aria-hidden="true" />{t("events.feedback.reviewVisibilityNotice")}</p>
               <div className="ev-feedback-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setFeedbackOpen(false)} disabled={feedbackSubmitting}>
                   {t("common.cancel")}
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={feedbackSubmitting || feedbackImageLoading}>
+                <button type="submit" className="ev-feedback-submit" disabled={feedbackSubmitting || feedbackImageLoading}>
                   {feedbackSubmitting ? t("events.working") : t("events.feedback.submit")}
+                  {!feedbackSubmitting && <ArrowRight size={17} aria-hidden="true" />}
                 </button>
               </div>
             </form>

@@ -56,6 +56,7 @@ function EventFeedbacksPanel() {
   const [actionError, setActionError] = useState("");
   const [publishingId, setPublishingId] = useState("");
   const [publishingSelection, setPublishingSelection] = useState(false);
+  const [activeFeedback, setActiveFeedback] = useState(null);
 
   const loadFeedbacks = useCallback(async () => {
     setLoading(true);
@@ -278,6 +279,15 @@ function EventFeedbacksPanel() {
                     aria-label={`${t("adminFeedbacks.eventFeedbacks.selectAll")} ${feedback.firstName} ${feedback.lastName}`}
                   />
                 </label>
+                <button
+                  type="button"
+                  className="afd-event-feedback__read"
+                  onClick={() => setActiveFeedback(feedback)}
+                  aria-label={`${t("adminFeedbacks.eventFeedbacks.readReview")} — ${feedback.firstName} ${feedback.lastName}`}
+                  title={t("adminFeedbacks.eventFeedbacks.readReview")}
+                >
+                  <FiEye size={16} aria-hidden="true" />
+                </button>
                 <div className="afd-event-feedback__person">
                   {feedback.image
                     ? <img src={feedback.image} alt="" />
@@ -320,6 +330,43 @@ function EventFeedbacksPanel() {
             ))}
           </div>
         </>
+      )}
+      {activeFeedback && (
+        <Modal
+          title={t("adminFeedbacks.eventFeedbacks.reviewDetails")}
+          onClose={() => setActiveFeedback(null)}
+          maxWidth={600}
+          className="afd-event-feedback__detail-modal"
+          footer={<button type="button" className="btn btn-primary" onClick={() => setActiveFeedback(null)}>{t("common.close")}</button>}
+        >
+          <div className="afd-event-feedback__detail">
+            <div className="afd-event-feedback__detail-person">
+              {activeFeedback.image
+                ? <img src={activeFeedback.image} alt="" />
+                : <span aria-hidden="true">{activeFeedback.firstName?.charAt(0) || ""}</span>}
+              <div>
+                <strong>{activeFeedback.firstName} {activeFeedback.lastName}</strong>
+                <small>{activeFeedback.student?.name || t("adminFeedbacks.eventFeedbacks.verified")}</small>
+              </div>
+            </div>
+            <div className="afd-event-feedback__detail-meta">
+              <span><FiCalendar size={15} />{activeFeedback.event?.title || selectedEvent?.title}</span>
+              <small>{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(activeFeedback.createdAt))}</small>
+            </div>
+            <div className="afd-event-feedback__rating" aria-label={t("events.feedback.ratingLabel", { rating: activeFeedback.rating })}>
+              {Array.from({ length: 5 }, (_, index) => (
+                <FiStar key={index} className={index < activeFeedback.rating ? "is-filled" : ""} aria-hidden="true" />
+              ))}
+              <span>{activeFeedback.rating}/5</span>
+            </div>
+            <p className="afd-event-feedback__detail-comment">{activeFeedback.comment}</p>
+            {activeFeedback.image && <img className="afd-event-feedback__detail-image" src={activeFeedback.image} alt={t("adminFeedbacks.eventFeedbacks.reviewImage")} />}
+            <span className={`afd-event-feedback__detail-status${activeFeedback.isPublished ? " is-published" : ""}`}>
+              <FiCheckCircle size={15} />
+              {t(activeFeedback.isPublished ? "adminFeedbacks.eventFeedbacks.published" : "adminFeedbacks.eventFeedbacks.unpublished")}
+            </span>
+          </div>
+        </Modal>
       )}
     </section>
   );

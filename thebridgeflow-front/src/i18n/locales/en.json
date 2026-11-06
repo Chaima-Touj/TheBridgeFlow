@@ -149,6 +149,7 @@
       "submittedNotice": "Your review was sent to the team and will appear after approval.",
       "loginRequiredMessage": "Sign in to your student account to share your feedback about this event.",
       "title": "Your feedback helps us improve",
+      "formIntro": "Tell us about your experience. Your feedback helps our team do even better.",
       "firstName": "First name",
       "lastName": "Last name",
       "rating": "Your rating",
@@ -157,6 +158,8 @@
       "commentPlaceholder": "Share your experience of the event.",
       "photo": "Add a photo",
       "optional": "(optional)",
+      "uploadHint": "JPG, PNG or WEBP · optional",
+      "choosePhoto": "Choose a photo",
       "photoPreview": "Preview of your selected photo",
       "imageLoading": "Preparing photo…",
       "imageError": "Unable to prepare this image.",
@@ -1302,6 +1305,7 @@
     "left2": "starts here",
     "leftSub": "Create an account to join our community",
     "title": "Hello! Welcome back",
+    "backHome": "Home",
     "emailPh": "Enter your email address",
     "passwordPh": "••••••••••••••",
     "remember": "Remember me",
@@ -1605,7 +1609,10 @@
       "rating": "Rating",
       "comment": "Comment",
       "receivedAt": "Received",
-      "verified": "Registered participant"
+      "verified": "Registered participant",
+      "readReview": "Read review",
+      "reviewDetails": "Review details",
+      "reviewImage": "Photo attached to the review"
     }
   },
   "adminUsers": {
