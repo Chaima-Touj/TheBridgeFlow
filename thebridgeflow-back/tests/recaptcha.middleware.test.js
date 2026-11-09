@@ -45,7 +45,7 @@ test("reCAPTCHA middleware allows safe requests and tracking events", async () =
   }
 });
 
-test("reCAPTCHA middleware fails closed in production when no secret is configured", async () => {
+test("reCAPTCHA middleware is disabled, even in production, when no secret is configured", async () => {
   const originalSecret = process.env.RECAPTCHA_SECRET_KEY;
   const originalAllowedHostnames = process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
   const originalEnvironment = process.env.NODE_ENV;
@@ -55,9 +55,9 @@ test("reCAPTCHA middleware fails closed in production when no secret is configur
   const response = createResponse();
   let nextCalled = false;
   try {
-    await verifyRecaptcha(createRequest(), response, () => { nextCalled = true; });
-    assert.equal(response.statusCode, 503);
-    assert.equal(nextCalled, false);
+    await verifyRecaptcha(createRequest({ token: "" }), response, () => { nextCalled = true; });
+    assert.equal(response.statusCode, null);
+    assert.equal(nextCalled, true);
   } finally {
     if (originalSecret === undefined) delete process.env.RECAPTCHA_SECRET_KEY;
     else process.env.RECAPTCHA_SECRET_KEY = originalSecret;

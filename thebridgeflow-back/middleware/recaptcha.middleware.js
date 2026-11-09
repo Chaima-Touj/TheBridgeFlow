@@ -1,20 +1,19 @@
 const RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 const DEFAULT_MINIMUM_SCORE = 0.5;
-let developmentWarningShown = false;
+let missingSecretWarningShown = false;
 
 export async function verifyRecaptcha(req, res, next) {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path.startsWith("/track/")) {
     return next();
   }
 
+  // Désactivé temporairement : sans RECAPTCHA_SECRET_KEY, la vérification est ignorée,
+  // y compris en production. Ajouter la clé sur le serveur la réactive automatiquement.
   const secret = process.env.RECAPTCHA_SECRET_KEY;
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      return res.status(503).json({ message: "La vérification anti-robot n'est pas configurée sur le serveur." });
-    }
-    if (!developmentWarningShown) {
-      console.warn("[recaptcha] RECAPTCHA_SECRET_KEY is missing; anti-bot verification is bypassed outside production.");
-      developmentWarningShown = true;
+    if (!missingSecretWarningShown) {
+      console.warn("[recaptcha] RECAPTCHA_SECRET_KEY is missing; anti-bot verification is disabled.");
+      missingSecretWarningShown = true;
     }
     return next();
   }

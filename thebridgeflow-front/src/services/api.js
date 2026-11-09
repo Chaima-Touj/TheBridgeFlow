@@ -9,13 +9,17 @@ const api = axios.create({
 api.interceptors.request.use(async (config) => {
   const method = (config.method || "get").toLowerCase();
   if (!["get", "head", "options"].includes(method) && !/\/track\//.test(config.url || "")) {
+    // Jeton reCAPTCHA en best-effort : si Google est bloqué, lent ou non configuré,
+    // la requête part sans jeton et c'est le backend qui décide (vérification
+    // désactivée tant que RECAPTCHA_SECRET_KEY n'est pas définie sur le serveur).
     let captchaToken;
     try {
-      captchaToken = await getRecaptchaToken();
+      captchaToken = await Promise.race([
+        getRecaptchaToken(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Google reCAPTCHA timed out.")), 5000)),
+      ]);
     } catch (captchaError) {
-      const error = new Error(captchaError.message);
-      error.response = { status: 503, data: { message: captchaError.message } };
-      throw error;
+      console.warn("[recaptcha]", captchaError.message);
     }
     if (captchaToken) {
       config.headers = config.headers || {};
