@@ -652,7 +652,7 @@ export default function AdminUsers() {
           ) : (
             <>
               <div className="af-table-wrap">
-                <table className="af-table">
+                <table className="af-table au-users-table">
                   <thead>
                     <tr>
                       <th>

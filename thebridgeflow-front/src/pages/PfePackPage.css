@@ -100,6 +100,7 @@
 .pfe-form__add-technology { margin-top: 9px; }
 .pfe-form__all-offers { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--pfe-blue); font-size: .82rem; font-weight: 700; text-decoration: none; }
 .pfe-form__all-offers:hover { text-decoration: underline; }
+.pfe-form__offers-status { color: var(--text-muted); font-size: .8rem; font-weight: 500; }
 .pfe-form__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .pfe-form-success { display: grid; justify-items: center; padding: 30px 12px; text-align: center; }.pfe-form-success svg { color: #10a676; }.pfe-form-success h3 { margin: 14px 0 6px; color: var(--text); }.pfe-form-success p { max-width: 420px; margin: 0; color: var(--text-muted); line-height: 1.65; }
 [data-theme="dark"] .pfe-page { --pfe-ink: #f1f5f9; --pfe-muted: #a8b7cc; --pfe-blue: #8ba5ff; }

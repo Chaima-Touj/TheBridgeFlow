@@ -20,6 +20,15 @@ const STEPS = [
   { key: "stepThree", Icon: CheckCircle2 },
 ];
 
+const TECHNOLOGY_SUGGESTIONS = [
+  "AdonisJS", "Angular", "ASP.NET Core", "Astro", "Blazor", "Bootstrap", "CakePHP",
+  "CodeIgniter", "Django", "Express.js", "FastAPI", "Fastify", "Flask", "Flutter",
+  "Gatsby", "Gin", "Hapi", "Ionic", "Koa", "Laravel", "Lit", "Micronaut", "NestJS",
+  "Next.js", "Nuxt", "Phoenix", "Quarkus", "React", "React Native", "Remix",
+  "Ruby on Rails", "SolidJS", "Spring Boot", "Strapi", "Svelte", "Symfony",
+  "Tailwind CSS", "Vue.js", "Yii",
+];
+
 export default function PfePackPage() {
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -38,6 +47,7 @@ export default function PfePackPage() {
   const [formations, setFormations] = useState([]);
   const [formationsError, setFormationsError] = useState(false);
   const [stageOffers, setStageOffers] = useState([]);
+  const [stageOffersStatus, setStageOffersStatus] = useState("loading");
 
   useEffect(() => {
     let active = true;
@@ -54,12 +64,21 @@ export default function PfePackPage() {
 
   useEffect(() => {
     let active = true;
-    offersService.getAll({ type: "stage", limit: 6 })
+    offersService.getAll({ type: "stage", page: 1, limit: 50, sort: "-createdAt" })
       .then(({ data }) => {
         const offers = Array.isArray(data) ? data : data?.offers;
-        if (active) setStageOffers(Array.isArray(offers) ? offers.slice(0, 6) : []);
+        if (active) {
+          const internships = Array.isArray(offers)
+            ? offers.filter((offer) => !offer.type || offer.type.toLowerCase() === "stage")
+            : [];
+          setStageOffers(internships.slice(0, 10));
+          setStageOffersStatus("loaded");
+        }
       })
-      .catch((error) => console.error("Failed to load internship offers for the Pack PFE form", error));
+      .catch((error) => {
+        console.error("Failed to load internship offers for the Pack PFE form", error);
+        if (active) setStageOffersStatus("error");
+      });
     return () => { active = false; };
   }, []);
 
@@ -266,6 +285,7 @@ export default function PfePackPage() {
                         onChange={(event) => handleTechnologyChange(index, event.target.value)}
                         maxLength={60}
                         required={index === 0}
+                        list="pfe-technology-suggestions"
                         aria-label={t("pfePack.technologyNumber", { number: index + 1 })}
                         placeholder={t("pfePack.technologyPlaceholder")}
                       />
@@ -277,6 +297,9 @@ export default function PfePackPage() {
                     </div>
                   ))}
                 </div>
+                <datalist id="pfe-technology-suggestions">
+                  {TECHNOLOGY_SUGGESTIONS.map((technology) => <option key={technology} value={technology} />)}
+                </datalist>
                 <button type="button" className="pfe-form__add-technology" onClick={addTechnology} disabled={formData.technologies.length >= 20}>
                   <Plus size={16} aria-hidden="true" /> {t("pfePack.addTechnology")}
                 </button>
@@ -287,9 +310,12 @@ export default function PfePackPage() {
                   {stageOffers.map((offer) => (
                     <option key={offer._id} value={String(offer._id)}>{offer.title}</option>
                   ))}
+                  {stageOffersStatus === "loading" && <option value="" disabled>{t("pfePack.loadingOffers")}</option>}
                   <option value="other">{t("pfePack.otherSubject")}</option>
                 </select>
-                <Link className="pfe-form__all-offers" to="/offers">{t("pfePack.viewAllOffers")} <ArrowRight size={14} aria-hidden="true" /></Link>
+                {stageOffersStatus === "error" && <span className="pfe-form__offers-status" role="status">{t("pfePack.offersLoadError")}</span>}
+                {stageOffersStatus === "loaded" && stageOffers.length === 0 && <span className="pfe-form__offers-status" role="status">{t("pfePack.noStageOffers")}</span>}
+                <Link className="pfe-form__all-offers" to="/offers" target="_blank" rel="noopener noreferrer">{t("pfePack.viewAllOffers")} <ArrowRight size={14} aria-hidden="true" /></Link>
               </label>
               {formData.subject === "other" && (
                 <label className="pfe-form__wide">{t("pfePack.customSubject")}

@@ -18,6 +18,13 @@
   flex: 1 1 280px;
 }
 
+.au-users-table th:first-child,
+.au-users-table td:first-child {
+  width: 52px;
+  min-width: 52px;
+  padding-inline: 16px 8px;
+}
+
 /* ── Cellule Utilisateur : avatar + nom + email empilés ──────────────────── */
 .au-user-cell {
   display: flex;
