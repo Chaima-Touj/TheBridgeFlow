@@ -9,7 +9,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const getPublicStats = asyncHandler(async (req, res) => {
   const [formationsCount, studentsCount, activeOffersCount] = await Promise.all([
     Formation.countDocuments({}),
-    User.countDocuments({ role: "étudiant" }),
+    User.countDocuments({ role: "étudiant", isVerified: true, isActive: true }),
     Offer.countDocuments({ isActive: true }),
   ]);
 

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import User from "../models/users.model.js";
 import { normalizeTunisianPhone } from "../utils/tunisianPhone.js";
 
 // ─── Configuration Gmail SMTP ──────────────────────────────────────────────────
@@ -1021,8 +1022,29 @@ const newsletterPublicationTemplate = ({ language = "fr", title, excerpt, url, u
   };
 };
 
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, allowUnverified = false }) => {
   const startedAt = Date.now();
+  if (!allowUnverified) {
+    try {
+      const recipients = (Array.isArray(to) ? to : String(to).split(/[;,]/))
+        .map((recipient) => String(recipient).trim().toLowerCase())
+        .filter(Boolean);
+      const accounts = await User.find({ email: { $in: recipients } })
+        .select("isVerified isActive")
+        .lean();
+      if (accounts.some((account) => account.isVerified !== true || account.isActive !== true)) {
+        console.info("[email] Skipping email to an unverified or inactive account", { recipient: to, subject });
+        return { success: false, skipped: true, reason: "account_not_verified_and_active" };
+      }
+    } catch (err) {
+      console.error("[email] Could not verify recipient account status; email was not sent", {
+        recipient: to,
+        subject,
+        errorMessage: err.message,
+      });
+      return { success: false, error: "Recipient account status could not be verified." };
+    }
+  }
   console.info("[email] Sending email", { recipient: to, subject });
   try {
     const transporter = getTransporter();
@@ -1074,7 +1096,7 @@ const emailService = {
   sendNewMessage:          (to, data) => sendEmail({ to, ...newMessageTemplate(data) }),
   sendNewUserAdmin:        (to, data) => sendEmail({ to, ...newUserAdminTemplate(data) }),
   sendAccountCreatedByAdmin: (to, data) => sendEmail({ to, ...accountCreatedByAdminTemplate(data) }),
-  sendVerifyCode:          (to, data) => sendEmail({ to, ...verifyCodeTemplate(data) }),
+  sendVerifyCode:          (to, data) => sendEmail({ to, ...verifyCodeTemplate(data), allowUnverified: true }),
   sendResetPassword:       (to, data) => sendEmail({ to, ...resetPasswordTemplate(data) }),
   sendVoteConfirmation:    (to, data) => sendEmail({ to, ...voteConfirmationTemplate(data) }),
   sendWinnerCongrats:      (to, data) => sendEmail({ to, ...winnerCongratsTemplate(data) }),

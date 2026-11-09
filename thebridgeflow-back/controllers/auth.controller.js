@@ -77,7 +77,7 @@ const sendVerificationSuccessEmails = async (user) => {
     console.error(`⚠️  Email de bienvenue non envoyé à ${user.email} : ${welcomeResult.error}`);
   }
 
-  const admins = await User.find({ role: "admin", isActive: true }).select("name email").lean();
+  const admins = await User.find({ role: "admin", isVerified: true, isActive: true }).select("name email").lean();
   if (!admins.length) {
     console.log(`ℹ️  Aucun administrateur actif pour notifier l'inscription vérifiée de ${user.email}`);
     return;

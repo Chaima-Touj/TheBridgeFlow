@@ -321,6 +321,8 @@
   transform:  translateY(-3px);
   box-shadow: var(--shadow-md);
 }
+.sd-stat-card--link { display: block; color: inherit; text-decoration: none; }
+.sd-stat-card--link:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .sd-stat-top {
   display:         flex;

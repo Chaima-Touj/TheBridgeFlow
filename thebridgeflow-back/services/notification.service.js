@@ -53,7 +53,7 @@ export async function notifyUsers(users, options) {
 export async function notifyAdmins(options) {
   let admins;
   try {
-    admins = await User.find({ role: "admin", isActive: true })
+    admins = await User.find({ role: "admin", isVerified: true, isActive: true })
       .select("name email")
       .lean();
   } catch (error) {
@@ -64,7 +64,7 @@ export async function notifyAdmins(options) {
 }
 
 export async function getActiveStudents() {
-  return User.find({ role: "étudiant", isActive: true })
+  return User.find({ role: "étudiant", isVerified: true, isActive: true })
     .select("name email")
     .lean();
 }

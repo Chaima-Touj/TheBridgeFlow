@@ -157,6 +157,14 @@
   padding: 6px 10px;
   font-size: 0.8rem;
 }
+.au-selection-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0 20px 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.au-selection-bar > span { margin-right: auto; color: var(--text-secondary); font-size: .875rem; font-weight: 650; }
+.au-selection-bar .btn { display: inline-flex; align-items: center; gap: 6px; }
+.au-delete-selected { border: 1px solid #dc2626; background: #dc2626; color: #fff; }
+.au-delete-selected:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; }
+.au-export-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.au-export-emails { display: flex; align-items: center; gap: 9px; margin-top: 14px; color: var(--text); font-size: .9rem; }
+.au-export-emails input { width: 17px; height: 17px; accent-color: var(--primary); }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
@@ -168,6 +176,7 @@
 
 @media (max-width: 480px) {
   .au-detail-head { flex-wrap: wrap; }
+  .au-export-dates { grid-template-columns: 1fr; gap: 0; }
   .au-detail-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;

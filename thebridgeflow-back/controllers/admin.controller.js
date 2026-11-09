@@ -34,7 +34,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     enrollmentsByMonth,
     formationsByLevel,
   ] = await Promise.all([
-    User.countDocuments({ role: "étudiant" }),
+    User.countDocuments({ role: "étudiant", isVerified: true, isActive: true }),
     Formation.countDocuments({}),
     EnrollmentRequest.countDocuments({ status: "en_attente" }),
     Enrollment.countDocuments({ overallStatus: "in_progress" }),
@@ -282,19 +282,10 @@ export const createUser = asyncHandler(async (req, res) => {
 
   console.log(`📝 Utilisateur créé par l'admin : ${user.name} (${user.email}) — rôle: ${user.role}`);
 
-  const emailResult = await emailService.sendAccountCreatedByAdmin(user.email, {
-    name: user.name,
-    email: user.email,
-    password: password || generatedPassword,
-    role: user.role,
-  });
   const verificationEmailResult = await emailService.sendVerifyCode(user.email, {
     name: user.name,
     code: verificationCode,
   });
-  if (!emailResult.success) {
-    console.error(`⚠️  Email d'identifiants non envoyé à ${user.email} : ${emailResult.error}`);
-  }
   if (!verificationEmailResult.success) {
     console.error(`⚠️  Code de vérification non envoyé à ${user.email} : ${verificationEmailResult.error}`);
   }
@@ -303,7 +294,7 @@ export const createUser = asyncHandler(async (req, res) => {
   res.status(201).json({
     user: safeUser,
     generatedPassword,
-    emailSent: emailResult.success,
+    emailSent: false,
     verificationEmailSent: verificationEmailResult.success,
   });
 });

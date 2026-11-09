@@ -1,8 +1,28 @@
 import axios from "axios";
 import { getToken, clearToken } from "../utils/tokenStorage.js";
+import { getRecaptchaToken } from "../utils/recaptchaV3Client.js";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+});
+
+api.interceptors.request.use(async (config) => {
+  const method = (config.method || "get").toLowerCase();
+  if (!["get", "head", "options"].includes(method) && !/\/track\//.test(config.url || "")) {
+    let captchaToken;
+    try {
+      captchaToken = await getRecaptchaToken();
+    } catch (captchaError) {
+      const error = new Error(captchaError.message);
+      error.response = { status: 503, data: { message: captchaError.message } };
+      throw error;
+    }
+    if (captchaToken) {
+      config.headers = config.headers || {};
+      config.headers["X-Recaptcha-Token"] = captchaToken;
+    }
+  }
+  return config;
 });
 
 // Injecter le token Bearer automatiquement sur chaque requête

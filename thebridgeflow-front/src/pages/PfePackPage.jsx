@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, BookOpen, CheckCircle2, Code2, FileText, Lightbulb, Mail, Phone, Trophy } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Code2, FileText, Lightbulb, Mail, Phone, Plus, Trophy, X } from "lucide-react";
 import Modal from "../components/common/Modal.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
@@ -11,6 +11,7 @@ import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import { TbBrandWhatsapp } from "react-icons/tb";
 import { formationsService } from "../services/formations.service.js";
 import { pfePackService } from "../services/pfePack.service.js";
+import { offersService } from "../services/offers.service.js";
 import "./PfePackPage.css";
 
 const STEPS = [
@@ -27,14 +28,16 @@ export default function PfePackPage() {
     lastName: "",
     phone: "",
     email: "",
-    technologies: "",
+    technologies: [""],
     subject: "",
+    customSubject: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [formations, setFormations] = useState([]);
   const [formationsError, setFormationsError] = useState(false);
+  const [stageOffers, setStageOffers] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -49,6 +52,17 @@ export default function PfePackPage() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    offersService.getAll({ type: "stage", limit: 6 })
+      .then(({ data }) => {
+        const offers = Array.isArray(data) ? data : data?.offers;
+        if (active) setStageOffers(Array.isArray(offers) ? offers.slice(0, 6) : []);
+      })
+      .catch((error) => console.error("Failed to load internship offers for the Pack PFE form", error));
+    return () => { active = false; };
+  }, []);
+
   const openForm = () => {
     setFormError("");
     setSubmitted(false);
@@ -60,15 +74,44 @@ export default function PfePackPage() {
     setFormData((current) => ({ ...current, [name]: value }));
   };
 
+  const handleTechnologyChange = (index, value) => {
+    setFormData((current) => ({
+      ...current,
+      technologies: current.technologies.map((technology, itemIndex) => itemIndex === index ? value : technology),
+    }));
+  };
+
+  const addTechnology = () => {
+    setFormData((current) => ({ ...current, technologies: [...current.technologies, ""] }));
+  };
+
+  const removeTechnology = (index) => {
+    setFormData((current) => ({
+      ...current,
+      technologies: current.technologies.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const technologies = formData.technologies.map((technology) => technology.trim()).filter(Boolean);
+    if (!technologies.length) {
+      setFormError(t("pfePack.technologyRequired"));
+      return;
+    }
+    const subject = formData.subject === "other"
+      ? formData.customSubject.trim()
+      : stageOffers.find((offer) => String(offer._id) === formData.subject)?.title || "";
+    if (!subject) {
+      setFormError(t("pfePack.subjectRequired"));
+      return;
+    }
     setSubmitting(true);
     setFormError("");
-    const technologies = formData.technologies.split(/[,;\n]/).map((technology) => technology.trim()).filter(Boolean);
     try {
-      await pfePackService.register({ ...formData, technologies });
+      await pfePackService.register({ ...formData, technologies, subject });
       setSubmitted(true);
-      setFormData({ firstName: "", lastName: "", phone: "", email: "", technologies: "", subject: "" });
+      setFormData({ firstName: "", lastName: "", phone: "", email: "", technologies: [""], subject: "", customSubject: "" });
     } catch (error) {
       setFormError(error.response?.data?.message || t("pfePack.formError"));
     } finally {
@@ -212,8 +255,47 @@ export default function PfePackPage() {
               <label>{t("pfePack.lastName")}<input name="lastName" value={formData.lastName} onChange={handleChange} maxLength={80} required autoComplete="family-name" /></label>
               <label><span><Phone size={15} /> {t("pfePack.phone")}</span><input name="phone" type="tel" value={formData.phone} onChange={handleChange} maxLength={32} required autoComplete="tel" /></label>
               <label><span><Mail size={15} /> {t("pfePack.email")}</span><input name="email" type="email" value={formData.email} onChange={handleChange} maxLength={254} required autoComplete="email" /></label>
-              <label className="pfe-form__wide">{t("pfePack.technologies")}<textarea name="technologies" value={formData.technologies} onChange={handleChange} rows={2} maxLength={1200} required placeholder={t("pfePack.technologiesHint")} /></label>
-              <label className="pfe-form__wide">{t("pfePack.subject")}<textarea name="subject" value={formData.subject} onChange={handleChange} rows={4} maxLength={3000} required /></label>
+              <div className="pfe-form__wide pfe-form__technology-field">
+                <span className="pfe-form__field-label">{t("pfePack.technologies")}</span>
+                <div className="pfe-form__technology-list">
+                  {formData.technologies.map((technology, index) => (
+                    <div className="pfe-form__technology-row" key={`technology-${index}`}>
+                      <input
+                        type="text"
+                        value={technology}
+                        onChange={(event) => handleTechnologyChange(index, event.target.value)}
+                        maxLength={60}
+                        required={index === 0}
+                        aria-label={t("pfePack.technologyNumber", { number: index + 1 })}
+                        placeholder={t("pfePack.technologyPlaceholder")}
+                      />
+                      {formData.technologies.length > 1 && (
+                        <button type="button" className="pfe-form__remove-technology" onClick={() => removeTechnology(index)} aria-label={t("pfePack.removeTechnology")}>
+                          <X size={17} aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="pfe-form__add-technology" onClick={addTechnology} disabled={formData.technologies.length >= 20}>
+                  <Plus size={16} aria-hidden="true" /> {t("pfePack.addTechnology")}
+                </button>
+              </div>
+              <label className="pfe-form__wide">{t("pfePack.subject")}
+                <select name="subject" value={formData.subject} onChange={handleChange} required>
+                  <option value="">{t("pfePack.chooseSubject")}</option>
+                  {stageOffers.map((offer) => (
+                    <option key={offer._id} value={String(offer._id)}>{offer.title}</option>
+                  ))}
+                  <option value="other">{t("pfePack.otherSubject")}</option>
+                </select>
+                <Link className="pfe-form__all-offers" to="/offers">{t("pfePack.viewAllOffers")} <ArrowRight size={14} aria-hidden="true" /></Link>
+              </label>
+              {formData.subject === "other" && (
+                <label className="pfe-form__wide">{t("pfePack.customSubject")}
+                  <textarea name="customSubject" value={formData.customSubject} onChange={handleChange} rows={4} maxLength={3000} required placeholder={t("pfePack.customSubjectPlaceholder")} />
+                </label>
+              )}
             </div>
             <div className="pfe-form__actions">
               <button type="button" className="pfe-button pfe-button--secondary" onClick={() => setIsFormOpen(false)}>{t("common.cancel")}</button>

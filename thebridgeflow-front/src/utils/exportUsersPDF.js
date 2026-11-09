@@ -4,7 +4,7 @@ import autoTable from "jspdf-autotable";
 const ROLE_KEY = { étudiant: "adminUsers.roleStudent", admin: "adminUsers.roleAdmin" };
 const formatDate = (value) => value ? new Date(value).toLocaleDateString("fr-FR") : "—";
 
-export function buildUsersPDF(rows, t) {
+export function buildUsersPDF(rows, t, emailsOnly = false) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   doc.setFontSize(16);
   doc.setTextColor(15, 23, 42);
@@ -13,13 +13,15 @@ export function buildUsersPDF(rows, t) {
   doc.setTextColor(100, 116, 139);
   doc.text(t("adminFormations.pdfExportedOn", { date: new Date().toLocaleDateString("fr-FR") }), 14, 21);
 
-  const head = ["csvColUser", "csvColEmail", "csvColRole", "csvColStatus", "csvColJoined"]
-    .map((key) => t(`adminUsers.${key}`));
-  const body = rows.map((user) => [
+  const head = emailsOnly
+    ? [t("adminUsers.csvColEmail")]
+    : ["csvColUser", "csvColEmail", "csvColRole", "csvColStatus", "csvColJoined"]
+      .map((key) => t(`adminUsers.${key}`));
+  const body = rows.map((user) => emailsOnly ? [user.email || ""] : [
     user.name || "",
     user.email || "",
     t(ROLE_KEY[user.role] || user.role),
-    !user.isVerified ? t("adminUsers.verifiedNo") : user.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
+    !user.isVerified ? t("adminUsers.verifiedNo") : user.isActive === true ? t("adminUsers.statusActive") : t("adminUsers.statusInactive"),
     formatDate(user.createdAt),
   ]);
 
@@ -33,8 +35,8 @@ export function buildUsersPDF(rows, t) {
   return doc;
 }
 
-export function exportUsersPDF(rows, t) {
-  const doc = buildUsersPDF(rows, t);
-  doc.save(`utilisateurs-stageflow-${new Date().toISOString().slice(0, 10)}.pdf`);
+export function exportUsersPDF(rows, t, emailsOnly = false) {
+  const doc = buildUsersPDF(rows, t, emailsOnly);
+  doc.save(`${emailsOnly ? "emails" : "utilisateurs"}-thebridgeflow-${new Date().toISOString().slice(0, 10)}.pdf`);
   return doc;
 }

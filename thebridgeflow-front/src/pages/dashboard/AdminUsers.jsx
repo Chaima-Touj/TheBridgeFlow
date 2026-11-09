@@ -2,14 +2,13 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  FiUsers, FiAlertTriangle,
+  FiUsers, FiAlertTriangle, FiDownload, FiTrash2,
   FiMoreVertical, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight,
   FiCheckCircle, FiUserPlus, FiCopy, FiEye, FiEyeOff,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
 import DestructiveActionModal from "../../components/common/DestructiveActionModal.jsx";
-import ExportMenu from "../../components/common/ExportMenu.jsx";
 import Loader from "../../components/common/Loader.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { adminService } from "../../services/admin.service.js";
@@ -43,7 +42,7 @@ function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("fr-FR");
 }
-const isAccountActive = (user) => user?.isVerified === true && user?.isActive !== false;
+const isAccountActive = (user) => user?.isVerified === true && user?.isActive === true;
 
 function extractErrorMessage(err, fallback) {
   return err?.response?.data?.message || fallback;
@@ -54,22 +53,22 @@ function csvEscape(value) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function exportUsersCSV(rows, t) {
-  const headers = [
+function exportUsersCSV(rows, t, emailsOnly = false) {
+  const headers = emailsOnly ? [t("adminUsers.csvColEmail")] : [
     t("adminUsers.csvColUser"), t("adminUsers.csvColEmail"), t("adminUsers.csvColRole"),
     t("adminUsers.csvColStatus"), t("adminUsers.csvColJoined"),
   ];
-  const lines = rows.map((u) => [
+  const lines = rows.map((u) => (emailsOnly ? [u.email] : [
     u.name, u.email, t(ROLE_LABEL_KEY[u.role] || u.role),
-    !u.isVerified ? t("adminUsers.verifiedNo") : u.isActive === false ? t("adminUsers.statusInactive") : t("adminUsers.statusActive"),
+    !u.isVerified ? t("adminUsers.verifiedNo") : isAccountActive(u) ? t("adminUsers.statusActive") : t("adminUsers.statusInactive"),
     formatDate(u.createdAt),
-  ].map(csvEscape).join(","));
+  ]).map(csvEscape).join(","));
   const csv = [headers.join(","), ...lines].join("\n");
   const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `utilisateurs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `${emailsOnly ? "emails" : "utilisateurs"}-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -367,6 +366,15 @@ export default function AdminUsers() {
   // Action inline (activer/désactiver)
   const [statusActionId, setStatusActionId] = useState(null);
   const [rowActionError, setRowActionError] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportScope, setExportScope] = useState("all");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
+  const [emailsOnly, setEmailsOnly] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const loadUsers = useCallback(() => {
     adminService.getUsers()
@@ -449,16 +457,65 @@ export default function AdminUsers() {
     }
   };
 
-  const exportUsers = async (format) => {
-    setError("");
-    try {
-      const { data } = await adminService.getUsers();
-      const rows = Array.isArray(data) ? data : data?.users || [];
-      if (format === "pdf") exportUsersPDF(rows, t);
-      else exportUsersCSV(rows, t);
-    } catch (exportError) {
-      setError(extractErrorMessage(exportError, t("adminUsers.errors.generic", { defaultValue: "Export failed. Please try again." })));
+  const exportUsers = (format) => {
+    let rows = exportScope === "selected"
+      ? users.filter((u) => selectedIds.includes(String(u._id)))
+      : users;
+
+    if (exportScope === "active") rows = rows.filter(isAccountActive);
+    if (exportScope === "date") {
+      if (!exportFrom || !exportTo || new Date(exportFrom) > new Date(exportTo)) {
+        setExportError(t("adminUsers.exportDateError"));
+        return;
+      }
+      const start = new Date(`${exportFrom}T00:00:00`);
+      const end = new Date(`${exportTo}T23:59:59.999`);
+      rows = rows.filter((u) => {
+        const joinedAt = new Date(u.createdAt);
+        return joinedAt >= start && joinedAt <= end;
+      });
     }
+
+    if (exportScope === "selected" && rows.length === 0) {
+      setExportError(t("adminUsers.selectUsersFirst"));
+      return;
+    }
+    if (emailsOnly && format === "pdf") exportUsersPDF(rows, t, true);
+    else if (emailsOnly) exportUsersCSV(rows, t, true);
+    else if (format === "pdf") exportUsersPDF(rows, t);
+    else exportUsersCSV(rows, t);
+    setShowExportModal(false);
+  };
+
+  const selectablePageItems = pageItems.filter((u) => !isSelf(u));
+  const allPageSelected = selectablePageItems.length > 0
+    && selectablePageItems.every((u) => selectedIds.includes(String(u._id)));
+  const togglePageSelection = (checked) => {
+    const pageIds = selectablePageItems.map((u) => String(u._id));
+    setSelectedIds((current) => checked
+      ? [...new Set([...current, ...pageIds])]
+      : current.filter((id) => !pageIds.includes(id)));
+  };
+  const toggleUserSelection = (userId, checked) => {
+    const id = String(userId);
+    setSelectedIds((current) => checked
+      ? [...new Set([...current, id])]
+      : current.filter((selectedId) => selectedId !== id));
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = selectedIds.filter((id) => !isSelf(users.find((u) => String(u._id) === id)));
+    if (!ids.length) return;
+    setBulkDeleting(true);
+    setRowActionError("");
+    const results = await Promise.allSettled(ids.map((id) => adminService.deleteUser(id)));
+    const deletedIds = ids.filter((_, index) => results[index].status === "fulfilled");
+    const failedCount = ids.length - deletedIds.length;
+    setUsers((current) => current.filter((u) => !deletedIds.includes(String(u._id))));
+    setSelectedIds((current) => current.filter((id) => !deletedIds.includes(id)));
+    if (failedCount) setRowActionError(t("adminUsers.bulkDeletePartial", { deleted: deletedIds.length, failed: failedCount }));
+    setShowBulkDeleteModal(false);
+    setBulkDeleting(false);
   };
 
   /* ── Changer le rôle ──────────────────────────────────────────────────── */
@@ -550,10 +607,9 @@ export default function AdminUsers() {
                 </select>
               </div>
 
-              <ExportMenu
-                onExportPDF={() => exportUsers("pdf")}
-                onExportCSV={() => exportUsers("csv")}
-              />
+              <button type="button" className="af-toolbar-btn" onClick={() => { setRowActionError(""); setExportError(""); setShowExportModal(true); }}>
+                <FiDownload size={14} /> {t("adminFormations.export")}
+              </button>
 
               <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
                 <FiUserPlus size={15} /> {t("adminUsers.newUserButton")}
@@ -565,6 +621,17 @@ export default function AdminUsers() {
             <div className="af-form-error" style={{ margin: "0 20px 16px" }}>
               <FiAlertTriangle size={15} />
               <span>{rowActionError}</span>
+            </div>
+          )}
+          {selectedIds.length > 0 && (
+            <div className="au-selection-bar">
+              <span>{t("adminUsers.selectedCount", { count: selectedIds.length })}</span>
+              <button type="button" className="btn btn-ghost" onClick={() => { setExportScope("selected"); setExportError(""); setShowExportModal(true); }}>
+                <FiDownload size={14} /> {t("adminUsers.exportSelected")}
+              </button>
+              <button type="button" className="btn au-delete-selected" onClick={() => setShowBulkDeleteModal(true)}>
+                <FiTrash2 size={14} /> {t("adminUsers.deleteSelected")}
+              </button>
             </div>
           )}
 
@@ -588,6 +655,14 @@ export default function AdminUsers() {
                 <table className="af-table">
                   <thead>
                     <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          aria-label={t("adminUsers.selectPage")}
+                          checked={allPageSelected}
+                          onChange={(event) => togglePageSelection(event.target.checked)}
+                        />
+                      </th>
                       <th className="af-th-sortable" onClick={() => toggleSort("name")}>
                         {t("adminUsers.colUser")} <SortIcon active={sortKey === "name"} dir={sortDir} />
                       </th>
@@ -606,6 +681,15 @@ export default function AdminUsers() {
                   <tbody>
                     {pageItems.map((u) => (
                       <tr key={u._id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            aria-label={t("adminUsers.selectUser", { name: u.name })}
+                            checked={selectedIds.includes(String(u._id))}
+                            disabled={isSelf(u)}
+                            onChange={(event) => toggleUserSelection(u._id, event.target.checked)}
+                          />
+                        </td>
                         <td className="af-cell-title">
                           <div className="af-formation-cell">
                             {u.avatarUrl
@@ -747,6 +831,60 @@ export default function AdminUsers() {
           onCancel={closeDelete}
           onConfirm={confirmDelete}
         />
+      )}
+
+      {showExportModal && (
+        <Modal
+          title={t("adminUsers.exportTitle")}
+          onClose={() => setShowExportModal(false)}
+          maxWidth={480}
+          footer={(
+            <>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowExportModal(false)}>{t("common.cancel")}</button>
+              <button type="button" className="btn btn-ghost" onClick={() => exportUsers("pdf")}>{t("adminFormations.exportPdf")}</button>
+              <button type="button" className="btn btn-primary" onClick={() => exportUsers("csv")}>{emailsOnly ? t("adminUsers.exportEmails") : t("adminFormations.exportCsv")}</button>
+            </>
+          )}
+        >
+          {exportError && <p className="af-form-error" role="alert">{exportError}</p>}
+          <div className="af-form-row">
+            <label className="label" htmlFor="au-export-scope">{t("adminUsers.exportScope")}</label>
+            <select id="au-export-scope" className="input" value={exportScope} onChange={(event) => setExportScope(event.target.value)}>
+              <option value="all">{t("adminUsers.exportAll")}</option>
+              <option value="date">{t("adminUsers.exportDateRange")}</option>
+              <option value="active">{t("adminUsers.exportActive")}</option>
+              <option value="selected">{t("adminUsers.exportSelected")}</option>
+            </select>
+          </div>
+          {exportScope === "date" && (
+            <div className="au-export-dates">
+              <label className="af-form-row"><span className="label">{t("adminUsers.exportFrom")}</span><input className="input" type="date" value={exportFrom} onChange={(event) => setExportFrom(event.target.value)} /></label>
+              <label className="af-form-row"><span className="label">{t("adminUsers.exportTo")}</span><input className="input" type="date" value={exportTo} onChange={(event) => setExportTo(event.target.value)} /></label>
+            </div>
+          )}
+          <label className="au-export-emails">
+            <input type="checkbox" checked={emailsOnly} onChange={(event) => setEmailsOnly(event.target.checked)} />
+            <span>{t("adminUsers.exportEmailsOnly")}</span>
+          </label>
+        </Modal>
+      )}
+
+      {showBulkDeleteModal && (
+        <Modal
+          title={t("adminUsers.deleteSelected")}
+          onClose={() => { if (!bulkDeleting) setShowBulkDeleteModal(false); }}
+          maxWidth={440}
+          footer={(
+            <>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowBulkDeleteModal(false)} disabled={bulkDeleting}>{t("common.cancel")}</button>
+              <button type="button" className="btn au-delete-selected" onClick={handleBulkDelete} disabled={bulkDeleting}>
+                {bulkDeleting ? t("adminDestructive.processing") : t("adminDestructive.confirmDelete")}
+              </button>
+            </>
+          )}
+        >
+          <p>{t("adminUsers.confirmDeleteSelected", { count: selectedIds.length })}</p>
+        </Modal>
       )}
 
       {/* ── Modale "Nouvel utilisateur" ───────────────────────────────────── */}

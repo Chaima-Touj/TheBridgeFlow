@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { FiUsers, FiBookOpen, FiClipboard, FiCheckSquare } from "react-icons/fi";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -27,10 +28,10 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { label: t("dashboard.admin.statTotalStudents"),      value: stats?.totalStudents,     color: "#2563EB", icon: <FiUsers size={20} /> },
-    { label: t("dashboard.admin.statTotalFormations"),     value: stats?.totalFormations,   color: "#8B5CF6", icon: <FiBookOpen size={20} /> },
-    { label: t("dashboard.admin.statPendingRequests"),  value: stats?.pendingRequests,   color: "#F59E0B", icon: <FiClipboard size={20} /> },
-    { label: t("dashboard.admin.statActiveEnrollments"), value: stats?.activeEnrollments, color: "#10B981", icon: <FiCheckSquare size={20} /> },
+    { label: t("dashboard.admin.statTotalStudents"), value: stats?.totalStudents, color: "#2563EB", icon: <FiUsers size={20} />, to: "/dashboard/admin/users" },
+    { label: t("dashboard.admin.statTotalFormations"), value: stats?.totalFormations, color: "#8B5CF6", icon: <FiBookOpen size={20} />, to: "/dashboard/admin/formations" },
+    { label: t("dashboard.admin.statPendingRequests"), value: stats?.pendingRequests, color: "#F59E0B", icon: <FiClipboard size={20} />, to: "/dashboard/admin/demandes" },
+    { label: t("dashboard.admin.statActiveEnrollments"), value: stats?.activeEnrollments, color: "#10B981", icon: <FiCheckSquare size={20} />, to: "/dashboard/admin/inscriptions" },
   ];
 
   const enrollmentsByMonth = stats?.enrollmentsByMonth || [];
@@ -44,7 +45,7 @@ export default function AdminDashboard() {
         {/* ── Stats ────────────────────────────────────────────────────── */}
         <div className="sd-stats">
           {statCards.map((s, i) => (
-            <div key={i} className="sd-stat-card">
+            <Link key={i} to={s.to} className="sd-stat-card sd-stat-card--link">
               <div className="sd-stat-top">
                 <div className="sd-stat-icon" style={{ background: s.color + "18", color: s.color }}>
                   {s.icon}
@@ -53,7 +54,7 @@ export default function AdminDashboard() {
               </div>
               <div className="sd-stat-value">{loading ? "—" : (s.value ?? 0)}</div>
               <div className="sd-stat-label">{s.label}</div>
-            </div>
+            </Link>
           ))}
         </div>
 
