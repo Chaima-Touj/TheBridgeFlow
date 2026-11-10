@@ -264,7 +264,7 @@ export default function PfePackPage() {
       {isFormOpen && <Modal
         title={t("pfePack.formTitle")}
         onClose={() => setIsFormOpen(false)}
-        maxWidth={960}
+        maxWidth={1160}
         className="pfe-form-modal"
         titleIcon={<span className="pfe-form-modal__title-icon" aria-hidden="true"><GraduationCap size={30} /></span>}
         headerContent={<span className="pfe-form-modal__badge"><Gift size={16} aria-hidden="true" />{t("pfePack.formBadge")}</span>}
