@@ -662,7 +662,7 @@ export const getMe = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
   const {
     name, phone, university, specialty,
-    bio, education, experience, skills, languages, socialLinks, cv, gender,
+    bio, education, experience, skills, languages, socialLinks, gender,
   } = req.body;
 
   let normalizedPhone;
@@ -679,18 +679,19 @@ export const updateProfile = asyncHandler(async (req, res) => {
   for (const field of ["name", "university", "specialty", "bio", "experience", "skills", "languages"]) {
     if (Object.hasOwn(req.body, field)) updateData[field] = req.body[field];
   }
-  for (const field of ["education", "socialLinks", "cv"]) {
+  // Le CV n'est pas modifiable ici : uniquement via POST/DELETE /profile/cv,
+  // pour qu'un client ne puisse pas y mettre une URL arbitraire.
+  for (const field of ["education", "socialLinks"]) {
     const values = req.body[field];
     if (values && typeof values === "object" && !Array.isArray(values)) {
       for (const [key, value] of Object.entries(values)) {
-        if (["institution", "degree", "fieldOfStudy", "startDate", "endDate", "current", "grade", "courses", "linkedin", "github", "portfolio", "fileName", "fileUrl"].includes(key)) {
+        if (["institution", "degree", "fieldOfStudy", "startDate", "endDate", "current", "grade", "courses", "linkedin", "github", "portfolio"].includes(key)) {
           updateData[`${field}.${key}`] = value;
         }
       }
     }
   }
   if (normalizedPhone !== undefined) updateData.phone = normalizedPhone;
-  if (cv !== undefined) updateData.cv = cv;
 
   if (gender === "homme" || gender === "femme") {
     updateData.gender = gender;
@@ -724,6 +725,19 @@ export const uploadProfileCV = asyncHandler(async (req, res) => {
     req.user._id,
     { cv: { fileName: req.file.originalname, fileUrl } },
     { new: true, runValidators: true }
+  ).lean();
+
+  res.json({ user });
+});
+
+// DELETE /api/auth/profile/cv
+// Retire le CV du profil. Le fichier reste sur le disque : les candidatures
+// déjà envoyées avec ce CV doivent toujours pouvoir l'ouvrir.
+export const deleteProfileCV = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { cv: { fileName: "", fileUrl: "" } } },
+    { new: true }
   ).lean();
 
   res.json({ user });

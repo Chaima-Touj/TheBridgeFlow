@@ -1,4 +1,5 @@
 // src/components/profile/ProfileView.jsx
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiEdit2, FiDownload, FiUpload, FiTrash2,
@@ -7,6 +8,7 @@ import {
   FiCheckCircle, FiAlertCircle, FiUser, FiCode, FiAward,
 } from "react-icons/fi";
 import { computeCompletion } from "../../utils/profileUtils";
+import DestructiveActionModal from "../common/DestructiveActionModal.jsx";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -117,6 +119,29 @@ const ProfileView = ({ profile, onEdit, onCVUpload, onCVDelete }) => {
       const fd = new FormData();
       fd.append("cv", file);
       onCVUpload(fd);
+    }
+  };
+
+  // Suppression du CV : toujours via une confirmation, jamais directement.
+  const [cvDeleteOpen, setCvDeleteOpen] = useState(false);
+  const [cvDeleting, setCvDeleting] = useState(false);
+  const [cvDeleteError, setCvDeleteError] = useState("");
+
+  const openCvDelete = () => {
+    setCvDeleteError("");
+    setCvDeleteOpen(true);
+  };
+
+  const confirmCvDelete = async () => {
+    setCvDeleting(true);
+    setCvDeleteError("");
+    try {
+      await onCVDelete();
+      setCvDeleteOpen(false);
+    } catch (err) {
+      setCvDeleteError(err?.response?.data?.message || t("profile.deleteCvError"));
+    } finally {
+      setCvDeleting(false);
     }
   };
 
@@ -393,11 +418,32 @@ const ProfileView = ({ profile, onEdit, onCVUpload, onCVDelete }) => {
                     <input type="file" accept=".pdf,.doc,.docx" hidden onChange={handleCVChange} />
                   </label>
                   {onCVDelete && (
-                    <button className="sf-pv-cv-btn sf-pv-cv-btn--del" onClick={onCVDelete}>
+                    <button
+                      type="button"
+                      className="sf-pv-cv-btn sf-pv-cv-btn--del"
+                      onClick={openCvDelete}
+                      aria-label={t("profile.deleteCvAria")}
+                      title={t("profile.deleteCvAria")}
+                    >
                       <FiTrash2 size={13} />
                     </button>
                   )}
                 </div>
+                {cvDeleteOpen && (
+                  <DestructiveActionModal
+                    title={t("profile.deleteCvTitle")}
+                    description={t("profile.deleteCvQuestion")}
+                    itemName={profile.cv.fileName || "CV"}
+                    consequence={t("profile.deleteCvWarning")}
+                    error={cvDeleteError}
+                    isLoading={cvDeleting}
+                    cancelLabel={t("common.cancel")}
+                    confirmLabel={t("profile.deleteCvConfirm")}
+                    loadingLabel={t("profile.deleteCvDeleting")}
+                    onCancel={() => setCvDeleteOpen(false)}
+                    onConfirm={confirmCvDelete}
+                  />
+                )}
               </div>
             ) : (
               <div className="sf-pv-cv-empty">

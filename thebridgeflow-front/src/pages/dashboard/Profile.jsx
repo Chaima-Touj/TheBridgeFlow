@@ -67,7 +67,7 @@ const Profile = () => {
 
   const handleCVDelete = async () => {
     try {
-      await profileService.updateProfile({ cv: { fileName: "", fileUrl: "" } });
+      await profileService.deleteCV();
       await loadProfile();
       refreshUser();
     } catch (err) {

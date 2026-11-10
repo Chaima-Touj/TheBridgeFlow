@@ -12,6 +12,7 @@ import {
   forgotPassword,
   resetPassword,
   uploadProfileCV,
+  deleteProfileCV,
   changePassword,
   updateSettings,
   deleteAccount,
@@ -34,6 +35,7 @@ router.post("/reset-password/:token",  verifyRecaptcha, resetPassword);
 router.get("/me",            protect, getMe);
 router.put("/profile",       protect, updateProfile);
 router.post("/profile/cv",   protect, uploadCV, uploadProfileCV);
+router.delete("/profile/cv", protect, deleteProfileCV);
 router.post("/logout",       protect, logout);
 router.put("/password",      protect, changePassword);
 router.put("/settings",      protect, updateSettings);

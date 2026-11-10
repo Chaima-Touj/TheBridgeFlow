@@ -40,6 +40,9 @@ export default defineConfig({
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB pour hero-girl.png (2.39 Mo) + JS bundle
+        // Ces chemins sont servis par le backend : le service worker ne doit pas
+        // les remplacer par index.html (sinon un CV /uploads/x.pdf ouvre la page 404 de React).
+        navigateFallbackDenylist: [/^\/api\//, /^\/uploads\//, /^\/media\//],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {

@@ -6,6 +6,7 @@ export const profileService = {
   uploadCV: (formData)     => api.post("/auth/profile/cv", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   }),
+  deleteCV:       ()       => api.delete("/auth/profile/cv"),
   changePassword: (data)   => api.put("/auth/password", data),
   updateSettings: (data)   => api.put("/auth/settings", data),
   deleteAccount:  (data)   => api.delete("/auth/account", { data }),
