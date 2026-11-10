@@ -692,7 +692,12 @@
     "noSkills": "No skills added",
     "noCv": "No CV on profile",
     "loading": "Loading offer...",
-    "viewCv": "View CV"
+    "viewCv": "View CV",
+    "errorCvRequired": "A CV is required to apply. Attach a CV or add one to your profile.",
+    "coverLetterAdd": "Attach a cover letter",
+    "cvProfileUsed": "This CV will be sent with your application.",
+    "cvWillBeSaved": "This CV will also be saved to your profile for your next applications.",
+    "cvProfileSaved": "Your CV has been added to your profile."
   },
   "applications": {
     "title": "My Applications",

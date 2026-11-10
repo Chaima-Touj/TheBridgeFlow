@@ -2,6 +2,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { getNewsletterSubscribers, subscribeToNewsletter, unsubscribeFromNewsletter } from "../controllers/newsletter.controller.js";
 import { authorize, protect } from "../middleware/auth.middleware.js";
+import { verifyRecaptcha } from "../middleware/recaptcha.middleware.js";
 
 const router = express.Router();
 const subscribeLimiter = rateLimit({
@@ -13,7 +14,7 @@ const subscribeLimiter = rateLimit({
   skip: () => process.env.NODE_ENV !== "production",
 });
 
-router.post("/subscribe", subscribeLimiter, subscribeToNewsletter);
+router.post("/subscribe", subscribeLimiter, verifyRecaptcha, subscribeToNewsletter);
 router.post("/unsubscribe/:token", unsubscribeFromNewsletter);
 router.get("/admin/subscribers", protect, authorize("admin"), getNewsletterSubscribers);
 

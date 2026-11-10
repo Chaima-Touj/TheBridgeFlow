@@ -692,7 +692,12 @@
     "noSkills": "Aucune compétence ajoutée",
     "noCv": "Aucun CV sur le profil",
     "loading": "Chargement de l'offre...",
-    "viewCv": "Voir le CV"
+    "viewCv": "Voir le CV",
+    "errorCvRequired": "Le CV est obligatoire pour postuler. Joignez un CV ou ajoutez-en un à votre profil.",
+    "coverLetterAdd": "Joindre une lettre de motivation",
+    "cvProfileUsed": "Ce CV sera envoyé avec votre candidature.",
+    "cvWillBeSaved": "Ce CV sera aussi enregistré dans votre profil pour vos prochaines candidatures.",
+    "cvProfileSaved": "Votre CV a été ajouté à votre profil."
   },
   "applications": {
     "title": "Mes candidatures",

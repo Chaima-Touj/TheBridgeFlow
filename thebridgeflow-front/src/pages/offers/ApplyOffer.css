@@ -258,23 +258,49 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ao-cv-link {
-  width: 30px;
-  height: 30px;
+a.ao-cv-profile-name {
+  display: block;
+  text-decoration: none;
+}
+a.ao-cv-profile-name:hover,
+a.ao-cv-profile-name:focus-visible {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.ao-cv-profile-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+/* Un autre CV est joint : le CV du profil n'est pas envoyé */
+.ao-cv-profile--inactive { opacity: 0.6; }
+
+/* Bouton "Voir le CV" */
+.ao-cv-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
   background: var(--bg-card);
-  transition: all var(--transition);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
   text-decoration: none;
   flex-shrink: 0;
-  position: relative;
+  transition: all var(--transition);
 }
-.ao-cv-link::before { content: ""; position: absolute; inset: -7px; }
-.ao-cv-link:hover { border-color: var(--primary); color: var(--primary); }
+.ao-cv-open:hover,
+.ao-cv-open:focus-visible {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+@media (max-width: 480px) {
+  .ao-cv-open span { display: none; }
+  .ao-cv-open { padding: 8px; }
+}
 
 /* Dropzone */
 .ao-cv-dropzone {
@@ -294,6 +320,17 @@
   border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 4%, transparent);
   outline: none;
+}
+.ao-cv-dropzone--error,
+.ao-cv-dropzone--error:hover,
+.ao-cv-dropzone--error:focus {
+  border-color: #ef4444;
+  background: color-mix(in srgb, #ef4444 5%, transparent);
+}
+.ao-cv-save-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 10px;
 }
 .ao-cv-dropzone-icon { color: var(--text-muted); }
 .ao-cv-dropzone-text {
@@ -586,6 +623,15 @@
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 32px;
+}
+.ao-success-sub:has(+ .ao-success-cv) { margin-bottom: 10px; }
+.ao-success-cv {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #10b981;
+  font-weight: 600;
 }
 .ao-success-actions {
   display: flex;

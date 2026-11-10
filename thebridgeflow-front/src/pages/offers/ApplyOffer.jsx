@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft, FiMapPin, FiClock, FiBriefcase,
-  FiUpload, FiCheckCircle, FiAlertCircle, FiUser,
+  FiUpload, FiCheckCircle, FiAlertCircle, FiExternalLink,
   FiMail, FiPhone, FiFileText, FiX, FiSend,
   FiBook, FiCode,
 } from "react-icons/fi";
@@ -37,6 +37,11 @@ function getAvatarColor(name = "") {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+// Lien de fichier ouvrable : URL http(s) ou chemin relatif du site (/uploads/...).
+function isOpenableFileUrl(url) {
+  return typeof url === "string" && (/^https?:\/\//i.test(url) || /^\/(?![\\/])/.test(url));
 }
 
 
@@ -84,7 +89,7 @@ function AlreadyApplied({ t, offerTitle, navigate }) {
 }
 
 /* ── SuccessScreen ───────────────────────────────────────────────────────── */
-function SuccessScreen({ t, offer, navigate }) {
+function SuccessScreen({ t, offer, navigate, profileCvSaved }) {
   return (
     <div className="ao-success">
       <div className="ao-success-ring">
@@ -100,6 +105,11 @@ function SuccessScreen({ t, offer, navigate }) {
         </div>
       )}
       <p className="ao-success-sub">{t("apply.successSub")}</p>
+      {profileCvSaved && (
+        <p className="ao-success-sub ao-success-cv">
+          <FiFileText size={14} /> {t("apply.cvProfileSaved")}
+        </p>
+      )}
       <div className="ao-success-actions">
         <button
           type="button"
@@ -138,9 +148,12 @@ export default function ApplyOffer() {
   const [alreadyApplied, setAlreadyApplied]= useState(false);
   const [coverLetterFile, setCoverLetterFile] = useState(null);
   const [cvFile,         setCvFile]        = useState(null);
+  const [cvMissing,      setCvMissing]     = useState(false);
+  const [profileCvSaved, setProfileCvSaved] = useState(false);
   const [error,          setError]         = useState("");
   const fileInputRef = useRef(null);
   const coverLetterInputRef = useRef(null);
+  const hasCvProfile = !!(profile?.cv?.fileUrl);
 
   /* load ──────────────────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -184,7 +197,8 @@ export default function ApplyOffer() {
       if (cvFile) formData.append("cv", cvFile);
       if (coverLetterFile) formData.append("coverLetter", coverLetterFile);
 
-      await applicationsService.create(formData);
+      const { data } = await applicationsService.create(formData);
+      setProfileCvSaved(!!data?.profileCvSaved);
       setSubmitted(true);
     } catch (err) {
       const status  = err?.response?.status;
@@ -202,19 +216,36 @@ export default function ApplyOffer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // CV obligatoire : un fichier joint ou le CV du profil.
+    if (!cvFile && !hasCvProfile) {
+      setCvMissing(true);
+      setError(t("apply.errorCvRequired"));
+      return;
+    }
     await runWithPhone(submitApplication);
   };
 
   /* file handler ──────────────────────────────────────────────────────────── */
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) setCvFile(file);
+  const selectCvFile = (file) => {
+    if (!file) return;
+    setCvFile(file);
+    if (cvMissing) {
+      setCvMissing(false);
+      setError("");
+    }
   };
+
+  const handleFileChange = (e) => selectCvFile(e.target.files?.[0]);
 
   const handleFileDrop = (e) => {
     e.preventDefault();
+    selectCvFile(e.dataTransfer.files?.[0]);
+  };
+
+  const handleCoverLetterDrop = (e) => {
+    e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file) setCvFile(file);
+    if (file) setCoverLetterFile(file);
   };
 
   /* char count color ──────────────────────────────────────────────────────── */
@@ -222,7 +253,7 @@ export default function ApplyOffer() {
   const offerLogo   = offer ? getLogoStyle(offer.companyName || "") : null;
   const profileName = profile?.name || user?.name || "";
   const skills      = (profile?.skills || user?.skills || []).slice(0, 6);
-  const hasCvProfile = !!(profile?.cv?.fileUrl);
+  const profileCvUrl = isOpenableFileUrl(profile?.cv?.fileUrl) ? profile.cv.fileUrl : "";
 
   /* ── Loading ─────────────────────────────────────────────────────────────── */
   if (isLoading) {
@@ -265,7 +296,7 @@ export default function ApplyOffer() {
     return (
       <DashboardLayout title={t("apply.successTitle")}>
         <div className="ao-page">
-          <SuccessScreen t={t} offer={offer} navigate={navigate} />
+          <SuccessScreen t={t} offer={offer} navigate={navigate} profileCvSaved={profileCvSaved} />
         </div>
       </DashboardLayout>
     );
@@ -389,29 +420,43 @@ export default function ApplyOffer() {
             <div className="ao-card ao-cv-card">
               <h3 className="ao-section-title">
                 <FiFileText size={16} /> {t("apply.cvSection")}
+                <span className="ao-required" aria-hidden="true">*</span>
               </h3>
 
-              {/* Profile CV display */}
+              {/* Profile CV display — utilisé tant qu'aucun autre CV n'est joint */}
               {hasCvProfile && (
-                <div className="ao-cv-profile">
+                <div className={`ao-cv-profile${cvFile ? " ao-cv-profile--inactive" : ""}`}>
                   <div className="ao-cv-profile-icon">
                     <FiFileText size={18} />
                   </div>
                   <div className="ao-cv-profile-body">
                     <div className="ao-cv-profile-label">{t("apply.cvProfile")}</div>
-                    <div className="ao-cv-profile-name">
-                      {profile.cv.fileName || "cv.pdf"}
-                    </div>
+                    {profileCvUrl ? (
+                      <a
+                        href={profileCvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ao-cv-profile-name"
+                      >
+                        {profile.cv.fileName || "cv.pdf"}
+                      </a>
+                    ) : (
+                      <div className="ao-cv-profile-name">{profile.cv.fileName || "cv.pdf"}</div>
+                    )}
+                    {!cvFile && <div className="ao-cv-profile-note">{t("apply.cvProfileUsed")}</div>}
                   </div>
-                  <a
-                    href={profile.cv.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="ao-cv-link"
-                    title={t("apply.viewCv")}
-                  >
-                    <FiUser size={14} />
-                  </a>
+                  {profileCvUrl && (
+                    <a
+                      href={profileCvUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ao-cv-open"
+                      title={t("apply.viewCv")}
+                    >
+                      <FiExternalLink size={14} />
+                      <span>{t("apply.viewCv")}</span>
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -434,12 +479,13 @@ export default function ApplyOffer() {
                 </div>
               ) : (
                 <div
-                  className="ao-cv-dropzone"
+                  className={`ao-cv-dropzone${cvMissing ? " ao-cv-dropzone--error" : ""}`}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleFileDrop}
                   onClick={() => fileInputRef.current?.click()}
                   role="button"
                   tabIndex={0}
+                  aria-invalid={cvMissing || undefined}
                   onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
                 >
                   <FiUpload size={22} className="ao-cv-dropzone-icon" />
@@ -448,6 +494,9 @@ export default function ApplyOffer() {
                   </span>
                   <span className="ao-cv-dropzone-hint">{t("apply.cvDropHint")}</span>
                 </div>
+              )}
+              {!hasCvProfile && (
+                <p className="ao-cv-save-hint">{t("apply.cvWillBeSaved")}</p>
               )}
               <input
                 ref={fileInputRef}
@@ -477,11 +526,13 @@ export default function ApplyOffer() {
                 </div>
               ) : (
                 <div className="ao-cv-dropzone" role="button" tabIndex={0}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleCoverLetterDrop}
                   onClick={() => coverLetterInputRef.current?.click()}
                   onKeyDown={(e) => e.key === "Enter" && coverLetterInputRef.current?.click()}>
                   <FiUpload size={22} className="ao-cv-dropzone-icon" />
-                  <span className="ao-cv-dropzone-text">{t("apply.cvAdd")}</span>
-                  <span className="ao-cv-dropzone-hint">PDF, DOC ou DOCX · 5 Mo max</span>
+                  <span className="ao-cv-dropzone-text">{t("apply.coverLetterAdd")}</span>
+                  <span className="ao-cv-dropzone-hint">{t("apply.cvDropHint")}</span>
                 </div>
               )}
               <input ref={coverLetterInputRef} type="file" accept=".pdf,.doc,.docx" hidden

@@ -6,9 +6,25 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
-api.interceptors.request.use(async (config) => {
+// Formulaires protégés par reCAPTCHA (même liste que verifyRecaptcha dans les routes
+// du backend) : connexion, inscription, vérification email, mot de passe oublié,
+// contact, newsletter et Pack PFE. Les autres requêtes ne chargent pas reCAPTCHA.
+const RECAPTCHA_ENDPOINTS = [
+  /^\/auth\/(register|login|verify-email|resend-code|forgot-password)$/,
+  /^\/auth\/reset-password\/[^/]+$/,
+  /^\/contact-messages\/?$/,
+  /^\/newsletter\/subscribe$/,
+  /^\/pfe-pack\/registrations\/?$/,
+];
+
+function needsRecaptcha(config) {
   const method = (config.method || "get").toLowerCase();
-  if (!["get", "head", "options"].includes(method) && !/\/track\//.test(config.url || "")) {
+  const path = (config.url || "").split("?")[0];
+  return method === "post" && RECAPTCHA_ENDPOINTS.some((pattern) => pattern.test(path));
+}
+
+api.interceptors.request.use(async (config) => {
+  if (needsRecaptcha(config)) {
     // Jeton reCAPTCHA en best-effort : si Google est bloqué, lent ou non configuré,
     // la requête part sans jeton et c'est le backend qui décide (vérification
     // désactivée tant que RECAPTCHA_SECRET_KEY n'est pas définie sur le serveur).

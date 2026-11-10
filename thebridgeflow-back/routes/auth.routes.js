@@ -18,17 +18,19 @@ import {
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { uploadCV } from "../middleware/upload.middleware.js";
+import { verifyRecaptcha } from "../middleware/recaptcha.middleware.js";
 // Créer un routeur Express
 const router = express.Router();
 // Définir les routes pour l'authentification et la gestion du compte
-router.post("/register",     register);
-router.post("/login",        login);
+// (reCAPTCHA sur les formulaires publics ; Google/Facebook sont déjà vérifiés par le fournisseur)
+router.post("/register",     verifyRecaptcha, register);
+router.post("/login",        verifyRecaptcha, login);
 router.post("/google",       googleAuth);
 router.post("/facebook",     facebookAuth);
-router.post("/verify-email", verifyEmail);
-router.post("/resend-code",  resendCode);
-router.post("/forgot-password",        forgotPassword);
-router.post("/reset-password/:token",  resetPassword);
+router.post("/verify-email", verifyRecaptcha, verifyEmail);
+router.post("/resend-code",  verifyRecaptcha, resendCode);
+router.post("/forgot-password",        verifyRecaptcha, forgotPassword);
+router.post("/reset-password/:token",  verifyRecaptcha, resetPassword);
 router.get("/me",            protect, getMe);
 router.put("/profile",       protect, updateProfile);
 router.post("/profile/cv",   protect, uploadCV, uploadProfileCV);

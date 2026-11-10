@@ -15,7 +15,6 @@ import Offer from "./models/offers.model.js";
 import asyncHandler from "./utils/asyncHandler.js";
 import { verifyEmailConfig } from "./services/email.service.js";
 import { mongoSanitize } from "./middleware/sanitize.middleware.js";
-import { verifyRecaptcha } from "./middleware/recaptcha.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
 import offersRoutes from "./routes/offers.routes.js";
 import applicationsRoutes from "./routes/applications.routes.js";
@@ -115,7 +114,8 @@ app.use(cookieParser());
 
 // ─── Protection NoSQL injection (compatible Express 5) ────────────────────────
 app.use(mongoSanitize);
-app.use("/api", verifyRecaptcha);
+// reCAPTCHA : appliqué route par route (connexion, inscription, formulaires publics),
+// voir verifyRecaptcha dans routes/auth, contactMessages, newsletter et pfePackRegistration.
 
 // ─── Uploads statiques ───────────────────────────────────────────────────────
 // helmet() applique par défaut Cross-Origin-Resource-Policy: same-origin, ce

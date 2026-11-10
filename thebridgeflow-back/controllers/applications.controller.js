@@ -42,7 +42,17 @@ export const createApplication = asyncHandler(async (req, res) => {
 
   const cvFile = req.files?.cv?.[0];
   const coverLetterFile = req.files?.coverLetter?.[0];
-  const cvUrl = cvFile ? `/uploads/${cvFile.filename}` : "";
+
+  // CV obligatoire : le fichier joint, sinon le CV du profil. La lettre de
+  // motivation reste facultative.
+  const profileCvUrl = req.user.cv?.fileUrl || "";
+  if (!cvFile && !profileCvUrl) {
+    removeUploadedFiles();
+    const err = new Error("Le CV est obligatoire pour postuler. Joignez un CV ou ajoutez-en un à votre profil.");
+    err.statusCode = 400;
+    throw err;
+  }
+  const cvUrl = cvFile ? `/uploads/${cvFile.filename}` : profileCvUrl;
 
   const application = await Application.create({
     offerId,
@@ -52,6 +62,25 @@ export const createApplication = asyncHandler(async (req, res) => {
     coverLetterName: coverLetterFile?.originalname || "",
     cvUrl,
   });
+
+  // Premier CV de l'étudiant : on l'enregistre aussi dans son profil pour ses
+  // prochaines candidatures, sans jamais écraser un CV de profil existant.
+  // Un échec ici ne doit pas faire échouer la candidature déjà créée.
+  let profileCvSaved = false;
+  if (cvFile && !profileCvUrl) {
+    try {
+      const result = await User.updateOne(
+        { _id: req.user._id, "cv.fileUrl": { $in: ["", null] } },
+        { $set: { cv: {
+          fileName: cvFile.originalname,
+          fileUrl: `${req.protocol}://${req.get("host")}/uploads/${cvFile.filename}`,
+        } } },
+      );
+      profileCvSaved = result.modifiedCount > 0;
+    } catch (error) {
+      console.error("[applications] Impossible d'enregistrer le CV dans le profil", { message: error.message });
+    }
+  }
 
   const studentNotification = {
     title: "Candidature envoyée",
@@ -88,7 +117,7 @@ export const createApplication = asyncHandler(async (req, res) => {
     },
   }));
 
-  res.status(201).json({ application });
+  res.status(201).json({ application, profileCvSaved });
 });
 
 // GET /api/applications
