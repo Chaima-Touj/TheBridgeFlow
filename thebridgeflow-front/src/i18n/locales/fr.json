@@ -1342,10 +1342,7 @@
     "loading": "Connexion...",
     "errorRequired": "Veuillez saisir votre email et votre mot de passe.",
     "errorDefault": "Email ou mot de passe incorrect",
-    "captchaPrompt": "Confirmez que vous n’êtes pas un robot pour continuer.",
-    "continueAfterCaptcha": "Continuer",
-    "captchaNotConfigured": "La clé du reCAPTCHA v2 Checkbox n’est pas configurée dans VITE_RECAPTCHA_V2_SITE_KEY.",
-    "captchaUnavailable": "Le reCAPTCHA ne peut pas être chargé. Vérifiez votre connexion et réessayez."
+    "captchaUnavailable": "La vérification anti-robot est indisponible. Vérifiez votre connexion et réessayez."
   },
   "adminFormations": {
     "pageSubtitle": "Gérer le catalogue de formations",

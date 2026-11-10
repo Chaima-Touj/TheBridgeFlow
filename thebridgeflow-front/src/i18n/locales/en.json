@@ -1342,10 +1342,7 @@
     "loading": "Signing in...",
     "errorRequired": "Please enter your email and password.",
     "errorDefault": "Incorrect email or password",
-    "captchaPrompt": "Confirm that you're not a robot to continue.",
-    "continueAfterCaptcha": "Continue",
-    "captchaNotConfigured": "The reCAPTCHA v2 Checkbox key is not configured in VITE_RECAPTCHA_V2_SITE_KEY.",
-    "captchaUnavailable": "reCAPTCHA could not be loaded. Check your connection and try again."
+    "captchaUnavailable": "Bot verification is unavailable. Check your connection and try again."
   },
   "adminFormations": {
     "pageSubtitle": "Manage the training catalog",

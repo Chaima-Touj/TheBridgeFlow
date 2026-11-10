@@ -1346,10 +1346,7 @@
     "loading": "جارٍ الدخول...",
     "errorRequired": "يرجى إدخال بريدك الإلكتروني وكلمة المرور.",
     "errorDefault": "البريد أو كلمة المرور غير صحيحة",
-    "captchaPrompt": "أكد أنك لست روبوتًا للمتابعة.",
-    "continueAfterCaptcha": "متابعة",
-    "captchaNotConfigured": "مفتاح reCAPTCHA v2 Checkbox غير مُعدّ في VITE_RECAPTCHA_V2_SITE_KEY.",
-    "captchaUnavailable": "تعذّر تحميل reCAPTCHA. تحقق من اتصالك وحاول مجددًا."
+    "captchaUnavailable": "التحقق من الروبوتات غير متاح. تحقق من اتصالك وحاول مجددًا."
   },
   "adminFormations": {
     "pageSubtitle": "إدارة كتالوج التكوينات",

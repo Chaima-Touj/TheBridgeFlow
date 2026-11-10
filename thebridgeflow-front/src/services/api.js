@@ -7,10 +7,10 @@ const api = axios.create({
 });
 
 // Formulaires protégés par reCAPTCHA v3 (même liste que verifyRecaptcha dans les routes
-// du backend) : inscription, vérification email, mot de passe oublié,
+// du backend) : connexion, inscription, vérification email, mot de passe oublié,
 // contact, newsletter et Pack PFE. Les autres requêtes ne chargent pas reCAPTCHA.
 const RECAPTCHA_ENDPOINTS = [
-  /^\/auth\/(register|verify-email|resend-code|forgot-password)$/,
+  /^\/auth\/(register|login|verify-email|resend-code|forgot-password)$/,
   /^\/auth\/reset-password\/[^/]+$/,
   /^\/contact-messages\/?$/,
   /^\/newsletter\/subscribe$/,
@@ -36,6 +36,9 @@ api.interceptors.request.use(async (config) => {
       ]);
     } catch (captchaError) {
       console.warn("[recaptcha]", captchaError.message);
+      if (/\/auth\/login$/.test((config.url || "").split("?")[0])) {
+        throw new Error("RECAPTCHA_UNAVAILABLE", { cause: captchaError });
+      }
     }
     if (captchaToken) {
       config.headers = config.headers || {};
