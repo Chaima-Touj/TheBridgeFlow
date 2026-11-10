@@ -1,6 +1,6 @@
 // Client reCAPTCHA v2 « Je ne suis pas un robot » (case visible).
-// Actif seulement si VITE_RECAPTCHA_V2_SITE_KEY est défini ; sinon l'app garde
-// reCAPTCHA v3 invisible (voir recaptchaV3Client.js et services/api.js).
+// Actif seulement si VITE_RECAPTCHA_V2_SITE_KEY est défini ; sinon aucun captcha
+// n'est affiché (voir services/api.js).
 export const RECAPTCHA_V2_SITE_KEY = import.meta.env.VITE_RECAPTCHA_V2_SITE_KEY || "";
 
 const ONLOAD_CALLBACK = "__onRecaptchaV2Load";

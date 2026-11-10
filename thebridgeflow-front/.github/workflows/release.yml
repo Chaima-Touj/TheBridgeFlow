@@ -59,7 +59,7 @@ jobs:
             VITE_API_URL=https://9antra.tn/api
             VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
             VITE_FACEBOOK_APP_ID=${{ vars.VITE_FACEBOOK_APP_ID }}
-            VITE_RECAPTCHA_SITE_KEY=6LdPIxguAAAAALu9opNZ0Sjl6VPgOaUgAFVe7eZr
+            VITE_RECAPTCHA_V2_SITE_KEY=6LeSqhkuAAAAAJv_I8lmlzX7yD4YFOEbEnlgqwgw
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.RELEASE_SHA }}
 

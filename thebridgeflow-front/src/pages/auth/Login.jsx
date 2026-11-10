@@ -59,10 +59,6 @@ export default function Login() {
       navigate(safeReturnTo ? returnTo : ROUTES[data.user?.role] || "/dashboard/student");
 
     } catch (err) {
-      if (err.message === "RECAPTCHA_UNAVAILABLE") {
-        setError(t("login.captchaUnavailable"));
-        return;
-      }
       const d = err.response?.data;
       if (d?.needsVerify) {
         navigate("/verify-email", { state: { email: d.email } });
