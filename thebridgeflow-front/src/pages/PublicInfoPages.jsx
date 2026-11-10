@@ -12,6 +12,7 @@ import { feedbacksService } from "../services/feedbacks.service.js";
 import { contactMessagesService } from "../services/contactMessages.service.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import "./PublicInfoPages.css";
 
 export default function PublicInfoPage({ type }) {
@@ -22,6 +23,7 @@ export default function PublicInfoPage({ type }) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const captcha = useRecaptchaCheckbox();
   const title = type === "about" ? t("landing.aboutTitle") : type === "testimonials" ? t("nav.testimonials") : t("landing.contactTitle");
   useDocumentMeta({ title: `${title} — TheBridgeFlow`, description: title });
 
@@ -33,14 +35,21 @@ export default function PublicInfoPage({ type }) {
 
   const handleContact = async (event) => {
     event.preventDefault();
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
     setSending(true); setError("");
     try {
-      await contactMessagesService.submit(form);
+      await contactMessagesService.submit(form, captcha.requestConfig);
       setSent(true);
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (submitError) {
       setError(submitError.response?.data?.message || t("landing.contactError"));
-    } finally { setSending(false); }
+    } finally {
+      setSending(false);
+      captcha.reset();
+    }
   };
 
   return <div className="public-info-page">
@@ -95,6 +104,7 @@ export default function PublicInfoPage({ type }) {
               <label>{t("landing.contactMessage")}<textarea required rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={t("landing.contactMessage")} /></label>
               {sent && <p className="pi-contact__notice pi-contact__notice--success" role="status">{t("landing.contactSuccess")}</p>}
               {error && <p className="pi-contact__notice pi-contact__notice--error" role="alert">{error}</p>}
+              {captcha.widget}
               <button className="btn btn-primary" type="submit" disabled={sending}>
                 {sending ? t("landing.contactSending") : t("landing.contactSend")} <FiSend aria-hidden="true" />
               </button>

@@ -1,7 +1,7 @@
 import api from "./api.js";
 
 export const contactMessagesService = {
-  submit: (payload) => api.post("/contact-messages", payload),
+  submit: (payload, config) => api.post("/contact-messages", payload, config),
   getAll: () => api.get("/contact-messages"),
   markRead: (id) => api.patch(`/contact-messages/${id}/read`),
 };

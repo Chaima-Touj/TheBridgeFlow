@@ -3,10 +3,12 @@ import { createApplication, getApplications, getApplication, updateStatus } from
 import { protect } from "../middleware/auth.middleware.js";
 import { uploadApplicationFiles } from "../middleware/upload.middleware.js";
 import { requireStudentPhone } from "../middleware/requireStudentPhone.middleware.js";
+import { verifyRecaptcha } from "../middleware/recaptcha.middleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, requireStudentPhone, (req, res, next) => {
+// reCAPTCHA vérifié avant l'upload : une requête refusée n'écrit aucun fichier sur le disque.
+router.post("/", protect, requireStudentPhone, verifyRecaptcha, (req, res, next) => {
   uploadApplicationFiles(req, res, (error) => {
     if (error) {
       const uploadError = new Error(error.message);

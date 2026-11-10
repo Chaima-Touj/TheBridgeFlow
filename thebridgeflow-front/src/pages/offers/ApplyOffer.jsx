@@ -14,6 +14,7 @@ import { offersService }         from "../../services/offers.service.js";
 import { profileService }        from "../../services/profile.service.js";
 import { applicationsService }   from "../../services/applications.service.js";
 import { usePhoneRequirement } from "../../hooks/usePhoneRequirement.jsx";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./ApplyOffer.css";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
@@ -154,6 +155,7 @@ export default function ApplyOffer() {
   const fileInputRef = useRef(null);
   const coverLetterInputRef = useRef(null);
   const hasCvProfile = !!(profile?.cv?.fileUrl);
+  const captcha = useRecaptchaCheckbox();
 
   /* load ──────────────────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -197,7 +199,7 @@ export default function ApplyOffer() {
       if (cvFile) formData.append("cv", cvFile);
       if (coverLetterFile) formData.append("coverLetter", coverLetterFile);
 
-      const { data } = await applicationsService.create(formData);
+      const { data } = await applicationsService.create(formData, captcha.requestConfig);
       setProfileCvSaved(!!data?.profileCvSaved);
       setSubmitted(true);
     } catch (err) {
@@ -211,6 +213,7 @@ export default function ApplyOffer() {
       }
     } finally {
       setSubmitting(false);
+      captcha.reset();
     }
   };
 
@@ -220,6 +223,10 @@ export default function ApplyOffer() {
     if (!cvFile && !hasCvProfile) {
       setCvMissing(true);
       setError(t("apply.errorCvRequired"));
+      return;
+    }
+    if (captcha.missing) {
+      setError(t("captcha.required"));
       return;
     }
     await runWithPhone(submitApplication);
@@ -541,6 +548,7 @@ export default function ApplyOffer() {
 
             {/* Submit section */}
             <div className="ao-submit-section">
+              {captcha.widget}
               {error && (
                 <div className="ao-error">
                   <FiAlertCircle size={16} />

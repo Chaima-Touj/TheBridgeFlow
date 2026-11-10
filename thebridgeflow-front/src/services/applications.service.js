@@ -2,7 +2,7 @@ import api from "./api.js";
 
 export const applicationsService = {
   // Créer une candidature
-  create: (data) => api.post("/applications", data),
+  create: (data, config) => api.post("/applications", data, config),
 
   // Récupérer toutes mes candidatures
   getAll: () => api.get("/applications"),

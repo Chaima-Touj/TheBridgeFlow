@@ -40,6 +40,7 @@ import { newsletterService } from "../services/newsletter.service.js";
 import { contactMessagesService } from "../services/contactMessages.service.js";
 import Modal from "../components/common/Modal.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import "./LandingPage.css";
@@ -106,6 +107,9 @@ export default function LandingPage() {
   const [newsletter,  setNewsletter]  = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState(null);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  // Une case « Je ne suis pas un robot » par formulaire (contact et newsletter).
+  const contactCaptcha = useRecaptchaCheckbox();
+  const newsletterCaptcha = useRecaptchaCheckbox();
   const [allFormations, setAllFormations] = useState([]);
   const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
   const [promoOpen,   setPromoOpen]   = useState(false);
@@ -151,10 +155,14 @@ export default function LandingPage() {
   const handleContact = async (e) => {
     e.preventDefault();
     if (contactSending) return;
+    if (contactCaptcha.missing) {
+      setContactError(t("captcha.required"));
+      return;
+    }
     setContactSending(true);
     setContactError("");
     try {
-      await contactMessagesService.submit(form);
+      await contactMessagesService.submit(form, contactCaptcha.requestConfig);
       setSent(true);
       setForm({ name: "", email: "", subject: "", message: "" });
       setTimeout(() => setSent(false), 4000);
@@ -162,16 +170,21 @@ export default function LandingPage() {
       setContactError(error.response?.data?.message || t("landing.contactError"));
     } finally {
       setContactSending(false);
+      contactCaptcha.reset();
     }
   };
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (newsletterSubmitting) return;
+    if (newsletterCaptcha.missing) {
+      setNewsletterStatus({ type: "error", message: t("captcha.required") });
+      return;
+    }
     setNewsletterSubmitting(true);
     setNewsletterStatus(null);
     try {
-      const { data } = await newsletterService.subscribe(newsletter, lang);
+      const { data } = await newsletterService.subscribe(newsletter, lang, newsletterCaptcha.requestConfig);
       setNewsletterStatus({ type: "success", message: data.message || t("landing.newsletterSuccess") });
       setNewsletter("");
     } catch (err) {
@@ -181,6 +194,7 @@ export default function LandingPage() {
       });
     } finally {
       setNewsletterSubmitting(false);
+      newsletterCaptcha.reset();
     }
   };
 
@@ -804,6 +818,7 @@ export default function LandingPage() {
                   placeholder={t("landing.contactMessage")}
                 />
               </div>
+              {contactCaptcha.widget}
               <button type="submit" className="btn btn-primary lp-contact__submit" disabled={contactSending}>
                 {contactSending ? t("landing.contactSending") : t("landing.contactSend")} <FiSend size={16} />
               </button>
@@ -893,6 +908,7 @@ export default function LandingPage() {
             <button className="btn btn-primary" type="submit" disabled={newsletterSubmitting}>
               {newsletterSubmitting ? t("landing.newsletterSubmitting") : t("landing.newsletterBtn")}
             </button>
+            {newsletterCaptcha.widget}
           </form>
         </div>
       </section>

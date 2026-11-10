@@ -1,10 +1,11 @@
 export function validatePfePackRegistration(input) {
-  const { firstName, lastName, phone, email, technologies, subject } = input || {};
+  const { firstName, lastName, phone, email, university, city, technologies, locationMode, preferredLocation, subject, consentConfirmed } = input || {};
   const requiredText = [
     ["firstName", firstName, 80],
     ["lastName", lastName, 80],
     ["phone", phone, 32],
-    ["subject", subject, 3000],
+    ["university", university, 160],
+    ["city", city, 100],
   ];
 
   for (const [field, value, maxLength] of requiredText) {
@@ -20,22 +21,43 @@ export function validatePfePackRegistration(input) {
     error.statusCode = 400;
     throw error;
   }
-  if (!Array.isArray(technologies) || technologies.length === 0 || technologies.length > 20) {
-    const error = new Error("Indiquez entre 1 et 20 technologies.");
+  if (!Array.isArray(technologies) || technologies.length < 2 || technologies.length > 20) {
+    const error = new Error("Indiquez entre 2 et 20 technologies.");
     error.statusCode = 400;
     throw error;
   }
 
   const cleanedTechnologies = [...new Set(technologies.map((technology) => {
-    if (typeof technology !== "string" || technology.trim().length > 60) {
-      const error = new Error("Chaque technologie doit contenir au maximum 60 caractères.");
+    if (typeof technology !== "string" || technology.trim().length > 160) {
+      const error = new Error("Chaque technologie doit contenir au maximum 160 caractères.");
       error.statusCode = 400;
       throw error;
     }
     return technology.trim();
   }).filter(Boolean))];
-  if (!cleanedTechnologies.length) {
-    const error = new Error("Indiquez au moins une technologie.");
+  if (cleanedTechnologies.length < 2) {
+    const error = new Error("Indiquez au moins deux technologies différentes.");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!["remote", "onsite"].includes(locationMode)) {
+    const error = new Error("Choisissez un mode de stage valide.");
+    error.statusCode = 400;
+    throw error;
+  }
+  const cleanedLocation = typeof preferredLocation === "string" ? preferredLocation.trim() : "";
+  if ((locationMode === "onsite" && !cleanedLocation) || cleanedLocation.length > 200) {
+    const error = new Error("Indiquez un lieu de stage valide.");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (consentConfirmed !== true) {
+    const error = new Error("Confirmez l’exactitude des informations et votre accord pour être contacté.");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (subject !== undefined && (typeof subject !== "string" || subject.trim().length > 3000)) {
+    const error = new Error("Le sujet ne doit pas dépasser 3000 caractères.");
     error.statusCode = 400;
     throw error;
   }
@@ -45,7 +67,12 @@ export function validatePfePackRegistration(input) {
     lastName: lastName.trim(),
     phone: phone.trim(),
     email: email.trim().toLowerCase(),
+    university: university.trim(),
+    city: city.trim(),
     technologies: cleanedTechnologies,
-    subject: subject.trim(),
+    locationMode,
+    preferredLocation: locationMode === "onsite" ? cleanedLocation : "",
+    consentConfirmed,
+    ...(typeof subject === "string" ? { subject: subject.trim() } : {}),
   };
 }

@@ -9,6 +9,7 @@ import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
 import BoxReveal from "../../components/auth/BoxReveal.jsx";
 import Loader from "../../components/common/Loader.jsx";
 import api from "../../services/api.js";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./Auth.css";
 
 const ROUTES = {
@@ -28,6 +29,7 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
+  const captcha = useRecaptchaCheckbox();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,9 +38,13 @@ export default function Login() {
       setError(t("login.errorRequired"));
       return;
     }
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/login", { email, password, rememberMe: remember });
+      const { data } = await api.post("/auth/login", { email, password, rememberMe: remember }, captcha.requestConfig);
 
       // Email non vérifié
       if (data.needsVerify) {
@@ -65,6 +71,7 @@ export default function Login() {
       setError(d?.message || t("login.errorDefault"));
     } finally {
       setLoading(false);
+      captcha.reset();
     }
   };
 
@@ -143,6 +150,8 @@ export default function Login() {
               </label>
               <Link to="/forgot-password" className="auth-forgot">{t("login.forgot")}</Link>
             </div>
+
+            {captcha.widget}
 
             {/* Bouton connexion */}
             <BoxReveal width="100%">

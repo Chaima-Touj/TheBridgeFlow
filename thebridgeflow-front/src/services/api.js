@@ -1,20 +1,26 @@
 import axios from "axios";
 import { getToken, clearToken } from "../utils/tokenStorage.js";
 import { getRecaptchaToken } from "../utils/recaptchaV3Client.js";
+import { RECAPTCHA_V2_SITE_KEY } from "../utils/recaptchaV2Client.js";
+
+const RECAPTCHA_V3_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
-// Formulaires protégés par reCAPTCHA v3 (même liste que verifyRecaptcha dans les routes
+// Formulaires protégés par reCAPTCHA (même liste que verifyRecaptcha dans les routes
 // du backend) : connexion, inscription, vérification email, mot de passe oublié,
-// contact, newsletter et Pack PFE. Les autres requêtes ne chargent pas reCAPTCHA.
+// contact, newsletter, Pack PFE et candidature à une offre.
+// - Case v2 visible : le formulaire passe { recaptchaToken } dans la config de la requête.
+// - Sinon v3 invisible : le jeton est demandé ici pour ces endpoints.
 const RECAPTCHA_ENDPOINTS = [
   /^\/auth\/(register|login|verify-email|resend-code|forgot-password)$/,
   /^\/auth\/reset-password\/[^/]+$/,
   /^\/contact-messages\/?$/,
   /^\/newsletter\/subscribe$/,
   /^\/pfe-pack\/registrations\/?$/,
+  /^\/applications\/?$/,
 ];
 
 function needsRecaptcha(config) {
@@ -24,10 +30,19 @@ function needsRecaptcha(config) {
 }
 
 api.interceptors.request.use(async (config) => {
-  if (needsRecaptcha(config)) {
-    // Jeton reCAPTCHA en best-effort : si Google est bloqué, lent ou non configuré,
-    // la requête part sans jeton et c'est le backend qui décide (vérification
-    // désactivée tant que RECAPTCHA_SECRET_KEY n'est pas définie sur le serveur).
+  // Case v2 « Je ne suis pas un robot » cochée dans le formulaire.
+  if (config.recaptchaToken) {
+    config.headers = config.headers || {};
+    config.headers["X-Recaptcha-Token"] = config.recaptchaToken;
+    config.headers["X-Recaptcha-Version"] = "v2";
+    return config;
+  }
+
+  // reCAPTCHA v3 invisible : seulement si la case v2 n'est pas configurée et
+  // qu'une clé v3 existe (sinon rien à demander à Google).
+  if (!RECAPTCHA_V2_SITE_KEY && RECAPTCHA_V3_SITE_KEY && needsRecaptcha(config)) {
+    // Jeton reCAPTCHA en best-effort : si Google est bloqué ou lent, la requête
+    // part sans jeton et c'est le backend qui décide (sauf pour la connexion).
     let captchaToken;
     try {
       captchaToken = await Promise.race([

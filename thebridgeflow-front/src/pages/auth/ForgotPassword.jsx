@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FiAlertCircle, FiCheckCircle, FiKey } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./VerifyEmail.css";
 
 export default function ForgotPassword() {
@@ -13,6 +14,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
   const [success, setSuccess] = useState(false);
+  const captcha = useRecaptchaCheckbox();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,14 +23,19 @@ export default function ForgotPassword() {
       setError(t("forgotPassword.errorRequired"));
       return;
     }
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
     setLoading(true);
     try {
-      await api.post("/auth/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email }, captcha.requestConfig);
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || t("forgotPassword.errorDefault"));
     } finally {
       setLoading(false);
+      captcha.reset();
     }
   };
 
@@ -67,6 +74,8 @@ export default function ForgotPassword() {
               required
               autoFocus
             />
+
+            {captcha.widget}
 
             <button type="submit" className="btn btn-primary verify-btn" disabled={loading}>
               {loading ? t("forgotPassword.sending") : t("forgotPassword.submitBtn")}

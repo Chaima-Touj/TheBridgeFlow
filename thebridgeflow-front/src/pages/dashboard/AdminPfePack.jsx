@@ -105,9 +105,13 @@ export default function AdminPfePack() {
                       <div className="appfe-detail-grid">
                         <article><span>{t("adminPfePack.email")}</span><a href={`mailto:${details.email}`}><Mail size={15} /> {details.email}</a></article>
                         <article><span>{t("adminPfePack.phone")}</span><a href={`tel:${details.phone}`}>{details.phone}</a></article>
+                        <article><span>{t("adminPfePack.university")}</span><p>{details.university || "—"}</p></article>
+                        <article><span>{t("adminPfePack.city")}</span><p>{details.city || "—"}</p></article>
                         <article><span>{t("adminPfePack.registeredAt")}</span><p>{new Date(details.createdAt).toLocaleString(dateLocale)}</p></article>
                         <article className="appfe-detail-grid__wide"><span>{t("adminPfePack.technologies")}</span><div className="appfe-tags">{details.technologies?.map((technology) => <span key={technology}>{technology}</span>)}</div></article>
-                        <article className="appfe-detail-grid__wide"><span>{t("adminPfePack.subject")}</span><p className="appfe-subject">{details.subject}</p></article>
+                        <article><span>{t("adminPfePack.locationMode")}</span><p>{details.locationMode ? t(details.locationMode === "remote" ? "adminPfePack.remote" : "adminPfePack.onsite") : "—"}</p></article>
+                        {details.locationMode === "onsite" && <article><span>{t("adminPfePack.preferredLocation")}</span><p>{details.preferredLocation || "—"}</p></article>}
+                        {details.subject && <article className="appfe-detail-grid__wide"><span>{t("adminPfePack.subject")}</span><p className="appfe-subject">{details.subject}</p></article>}
                       </div>
                     </>}
               </section>

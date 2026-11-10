@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, BookOpen, CheckCircle2, Code2, FileText, Lightbulb, Mail, Phone, Plus, Trophy, X } from "lucide-react";
+import { ArrowRight, BookOpen, Building2, CheckCircle2, Code2, FileText, Gift, GraduationCap, Lightbulb, Mail, MapPin, Monitor, Phone, Search, Trophy, University, UserRound } from "lucide-react";
 import Modal from "../components/common/Modal.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
@@ -11,7 +11,7 @@ import { buildWhatsAppLink } from "../utils/whatsapp.js";
 import { TbBrandWhatsapp } from "react-icons/tb";
 import { formationsService } from "../services/formations.service.js";
 import { pfePackService } from "../services/pfePack.service.js";
-import { offersService } from "../services/offers.service.js";
+import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import "./PfePackPage.css";
 
 const STEPS = [
@@ -20,13 +20,16 @@ const STEPS = [
   { key: "stepThree", Icon: CheckCircle2 },
 ];
 
-const TECHNOLOGY_SUGGESTIONS = [
-  "AdonisJS", "Angular", "ASP.NET Core", "Astro", "Blazor", "Bootstrap", "CakePHP",
-  "CodeIgniter", "Django", "Express.js", "FastAPI", "Fastify", "Flask", "Flutter",
-  "Gatsby", "Gin", "Hapi", "Ionic", "Koa", "Laravel", "Lit", "Micronaut", "NestJS",
-  "Next.js", "Nuxt", "Phoenix", "Quarkus", "React", "React Native", "Remix",
-  "Ruby on Rails", "SolidJS", "Spring Boot", "Strapi", "Svelte", "Symfony",
-  "Tailwind CSS", "Vue.js", "Yii",
+const FEATURED_TECHNOLOGIES = [
+  "Mobile Development (Flutter + Node/Spring Boot)",
+  "Full Stack Development (Spring Boot + Angular)",
+  "Marketing Digital",
+  "Business Intelligence (BI)",
+  "Artificial Intelligence (AI Chatbot / Système de recommandation)",
+  "Internet of Things (IoT)",
+  "DevOps",
+  "MERN Stack Development (React + Node)",
+  "Cyber Security",
 ];
 
 export default function PfePackPage() {
@@ -37,17 +40,28 @@ export default function PfePackPage() {
     lastName: "",
     phone: "",
     email: "",
-    technologies: [""],
-    subject: "",
-    customSubject: "",
+    university: "",
+    city: "",
+    technologies: [],
+    locationMode: "remote",
+    preferredLocation: "",
+    customLocation: "",
+    consentConfirmed: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [formations, setFormations] = useState([]);
   const [formationsError, setFormationsError] = useState(false);
-  const [stageOffers, setStageOffers] = useState([]);
-  const [stageOffersStatus, setStageOffersStatus] = useState("loading");
+  const [technologySearch, setTechnologySearch] = useState("");
+  const captcha = useRecaptchaCheckbox();
+
+  const technologyOptions = [...new Set([
+    ...FEATURED_TECHNOLOGIES,
+    ...formations.map((formation) => formation.title?.trim()).filter(Boolean),
+  ])].sort((a, b) => a.localeCompare(b));
+  const filteredTechnologyOptions = technologyOptions.filter((technology) =>
+    technology.toLocaleLowerCase().includes(technologySearch.trim().toLocaleLowerCase()));
 
   useEffect(() => {
     let active = true;
@@ -58,26 +72,6 @@ export default function PfePackPage() {
       .catch((error) => {
         console.error("Failed to load trainings for the Pack PFE page", error);
         if (active) setFormationsError(true);
-      });
-    return () => { active = false; };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    offersService.getAll({ type: "stage", page: 1, limit: 50, sort: "-createdAt" })
-      .then(({ data }) => {
-        const offers = Array.isArray(data) ? data : data?.offers;
-        if (active) {
-          const internships = Array.isArray(offers)
-            ? offers.filter((offer) => !offer.type || offer.type.toLowerCase() === "stage")
-            : [];
-          setStageOffers(internships.slice(0, 10));
-          setStageOffersStatus("loaded");
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load internship offers for the Pack PFE form", error);
-        if (active) setStageOffersStatus("error");
       });
     return () => { active = false; };
   }, []);
@@ -93,48 +87,51 @@ export default function PfePackPage() {
     setFormData((current) => ({ ...current, [name]: value }));
   };
 
-  const handleTechnologyChange = (index, value) => {
+  const toggleTechnology = (technology) => {
     setFormData((current) => ({
       ...current,
-      technologies: current.technologies.map((technology, itemIndex) => itemIndex === index ? value : technology),
-    }));
-  };
-
-  const addTechnology = () => {
-    setFormData((current) => ({ ...current, technologies: [...current.technologies, ""] }));
-  };
-
-  const removeTechnology = (index) => {
-    setFormData((current) => ({
-      ...current,
-      technologies: current.technologies.filter((_, itemIndex) => itemIndex !== index),
+      technologies: current.technologies.includes(technology)
+        ? current.technologies.filter((item) => item !== technology)
+        : current.technologies.length < 20 ? [...current.technologies, technology] : current.technologies,
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const technologies = formData.technologies.map((technology) => technology.trim()).filter(Boolean);
-    if (!technologies.length) {
+    const technologies = [...new Set(formData.technologies.map((technology) => technology.trim()).filter(Boolean))];
+    if (technologies.length < 2) {
       setFormError(t("pfePack.technologyRequired"));
       return;
     }
-    const subject = formData.subject === "other"
-      ? formData.customSubject.trim()
-      : stageOffers.find((offer) => String(offer._id) === formData.subject)?.title || "";
-    if (!subject) {
-      setFormError(t("pfePack.subjectRequired"));
+    if (!formData.consentConfirmed) {
+      setFormError(t("pfePack.consentRequired"));
+      return;
+    }
+    const preferredLocation = formData.locationMode === "remote"
+      ? ""
+      : formData.preferredLocation === "other"
+        ? formData.customLocation.trim()
+        : formData.preferredLocation;
+    if (formData.locationMode === "onsite" && !preferredLocation) {
+      setFormError(t("pfePack.locationRequired"));
+      return;
+    }
+    if (captcha.missing) {
+      setFormError(t("captcha.required"));
       return;
     }
     setSubmitting(true);
     setFormError("");
     try {
-      await pfePackService.register({ ...formData, technologies, subject });
+      await pfePackService.register({ ...formData, technologies, preferredLocation }, captcha.requestConfig);
       setSubmitted(true);
-      setFormData({ firstName: "", lastName: "", phone: "", email: "", technologies: [""], subject: "", customSubject: "" });
+      setFormData({ firstName: "", lastName: "", phone: "", email: "", university: "", city: "", technologies: [], locationMode: "remote", preferredLocation: "", customLocation: "", consentConfirmed: false });
+      setTechnologySearch("");
     } catch (error) {
       setFormError(error.response?.data?.message || t("pfePack.formError"));
     } finally {
       setSubmitting(false);
+      captcha.reset();
     }
   };
 
@@ -264,65 +261,73 @@ export default function PfePackPage() {
         <TbBrandWhatsapp size={30} aria-hidden="true" />
       </a>
 
-      {isFormOpen && <Modal title={t("pfePack.formTitle")} onClose={() => setIsFormOpen(false)} maxWidth={620} className="pfe-form-modal">
+      {isFormOpen && <Modal
+        title={t("pfePack.formTitle")}
+        onClose={() => setIsFormOpen(false)}
+        maxWidth={960}
+        className="pfe-form-modal"
+        titleIcon={<span className="pfe-form-modal__title-icon" aria-hidden="true"><GraduationCap size={30} /></span>}
+        headerContent={<span className="pfe-form-modal__badge"><Gift size={16} aria-hidden="true" />{t("pfePack.formBadge")}</span>}
+      >
         {submitted ? <div className="pfe-form-success" role="status"><CheckCircle2 size={36} /><h3>{t("pfePack.successTitle")}</h3><p>{t("pfePack.successDescription")}</p></div>
           : <form className="pfe-form" onSubmit={handleSubmit}>
-            <p className="pfe-form__notice">{t("pfePack.formNotice")}</p>
+            <p className="pfe-form__notice"><span><CheckCircle2 size={17} aria-hidden="true" /></span>{t("pfePack.formNotice")}</p>
             {formError && <p className="pfe-form__error" role="alert">{formError}</p>}
             <div className="pfe-form__grid">
-              <label>{t("pfePack.firstName")}<input name="firstName" value={formData.firstName} onChange={handleChange} maxLength={80} required autoComplete="given-name" /></label>
-              <label>{t("pfePack.lastName")}<input name="lastName" value={formData.lastName} onChange={handleChange} maxLength={80} required autoComplete="family-name" /></label>
+              <label><span><UserRound size={15} /> {t("pfePack.lastName")}</span><input name="lastName" value={formData.lastName} onChange={handleChange} maxLength={80} required autoComplete="family-name" /></label>
+              <label><span><UserRound size={15} /> {t("pfePack.firstName")}</span><input name="firstName" value={formData.firstName} onChange={handleChange} maxLength={80} required autoComplete="given-name" /></label>
               <label><span><Phone size={15} /> {t("pfePack.phone")}</span><input name="phone" type="tel" value={formData.phone} onChange={handleChange} maxLength={32} required autoComplete="tel" /></label>
               <label><span><Mail size={15} /> {t("pfePack.email")}</span><input name="email" type="email" value={formData.email} onChange={handleChange} maxLength={254} required autoComplete="email" /></label>
+              <label><span><University size={15} /> {t("pfePack.university")}</span><input name="university" value={formData.university} onChange={handleChange} maxLength={160} required autoComplete="organization" /></label>
+              <label><span><MapPin size={15} /> {t("pfePack.city")}</span><input name="city" value={formData.city} onChange={handleChange} maxLength={100} required autoComplete="address-level2" /></label>
               <div className="pfe-form__wide pfe-form__technology-field">
-                <span className="pfe-form__field-label">{t("pfePack.technologies")}</span>
-                <div className="pfe-form__technology-list">
-                  {formData.technologies.map((technology, index) => (
-                    <div className="pfe-form__technology-row" key={`technology-${index}`}>
-                      <input
-                        type="text"
-                        value={technology}
-                        onChange={(event) => handleTechnologyChange(index, event.target.value)}
-                        maxLength={60}
-                        required={index === 0}
-                        list="pfe-technology-suggestions"
-                        aria-label={t("pfePack.technologyNumber", { number: index + 1 })}
-                        placeholder={t("pfePack.technologyPlaceholder")}
-                      />
-                      {formData.technologies.length > 1 && (
-                        <button type="button" className="pfe-form__remove-technology" onClick={() => removeTechnology(index)} aria-label={t("pfePack.removeTechnology")}>
-                          <X size={17} aria-hidden="true" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                <span className="pfe-form__field-label"><Code2 size={16} aria-hidden="true" /> {t("pfePack.technologies")}</span>
+                <p className="pfe-form__tech-description">{t("pfePack.technologyInstructions")}</p>
+                <label className="pfe-tech-picker__search"><Search size={16} aria-hidden="true" /><input value={technologySearch} onChange={(event) => setTechnologySearch(event.target.value)} placeholder={t("pfePack.searchTechnologies")} /></label>
+                <div className="pfe-tech-picker__options" role="group" aria-label={t("pfePack.technologies")}>
+                  {filteredTechnologyOptions.map((technology) => {
+                    const selected = formData.technologies.includes(technology);
+                    return <button type="button" role="checkbox" aria-checked={selected} className={`pfe-tech-option${selected ? " is-selected" : ""}`} key={technology} onClick={() => toggleTechnology(technology)} disabled={!selected && formData.technologies.length >= 20}>
+                      <span className="pfe-tech-option__check">{selected && <CheckCircle2 size={15} />}</span>{technology}
+                    </button>;
+                  })}
+                  {filteredTechnologyOptions.length === 0 && <span className="pfe-tech-picker__empty">{t("pfePack.noTechnologyMatch")}</span>}
                 </div>
-                <datalist id="pfe-technology-suggestions">
-                  {TECHNOLOGY_SUGGESTIONS.map((technology) => <option key={technology} value={technology} />)}
-                </datalist>
-                <button type="button" className="pfe-form__add-technology" onClick={addTechnology} disabled={formData.technologies.length >= 20}>
-                  <Plus size={16} aria-hidden="true" /> {t("pfePack.addTechnology")}
-                </button>
+                <span className={`pfe-form__field-hint${formData.technologies.length < 2 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: formData.technologies.length })}</span>
+                {formationsError && <span className="pfe-form__offers-status" role="status">{t("pfePack.technologiesLoadError")}</span>}
               </div>
-              <label className="pfe-form__wide">{t("pfePack.subject")}
-                <select name="subject" value={formData.subject} onChange={handleChange} required>
-                  <option value="">{t("pfePack.chooseSubject")}</option>
-                  {stageOffers.map((offer) => (
-                    <option key={offer._id} value={String(offer._id)}>{offer.title}</option>
-                  ))}
-                  {stageOffersStatus === "loading" && <option value="" disabled>{t("pfePack.loadingOffers")}</option>}
-                  <option value="other">{t("pfePack.otherSubject")}</option>
-                </select>
-                {stageOffersStatus === "error" && <span className="pfe-form__offers-status" role="status">{t("pfePack.offersLoadError")}</span>}
-                {stageOffersStatus === "loaded" && stageOffers.length === 0 && <span className="pfe-form__offers-status" role="status">{t("pfePack.noStageOffers")}</span>}
-                <Link className="pfe-form__all-offers" to="/offers" target="_blank" rel="noopener noreferrer">{t("pfePack.viewAllOffers")} <ArrowRight size={14} aria-hidden="true" /></Link>
-              </label>
-              {formData.subject === "other" && (
-                <label className="pfe-form__wide">{t("pfePack.customSubject")}
-                  <textarea name="customSubject" value={formData.customSubject} onChange={handleChange} rows={4} maxLength={3000} required placeholder={t("pfePack.customSubjectPlaceholder")} />
-                </label>
-              )}
+              <div className="pfe-form__wide pfe-location-field">
+                <span className="pfe-form__field-label"><MapPin size={16} aria-hidden="true" /> {t("pfePack.locationHeading")}</span>
+                <div className="pfe-location-options">
+                  <button type="button" className={`pfe-location-card${formData.locationMode === "remote" ? " is-selected" : ""}`} onClick={() => setFormData((current) => ({ ...current, locationMode: "remote", preferredLocation: "", customLocation: "" }))}>
+                    <Monitor size={22} aria-hidden="true" /><span><strong>{t("pfePack.remote")}</strong><small>{t("pfePack.remoteDescription")}</small></span>
+                  </button>
+                  <div className={`pfe-location-card pfe-location-card--onsite${formData.locationMode === "onsite" ? " is-selected" : ""}`}>
+                    <Building2 size={22} aria-hidden="true" />
+                    <span><strong>{t("pfePack.onsite")}</strong><small>{t("pfePack.onsiteDescription")}</small></span>
+                    <select aria-label={t("pfePack.chooseLocation")} value={formData.preferredLocation === "other" ? "other" : formData.preferredLocation} onChange={(event) => setFormData((current) => ({ ...current, locationMode: "onsite", preferredLocation: event.target.value, customLocation: event.target.value === "other" ? current.customLocation : "" }))}>
+                      <option value="">{t("pfePack.chooseLocation")}</option>
+                      <option value={t("pfePack.locationLac1")}>{t("pfePack.locationLac1")}</option>
+                      <option value={t("pfePack.locationSahloul")}>{t("pfePack.locationSahloul")}</option>
+                      <option value={t("pfePack.locationFirq")}>{t("pfePack.locationFirq")}</option>
+                      <option value="other">{t("pfePack.locationOther")}</option>
+                    </select>
+                  </div>
+                </div>
+                {formData.locationMode === "onsite" && formData.preferredLocation === "other" && <input className="pfe-location-custom" value={formData.customLocation} onChange={(event) => setFormData((current) => ({ ...current, customLocation: event.target.value }))} maxLength={200} required placeholder={t("pfePack.customLocationPlaceholder")} />}
+              </div>
             </div>
+            <label className="pfe-form__consent">
+              <input
+                type="checkbox"
+                name="consentConfirmed"
+                checked={formData.consentConfirmed}
+                onChange={(event) => setFormData((current) => ({ ...current, consentConfirmed: event.target.checked }))}
+                required
+              />
+              <span>{t("pfePack.consentConfirmation")} <strong className="pfe-form__required-mark" aria-hidden="true">*</strong></span>
+            </label>
+            {captcha.widget}
             <div className="pfe-form__actions">
               <button type="button" className="pfe-button pfe-button--secondary" onClick={() => setIsFormOpen(false)}>{t("common.cancel")}</button>
               <button type="submit" className="pfe-button pfe-button--primary" disabled={submitting}>{submitting ? t("pfePack.submitting") : t("pfePack.submit")}</button>

@@ -584,6 +584,9 @@
 .lp-newsletter__title { font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
 .lp-newsletter__sub   { font-size: 0.875rem; color: rgba(255,255,255,0.8); }
 .lp-newsletter__form  { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+/* Case « Je ne suis pas un robot » sur sa propre ligne, sous le champ et le bouton */
+.lp-newsletter__form .recaptcha-checkbox { flex-basis: 100%; margin: 0; align-items: flex-start; }
+.lp-newsletter__form .recaptcha-checkbox__widget { justify-content: flex-start; }
 .lp-newsletter__input {
   padding: 0.75rem 1.25rem;
   border: none;

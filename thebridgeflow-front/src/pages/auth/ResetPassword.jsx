@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FiAlertCircle, FiCheckCircle, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./VerifyEmail.css";
 import "./Auth.css";
 
@@ -18,6 +19,7 @@ export default function ResetPassword() {
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState("");
   const [success, setSuccess]                 = useState(false);
+  const captcha = useRecaptchaCheckbox();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,16 +33,21 @@ export default function ResetPassword() {
       setError(t("resetPassword.errorMismatch"));
       return;
     }
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
 
     setLoading(true);
     try {
-      await api.post(`/auth/reset-password/${token}`, { password });
+      await api.post(`/auth/reset-password/${token}`, { password }, captcha.requestConfig);
       setSuccess(true);
       setTimeout(() => navigate("/login", { replace: true }), 1800);
     } catch (err) {
       setError(err.response?.data?.message || t("resetPassword.errorDefault"));
     } finally {
       setLoading(false);
+      captcha.reset();
     }
   };
 
@@ -97,6 +104,8 @@ export default function ResetPassword() {
                 required
               />
             </div>
+
+            {captcha.widget}
 
             <button type="submit" className="btn btn-primary verify-btn" disabled={loading}>
               {loading ? t("resetPassword.submitting") : t("resetPassword.submitBtn")}

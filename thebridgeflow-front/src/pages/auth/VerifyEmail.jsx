@@ -5,6 +5,7 @@ import { FiAlertCircle, FiCheckCircle, FiClock, FiShield } from "react-icons/fi"
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "../../components/common/LangFlags.jsx";
 import api from "../../services/api.js";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./VerifyEmail.css";
 
 export default function VerifyEmail() {
@@ -22,6 +23,8 @@ export default function VerifyEmail() {
   const [success, setSuccess]   = useState("");
   const [resending, setResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  // Une seule case pour « Vérifier » et « Renvoyer le code » (re-cochée après chaque envoi).
+  const captcha = useRecaptchaCheckbox();
 
   const inputRefs = useRef([]);
 
@@ -82,12 +85,16 @@ export default function VerifyEmail() {
       setError(t("verifyEmail.errorIncomplete"));
       return;
     }
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      const { data } = await api.post("/auth/verify-email", { email, code });
+      const { data } = await api.post("/auth/verify-email", { email, code }, captcha.requestConfig);
       setSuccess(t("verifyEmail.successVerified"));
 
       // Mettre à jour AuthContext (token + user) — même logique que Login.jsx
@@ -110,14 +117,19 @@ export default function VerifyEmail() {
       inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
+      captcha.reset();
     }
   };
 
   const handleResend = async () => {
+    if (captcha.missing) {
+      setError(t("captcha.required"));
+      return;
+    }
     setResending(true);
     setError("");
     try {
-      await api.post("/auth/resend-code", { email });
+      await api.post("/auth/resend-code", { email }, captcha.requestConfig);
       setSuccess(t("verifyEmail.successResent"));
       setCountdown(60); // 60 secondes avant de pouvoir renvoyer
       setDigits(["", "", "", "", "", ""]);
@@ -127,6 +139,7 @@ export default function VerifyEmail() {
       setError(err.response?.data?.message || t("verifyEmail.errorResend"));
     } finally {
       setResending(false);
+      captcha.reset();
     }
   };
 
@@ -176,6 +189,8 @@ export default function VerifyEmail() {
         </div>
 
         <p className="verify-expire"><FiClock aria-hidden="true" /> {t("verifyEmail.expireNotice")}</p>
+
+        {captcha.widget}
 
         {/* Bouton vérifier */}
         <button

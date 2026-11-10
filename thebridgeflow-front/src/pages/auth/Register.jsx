@@ -6,6 +6,7 @@ import LangFlags from "../../components/common/LangFlags.jsx";
 import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
 import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
 import api from "../../services/api.js";
+import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./Auth.css";
 
 const passwordRequirements = [
@@ -39,6 +40,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const captcha = useRecaptchaCheckbox();
   const submitting = useRef(false);
 
   const updateValue = (field, value) => {
@@ -80,6 +82,10 @@ export default function Register() {
     event.preventDefault();
     setFormError("");
     if (submitting.current || !validate()) return;
+    if (captcha.missing) {
+      setFormError(t("captcha.required"));
+      return;
+    }
 
     submitting.current = true;
     setLoading(true);
@@ -92,7 +98,7 @@ export default function Register() {
     };
 
     try {
-      const { data } = await api.post("/auth/register", payload);
+      const { data } = await api.post("/auth/register", payload, captcha.requestConfig);
       if (data.needsVerify) {
         navigate("/verify-email", { state: { email: data.email } });
       }
@@ -101,6 +107,7 @@ export default function Register() {
     } finally {
       submitting.current = false;
       setLoading(false);
+      captcha.reset();
     }
   };
 
@@ -267,6 +274,8 @@ export default function Register() {
                 <p className="register-field-error" id="register-terms-error">{errors.acceptedTerms}</p>
               )}
             </div>
+
+            {captcha.widget}
 
             <button type="submit" className="auth-submit-btn register-submit" disabled={loading}>
               {loading ? t("register.creating") : t("register.createAccount")}

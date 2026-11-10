@@ -8,7 +8,7 @@ import "./Modal.css";
  * Pattern repris de la modal déjà existante dans MyApplications.jsx (ma-overlay/ma-modal),
  * généralisé avec les classes CSS du thème plutôt que du contenu spécifique aux offres.
  */
-export default function Modal({ title, onClose, children, footer, maxWidth = 520, className = "", overlayClassName = "" }) {
+export default function Modal({ title, onClose, children, footer, maxWidth = 520, className = "", overlayClassName = "", titleIcon = null, headerContent = null }) {
   const { t } = useTranslation();
   const overlayRef = useRef(null);
   const titleId = useId();
@@ -35,7 +35,8 @@ export default function Modal({ title, onClose, children, footer, maxWidth = 520
     <div className={`modal-overlay ${overlayClassName}`} ref={overlayRef} onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className={`modal-card ${className}`} style={{ maxWidth }}>
         <div className="modal-header">
-          <h2 className="modal-title" id={titleId}>{title}</h2>
+          <h2 className="modal-title" id={titleId}>{titleIcon}{title}</h2>
+          {headerContent}
           <button type="button" className="modal-close" onClick={onClose} aria-label={t("applications.closeModal")}>
             <FiX size={18} />
           </button>
