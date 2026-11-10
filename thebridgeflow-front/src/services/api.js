@@ -6,11 +6,11 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
-// Formulaires protégés par reCAPTCHA (même liste que verifyRecaptcha dans les routes
-// du backend) : connexion, inscription, vérification email, mot de passe oublié,
+// Formulaires protégés par reCAPTCHA v3 (même liste que verifyRecaptcha dans les routes
+// du backend) : inscription, vérification email, mot de passe oublié,
 // contact, newsletter et Pack PFE. Les autres requêtes ne chargent pas reCAPTCHA.
 const RECAPTCHA_ENDPOINTS = [
-  /^\/auth\/(register|login|verify-email|resend-code|forgot-password)$/,
+  /^\/auth\/(register|verify-email|resend-code|forgot-password)$/,
   /^\/auth\/reset-password\/[^/]+$/,
   /^\/contact-messages\/?$/,
   /^\/newsletter\/subscribe$/,

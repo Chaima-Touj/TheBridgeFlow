@@ -107,6 +107,10 @@
 
 /* ─── Champs ─────────────────────────────────────────────────────────────── */
 .auth-form-body { display: flex; flex-direction: column; gap: 0; }
+.auth-captcha-section { display: grid; justify-items: center; gap: 8px; margin: 0 0 1rem; }
+.auth-captcha-label { width: 100%; margin: 0; color: var(--text-secondary); font-size: .85rem; }
+.auth-recaptcha { min-height: 78px; }
+.auth-captcha-error { width: 100%; margin: 0; color: #b42318; font-size: .82rem; }
 
 .auth-field { margin-bottom: 1.1rem; }
 

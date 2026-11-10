@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMoon, FiSun } from "react-icons/fi";
-import { Home, Briefcase, Info, MessageSquare, Mail, CalendarDays, Newspaper, BadgeDollarSign, Code2 } from "lucide-react";
+import { Home, Briefcase, Info, MessageSquare, Mail, CalendarDays, Newspaper, BadgeDollarSign, Code2, BookOpen } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/langContext.js";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -19,7 +19,8 @@ const NAV_ITEMS = [
   { key: "home",         icon: Home,          to: "/",           anchorId: "hero" },
   { key: "pfePack",      icon: Code2,         to: "/pack-pfe" },
   { key: "offers",       icon: Briefcase,     to: "/offers" },
-  { key: "events",       icon: CalendarDays,  to: "/events" },
+  { key: "formations",   icon: BookOpen,      to: "/formations" },
+  { key: "events",       icon: CalendarDays, to: "/events" },
   { key: "pricing",      icon: BadgeDollarSign,to: "/tarifs" },
   { key: "testimonials", icon: MessageSquare, to: "/testimonials" },
   { key: "news",         icon: Newspaper,     to: "/blog" },

@@ -19,13 +19,13 @@ import {
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { uploadCV } from "../middleware/upload.middleware.js";
-import { verifyRecaptcha } from "../middleware/recaptcha.middleware.js";
+import { verifyRecaptcha, verifyRecaptchaCheckbox } from "../middleware/recaptcha.middleware.js";
 // Créer un routeur Express
 const router = express.Router();
 // Définir les routes pour l'authentification et la gestion du compte
 // (reCAPTCHA sur les formulaires publics ; Google/Facebook sont déjà vérifiés par le fournisseur)
 router.post("/register",     verifyRecaptcha, register);
-router.post("/login",        verifyRecaptcha, login);
+router.post("/login",        verifyRecaptchaCheckbox, login);
 router.post("/google",       googleAuth);
 router.post("/facebook",     facebookAuth);
 router.post("/verify-email", verifyRecaptcha, verifyEmail);

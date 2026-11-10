@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { verifyRecaptcha } from "../middleware/recaptcha.middleware.js";
+import { verifyRecaptcha, verifyRecaptchaCheckbox } from "../middleware/recaptcha.middleware.js";
 
 function createRequest({ method = "POST", path = "/auth/login", token = "test-token" } = {}) {
   return {
@@ -136,6 +136,75 @@ test("reCAPTCHA middleware rejects invalid, low-score, wrong-action, and wrong-h
   } finally {
     if (originalSecret === undefined) delete process.env.RECAPTCHA_SECRET_KEY;
     else process.env.RECAPTCHA_SECRET_KEY = originalSecret;
+    if (originalAllowedHostnames === undefined) delete process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
+    else process.env.RECAPTCHA_ALLOWED_HOSTNAMES = originalAllowedHostnames;
+    global.fetch = originalFetch;
+  }
+});
+
+test("reCAPTCHA checkbox middleware fails closed when its v2 secret is missing", async () => {
+  const originalSecret = process.env.RECAPTCHA_V2_SECRET_KEY;
+  delete process.env.RECAPTCHA_V2_SECRET_KEY;
+  const response = createResponse();
+  let nextCalled = false;
+  try {
+    await verifyRecaptchaCheckbox(createRequest(), response, () => { nextCalled = true; });
+    assert.equal(response.statusCode, 503);
+    assert.equal(nextCalled, false);
+  } finally {
+    if (originalSecret === undefined) delete process.env.RECAPTCHA_V2_SECRET_KEY;
+    else process.env.RECAPTCHA_V2_SECRET_KEY = originalSecret;
+  }
+});
+
+test("reCAPTCHA checkbox middleware accepts a verified v2 checkbox token", async () => {
+  const originalSecret = process.env.RECAPTCHA_V2_SECRET_KEY;
+  const originalAllowedHostnames = process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
+  const originalFetch = global.fetch;
+  process.env.RECAPTCHA_V2_SECRET_KEY = "test-v2-secret";
+  process.env.RECAPTCHA_ALLOWED_HOSTNAMES = "localhost";
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({ success: true, hostname: "localhost" }),
+  });
+  let nextCalled = false;
+  try {
+    await verifyRecaptchaCheckbox(createRequest(), createResponse(), () => { nextCalled = true; });
+    assert.equal(nextCalled, true);
+  } finally {
+    if (originalSecret === undefined) delete process.env.RECAPTCHA_V2_SECRET_KEY;
+    else process.env.RECAPTCHA_V2_SECRET_KEY = originalSecret;
+    if (originalAllowedHostnames === undefined) delete process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
+    else process.env.RECAPTCHA_ALLOWED_HOSTNAMES = originalAllowedHostnames;
+    global.fetch = originalFetch;
+  }
+});
+
+test("reCAPTCHA checkbox middleware rejects missing, invalid, and wrong-host tokens", async () => {
+  const originalSecret = process.env.RECAPTCHA_V2_SECRET_KEY;
+  const originalAllowedHostnames = process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
+  const originalFetch = global.fetch;
+  process.env.RECAPTCHA_V2_SECRET_KEY = "test-v2-secret";
+  process.env.RECAPTCHA_ALLOWED_HOSTNAMES = "localhost";
+  try {
+    for (const result of [
+      { success: false, hostname: "localhost" },
+      { success: true, hostname: "example.com" },
+    ]) {
+      global.fetch = async () => ({ ok: true, json: async () => result });
+      const response = createResponse();
+      let nextCalled = false;
+      await verifyRecaptchaCheckbox(createRequest(), response, () => { nextCalled = true; });
+      assert.equal(response.statusCode, 403);
+      assert.equal(nextCalled, false);
+    }
+
+    const missingResponse = createResponse();
+    await verifyRecaptchaCheckbox(createRequest({ token: "" }), missingResponse, () => {});
+    assert.equal(missingResponse.statusCode, 403);
+  } finally {
+    if (originalSecret === undefined) delete process.env.RECAPTCHA_V2_SECRET_KEY;
+    else process.env.RECAPTCHA_V2_SECRET_KEY = originalSecret;
     if (originalAllowedHostnames === undefined) delete process.env.RECAPTCHA_ALLOWED_HOSTNAMES;
     else process.env.RECAPTCHA_ALLOWED_HOSTNAMES = originalAllowedHostnames;
     global.fetch = originalFetch;

@@ -8,6 +8,7 @@ import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
 import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
 import BoxReveal from "../../components/auth/BoxReveal.jsx";
 import Loader from "../../components/common/Loader.jsx";
+import RecaptchaCheckbox from "../../components/common/RecaptchaCheckbox.jsx";
 import api from "../../services/api.js";
 import "./Auth.css";
 
@@ -28,6 +29,9 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,9 +40,18 @@ export default function Login() {
       setError(t("login.errorRequired"));
       return;
     }
+    if (!captchaToken) {
+      setShowCaptcha(true);
+      setCaptchaError("");
+      return;
+    }
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/login", { email, password, rememberMe: remember });
+      const { data } = await api.post(
+        "/auth/login",
+        { email, password, rememberMe: remember },
+        { headers: { "X-Recaptcha-Token": captchaToken } },
+      );
 
       // Email non vérifié
       if (data.needsVerify) {
@@ -61,6 +74,8 @@ export default function Login() {
       setError(d?.message || t("login.errorDefault"));
     } finally {
       setLoading(false);
+      setCaptchaToken("");
+      setShowCaptcha(false);
     }
   };
 
@@ -140,10 +155,22 @@ export default function Login() {
               <Link to="/forgot-password" className="auth-forgot">{t("login.forgot")}</Link>
             </div>
 
+            {showCaptcha && (
+              <div className="auth-captcha-section">
+                <p className="auth-captcha-label">{t("login.captchaPrompt")}</p>
+                <RecaptchaCheckbox
+                  language={document.documentElement.lang || "fr"}
+                  onToken={(token) => { setCaptchaToken(token); setCaptchaError(""); }}
+                  onError={(reason) => setCaptchaError(t(reason === "not-configured" ? "login.captchaNotConfigured" : "login.captchaUnavailable"))}
+                />
+                {captchaError && <p className="auth-captcha-error" role="alert">{captchaError}</p>}
+              </div>
+            )}
+
             {/* Bouton connexion */}
             <BoxReveal width="100%">
               <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? <Loader size="sm" className="auth-submit-btn__loader" /> : t("nav.signIn")}
+                {loading ? <Loader size="sm" className="auth-submit-btn__loader" /> : showCaptcha ? t("login.continueAfterCaptcha") : t("nav.signIn")}
               </button>
             </BoxReveal>
 
