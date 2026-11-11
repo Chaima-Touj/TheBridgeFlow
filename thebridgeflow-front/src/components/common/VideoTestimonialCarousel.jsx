@@ -223,29 +223,22 @@ function TestimonialDriveFrame({ item, t }) {
    key={item.id} : l'état repart à zéro à chaque changement de témoignage. */
 function TestimonialDriveVideo({ item, t }) {
   const [failed, setFailed] = useState(false);
-  const [ready, setReady] = useState(false);
 
   if (failed) return <TestimonialDriveFrame item={item} t={t} />;
 
+  // Pas de spinner à nous : le lecteur natif affiche déjà le sien pendant le
+  // chargement (deux cercles superposés sinon).
   return (
-    <>
-      <video
-        className="vtc-modal__video"
-        src={resolveDriveVideoProxyUrl(item.videoUrl)}
-        poster={getPosterSrc(item, true)}
-        controls
-        playsInline
-        autoPlay
-        preload="auto"
-        onCanPlay={() => setReady(true)}
-        onError={() => setFailed(true)}
-      />
-      {!ready && (
-        <div className="vtc-modal__loading" aria-hidden="true">
-          <span className="vtc-modal__spinner" />
-        </div>
-      )}
-    </>
+    <video
+      className="vtc-modal__video"
+      src={resolveDriveVideoProxyUrl(item.videoUrl)}
+      poster={getPosterSrc(item, true)}
+      controls
+      playsInline
+      autoPlay
+      preload="auto"
+      onError={() => setFailed(true)}
+    />
   );
 }
 
