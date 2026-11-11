@@ -125,6 +125,19 @@
 .pfe-location-card--onsite { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: center; }
 .pfe-location-card--onsite select { grid-column: 1 / -1; min-height: 36px; margin-top: 5px; padding: 7px 9px; font-size: .8rem; }
 .pfe-location-custom { grid-column: 1 / -1; }
+
+/* Popup étroit et vertical : une seule colonne, la liste des technologies défile avec le formulaire */
+.pfe-form-modal.modal-card { height: min(920px, 92vh); height: min(920px, 92dvh); }
+.pfe-form-modal .pfe-form__grid { grid-template-columns: 1fr; }
+.pfe-form-modal .pfe-form__wide { grid-column: auto; }
+.pfe-form-modal .pfe-tech-picker__options { grid-template-columns: 1fr; max-height: none; overflow: visible; }
+/* Le badge passe sous le titre : le popup n'est plus assez large pour une seule ligne */
+.pfe-form-modal .modal-header { flex-wrap: wrap; row-gap: 8px; }
+.pfe-form-modal .modal-title { flex: 1 1 calc(100% - 64px); }
+.pfe-form-modal__badge { order: 3; margin-inline-start: 62px; }
+/* Option « Autre » + champ libre */
+.pfe-tech-option--other { border-style: dashed; }
+.pfe-tech-other-input { margin-top: 2px; }
 .pfe-form__all-offers { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--pfe-blue); font-size: .82rem; font-weight: 700; text-decoration: none; }
 .pfe-form__all-offers:hover { text-decoration: underline; }
 .pfe-form__offers-status { color: var(--text-muted); font-size: .8rem; font-weight: 500; }
@@ -154,3 +167,5 @@
 @media (max-width: 560px) { .pfe-whatsapp-float { width: 54px; height: 54px; }.pfe-location-options, .pfe-tech-picker__options { grid-template-columns: 1fr; }.pfe-location-card { min-height: 64px; }.pfe-form-modal .modal-header { min-height: 68px; gap: 9px; padding: 10px 12px; }.pfe-form-modal .modal-title { min-height: 42px; gap: 9px; font-size: .82rem; }.pfe-form-modal__title-icon { width: 40px; height: 40px; flex-basis: 40px; border-radius: 14px; }.pfe-form-modal__title-icon svg { width: 24px; height: 24px; }.pfe-form-modal .modal-title::after { inset-inline-start: 49px; width: 52px; }.pfe-form-modal__badge { width: 38px; min-height: 38px; gap: 0; padding: 0; font-size: 0; }.pfe-form-modal__badge svg { width: 17px; height: 17px; }.pfe-form-modal .modal-close { width: 38px; height: 38px; } }
 @media (max-width: 820px) { .pfe-hero__grid { grid-template-columns: minmax(0, 1fr); }.pfe-hero__content { min-width: 0; }.pfe-hero__visual { min-height: 0; }.pfe-code-card__code p { font-size: clamp(.78rem, 1.8vw, 1rem); }.pfe-steps, .pfe-training-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .pfe-container { width: min(100% - 28px, 1160px); }.pfe-hero { padding: calc(58px + 64px) 0 66px; }.pfe-hero h1 { font-size: clamp(1.9rem, 9.5vw, 2.5rem); letter-spacing: -.045em; }.pfe-hero__visual { padding: 5px; border-radius: 20px; }.pfe-code-card { border-radius: 16px; }.pfe-code-card__header { height: 52px; gap: 16px; padding-inline: 14px; }.pfe-code-card__dots { gap: 7px; }.pfe-code-card__dots i { width: 10px; height: 10px; }.pfe-code-card__tab { height: 42px; gap: 7px; padding-inline: 12px; font-size: .9rem; }.pfe-code-card__tab span { width: 23px; height: 23px; font-size: .72rem; }.pfe-code-card__code { gap: 2px; padding: 20px 11px 22px; }.pfe-code-card__code p { grid-template-columns: 2.6ch minmax(0, 1fr); gap: 8px; font-size: clamp(.62rem, 3vw, .82rem); line-height: 1.8; }.pfe-code-card__line--indent { padding-inline-start: 10px; }.pfe-steps, .pfe-training-grid { grid-template-columns: 1fr; }.pfe-step { padding: 22px; }.pfe-cta__inner { align-items: flex-start; flex-direction: column; }.pfe-form__grid { grid-template-columns: 1fr; }.pfe-form__wide { grid-column: auto; }.pfe-form__actions { flex-direction: column-reverse; }.pfe-form__actions .pfe-button { width: 100%; }.pfe-hero__actions { align-items: stretch; flex-direction: column; }.pfe-hero__actions .pfe-button { width: 100%; } }
+/* Mobile : badge réduit à son icône, de nouveau sur la ligne du titre */
+@media (max-width: 560px) { .pfe-form-modal .modal-header { flex-wrap: nowrap; }.pfe-form-modal .modal-title { flex: 1 1 auto; }.pfe-form-modal__badge { order: 0; margin-inline-start: 0; } }

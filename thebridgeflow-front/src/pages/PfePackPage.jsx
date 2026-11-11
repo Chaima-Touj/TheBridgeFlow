@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, BookOpen, Building2, CheckCircle2, Code2, FileText, Gift, GraduationCap, Lightbulb, Mail, MapPin, Monitor, Phone, Search, Trophy, University, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, Building2, CheckCircle2, Code2, FileText, Gift, GraduationCap, Lightbulb, Mail, MapPin, Monitor, Phone, Trophy, University, UserRound } from "lucide-react";
 import Modal from "../components/common/Modal.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarousel.jsx";
@@ -53,15 +53,17 @@ export default function PfePackPage() {
   const [submitted, setSubmitted] = useState(false);
   const [formations, setFormations] = useState([]);
   const [formationsError, setFormationsError] = useState(false);
-  const [technologySearch, setTechnologySearch] = useState("");
+  // Option « Autre » : l'étudiant écrit lui-même une technologie absente de la liste.
+  const [otherTechSelected, setOtherTechSelected] = useState(false);
+  const [otherTechnology, setOtherTechnology] = useState("");
   const captcha = useRecaptchaCheckbox();
 
   const technologyOptions = [...new Set([
     ...FEATURED_TECHNOLOGIES,
     ...formations.map((formation) => formation.title?.trim()).filter(Boolean),
   ])].sort((a, b) => a.localeCompare(b));
-  const filteredTechnologyOptions = technologyOptions.filter((technology) =>
-    technology.toLocaleLowerCase().includes(technologySearch.trim().toLocaleLowerCase()));
+  const otherTechnologyValue = otherTechSelected ? otherTechnology.trim() : "";
+  const selectedTechnologyCount = formData.technologies.length + (otherTechnologyValue ? 1 : 0);
 
   useEffect(() => {
     let active = true;
@@ -98,7 +100,13 @@ export default function PfePackPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const technologies = [...new Set(formData.technologies.map((technology) => technology.trim()).filter(Boolean))];
+    if (otherTechSelected && !otherTechnologyValue) {
+      setFormError(t("pfePack.otherTechnologyRequired"));
+      return;
+    }
+    const technologies = [...new Set([...formData.technologies, otherTechnologyValue]
+      .map((technology) => technology.trim())
+      .filter(Boolean))];
     if (technologies.length < 2) {
       setFormError(t("pfePack.technologyRequired"));
       return;
@@ -126,7 +134,8 @@ export default function PfePackPage() {
       await pfePackService.register({ ...formData, technologies, preferredLocation }, captcha.requestConfig);
       setSubmitted(true);
       setFormData({ firstName: "", lastName: "", phone: "", email: "", university: "", city: "", technologies: [], locationMode: "remote", preferredLocation: "", customLocation: "", consentConfirmed: false });
-      setTechnologySearch("");
+      setOtherTechSelected(false);
+      setOtherTechnology("");
     } catch (error) {
       setFormError(error.response?.data?.message || t("pfePack.formError"));
     } finally {
@@ -264,7 +273,7 @@ export default function PfePackPage() {
       {isFormOpen && <Modal
         title={t("pfePack.formTitle")}
         onClose={() => setIsFormOpen(false)}
-        maxWidth={1160}
+        maxWidth={640}
         className="pfe-form-modal"
         titleIcon={<span className="pfe-form-modal__title-icon" aria-hidden="true"><GraduationCap size={30} /></span>}
         headerContent={<span className="pfe-form-modal__badge"><Gift size={16} aria-hidden="true" />{t("pfePack.formBadge")}</span>}
@@ -283,17 +292,28 @@ export default function PfePackPage() {
               <div className="pfe-form__wide pfe-form__technology-field">
                 <span className="pfe-form__field-label"><Code2 size={16} aria-hidden="true" /> {t("pfePack.technologies")}</span>
                 <p className="pfe-form__tech-description">{t("pfePack.technologyInstructions")}</p>
-                <label className="pfe-tech-picker__search"><Search size={16} aria-hidden="true" /><input value={technologySearch} onChange={(event) => setTechnologySearch(event.target.value)} placeholder={t("pfePack.searchTechnologies")} /></label>
                 <div className="pfe-tech-picker__options" role="group" aria-label={t("pfePack.technologies")}>
-                  {filteredTechnologyOptions.map((technology) => {
+                  {technologyOptions.map((technology) => {
                     const selected = formData.technologies.includes(technology);
                     return <button type="button" role="checkbox" aria-checked={selected} className={`pfe-tech-option${selected ? " is-selected" : ""}`} key={technology} onClick={() => toggleTechnology(technology)} disabled={!selected && formData.technologies.length >= 20}>
                       <span className="pfe-tech-option__check">{selected && <CheckCircle2 size={15} />}</span>{technology}
                     </button>;
                   })}
-                  {filteredTechnologyOptions.length === 0 && <span className="pfe-tech-picker__empty">{t("pfePack.noTechnologyMatch")}</span>}
+                  <button type="button" role="checkbox" aria-checked={otherTechSelected} aria-expanded={otherTechSelected} className={`pfe-tech-option pfe-tech-option--other${otherTechSelected ? " is-selected" : ""}`} onClick={() => setOtherTechSelected((selected) => !selected)}>
+                    <span className="pfe-tech-option__check">{otherTechSelected && <CheckCircle2 size={15} />}</span>{t("pfePack.otherTechnology")}
+                  </button>
+                  {otherTechSelected && <input
+                    className="pfe-tech-other-input"
+                    value={otherTechnology}
+                    onChange={(event) => setOtherTechnology(event.target.value)}
+                    maxLength={160}
+                    required
+                    autoFocus
+                    aria-label={t("pfePack.otherTechnologyPlaceholder")}
+                    placeholder={t("pfePack.otherTechnologyPlaceholder")}
+                  />}
                 </div>
-                <span className={`pfe-form__field-hint${formData.technologies.length < 2 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: formData.technologies.length })}</span>
+                <span className={`pfe-form__field-hint${selectedTechnologyCount < 2 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: selectedTechnologyCount })}</span>
                 {formationsError && <span className="pfe-form__offers-status" role="status">{t("pfePack.technologiesLoadError")}</span>}
               </div>
               <div className="pfe-form__wide pfe-location-field">
