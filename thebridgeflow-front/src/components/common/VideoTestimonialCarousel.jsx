@@ -228,12 +228,16 @@ function TestimonialDriveVideo({ item, t }) {
 
   // Pas de spinner à nous : le lecteur natif affiche déjà le sien pendant le
   // chargement (deux cercles superposés sinon).
+  // controlsList="nodownload" retire « Télécharger » du menu du lecteur (vitesse
+  // et image dans l'image restent) ; le clic droit « Enregistrer la vidéo » est bloqué aussi.
   return (
     <video
       className="vtc-modal__video"
       src={resolveDriveVideoProxyUrl(item.videoUrl)}
       poster={getPosterSrc(item, true)}
       controls
+      controlsList="nodownload"
+      onContextMenu={(event) => event.preventDefault()}
       playsInline
       autoPlay
       preload="auto"
@@ -303,6 +307,8 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
               src={item.videoUrl}
               poster={item.posterUrl || undefined}
               controls
+              controlsList="nodownload"
+              onContextMenu={(event) => event.preventDefault()}
               playsInline
               autoPlay
             >
