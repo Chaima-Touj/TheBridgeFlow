@@ -46,7 +46,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https?:\/\/.*\/api\/.*/i,
+            // Sauf /api/drive-video/ : les vidéos (requêtes Range) passent
+            // directement au réseau, sans être recopiées dans le cache du navigateur.
+            urlPattern: /^https?:\/\/[^/]+\/api\/(?!drive-video\/).*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',

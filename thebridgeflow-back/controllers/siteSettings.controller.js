@@ -1,6 +1,7 @@
 import SiteSettings from "../models/siteSettings.model.js";
 import asyncHandler  from "../utils/asyncHandler.js";
 import { normalizeDriveUrl, isBase64Image } from "../utils/driveHelper.js";
+import { warmDriveVideoCache } from "../services/driveVideoCache.service.js";
 
 // Document singleton : un seul SiteSettings existe en base — créé à la
 // première lecture/écriture s'il n'existe pas encore.
@@ -75,6 +76,8 @@ export const addTestimonialVideo = asyncHandler(async (req, res) => {
     category:  category || "unknown",
   });
   await settings.save();
+  // Met la nouvelle vidéo en cache serveur en arrière-plan (lecture rapide).
+  warmDriveVideoCache();
 
   res.status(201).json(settings.testimonialVideos[settings.testimonialVideos.length - 1]);
 });
@@ -100,6 +103,7 @@ export const updateTestimonialVideo = asyncHandler(async (req, res) => {
   if (category !== undefined)  testimonial.category = category;
 
   await settings.save();
+  if (driveUrl !== undefined) warmDriveVideoCache();
   res.json(testimonial);
 });
 

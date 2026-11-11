@@ -6,7 +6,7 @@ import {
   FiBriefcase, FiFilm,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
-import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl, extractDriveFileId } from "../../constants/videoUrls.js";
+import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl, resolveDriveVideoProxyUrl, extractDriveFileId } from "../../constants/videoUrls.js";
 import "./VideoTestimonialCarousel.css";
 
 const AUTO_ADVANCE_MS = 4500;
@@ -36,6 +36,13 @@ function logVideoDiagnostic(event, { mountedAt, videoUrl, extra } = {}) {
   });
 }
 
+// Vignette d'un témoignage : poster fourni (Drive via notre proxy, ou image
+// directe), sinon vignette générée par Drive depuis la vidéo elle-même.
+function getPosterSrc(item, isDrive = isGoogleDriveUrl(item.videoUrl)) {
+  return (item.posterUrl && (isGoogleDriveUrl(item.posterUrl) ? resolveDriveThumbnailProxyUrl(item.posterUrl) : item.posterUrl)) ||
+    (isDrive ? resolveDriveThumbnailProxyUrl(item.videoUrl) : undefined);
+}
+
 /* ─── Une carte "story" (9:16) — statique, jamais de lecture inline dans la
    rangée (source de l'ancien bug "barre de contrôles Drive coupée" : un
    iframe qui joue dans une carte trop petite). Chaque carte affiche
@@ -54,9 +61,7 @@ function TestimonialCard({ item, isActive, wrapRef, onOpen }) {
   // Vignette dérivée à la volée depuis l'URL vidéo elle-même quand aucune
   // n'est fournie — Drive génère aussi une image depuis un fichier vidéo, pas
   // seulement depuis une image (endpoint /thumbnail, même que pour les images).
-  const posterSrc =
-    (item.posterUrl && (isGoogleDriveUrl(item.posterUrl) ? resolveDriveThumbnailProxyUrl(item.posterUrl) : item.posterUrl)) ||
-    (isDrive ? resolveDriveThumbnailProxyUrl(item.videoUrl) : undefined);
+  const posterSrc = getPosterSrc(item, isDrive);
 
   return (
     <div className="vtc-card-wrap" ref={wrapRef}>
@@ -210,6 +215,40 @@ function TestimonialDriveFrame({ item, t }) {
   );
 }
 
+/* ─── Vidéo Drive servie par notre serveur (/api/drive-video : téléchargée une
+   fois depuis Drive puis gardée en cache) dans un lecteur <video> natif, qui
+   démarre bien plus vite que le lecteur intégré de Drive. En cas d'erreur
+   (Drive indisponible pendant la première mise en cache, format non lu par
+   le navigateur...), retour automatique au lecteur Drive. Monté avec
+   key={item.id} : l'état repart à zéro à chaque changement de témoignage. */
+function TestimonialDriveVideo({ item, t }) {
+  const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  if (failed) return <TestimonialDriveFrame item={item} t={t} />;
+
+  return (
+    <>
+      <video
+        className="vtc-modal__video"
+        src={resolveDriveVideoProxyUrl(item.videoUrl)}
+        poster={getPosterSrc(item, true)}
+        controls
+        playsInline
+        autoPlay
+        preload="auto"
+        onCanPlay={() => setReady(true)}
+        onError={() => setFailed(true)}
+      />
+      {!ready && (
+        <div className="vtc-modal__loading" aria-hidden="true">
+          <span className="vtc-modal__spinner" />
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ─── Modale plein écran — son activé, navigation précédent/suivant ────────── */
 function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
   const { t } = useTranslation();
@@ -262,7 +301,7 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
 
         <div className="vtc-modal__video-wrap">
           {isDrive ? (
-            <TestimonialDriveFrame key={item.id} item={item} t={t} />
+            <TestimonialDriveVideo key={item.id} item={item} t={t} />
           ) : (
             <video
               ref={videoRef}

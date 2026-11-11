@@ -259,6 +259,20 @@ export function resolveDriveThumbnailProxyUrl(url = "") {
 }
 
 /**
+ * Vidéo témoignage Google Drive servie par notre serveur (/api/drive-video),
+ * qui la télécharge une fois depuis Drive puis la sert au lecteur <video>
+ * natif : démarrage bien plus rapide que le lecteur intégré de Drive.
+ * @param {string} url - Lien Google Drive de la vidéo
+ * @returns {string|null} URL de la vidéo en cache, ou null si `url` n'est pas un lien Drive
+ */
+export function resolveDriveVideoProxyUrl(url = "") {
+  const fileId = extractDriveFileId(url);
+  if (!fileId) return null;
+  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  return `${apiBase}/drive-video/${fileId}`;
+}
+
+/**
  * Auto-detects the type from the URL context and normalizes.
  */
 export function autoResolveDriveUrl(url = "") {

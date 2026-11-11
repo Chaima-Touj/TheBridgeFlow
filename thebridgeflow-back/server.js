@@ -35,6 +35,8 @@ import trackRoutes             from "./routes/track.routes.js";
 import settingsRoutes          from "./routes/settings.routes.js";
 import testimonialScreenshotRoutes from "./routes/testimonialScreenshot.routes.js";
 import driveProxyRoutes            from "./routes/driveProxy.routes.js";
+import driveVideoRoutes            from "./routes/driveVideo.routes.js";
+import { warmDriveVideoCache }     from "./services/driveVideoCache.service.js";
 import ceremonyRoutes              from "./routes/ceremony.routes.js";
 import eventsRoutes                from "./routes/events.routes.js";
 import newsletterRoutes            from "./routes/newsletter.routes.js";
@@ -103,6 +105,15 @@ const apiLimiter = rateLimit({
 const thumbnailLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Dédié à /api/drive-video : le lecteur <video> envoie plusieurs requêtes
+// Range par vidéo regardée (démarrage, avance rapide...).
+const videoLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 600,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -188,6 +199,7 @@ app.use("/api/track",               apiLimiter, trackRoutes);
 app.use("/api/settings",            apiLimiter, settingsRoutes);
 app.use("/api/testimonial-screenshots", apiLimiter, testimonialScreenshotRoutes);
 app.use("/api/drive-thumbnail",     thumbnailLimiter, driveProxyRoutes);
+app.use("/api/drive-video",         videoLimiter, driveVideoRoutes);
 app.use("/api/ceremony",            apiLimiter, ceremonyRoutes);
 app.use("/api/events",              apiLimiter, eventsRoutes);
 app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
@@ -215,6 +227,8 @@ connectDB().then(() => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 API: http://localhost:${PORT}`);
     console.log("─────────────────────────────────────");
+    // Vidéos témoignages Drive mises en cache en arrière-plan (ne bloque rien).
+    warmDriveVideoCache();
   });
 
   // Diagnostic de la configuration email (API Brevo) au démarrage — ne bloque pas
