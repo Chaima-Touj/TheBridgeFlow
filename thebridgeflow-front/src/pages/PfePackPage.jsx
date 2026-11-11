@@ -32,6 +32,11 @@ const FEATURED_TECHNOLOGIES = [
   "Cyber Security",
 ];
 
+// « Autre » : plusieurs technologies séparées par un espace, une virgule, un point-virgule, / ou \.
+function splitTechnologies(value) {
+  return [...new Set(value.split(/[\s,;/\\]+/).map((item) => item.trim()).filter(Boolean))];
+}
+
 export default function PfePackPage() {
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -62,8 +67,8 @@ export default function PfePackPage() {
     ...FEATURED_TECHNOLOGIES,
     ...formations.map((formation) => formation.title?.trim()).filter(Boolean),
   ])].sort((a, b) => a.localeCompare(b));
-  const otherTechnologyValue = otherTechSelected ? otherTechnology.trim() : "";
-  const selectedTechnologyCount = formData.technologies.length + (otherTechnologyValue ? 1 : 0);
+  const otherTechnologies = otherTechSelected ? splitTechnologies(otherTechnology) : [];
+  const selectedTechnologyCount = new Set([...formData.technologies, ...otherTechnologies]).size;
 
   useEffect(() => {
     let active = true;
@@ -100,11 +105,11 @@ export default function PfePackPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (otherTechSelected && !otherTechnologyValue) {
+    if (otherTechSelected && otherTechnologies.length === 0) {
       setFormError(t("pfePack.otherTechnologyRequired"));
       return;
     }
-    const technologies = [...new Set([...formData.technologies, otherTechnologyValue]
+    const technologies = [...new Set([...formData.technologies, ...otherTechnologies]
       .map((technology) => technology.trim())
       .filter(Boolean))];
     if (technologies.length < 2) {
@@ -283,12 +288,12 @@ export default function PfePackPage() {
             <p className="pfe-form__notice"><span><CheckCircle2 size={17} aria-hidden="true" /></span>{t("pfePack.formNotice")}</p>
             {formError && <p className="pfe-form__error" role="alert">{formError}</p>}
             <div className="pfe-form__grid">
-              <label><span><UserRound size={15} /> {t("pfePack.lastName")}</span><input name="lastName" value={formData.lastName} onChange={handleChange} maxLength={80} required autoComplete="family-name" /></label>
-              <label><span><UserRound size={15} /> {t("pfePack.firstName")}</span><input name="firstName" value={formData.firstName} onChange={handleChange} maxLength={80} required autoComplete="given-name" /></label>
-              <label><span><Phone size={15} /> {t("pfePack.phone")}</span><input name="phone" type="tel" value={formData.phone} onChange={handleChange} maxLength={32} required autoComplete="tel" /></label>
-              <label><span><Mail size={15} /> {t("pfePack.email")}</span><input name="email" type="email" value={formData.email} onChange={handleChange} maxLength={254} required autoComplete="email" /></label>
-              <label><span><University size={15} /> {t("pfePack.university")}</span><input name="university" value={formData.university} onChange={handleChange} maxLength={160} required autoComplete="organization" /></label>
-              <label><span><MapPin size={15} /> {t("pfePack.city")}</span><input name="city" value={formData.city} onChange={handleChange} maxLength={100} required autoComplete="address-level2" /></label>
+              <label><span><UserRound size={15} /> {t("pfePack.lastName")}</span><input name="lastName" value={formData.lastName} onChange={handleChange} maxLength={80} required autoComplete="family-name" placeholder={t("register.lastNamePlaceholder")} /></label>
+              <label><span><UserRound size={15} /> {t("pfePack.firstName")}</span><input name="firstName" value={formData.firstName} onChange={handleChange} maxLength={80} required autoComplete="given-name" placeholder={t("register.firstNamePlaceholder")} /></label>
+              <label><span><Phone size={15} /> {t("pfePack.phone")}</span><input name="phone" type="tel" value={formData.phone} onChange={handleChange} maxLength={32} required autoComplete="tel" placeholder={t("pfePack.phonePlaceholder")} /></label>
+              <label><span><Mail size={15} /> {t("pfePack.email")}</span><input name="email" type="email" value={formData.email} onChange={handleChange} maxLength={254} required autoComplete="email" placeholder={t("register.emailPlaceholder")} /></label>
+              <label><span><University size={15} /> {t("pfePack.university")}</span><input name="university" value={formData.university} onChange={handleChange} maxLength={160} required autoComplete="organization" placeholder={t("pfePack.universityPlaceholder")} /></label>
+              <label><span><MapPin size={15} /> {t("pfePack.city")}</span><input name="city" value={formData.city} onChange={handleChange} maxLength={100} required autoComplete="address-level2" placeholder={t("pfePack.cityPlaceholder")} /></label>
               <div className="pfe-form__wide pfe-form__technology-field">
                 <span className="pfe-form__field-label"><Code2 size={16} aria-hidden="true" /> {t("pfePack.technologies")}</span>
                 <p className="pfe-form__tech-description">{t("pfePack.technologyInstructions")}</p>
@@ -309,9 +314,14 @@ export default function PfePackPage() {
                     maxLength={160}
                     required
                     autoFocus
-                    aria-label={t("pfePack.otherTechnologyPlaceholder")}
+                    aria-label={t("pfePack.otherTechnology")}
+                    aria-describedby="pfe-other-technology-hint"
                     placeholder={t("pfePack.otherTechnologyPlaceholder")}
                   />}
+                  {otherTechSelected && <p className="pfe-tech-other-hint" id="pfe-other-technology-hint">{t("pfePack.otherTechnologyHint")}</p>}
+                  {otherTechnologies.length > 0 && <div className="pfe-tech-other-chips" aria-live="polite">
+                    {otherTechnologies.map((technology) => <span key={technology}>{technology}</span>)}
+                  </div>}
                 </div>
                 <span className={`pfe-form__field-hint${selectedTechnologyCount < 2 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: selectedTechnologyCount })}</span>
                 {formationsError && <span className="pfe-form__offers-status" role="status">{t("pfePack.technologiesLoadError")}</span>}

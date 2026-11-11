@@ -138,6 +138,9 @@
 /* Option « Autre » + champ libre */
 .pfe-tech-option--other { border-style: dashed; }
 .pfe-tech-other-input { margin-top: 2px; }
+.pfe-tech-other-hint { margin: -2px 2px 0; color: var(--text-muted); font-size: .76rem; font-weight: 500; }
+.pfe-tech-other-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pfe-tech-other-chips span { padding: 4px 11px; border: 1px solid color-mix(in srgb, var(--pfe-blue) 25%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--pfe-blue) 9%, var(--bg-card)); color: var(--pfe-blue); font-size: .78rem; font-weight: 700; }
 .pfe-form__all-offers { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--pfe-blue); font-size: .82rem; font-weight: 700; text-decoration: none; }
 .pfe-form__all-offers:hover { text-decoration: underline; }
 .pfe-form__offers-status { color: var(--text-muted); font-size: .8rem; font-weight: 500; }
