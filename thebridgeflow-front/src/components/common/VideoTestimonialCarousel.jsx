@@ -171,13 +171,13 @@ function TestimonialDriveFrame({ item, t }) {
       <iframe
         className="vtc-modal__video"
         style={{ border: 0 }}
-        // autoplay=1 indispensable ici : le calque anti-flash ci-dessous
-        // absorbe TOUT tap, y compris celui qui servait jusqu'ici à lancer
-        // la lecture — sans autoplay, la vidéo ne démarrerait plus jamais
-        // (vérifié : reproduit, deux taps sans effet, toujours à l'état
-        // pause initial). Pas de mute : cette modale est la version "son
-        // activé" par design (contrairement à l'aperçu carte, muet).
-        src={`${resolveDriveUrl(item.videoUrl, "video")}?autoplay=1`}
+        // Même lecteur que les vidéos des formations (CoursePreviewModal) :
+        // pas d'autoplay=1. Avec autoplay, Drive commence à télécharger la
+        // vidéo pendant le chargement de la page, et l'iframe ne termine son
+        // chargement qu'une fois ces données reçues (souvent > 15 s, d'où le
+        // message de lenteur). Sans autoplay, la page Drive s'affiche en ~1 s
+        // et l'utilisateur lance la vidéo avec le bouton lecture de Drive.
+        src={resolveDriveUrl(item.videoUrl, "video")}
         allow="autoplay; encrypted-media; fullscreen"
         allowFullScreen
         title={t("testimonials.openAria")}
@@ -203,14 +203,9 @@ function TestimonialDriveFrame({ item, t }) {
           </div>
         )
       )}
-      {/* Bloque tout tap vers l'iframe Drive (investigation confirmée : un
-         calque au-dessus, sans pointer-events:none, absorbe le clic avant
-         qu'il atteigne l'iframe) — empêche le flash natif "icône dupliquée"
-         que Drive affiche à chaque bascule play/pause, au prix d'une vidéo
-         qu'on ne peut plus mettre en pause/reprendre soi-même une fois
-         lancée (compromis accepté, voir bouton fermer + flèches, non
-         couverts par ce calque). */}
-      <div className="vtc-modal__tap-blocker" aria-hidden="true" />
+      {/* Pas de calque anti-tap : les contrôles Drive (lecture, pause,
+         volume, plein écran) doivent rester utilisables, comme pour les
+         vidéos des formations. */}
     </>
   );
 }

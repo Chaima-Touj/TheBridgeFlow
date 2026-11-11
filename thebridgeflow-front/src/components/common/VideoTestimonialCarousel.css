@@ -274,28 +274,14 @@
   display: block;
   background: #000;
 }
-/* Masque la bande de contrôles Google Drive (volume/CC/x1/roue crantée),
-   rendue non-fonctionnelle par .vtc-modal__tap-blocker (voir plus bas) — le
-   tap est absorbé avant d'atteindre l'iframe, donc ces boutons restent
-   visibles mais ne répondent à aucun clic. Mesuré sur capture réelle
-   Android : cette bande occupe exactement les derniers ~13% du cadre
-   (87%→100%), sans contenu vidéo réel dans cette zone (le contenu réel
-   s'arrête à ~86%). Agrandit l'iframe Drive à 100/0.87 ≈ 114.9% de la
-   hauteur du conteneur, ancrée en haut (top:0) — l'excédent en bas (la
-   bande de contrôles) sort du cadre visible, coupé par
-   .vtc-modal__video-wrap{overflow:hidden} ci-dessus. Largeur et transform
-   horizontal inchangés. Scope volontaire à iframe.vtc-modal__video (plus
-   spécifique que .vtc-modal__video seul) : ne s'applique pas à la balise
-   <video> native (source non-Drive), dont les contrôles natifs sont
-   pleinement fonctionnels et ne doivent pas être rognés. La bande
-   pause/skip/progression de Drive (~47%-66% du cadre d'origine) reste hors
-   de cette zone agrandie/coupée, donc toujours visible telle quelle. */
+/* Lecteur Google Drive en entier (comme pour les formations) : sa barre de
+   contrôles (lecture, volume, plein écran) est utilisable, rien à rogner. */
 .vtc-modal__video-wrap iframe.vtc-modal__video {
   position: absolute;
   top:      0;
   left:     0;
   width:    100%;
-  height:   114.9%;
+  height:   100%;
 }
 /* ── Spinner de chargement (iframe Drive) — même pattern que
    CoursePreviewModal (.cpm-loading/.cpm-spinner) : fondu 250ms au lieu
@@ -361,18 +347,6 @@
 .vtc-timeout-link:hover,
 .vtc-timeout-link:focus-visible {
   background: rgba(255, 255, 255, 0.85);
-}
-/* Calque anti-flash (voir TestimonialDriveFrame) — z-index:1 : au-dessus de
-   l'iframe (pas de z-index propre, donc 0/auto), en dessous des flèches
-   mobiles .vtc-modal__nav (z-index:2, sibling de .vtc-modal__video-wrap qui
-   ne crée pas de nouveau contexte d'empilement — un z-index égal ou
-   supérieur ici les rendrait incliquables, vérifié en test). Pas de
-   pointer-events:none : c'est justement l'inverse de l'effet recherché. */
-.vtc-modal__tap-blocker {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: transparent;
 }
 .vtc-modal__info {
   position: absolute;
