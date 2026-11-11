@@ -319,6 +319,13 @@
   border:     0;
   pointer-events: none;
 }
+/* Lecteur YouTube de l'aperçu : invisible tant qu'il n'a pas démarré, l'image
+   de la vidéo (juste dessous) reste affichée à la place de l'écran noir. */
+.lp-promo-video__preview--youtube {
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+.lp-promo-video__preview--youtube.is-loaded { opacity: 1; }
 
 /* Subtle gradient overlay (glassmorphism depth) */
 .lp-promo-video__card-overlay {
@@ -405,6 +412,12 @@
   align-items:     center;
   justify-content: center;
   padding:         1rem;
+}
+/* Modale YouTube préchargée mais pas encore ouverte : invisible et inerte
+   (le lecteur continue de se charger en arrière-plan). */
+.lp-promo-video__overlay--preload {
+  visibility:     hidden;
+  pointer-events: none;
 }
 
 /* Modal box */

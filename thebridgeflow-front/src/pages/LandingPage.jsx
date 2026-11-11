@@ -77,6 +77,14 @@ function getYouTubeId(url = "") {
   return url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]{11})/)?.[1] || null;
 }
 
+// Lecteurs YouTube de la vidéo de présentation : chargés une seule fois puis
+// pilotés (lecture/pause) par messages (enablejsapi=1), sans jamais recharger
+// l'iframe — c'est le rechargement qui faisait attendre à chaque fois.
+const YOUTUBE_EMBED_ORIGIN = "https://www.youtube-nocookie.com";
+function sendYouTubeCommand(iframe, func) {
+  iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), YOUTUBE_EMBED_ORIGIN);
+}
+
 /* Placeholder discret pendant le chargement des témoignages/captures depuis
    l'API — évite un flash de section vide entre le montage et la résolution
    du fetch (voir testimonialVideos/screenshotItems, initialisés à `null`). */
@@ -278,7 +286,13 @@ export default function LandingPage() {
      (aucune API de contrôle externe possible sur le lecteur intégré). ── */
   const promoCardRef  = useRef(null);
   const promoVideoRef = useRef(null);
+  const promoPreviewFrameRef = useRef(null);
+  const promoModalFrameRef   = useRef(null);
   const [promoInView, setPromoInView] = useState(false);
+  // Devient vrai (définitivement) quand la section approche de l'écran :
+  // les lecteurs YouTube se chargent avant que l'utilisateur n'y arrive.
+  const [promoNear, setPromoNear] = useState(false);
+  const [promoPreviewLoaded, setPromoPreviewLoaded] = useState(false);
 
   useEffect(() => {
     const el = promoCardRef.current;
@@ -292,12 +306,43 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
+    const el = promoCardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setPromoNear(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "800px 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (promoIsDrive) return; // iframe: géré par mount/unmount, pas par play()/pause()
+    if (promoIsYouTube) {
+      // Aperçu muet : lecture quand la section est visible et la modale fermée.
+      sendYouTubeCommand(promoPreviewFrameRef.current, promoInView && !promoOpen ? "playVideo" : "pauseVideo");
+      return;
+    }
     const v = promoVideoRef.current;
     if (!v) return;
     if (promoInView) v.play().catch(() => {});
     else v.pause();
-  }, [promoInView, promoIsDrive]);
+  }, [promoInView, promoIsDrive, promoIsYouTube, promoOpen]);
+
+  // Modale YouTube : le lecteur est déjà chargé (caché), il démarre tout de suite.
+  // Quelques rappels couvrent le cas où il finit juste de s'initialiser.
+  useEffect(() => {
+    if (!promoIsYouTube) return undefined;
+    const frame = promoModalFrameRef.current;
+    if (!promoOpen) {
+      sendYouTubeCommand(frame, "pauseVideo");
+      return undefined;
+    }
+    const timers = [0, 400, 1200].map((delay) => setTimeout(() => sendYouTubeCommand(frame, "playVideo"), delay));
+    return () => timers.forEach(clearTimeout);
+  }, [promoOpen, promoIsYouTube]);
 
   return (
     <div className="landing" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -549,15 +594,28 @@ export default function LandingPage() {
                     />
                   )
                 ) : promoIsYouTube ? (
-                  promoInView && (
-                    <iframe
+                  <>
+                    {/* Image de la vidéo affichée tout de suite, en attendant le lecteur. */}
+                    <img
                       className="lp-promo-video__preview"
-                      src={`https://www.youtube-nocookie.com/embed/${promoYouTubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${promoYouTubeId}&playsinline=1&rel=0`}
-                      allow="autoplay; encrypted-media; picture-in-picture"
-                      title={t("landing.promoVideoLabel")}
-                      tabIndex={-1}
+                      src={`https://i.ytimg.com/vi/${promoYouTubeId}/hqdefault.jpg`}
+                      alt=""
+                      aria-hidden="true"
                     />
-                  )
+                    {/* Chargé dès que la section approche, puis jamais démonté :
+                        mis en pause/relancé selon la visibilité (voir effets). */}
+                    {promoNear && (
+                      <iframe
+                        ref={promoPreviewFrameRef}
+                        className={`lp-promo-video__preview lp-promo-video__preview--youtube${promoPreviewLoaded ? " is-loaded" : ""}`}
+                        src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${promoYouTubeId}&playsinline=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        title={t("landing.promoVideoLabel")}
+                        tabIndex={-1}
+                        onLoad={() => setTimeout(() => setPromoPreviewLoaded(true), 600)}
+                      />
+                    )}
+                  </>
                 ) : (
                   <video
                     ref={promoVideoRef}
@@ -584,20 +642,22 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        {/* Promo modal */}
-        {promoOpen && (
+        {/* Promo modal — pour YouTube, rendue (cachée) dès que la section
+            approche : son lecteur est déjà chargé quand on clique. */}
+        {(promoOpen || (promoIsYouTube && promoNear)) && (
           <div
-            className="lp-promo-video__overlay"
+            className={`lp-promo-video__overlay${promoOpen ? "" : " lp-promo-video__overlay--preload"}`}
             onClick={() => setPromoOpen(false)}
             role="dialog"
             aria-modal="true"
+            aria-hidden={promoOpen ? undefined : true}
             aria-label={t("landing.promoModalAriaLabel")}
           >
             <motion.div
               className="lp-promo-video__modal"
               onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={promoOpen ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.22 }}
             >
               <button
@@ -629,11 +689,18 @@ export default function LandingPage() {
                 />
               ) : promoIsYouTube ? (
                 <iframe
+                  ref={promoModalFrameRef}
                   className="lp-promo-video__modal-video"
-                  src={`https://www.youtube-nocookie.com/embed/${promoYouTubeId}?autoplay=1&rel=0&playsinline=1`}
+                  // Pas d'autoplay : préchargée cachée, lancée par message à l'ouverture.
+                  src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                   allow="autoplay; encrypted-media; picture-in-picture"
                   allowFullScreen
                   title={t("landing.promoVideoLabel")}
+                  tabIndex={promoOpen ? undefined : -1}
+                  onLoad={() => {
+                    // Ouverte avant la fin du chargement : on lance dès que possible.
+                    if (promoOpen) [300, 1000].forEach((delay) => setTimeout(() => sendYouTubeCommand(promoModalFrameRef.current, "playVideo"), delay));
+                  }}
                 />
               ) : (
                 <video
