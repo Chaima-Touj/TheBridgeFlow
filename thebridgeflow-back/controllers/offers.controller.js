@@ -16,7 +16,7 @@ const normalizeType = (value) => {
 const normalizePayload = (body) => {
   let {
     title, description, companyName, domain, location, duration,
-    type, skills, salary, deadline,
+    type, skills, salary, deadline, translations,
     company, specialite, skillsRequired, motsCles, desc,
   } = body || {};
 
@@ -41,6 +41,10 @@ const normalizePayload = (body) => {
     skills: normalizedSkills,
     salary,
     deadline,
+    translations: {
+      fr: { title: translations?.fr?.title || "", description: translations?.fr?.description || "", domain: translations?.fr?.domain || "", location: translations?.fr?.location || "", duration: translations?.fr?.duration || "", skills: translations?.fr?.skills || [] },
+      en: { title: translations?.en?.title || "", description: translations?.en?.description || "", domain: translations?.en?.domain || "", location: translations?.en?.location || "", duration: translations?.en?.duration || "", skills: translations?.en?.skills || [] },
+    },
   };
 };
 

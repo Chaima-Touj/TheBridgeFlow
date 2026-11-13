@@ -9,7 +9,7 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import { useAuth }               from "../../context/AuthContext.jsx";
-import { offersService }         from "../../services/offers.service.js";
+import { offersService, localizeOffer } from "../../services/offers.service.js";
 import { favoritesService }      from "../../services/favorites.service.js";
 import { applicationsService }   from "../../services/applications.service.js";
 import { useFormationsTechMap }  from "../../hooks/useFormationsTechMap.js";
@@ -133,7 +133,8 @@ function NotFound({ t }) {
 export default function OfferDetail() {
   const { id }     = useParams();
   const navigate   = useNavigate();
-  const { t }      = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage || i18n.language || "fr";
   const { user }   = useAuth();
 
   const [offer,        setOffer]       = useState(null);
@@ -177,7 +178,7 @@ export default function OfferDetail() {
       .then(([offRes, favRes, appRes]) => {
         const o = offRes.data.offer || offRes.data.offers?.[0] || offRes.data;
         if (!o || !o._id) throw new Error("Offre introuvable");
-        setOffer(o);
+        setOffer(localizeOffer(o, language));
 
         // Favorites
         const favIds = new Set((favRes.data.favorites || []).map((f) => f._id));
@@ -197,14 +198,14 @@ export default function OfferDetail() {
           .getAll({ domain: o.domain, limit: 4 })
           .then((simRes) => {
             const all = simRes.data.offers || [];
-            setSimilar(all.filter((s) => s._id !== id).slice(0, 3));
+            setSimilar(all.filter((s) => s._id !== id).slice(0, 3).map((s) => localizeOffer(s, language)));
           });
       })
       .catch(() => {
         /* offer not found — setOffer stays null */
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, language]);
 
   /* handlers */
   const handleApply = () => navigate(`/dashboard/student/offers/${id}/apply`);

@@ -4,6 +4,10 @@ const offerSchema = new mongoose.Schema(
   {
     title:       { type: String, required: [true, "Titre requis"], trim: true },
     description: { type: String, default: "" },
+    translations: {
+      fr: { title: { type: String, default: "" }, description: { type: String, default: "" }, domain: { type: String, default: "" }, location: { type: String, default: "" }, duration: { type: String, default: "" }, skills: [{ type: String }] },
+      en: { title: { type: String, default: "" }, description: { type: String, default: "" }, domain: { type: String, default: "" }, location: { type: String, default: "" }, duration: { type: String, default: "" }, skills: [{ type: String }] },
+    },
     companyName: { type: String, default: "" },
     companyId:   { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
     domain:      { type: String, default: "", index: true },

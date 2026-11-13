@@ -44,6 +44,7 @@ const PAGE_SIZES = [6, 10, 25, 50];
 const EMPTY_FORM = {
   title: "",
   description: "",
+  translations: { fr: { title: "", description: "", domain: "", location: "", duration: "", skills: "" }, en: { title: "", description: "", domain: "", location: "", duration: "", skills: "" } },
   companyName: "",
   domain: "",
   location: "",
@@ -58,6 +59,14 @@ function offerToForm(offer) {
   return {
     title:       offer.title || "",
     description: offer.description || "",
+    translations: Object.fromEntries(["fr", "en"].map((lang) => [lang, {
+      title: offer.translations?.[lang]?.title || "",
+      description: offer.translations?.[lang]?.description || "",
+      domain: offer.translations?.[lang]?.domain || "",
+      location: offer.translations?.[lang]?.location || "",
+      duration: offer.translations?.[lang]?.duration || "",
+      skills: (offer.translations?.[lang]?.skills || []).join(", "),
+    }])),
     companyName: offer.companyName || "",
     domain:      offer.domain || "",
     location:    offer.location || "",
@@ -194,6 +203,10 @@ function OfferForm({ initial, isEdit, submitting, formError, domainOptions, onSu
     onSubmit({
       title:       form.title.trim(),
       description: form.description.trim(),
+      translations: Object.fromEntries(["fr", "en"].map((lang) => [lang, {
+        ...form.translations[lang],
+        skills: form.translations[lang].skills.split(",").map((skill) => skill.trim()).filter(Boolean),
+      }])),
       companyName: form.companyName.trim(),
       domain:      form.domain.trim(),
       location:    form.location.trim(),
@@ -219,6 +232,28 @@ function OfferForm({ initial, isEdit, submitting, formError, domainOptions, onSu
         <input id="ao-title" className="input" value={form.title} onChange={set("title")} />
         {fieldErrors.title && <span className="af-field-error">{fieldErrors.title}</span>}
       </div>
+
+      <fieldset className="af-form-row" style={{ border: 0, padding: 0, marginTop: 16 }}>
+        <legend className="label">Traductions (facultatif)</legend>
+        {["fr", "en"].map((lang) => (
+          <div key={lang} className="af-form-grid">
+            <div className="af-form-row">
+              <label className="label" htmlFor={`ao-${lang}-title`}>{lang === "fr" ? "Titre (français)" : "Title (English)"}</label>
+              <input id={`ao-${lang}-title`} className="input" value={form.translations?.[lang]?.title || ""} onChange={(e) => setForm((f) => ({ ...f, translations: { ...f.translations, [lang]: { ...f.translations?.[lang], title: e.target.value } } }))} />
+            </div>
+            <div className="af-form-row">
+              <label className="label" htmlFor={`ao-${lang}-description`}>{lang === "fr" ? "Description (français)" : "Description (English)"}</label>
+              <textarea id={`ao-${lang}-description`} className="input" rows={3} value={form.translations?.[lang]?.description || ""} onChange={(e) => setForm((f) => ({ ...f, translations: { ...f.translations, [lang]: { ...f.translations?.[lang], description: e.target.value } } }))} />
+            </div>
+            {[["domain", lang === "fr" ? "Domaine (français)" : "Domain (English)"], ["location", lang === "fr" ? "Lieu (français)" : "Location (English)"], ["duration", lang === "fr" ? "Durée (français)" : "Duration (English)"], ["skills", lang === "fr" ? "Compétences (français, séparées par des virgules)" : "Skills (English, comma-separated)"]].map(([field, label]) => (
+              <div key={field} className="af-form-row">
+                <label className="label" htmlFor={`ao-${lang}-${field}`}>{label}</label>
+                <input id={`ao-${lang}-${field}`} className="input" value={form.translations?.[lang]?.[field] || ""} onChange={(e) => setForm((f) => ({ ...f, translations: { ...f.translations, [lang]: { ...f.translations?.[lang], [field]: e.target.value } } }))} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </fieldset>
 
       <div className="af-form-row">
         <label className="label" htmlFor="ao-description">{t("adminOffers.descriptionLabel")}</label>

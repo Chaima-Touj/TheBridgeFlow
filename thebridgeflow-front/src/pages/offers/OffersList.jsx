@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import { useAuth }               from "../../context/AuthContext.jsx";
-import { offersService }         from "../../services/offers.service.js";
+import { offersService, localizeOffer } from "../../services/offers.service.js";
 import { favoritesService }      from "../../services/favorites.service.js";
 import { applicationsService }   from "../../services/applications.service.js";
 import "./Offers.css";
@@ -176,7 +176,8 @@ function EmptyState({ icon, title, description, actionLabel, onAction }) {
 
 /* ── Main component ──────────────────────────────────────────────────────── */
 export default function OffersList() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage || i18n.language || "fr";
   const { user } = useAuth();
   const navigate = useNavigate();
   const [urlParams] = useSearchParams();
@@ -221,7 +222,7 @@ export default function OffersList() {
     // All offers for metadata + recommendations
     offersService.getAll({ limit: 300 })
       .then(({ data }) => {
-        const all = data.offers.map(normalizeOffer);
+        const all = data.offers.map((offer) => normalizeOffer(localizeOffer(offer, language)));
         setLocations([...new Set(all.map((o) => o.location).filter(Boolean))].sort());
         setDurations([...new Set(all.map((o) => o.duration).filter(Boolean))]);
         setNewOffersCount(all.filter((o) => isRecentOffer(o.createdAt)).length);
@@ -243,7 +244,7 @@ export default function OffersList() {
     setLoadingFavs(true);
     favoritesService.getAll()
       .then(({ data }) => {
-        const favs = (data.favorites || []).map(normalizeOffer);
+        const favs = (data.favorites || []).map((offer) => normalizeOffer(localizeOffer(offer, language)));
         setFavoriteIds(new Set(favs.map((f) => f._id)));
         setSavedOffers(favs);
       })
@@ -258,7 +259,7 @@ export default function OffersList() {
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [language]);
 
   /* paginated offers ──────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -277,13 +278,13 @@ export default function OffersList() {
     offersService.getAll(params)
       .then(({ data }) => {
         if (!active) return;
-        setOffers(data.offers.map(normalizeOffer));
+        setOffers(data.offers.map((offer) => normalizeOffer(localizeOffer(offer, language))));
         setPagination(data.pagination);
       })
       .finally(() => { if (active) setLoading(false); });
 
     return () => { active = false; };
-  }, [search, typeFilter, domainFilter, locationFilter, durationFilter, levelFilter, sortFilter, page]);
+  }, [search, typeFilter, domainFilter, locationFilter, durationFilter, levelFilter, sortFilter, page, language]);
 
   /* toggle favorite ───────────────────────────────────────────────────────── */
   const handleToggleFavorite = async (offerId) => {
