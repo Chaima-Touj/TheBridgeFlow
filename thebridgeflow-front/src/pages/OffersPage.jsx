@@ -9,7 +9,7 @@ import {
 import { useLang } from "../context/langContext.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
-import { offersService } from "../services/offers.service.js";
+import { offersService, localizeOffer } from "../services/offers.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import "./OffersPage.css";
 
@@ -144,7 +144,8 @@ const OffersPage = () => {
     }).then(res => {
       if (!active) return;
       const data = res.data;
-      setOffers(Array.isArray(data) ? data : (data.offers ?? []));
+      const offers = Array.isArray(data) ? data : (data.offers ?? []);
+      setOffers(offers.map((offer) => localizeOffer(offer, lang)));
       setTotal(data.pagination?.total ?? data.total ?? (Array.isArray(data) ? data.length : 0));
       setPages(data.pagination?.totalPages ?? data.pages ?? 1);
     }).catch(err => {
@@ -152,7 +153,7 @@ const OffersPage = () => {
       setError(err?.response?.data?.message ?? t("offers.error"));
     }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [apiQuery, t]);
+  }, [apiQuery, t, lang]);
 
   // Debounced search
   const handleSearchChange = (val) => {

@@ -12,7 +12,7 @@ import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useFormationsTechMap } from "../hooks/useFormationsTechMap.js";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { buildSkillFormationMatcher } from "../utils/techMatch.js";
-import { offersService } from "../services/offers.service.js";
+import { offersService, localizeOffer } from "../services/offers.service.js";
 import "./PublicOfferDetail.css";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ const PublicOfferDetail = () => {
         const o = res.data?.offer ?? res.data?.offers?.[0] ?? res.data;
         if (!o?._id) throw new Error(t("offers.offerNotFound"));
         setError(null);
-        setOffer(o);
+        setOffer(localizeOffer(o, lang));
       })
       .catch(err => {
         if (!active) return;
@@ -105,7 +105,7 @@ const PublicOfferDetail = () => {
         }
       });
     return () => { active = false; };
-  }, [id, t]);
+  }, [id, t, lang]);
 
   // SEO — uniquement une fois l'offre chargée.
   useDocumentMeta({
