@@ -2773,8 +2773,10 @@
           "titleTooLong": "The title must not exceed {{max}} characters.",
           "descriptionTooLong": "The description must not exceed {{max}} characters.",
           "dateInvalid": "Invalid date.",
-          "confirmRequired": "Tick the confirmation to mark the task as completed."
-        }
+          "confirmRequired": "Tick the confirmation to mark the task as completed.",
+          "dateOutOfRange": "The date must be between 2000 and the next five years."
+        },
+        "conflictInline": "This task was just modified by another administrator. The data has been refreshed: check your changes and save again."
       },
       "completion": {
         "title": "Confirm completion",

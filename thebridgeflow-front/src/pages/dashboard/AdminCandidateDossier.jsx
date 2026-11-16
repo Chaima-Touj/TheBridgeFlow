@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
@@ -13,7 +13,7 @@ import { candidatesService } from "../../services/candidates.service.js";
 import { applicationsService } from "../../services/applications.service.js";
 import ProposeInterviewForm from "./candidatures/ProposeInterviewForm.jsx";
 import { ICON_SIZE, ICON_STROKE } from "./candidatures/candidatesConfig.js";
-import { getApiErrorCode, getApiErrorMessage, isNetworkError, resolveLocale } from "./candidatures/candidatesUtils.js";
+import { getApiErrorCode, getApiErrorMessage, isNetworkError, resolveLocale, summarizeTasks } from "./candidatures/candidatesUtils.js";
 import { CndToastViewport } from "./candidatures/shared/CndToast.jsx";
 import { useCndToast } from "./candidatures/shared/useCndToast.js";
 import EmptyState from "./candidatures/shared/EmptyState.jsx";
@@ -57,12 +57,14 @@ function DossierSkeleton() {
           {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} height={52} />)}
         </div>
       </div>
+      <div className="cnd-dos-layout-wrap">
       <div className="cnd-dos-layout">
         <div className="cnd-dos-main">
           <Skeleton height={44} />
           {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} height={120} style={{ marginTop: 14 }} />)}
         </div>
         <div className="cnd-dos-aside"><Skeleton height={180} /><Skeleton height={110} style={{ marginTop: 14 }} /></div>
+      </div>
       </div>
     </div>
   );
@@ -77,7 +79,10 @@ function DossierPage({ studentId }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const now = useNow();
-  const { dossier, tasks, summary, error, loading, reload, silentRefresh, applyTask, dropTask } = useDossierData(studentId);
+  const { dossier, tasks, error, loading, reload, silentRefresh, applyTask, dropTask } = useDossierData(studentId);
+  // Compteurs recalculés en continu (même horloge que la timeline) : retard et
+  // prochaine échéance restent cohérents partout, même sans rechargement.
+  const liveSummary = useMemo(() => summarizeTasks(tasks, now), [tasks, now]);
   const { toasts, pushToast, dismissToast } = useCndToast();
 
   const tabParam = searchParams.get("onglet");
@@ -118,16 +123,13 @@ function DossierPage({ studentId }) {
     }, { replace: true, state: location.state });
   };
 
-  // Mise en évidence + défilement vers une tâche (ajout, échéance cliquée…).
+  // Mise en évidence temporaire d'une tâche (ajout, échéance cliquée…) ; le
+  // défilement est fait par la carte elle-même une fois montée (TaskItem).
   useEffect(() => {
     if (!highlightId) return undefined;
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const frame = requestAnimationFrame(() => {
-      document.getElementById(`cnd-task-${highlightId}`)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    });
     const timer = setTimeout(() => setHighlightId(null), 2600);
-    return () => { cancelAnimationFrame(frame); clearTimeout(timer); };
-  }, [highlightId, tab]);
+    return () => clearTimeout(timer);
+  }, [highlightId]);
 
   const focusTask = (taskId) => {
     setFilters((previous) => ({ ...DEFAULT_TIMELINE_FILTERS, order: previous.order }));
@@ -147,8 +149,12 @@ function DossierPage({ studentId }) {
   };
 
   const handleConflict = (kind) => {
-    setTaskModal(null);
-    pushToast("error", kind === "conflict" ? tc("errors.conflict") : tc("errors.notFound"));
+    // Conflit : la modale reste ouverte (saisie conservée) et reçoit la tâche à
+    // jour après rechargement. Tâche supprimée entre-temps : on ferme.
+    if (kind !== "conflict") {
+      setTaskModal(null);
+      pushToast("error", tc("errors.notFound"));
+    }
     silentRefresh();
   };
 
@@ -205,6 +211,13 @@ function DossierPage({ studentId }) {
       pushToast("success", td("toast.taskDeleted"));
       silentRefresh({ tasks: false });
     } catch (requestError) {
+      if (requestError?.response?.status === 404) {
+        dropTask(deletion.task._id);
+        setDeletion(null);
+        pushToast("error", tc("errors.notFound"));
+        silentRefresh();
+        return;
+      }
       const forbidden = getApiErrorCode(requestError) === "TASK_DELETE_FORBIDDEN";
       setDeletion((value) => (value ? { ...value, loading: false, error: forbidden ? td("toast.deleteForbidden") : errorMessage(requestError) } : value));
     }
@@ -276,7 +289,7 @@ function DossierPage({ studentId }) {
   }
 
   const { student, applications, documents, systemEvents, globalStatus } = dossier;
-  const openCount = (summary?.pending || 0) + (summary?.in_progress || 0);
+  const openCount = (liveSummary.pending || 0) + (liveSummary.in_progress || 0);
   const tabCounts = { suivi: openCount, candidatures: applications.length, profil: null, documents: documents.length };
 
   return (
@@ -289,7 +302,7 @@ function DossierPage({ studentId }) {
       <DossierHero
         student={student}
         globalStatus={globalStatus}
-        summary={summary}
+        summary={liveSummary}
         applicationsCount={applications.length}
         locale={locale}
         onAddTask={() => setTaskModal({ mode: "create", preset: {} })}
@@ -324,6 +337,7 @@ function DossierPage({ studentId }) {
         )}
       </AnimatePresence>
 
+      <div className="cnd-dos-layout-wrap">
       <div className="cnd-dos-layout">
         <div className="cnd-dos-main">
           <div className="cnd-dos-tabs" role="tablist" aria-label={td("tabsLabel")} onKeyDown={onTabKeyDown}>
@@ -343,7 +357,7 @@ function DossierPage({ studentId }) {
                   onClick={() => setTab(key)}
                 >
                   <Icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
-                  <span>{td(`tabs.${key}`)}</span>
+                  <span className="cnd-dos-tab__label">{td(`tabs.${key}`)}</span>
                   {typeof tabCounts[key] === "number" && <span className="cnd-dos-tab__count cnd-num">{tabCounts[key]}</span>}
                   {selected && <motion.span layoutId="cnd-dos-tab-underline" className="cnd-dos-tab__underline" transition={{ type: "spring", stiffness: 500, damping: 38 }} />}
                 </button>
@@ -394,6 +408,7 @@ function DossierPage({ studentId }) {
                     setTab("suivi");
                   }}
                   onPreviewDocument={openApplicationDocument}
+                  busyDocument={documentsApi.busy}
                 />
               )}
               {tab === "profil" && <ProfilePanel student={student} locale={locale} />}
@@ -415,11 +430,12 @@ function DossierPage({ studentId }) {
           onDownload={documentsApi.download}
         />
       </div>
+      </div>
 
       {taskModal && (
         <TaskFormModal
           mode={taskModal.mode}
-          task={taskModal.task}
+          task={taskModal.task ? tasks.find((item) => item._id === taskModal.task._id) || taskModal.task : null}
           preset={taskModal.preset}
           studentId={studentId}
           student={student}

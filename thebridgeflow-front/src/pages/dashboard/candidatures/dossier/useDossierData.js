@@ -54,6 +54,9 @@ export function useDossierData(studentId) {
   }, [studentId, requestKey]);
 
   const silentRefresh = useCallback(({ tasks = true, dossier = true } = {}) => {
+    // Horodaté dès le départ : focus + visibilitychange (quasi simultanés)
+    // ne déclenchent qu'un seul rafraîchissement.
+    lastFetchRef.current = Date.now();
     silentRef.current?.abort();
     const controller = new AbortController();
     silentRef.current = controller;

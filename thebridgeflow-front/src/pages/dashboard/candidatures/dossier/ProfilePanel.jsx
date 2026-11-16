@@ -7,6 +7,12 @@ import {
 import { ICON_STROKE } from "../candidatesConfig.js";
 import { buildMailtoLink, buildTelLink, formatDate, formatDateTime, safeExternalUrl } from "../candidatesUtils.js";
 
+// Niveaux stockés en français dans le profil : libellés traduits existants.
+const LEVEL_KEYS = {
+  "Débutant": "levelDebutant", "Intermédiaire": "levelIntermediaire", "Avancé": "levelAvance",
+  "Expert": "levelExpert", "Courant": "levelCourant", "Natif": "levelNatif",
+};
+
 function Section({ icon: Icon, title, children, index = 0, className = "" }) {
   return (
     <motion.section
@@ -46,6 +52,7 @@ function period(start, end, current, locale, presentLabel) {
 export default function ProfilePanel({ student, locale }) {
   const { t } = useTranslation();
   const tp = (key, options) => t(`adminCandidates.dossier.profile.${key}`, options);
+  const level = (value) => (LEVEL_KEYS[value] ? t(`profileEditor.${LEVEL_KEYS[value]}`) : value);
   const empty = <p className="cnd-dos-empty-line">{tp("notProvided")}</p>;
   const education = student.education || {};
   const hasEducation = Boolean(education.institution || education.degree || education.fieldOfStudy || education.grade || education.courses?.length);
@@ -121,7 +128,7 @@ export default function ProfilePanel({ student, locale }) {
               {student.skills.filter((skill) => skill.name).map((skill, index) => (
                 <span key={`${skill.name}-${index}`}>
                   {skill.name}
-                  {[skill.category, skill.level].filter(Boolean).length > 0 && <small>{[skill.category, skill.level].filter(Boolean).join(" · ")}</small>}
+                  {[skill.category, skill.level].filter(Boolean).length > 0 && <small>{[skill.category, level(skill.level)].filter(Boolean).join(" · ")}</small>}
                 </span>
               ))}
             </div>
@@ -132,7 +139,7 @@ export default function ProfilePanel({ student, locale }) {
           {student.languages?.filter((language) => language.name).length ? (
             <ul className="cnd-dos-lang">
               {student.languages.filter((language) => language.name).map((language, index) => (
-                <li key={`${language.name}-${index}`}><strong>{language.name}</strong><span>{language.level}</span></li>
+                <li key={`${language.name}-${index}`}><strong>{language.name}</strong><span>{level(language.level)}</span></li>
               ))}
             </ul>
           ) : empty}

@@ -67,6 +67,16 @@ test("task form validation and completion confirmation", () => {
   assert.equal(validateTaskForm(form, { title: "x".repeat(161) }).title, "titleTooLong");
   assert.equal(validateTaskForm({ ...form, type: "" }, { title: "x" }).type, "typeRequired");
   assert.equal(validateTaskForm({ ...form, activityDate: "" }, { title: "x" }).activityDate, "dateInvalid");
+  assert.equal(validateTaskForm({ ...form, activityDate: "1990-01-01T10:00" }, { title: "x", now: NOW }).activityDate, "dateOutOfRange");
+  assert.equal(validateTaskForm({ ...form, dueEnabled: true, dueDate: "2099-01-01T10:00" }, { title: "x", now: NOW }).dueDate, "dateOutOfRange");
+});
+
+test("a note converted to a contact type requires confirmation to stay completed", () => {
+  const note = { _id: "n", type: "note", title: "Note", description: "", status: "completed", applicationId: null, activityDate: new Date(NOW).toISOString(), dueDate: null };
+  const form = { ...initialTaskForm({ task: note }), type: "call" };
+  assert.equal(needsCompletionConfirmation(form, note), true);
+  assert.deepEqual(buildTaskPatch({ ...form, status: "pending" }, note, { title: "Note" }), { type: "call", status: "pending" });
+  assert.deepEqual(buildTaskPatch({ ...form, confirmDone: true }, note, { title: "Note" }), { type: "call", status: "completed", confirmCompletion: true });
 });
 
 test("buildTaskPayload never completes without confirmation flag", () => {

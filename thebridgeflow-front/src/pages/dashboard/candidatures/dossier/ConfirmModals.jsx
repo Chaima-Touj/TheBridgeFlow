@@ -61,8 +61,9 @@ export function DecisionConfirmModal({ application, decision, loading, error, st
       className="cnd-scope cnd-dos-confirm-modal"
       footer={(
         <>
-          <button type="button" className="cnd-btn cnd-btn--ghost" onClick={onCancel} disabled={loading}>{t("adminCandidates.common.actions.cancel")}</button>
-          <button type="button" className={`cnd-btn ${accept ? "cnd-btn--primary" : "cnd-btn--danger"}`} onClick={onConfirm} disabled={loading} autoFocus>
+          {/* Refus irréversible (email envoyé) : le focus initial va sur Annuler. */}
+          <button type="button" className="cnd-btn cnd-btn--ghost" onClick={onCancel} disabled={loading} autoFocus={!accept}>{t("adminCandidates.common.actions.cancel")}</button>
+          <button type="button" className={`cnd-btn ${accept ? "cnd-btn--primary" : "cnd-btn--danger"}`} onClick={onConfirm} disabled={loading} autoFocus={accept}>
             {loading && <LoaderCircle className="cnd-spin" size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />}
             {td(accept ? "acceptConfirm" : "rejectConfirm")}
           </button>

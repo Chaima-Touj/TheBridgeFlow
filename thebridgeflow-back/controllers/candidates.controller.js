@@ -111,6 +111,15 @@ async function loadSerializedTask(taskId, now) {
   return task ? serializeTask(task, now) : null;
 }
 
+// Jointure des offres en égalité localField/foreignField : utilise l'index
+// _id (un $in dans $expr parcourrait toute la collection pour chaque étudiant).
+function offerLookupStages() {
+  return [
+    { $lookup: { from: Offer.collection.name, localField: "apps.offerId", foreignField: "_id", as: "offerDocs" } },
+    { $set: { offerDocs: { $map: { input: "$offerDocs", as: "offer", in: { _id: "$$offer._id", title: "$$offer.title", companyName: "$$offer.companyName" } } } } },
+  ];
+}
+
 /* ── Agrégation commune : une ligne par étudiant candidat ──────────────────
    Part de Application (groupée par studentId) puis joint l'utilisateur, ses
    tâches et ses entretiens. Exclut les candidatures orphelines (compte
@@ -150,19 +159,7 @@ function candidateStages(now, { withOffers = true } = {}) {
     { $match: { "student.role": "étudiant" } },
   ];
 
-  if (withOffers) {
-    stages.push({
-      $lookup: {
-        from: Offer.collection.name,
-        let: { ids: "$apps.offerId" },
-        pipeline: [
-          { $match: { $expr: { $in: ["$_id", "$$ids"] } } },
-          { $project: { title: 1, companyName: 1 } },
-        ],
-        as: "offerDocs",
-      },
-    });
-  }
+  if (withOffers) stages.push(...offerLookupStages());
 
   stages.push(
     {
@@ -248,32 +245,31 @@ const sumIf = (condition) => ({ $sum: { $cond: [condition, 1, 0] } });
 // « Entretien programmé » = proposé/confirmé ET date à venir : un entretien
 // dépassé non encore basculé en « terminé » n'est donc jamais compté.
 export const getCandidateStats = asyncHandler(async (req, res) => {
+  // Tous les indicateurs portent sur le même ensemble (étudiants candidats
+  // existants) que la liste et ses filtres : aucun écart possible entre eux.
   const now = new Date();
-  const [aggregate, scheduledInterviews, pendingTasks, overdueTasks] = await Promise.all([
-    Application.aggregate([
-      ...candidateStages(now, { withOffers: false }),
-      {
-        $group: {
-          _id: null,
-          totalStudents: { $sum: 1 },
-          totalApplications: { $sum: "$applicationsCount" },
-          studentsToContact: sumIf({ $eq: ["$globalStatus", "new"] }),
-        },
+  const [totals = {}] = await Application.aggregate([
+    ...candidateStages(now, { withOffers: false }),
+    {
+      $group: {
+        _id: null,
+        totalStudents: { $sum: 1 },
+        totalApplications: { $sum: "$applicationsCount" },
+        studentsToContact: sumIf({ $eq: ["$globalStatus", "new"] }),
+        scheduledInterviews: { $sum: "$interviewStats.upcoming" },
+        pendingTasks: { $sum: "$taskStats.open" },
+        overdueTasks: { $sum: "$taskStats.overdue" },
       },
-    ]),
-    Interview.countDocuments({ status: { $in: UPCOMING_INTERVIEW_STATUSES }, scheduledAt: { $gte: now } }),
-    FollowUpTask.countDocuments({ status: { $in: OPEN_TASK_STATUSES } }),
-    FollowUpTask.countDocuments({ status: { $in: OPEN_TASK_STATUSES }, dueDate: { $ne: null, $lt: now } }),
+    },
   ]);
-  const totals = aggregate[0] || {};
   res.json({
     stats: {
       totalStudents: totals.totalStudents || 0,
       totalApplications: totals.totalApplications || 0,
       studentsToContact: totals.studentsToContact || 0,
-      scheduledInterviews,
-      pendingTasks,
-      overdueTasks,
+      scheduledInterviews: totals.scheduledInterviews || 0,
+      pendingTasks: totals.pendingTasks || 0,
+      overdueTasks: totals.overdueTasks || 0,
     },
   });
 });
@@ -283,7 +279,9 @@ export const listCandidates = asyncHandler(async (req, res) => {
   const { search, filter, sort, page, limit } = parseListQuery(req.query);
   const now = new Date();
 
-  const pipeline = candidateStages(now);
+  // Les offres ne sont jointes avant la pagination que si la recherche en a
+  // besoin ; sinon uniquement pour la page affichée (10 à 50 lignes).
+  const pipeline = candidateStages(now, { withOffers: Boolean(search) });
   if (search) {
     const rx = new RegExp(escapeRegex(search), "i");
     pipeline.push({ $match: { $or: [{ "student.name": rx }, { "student.email": rx }, { "offerDocs.title": rx }, { "offerDocs.companyName": rx }] } });
@@ -310,6 +308,7 @@ export const listCandidates = asyncHandler(async (req, res) => {
         { $sort: SORTS[sort] },
         { $skip: (page - 1) * limit },
         { $limit: limit },
+        ...(search ? [] : offerLookupStages()),
         {
           $project: {
             student: 1, applicationsCount: 1, pendingCount: 1, inReviewCount: 1, acceptedCount: 1, refusedCount: 1,
@@ -616,7 +615,13 @@ export const getCandidateDocument = asyncHandler(async (req, res, next) => {
   res.setHeader("Cache-Control", "private, no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.sendFile(local.filePath, { dotfiles: "deny" }, (error) => {
-    if (error && !res.headersSent) next(error);
+    if (!error) return;
+    // Jamais de chemin serveur dans la réponse : l'erreur brute reste dans les logs.
+    console.error("[candidates] Envoi du document impossible", { code: error.code, message: error.message });
+    if (!res.headersSent) {
+      const missing = error.code === "ENOENT" || error.statusCode === 404 || error.status === 404;
+      next(httpError(missing ? 404 : 500, "Ce document n'est pas disponible sur le serveur.", "DOCUMENT_UNAVAILABLE"));
+    }
   });
 });
 
@@ -709,7 +714,8 @@ export const updateStudentTask = asyncHandler(async (req, res) => {
 
   const set = { ...Object.fromEntries(changed), updatedBy: req.user._id };
   const finalStatus = set.status ?? existing.status;
-  if (finalStatus === "completed" && existing.status !== "completed") {
+  const leavingNote = existing.type === "note" && (set.type ?? existing.type) !== "note";
+  if (finalStatus === "completed" && (existing.status !== "completed" || leavingNote)) {
     set.completedAt = now;
     set.completedBy = req.user._id;
   } else if (finalStatus !== "completed" && existing.status === "completed") {
@@ -734,7 +740,9 @@ export const deleteStudentTask = asyncHandler(async (req, res) => {
   await loadCandidateOr404(studentId, "_id role");
   const task = await FollowUpTask.findOne({ _id: taskId, studentId }).select("createdBy").lean();
   if (!task) throw httpError(404, "Tâche introuvable dans ce dossier.");
-  if (String(task.createdBy) !== String(req.user._id)) {
+  // Seul le créateur supprime sa tâche — sauf si son compte administrateur
+  // n'existe plus : la tâche ne doit pas devenir impossible à retirer.
+  if (String(task.createdBy) !== String(req.user._id) && (await User.exists({ _id: task.createdBy, role: "admin" }))) {
     throw httpError(403, "Seul l'administrateur qui a créé cette tâche peut la supprimer.", "TASK_DELETE_FORBIDDEN");
   }
   await FollowUpTask.deleteOne({ _id: task._id, studentId });

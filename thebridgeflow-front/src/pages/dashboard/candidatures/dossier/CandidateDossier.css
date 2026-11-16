@@ -2,7 +2,9 @@
    Dossier étudiant (admin) — préfixe .cnd-dos-*
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.cnd-dos { display: grid; gap: 1.1rem; min-width: 0; padding-bottom: 2.5rem; }
+.cnd-dos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.1rem; min-width: 0; padding-bottom: 2.5rem; }
+/* Évite qu'un contenu non sécable élargisse la page (défilement horizontal). */
+.cnd-dos > * { min-width: 0; }
 
 .cnd-dos-back {
   display: inline-flex;
@@ -28,38 +30,33 @@
   border-radius: calc(var(--cnd-radius) + 4px);
   background: var(--bg-card);
   box-shadow: var(--cnd-shadow);
+  container: cnd-hero / inline-size;
 }
+/* Dégradé doux qui s'estompe progressivement : aucune ligne nette ne vient
+   couper les informations de contact, quel que soit le zoom. */
 .cnd-dos-hero__band {
   position: absolute;
-  inset: 0 0 auto;
-  height: 96px;
+  inset: 0;
   background:
-    radial-gradient(120% 140% at 0% 0%, rgb(37 99 235 / 22%), transparent 55%),
-    radial-gradient(90% 120% at 100% 0%, rgb(124 58 237 / 18%), transparent 60%),
-    linear-gradient(135deg, rgb(37 99 235 / 10%), rgb(79 70 229 / 6%));
+    radial-gradient(70% 120% at 0% 0%, rgb(37 99 235 / 13%), transparent 60%),
+    radial-gradient(60% 110% at 100% 0%, rgb(124 58 237 / 10%), transparent 60%),
+    linear-gradient(180deg, rgb(37 99 235 / 6%), transparent 75%);
   pointer-events: none;
-}
-.cnd-dos-hero__band::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 25%, transparent), transparent);
 }
 [data-theme="dark"] .cnd-dos-hero__band {
   background:
-    radial-gradient(120% 140% at 0% 0%, rgb(59 130 246 / 22%), transparent 55%),
-    radial-gradient(90% 120% at 100% 0%, rgb(139 92 246 / 20%), transparent 60%);
+    radial-gradient(70% 120% at 0% 0%, rgb(59 130 246 / 18%), transparent 60%),
+    radial-gradient(60% 110% at 100% 0%, rgb(139 92 246 / 14%), transparent 60%);
 }
 .cnd-dos-hero__main {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  padding: 2.4rem 1.5rem 1.1rem;
+  gap: 1.25rem 1.5rem;
+  padding: 1.5rem;
 }
-.cnd-dos-hero__identity { flex: 1 1 280px; min-width: 0; padding-bottom: .15rem; }
+.cnd-dos-hero__identity { display: grid; flex: 1 1 320px; gap: .6rem; min-width: 0; }
 .cnd-dos-hero__title { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; }
 .cnd-dos-hero__title h1 {
   margin: 0;
@@ -70,31 +67,77 @@
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
-.cnd-dos-hero__meta { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin-top: .55rem; color: var(--text-secondary); font-size: .82rem; }
-.cnd-dos-hero__meta > span { display: inline-flex; align-items: center; gap: .4rem; min-width: 0; overflow-wrap: anywhere; }
-.cnd-dos-hero__meta svg { flex: 0 0 auto; color: var(--primary); }
+.cnd-dos-hero__meta { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cnd-dos-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: 100%;
+  min-height: 2.1rem;
+  padding: .35rem .8rem;
+  border: 1px solid var(--cnd-border);
+  border-radius: 999px;
+  color: var(--text);
+  background: var(--bg-card);
+  box-shadow: var(--cnd-shadow-sm);
+  font-size: .86rem;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: border-color .18s ease, color .18s ease, box-shadow .2s var(--cnd-ease);
+}
+.cnd-dos-hero__pill svg { flex: 0 0 auto; color: var(--primary); }
+a.cnd-dos-hero__pill:hover { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); box-shadow: var(--cnd-shadow); }
+a.cnd-dos-hero__pill:focus-visible { outline: none; box-shadow: var(--cnd-ring); }
+.cnd-dos-hero__sub { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; color: var(--text-secondary); font-size: .82rem; font-weight: 500; }
+.cnd-dos-hero__sub > span { display: inline-flex; align-items: center; gap: .4rem; min-width: 0; overflow-wrap: anywhere; }
+.cnd-dos-hero__sub svg { flex: 0 0 auto; color: var(--text-muted); }
 .cnd-dos-hero__actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; }
 .cnd-dos-hero__contacts { display: flex; flex-wrap: wrap; gap: .45rem; }
 .cnd-dos-contact[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 .cnd-dos-contact:not([aria-disabled="true"]):hover { color: var(--primary); }
 
 .cnd-dos-kpis {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin: 0;
   border-top: 1px solid var(--cnd-border);
   background: var(--cnd-surface-2);
 }
-.cnd-dos-kpi { display: flex; align-items: center; gap: .65rem; min-width: 0; padding: .85rem 1.25rem; }
-.cnd-dos-kpi + .cnd-dos-kpi { border-inline-start: 1px solid var(--cnd-border); }
+.cnd-dos-kpi { display: flex; align-items: center; gap: .65rem; min-width: 0; padding: .8rem 1rem; border-top: 1px solid var(--cnd-border); }
+.cnd-dos-kpi:nth-child(-n + 2) { border-top: 0; }
+.cnd-dos-kpi:nth-child(even) { border-inline-start: 1px solid var(--cnd-border); }
+.cnd-dos-kpi:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .cnd-dos-kpi__text { display: grid; min-width: 0; }
-.cnd-dos-kpi dt { overflow: hidden; color: var(--text-muted); font-size: .7rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.cnd-dos-kpi dt { color: var(--text-muted); font-size: .7rem; font-weight: 650; line-height: 1.25; overflow-wrap: anywhere; }
 .cnd-dos-kpi dd { margin: 0; color: var(--text); font-size: 1.15rem; font-weight: 800; line-height: 1.25; }
 .cnd-dos-kpi__value--small { font-size: .92rem !important; }
 .cnd-dos-kpi--alert dd { color: #dc2626; }
 [data-theme="dark"] .cnd-dos-kpi--alert dd { color: #f87171; }
 .cnd-dos-hero--skeleton .cnd-dos-kpis { gap: .75rem; padding: .85rem 1.25rem; }
+
+@container cnd-hero (min-width: 760px) {
+  .cnd-dos-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .cnd-dos-kpi,
+  .cnd-dos-kpi:nth-child(-n + 2),
+  .cnd-dos-kpi:nth-child(even) { padding: .85rem 1.25rem; border-top: 0; border-inline-start: 1px solid var(--cnd-border); }
+  .cnd-dos-kpi:first-child { border-inline-start: 0; }
+  .cnd-dos-kpi:last-child:nth-child(odd) { grid-column: auto; }
+}
+@container cnd-hero (max-width: 620px) {
+  .cnd-dos-hero__main { padding: 1.15rem 1rem; }
+  .cnd-dos-hero__actions { justify-content: flex-start; width: 100%; }
+  .cnd-dos-hero__contacts { width: 100%; }
+  .cnd-dos-hero__contacts .cnd-btn { flex: 1; padding-inline: .5rem; }
+  .cnd-dos-hero__add { width: 100%; }
+}
+@container cnd-hero (max-width: 340px) {
+  .cnd-dos-hero__contacts .cnd-btn span { display: none; }
+  .cnd-dos-hero__pill { font-size: .8rem; }
+}
+.cnd-dos-hero--skeleton .cnd-dos-kpi { border: 0; }
 
 /* ── Bandeau « consigner l'interaction » ─────────────────────────────────── */
 .cnd-dos-banner {
@@ -110,10 +153,20 @@
 .cnd-dos-banner p { flex: 1; margin: 0; color: var(--text); font-size: .85rem; font-weight: 550; }
 .cnd-dos-banner__actions { display: flex; align-items: center; gap: .35rem; }
 
-/* ── Mise en page principale ─────────────────────────────────────────────── */
-.cnd-dos-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.1rem; align-items: start; }
-.cnd-dos-main { display: grid; gap: 1rem; min-width: 0; }
-.cnd-dos-aside { position: sticky; top: 1rem; display: grid; gap: 1rem; min-width: 0; }
+/* ── Mise en page principale ─────────────────────────────────────────────
+   Le conteneur cnd-layout décide d'afficher la colonne latérale selon la
+   largeur réellement disponible (sidebar ouverte ou non, zoom). */
+.cnd-dos-layout-wrap { min-width: 0; container: cnd-layout / inline-size; }
+.cnd-dos-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.1rem; align-items: start; }
+.cnd-dos-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; min-width: 0; container: cnd-main / inline-size; }
+.cnd-dos-aside { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; min-width: 0; order: -1; }
+@container cnd-layout (min-width: 640px) {
+  .cnd-dos-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container cnd-layout (min-width: 1000px) {
+  .cnd-dos-layout { grid-template-columns: minmax(0, 1fr) 320px; }
+  .cnd-dos-aside { position: sticky; top: 1rem; grid-template-columns: minmax(0, 1fr); order: 0; }
+}
 .cnd-dos-skeleton { display: grid; gap: 1.1rem; }
 .cnd-dos-skeleton__lines { display: grid; flex: 1; gap: .6rem; }
 
@@ -142,7 +195,8 @@
   transition: color .18s ease;
 }
 .cnd-dos-tab:hover { color: var(--text); }
-.cnd-dos-tab:focus-visible { outline: none; border-radius: 8px; box-shadow: var(--cnd-ring); }
+/* Anneau intérieur : il n'est pas rogné par le conteneur à défilement. */
+.cnd-dos-tab:focus-visible { outline: none; border-radius: 8px; box-shadow: inset 0 0 0 2px var(--primary); }
 .cnd-dos-tab--active { color: var(--primary); }
 .cnd-dos-tab__count {
   min-width: 1.35rem;
@@ -598,6 +652,7 @@
 }
 .cnd-dos-doc__ext { position: absolute; inset: auto -.35rem -.35rem auto; padding: .02rem .3rem; border-radius: 4px; color: #fff; background: var(--tone); font-size: .55rem; font-weight: 800; letter-spacing: .03em; }
 [dir="rtl"] .cnd-dos-doc__ext { inset: auto auto -.35rem -.35rem; }
+[data-theme="dark"] .cnd-dos-doc__ext { background: color-mix(in srgb, var(--tone) 55%, #0f172a); }
 .cnd-dos-doc__text { display: grid; flex: 1; gap: .1rem; min-width: 0; }
 .cnd-dos-doc__text strong { overflow: hidden; color: var(--text); font-size: .84rem; text-overflow: ellipsis; white-space: nowrap; }
 .cnd-dos-doc__text small { overflow: hidden; color: var(--text-muted); font-size: .73rem; text-overflow: ellipsis; white-space: nowrap; }
@@ -637,52 +692,26 @@
 .cnd-dos-upcoming__item--overdue small { color: #dc2626; font-weight: 650; }
 [data-theme="dark"] .cnd-dos-upcoming__item--overdue small { color: #f87171; }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 1280px) {
-  .cnd-dos-kpi { padding: .8rem .9rem; }
-}
-
-@media (max-width: 1100px) {
-  .cnd-dos-layout { grid-template-columns: minmax(0, 1fr); }
-  .cnd-dos-aside { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); order: -1; }
-  .cnd-dos-hero__actions { justify-content: flex-start; width: 100%; }
-}
-
-@media (max-width: 900px) {
-  .cnd-dos-tl-day { top: 62px; }
-  .cnd-dos-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .cnd-dos-kpi:nth-child(4) { border-inline-start: 0; }
-  .cnd-dos-kpi:nth-child(n + 4) { border-top: 1px solid var(--cnd-border); }
+/* ── Responsive ─────────────────────────────────────────────────────────────
+   Contenu principal : container queries sur cnd-main (largeur réelle). Les
+   modales dépendent de leur propre largeur (cnd-form). */
+@container cnd-main (max-width: 760px) {
   .cnd-dos-profile { grid-template-columns: minmax(0, 1fr); }
-  .cnd-dos-type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 768px) {
-  .cnd-dos-hero__main { padding: 2rem 1rem 1rem; gap: 1rem; }
-  .cnd-dos-hero__band { height: 80px; }
-  .cnd-dos-aside { grid-template-columns: minmax(0, 1fr); }
   .cnd-dos-app__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cnd-dos-tl-select { flex: 1 1 160px; }
-  .cnd-dos-banner { flex-wrap: wrap; }
-  .cnd-dos-banner p { flex-basis: calc(100% - 3rem); }
-  .cnd-dos-banner__actions { width: 100%; justify-content: flex-end; }
 }
-
-@media (max-width: 640px) {
-  .cnd-dos-hero__contacts { width: 100%; }
-  .cnd-dos-hero__contacts .cnd-btn { flex: 1; padding-inline: .5rem; }
-  .cnd-dos-hero__add { width: 100%; }
-  .cnd-dos-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cnd-dos-kpi { padding: .7rem .8rem; }
-  .cnd-dos-kpi + .cnd-dos-kpi { border-inline-start: 0; }
-  .cnd-dos-kpi:nth-child(even) { border-inline-start: 1px solid var(--cnd-border); }
-  .cnd-dos-kpi:nth-child(n + 3) { border-top: 1px solid var(--cnd-border); }
-  .cnd-dos-kpi:last-child:nth-child(odd) { grid-column: 1 / -1; }
-  .cnd-dos-form__grid { grid-template-columns: minmax(0, 1fr); }
+@container cnd-main (max-width: 560px) {
+  /* Onglets : partage égal de la largeur, icône + compteur (libellé conservé
+     pour les lecteurs d'écran). Filtre de statut : passage à la ligne. */
+  .cnd-dos-tab { flex: 1 1 0; min-width: 0; justify-content: center; padding-inline: .4rem; }
+  .cnd-dos-tab__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .cnd-dos-tl-status { display: flex; flex-wrap: wrap; overflow: visible; }
+  .cnd-dos-tl-status .cnd-seg__btn { flex: 1 1 auto; padding-inline: .6rem; }
+  .cnd-dos-tl-card__side .cnd-dos-status__menu { inset-inline-end: auto; inset-inline-start: 0; transform-origin: top left; }
+  [dir="rtl"] .cnd-dos-tl-card__side .cnd-dos-status__menu { transform-origin: top right; }
   .cnd-dos-facts { grid-template-columns: minmax(0, 1fr); }
   .cnd-dos-tl-list { padding-inline-start: 2.4rem; }
   .cnd-dos-tl-node { inset-inline-start: -2.4rem; }
-  .cnd-dos-tl-list::before { inset-inline-start: calc(.925rem - 1px); }
   .cnd-dos-tl-card { padding: .75rem .8rem; }
   .cnd-dos-tl-card__head { flex-direction: column; }
   .cnd-dos-tl-card__side { align-self: stretch; justify-content: flex-start; }
@@ -690,21 +719,37 @@
   .cnd-dos-app__actions-spacer { display: none; }
   .cnd-dos-app__actions .cnd-btn { flex: 1 1 auto; }
 }
-
-@media (max-width: 480px) {
-  .cnd-dos-hero__identity { flex-basis: 100%; }
-  .cnd-dos-tab { padding: .7rem .65rem; font-size: .8rem; }
-  .cnd-dos-type-grid { gap: .4rem; }
-  .cnd-dos-type { min-height: 2.75rem; font-size: .74rem; }
+@container cnd-main (max-width: 420px) {
   .cnd-dos-app__facts { grid-template-columns: minmax(0, 1fr); }
   .cnd-dos-doc { flex-wrap: wrap; }
   .cnd-dos-doc__actions { width: 100%; justify-content: flex-end; }
-  .cnd-dos-doc--compact .cnd-dos-doc__actions { width: auto; }
 }
 
-@media (max-width: 400px) {
-  .cnd-dos-hero__contacts .cnd-btn span { display: none; }
+.cnd-dos-form-modal { container: cnd-form / inline-size; }
+@container cnd-form (max-width: 600px) {
+  .cnd-dos-type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container cnd-form (max-width: 520px) {
+  .cnd-dos-form__grid { grid-template-columns: minmax(0, 1fr); }
+  .cnd-dos-type { min-height: 2.75rem; font-size: .74rem; }
+}
+@container cnd-form (max-width: 420px) {
+  .cnd-dos-form__status .cnd-seg__btn { min-width: 0; padding-inline: .45rem; white-space: normal; text-align: center; line-height: 1.2; }
+  .cnd-dos-form__status .cnd-seg__btn svg { display: none; }
+}
+@container cnd-form (max-width: 340px) {
   .cnd-dos-type-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Sous 900px le Topbar colle en haut de la page : les en-têtes de jour
+   restent visibles juste en dessous. */
+@media (max-width: 900px) {
+  .cnd-dos-tl-day { top: 62px; }
+}
+@media (max-width: 768px) {
+  .cnd-dos-banner { flex-wrap: wrap; }
+  .cnd-dos-banner p { flex-basis: calc(100% - 3rem); }
+  .cnd-dos-banner__actions { width: 100%; justify-content: flex-end; }
 }
 
 @media (prefers-reduced-motion: reduce) {

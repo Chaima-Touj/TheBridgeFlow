@@ -416,7 +416,9 @@ export const deleteUser = asyncHandler(async (req, res) => {
     Application.countDocuments({ studentId: user._id }),
     Interview.countDocuments({ $or: [{ studentId: user._id }, { companyId: user._id }] }),
     Conversation.countDocuments({ participants: user._id }),
-    FollowUpTask.countDocuments({ studentId: user._id }),
+    // Étudiant suivi OU administrateur auteur/éditeur de tâches : l'historique
+    // partagé doit garder ses auteurs et rester gérable.
+    FollowUpTask.countDocuments({ $or: [{ studentId: user._id }, { createdBy: user._id }, { updatedBy: user._id }, { completedBy: user._id }] }),
   ]);
 
   if (applicationCount > 0 || interviewCount > 0 || conversationCount > 0 || followUpTaskCount > 0) {

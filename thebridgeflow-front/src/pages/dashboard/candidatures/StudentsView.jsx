@@ -221,8 +221,9 @@ export default function StudentsView({ searchParams, setSearchParams }) {
 
               <div className="cnd-list-cell cnd-list-cell--activity">
                 <span className="cnd-list-cell__label">{tl("colLastActivity")}</span>
-                <span className="cnd-list-activity" title={formatDateTime(student.lastActivityAt, locale)}>
+                <span className="cnd-list-activity">
                   {formatRelative(student.lastActivityAt, locale)}
+                  <small>{formatDate(student.lastActivityAt, locale)}</small>
                 </span>
               </div>
 

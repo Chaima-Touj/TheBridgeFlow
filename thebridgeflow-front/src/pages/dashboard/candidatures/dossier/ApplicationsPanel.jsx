@@ -16,7 +16,7 @@ const cardVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.26, ease: [0.22, 0.8, 0.24, 1] } },
 };
 
-function ApplicationCard({ application, documents, locale, onProposeInterview, onDecision, onAddLinkedTask, onShowHistory, onPreviewDocument }) {
+function ApplicationCard({ application, documents, locale, busyDocument, onProposeInterview, onDecision, onAddLinkedTask, onShowHistory, onPreviewDocument }) {
   const { t } = useTranslation();
   const ta = (key, options) => t(`adminCandidates.dossier.applications.${key}`, options);
   const [expanded, setExpanded] = useState(false);
@@ -105,7 +105,7 @@ function ApplicationCard({ application, documents, locale, onProposeInterview, o
               type="button"
               className="cnd-dos-chip cnd-dos-chip--action"
               onClick={() => onPreviewDocument(doc)}
-              disabled={!doc.available && !doc.externalUrl}
+              disabled={(!doc.available && !doc.externalUrl) || Boolean(busyDocument)}
             >
               {doc.available ? <Eye size={13} strokeWidth={ICON_STROKE} aria-hidden="true" /> : <FileText size={13} strokeWidth={ICON_STROKE} aria-hidden="true" />}
               {doc.kind === "coverLetter" ? ta("coverLetterFile") : ta("applicationCv")}

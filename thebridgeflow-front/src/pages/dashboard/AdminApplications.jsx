@@ -112,8 +112,8 @@ export default function AdminApplications() {
             </motion.section>
           </AnimatePresence>
         </div>
+        <CndToastViewport toasts={toasts} onDismiss={dismissToast} />
       </MotionConfig>
-      <CndToastViewport toasts={toasts} onDismiss={dismissToast} />
     </DashboardLayout>
   );
 }

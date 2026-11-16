@@ -2773,8 +2773,10 @@
           "titleTooLong": "Le titre ne doit pas dépasser {{max}} caractères.",
           "descriptionTooLong": "La description ne doit pas dépasser {{max}} caractères.",
           "dateInvalid": "Date invalide.",
-          "confirmRequired": "Cochez la confirmation pour marquer la tâche comme terminée."
-        }
+          "confirmRequired": "Cochez la confirmation pour marquer la tâche comme terminée.",
+          "dateOutOfRange": "La date doit être comprise entre 2000 et les cinq prochaines années."
+        },
+        "conflictInline": "Cette tâche vient d'être modifiée par un autre administrateur. Les données ont été actualisées : vérifiez vos changements puis enregistrez à nouveau."
       },
       "completion": {
         "title": "Confirmer la réalisation",

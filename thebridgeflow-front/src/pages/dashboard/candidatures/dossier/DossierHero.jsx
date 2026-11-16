@@ -12,7 +12,7 @@ import { buildMailtoLink, buildTelLink, buildWhatsAppLink, formatDate } from "..
 function ContactAction({ href, type, Icon, label, unavailable, onContact, external }) {
   if (!href) {
     return (
-      <span className="cnd-btn cnd-btn--secondary cnd-dos-contact" aria-disabled="true" title={unavailable}>
+      <span className="cnd-btn cnd-btn--secondary cnd-dos-contact" aria-disabled="true" title={unavailable} aria-label={`${label} — ${unavailable}`}>
         <Icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
         <span>{label}</span>
       </span>
@@ -22,6 +22,8 @@ function ContactAction({ href, type, Icon, label, unavailable, onContact, extern
     <a
       className="cnd-btn cnd-btn--secondary cnd-dos-contact"
       href={href}
+      aria-label={label}
+      title={label}
       onClick={() => onContact(type)}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
@@ -71,12 +73,22 @@ export default function DossierHero({ student, globalStatus, summary, applicatio
             <GlobalStatusBadge status={globalStatus} />
           </div>
           <div className="cnd-dos-hero__meta">
-            {student.email && (
-              <span><Mail size={14} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.email}</span></span>
-            )}
-            {student.phone && (
-              <span><Phone size={14} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.phone}</span></span>
-            )}
+            {student.email && (mailLink ? (
+              <a className="cnd-dos-hero__pill" href={mailLink} onClick={() => onContact("email")} title={td("email")}>
+                <Mail size={15} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.email}</span>
+              </a>
+            ) : (
+              <span className="cnd-dos-hero__pill"><Mail size={15} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.email}</span></span>
+            ))}
+            {student.phone && (telLink ? (
+              <a className="cnd-dos-hero__pill" href={telLink} onClick={() => onContact("call")} title={td("call")}>
+                <Phone size={15} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.phone}</span>
+              </a>
+            ) : (
+              <span className="cnd-dos-hero__pill"><Phone size={15} strokeWidth={ICON_STROKE} aria-hidden="true" /><span className="cnd-ltr">{student.phone}</span></span>
+            ))}
+          </div>
+          <div className="cnd-dos-hero__sub">
             {(student.university || student.specialty) && (
               <span><GraduationCap size={14} strokeWidth={ICON_STROKE} aria-hidden="true" />{[student.university, student.specialty].filter(Boolean).join(" · ")}</span>
             )}

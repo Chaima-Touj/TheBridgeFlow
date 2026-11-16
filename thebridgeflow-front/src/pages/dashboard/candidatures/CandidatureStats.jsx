@@ -80,6 +80,7 @@ export default function CandidatureStats({ refreshKey = 0, onStats, onSelectFilt
   }
 
   return (
+    <div className="cnd-list-stats-wrap">
     <section className="cnd-list-stats" aria-label={tl("label")} aria-busy={loading}>
       {CARDS.map(({ key, Icon, tone, filter, alert }, index) => {
         const value = stats?.[key] ?? 0;
@@ -125,5 +126,6 @@ export default function CandidatureStats({ refreshKey = 0, onStats, onSelectFilt
         );
       })}
     </section>
+    </div>
   );
 }

@@ -45,7 +45,14 @@ export default function TaskFormModal({
 
   const selectType = (key) => {
     const meta = getTaskType(key);
-    update({ type: key, dueEnabled: form.dueEnabled || (!isEdit && meta.needsDueDate) });
+    // Une note (toujours « terminée ») convertie en action repart « à faire » :
+    // la réalisation devra être confirmée explicitement.
+    const leavingNote = form.type === "note" && key !== "note";
+    update({
+      type: key,
+      dueEnabled: form.dueEnabled || (!isEdit && meta.needsDueDate),
+      ...(leavingNote ? { status: "pending", confirmDone: false } : {}),
+    });
   };
 
   const contactLinks = {
@@ -78,8 +85,16 @@ export default function TaskFormModal({
     } catch (requestError) {
       const code = getApiErrorCode(requestError);
       const status = requestError?.response?.status;
-      if (code === "TASK_CONFLICT" || (isEdit && status === 404)) {
-        onConflict(code === "TASK_CONFLICT" ? "conflict" : "notFound");
+      if (isEdit && status === 404) {
+        onConflict("notFound");
+        return;
+      }
+      if (code === "TASK_CONFLICT") {
+        // Le formulaire reste ouvert (rien de ce qui a été saisi n'est perdu) ;
+        // le parent recharge la tâche à jour, un nouvel envoi repart d'elle.
+        setError(tf("conflictInline"));
+        setSubmitting(false);
+        onConflict("conflict");
         return;
       }
       if (code === "COMPLETION_CONFIRMATION_REQUIRED") setError(t("adminCandidates.common.errors.completionConfirm"));
@@ -129,15 +144,14 @@ export default function TaskFormModal({
 
         <fieldset className="cnd-dos-form__types">
           <legend className="cnd-label">{tf("typeLabel")}</legend>
-          <div className="cnd-dos-type-grid" role="radiogroup" aria-label={tf("typeLabel")}>
+          <div className="cnd-dos-type-grid" role="group" aria-label={tf("typeLabel")}>
             {TASK_TYPES.map(({ key, Icon, tone }) => {
               const selected = form.type === key;
               return (
                 <button
                   key={key}
                   type="button"
-                  role="radio"
-                  aria-checked={selected}
+                  aria-pressed={selected}
                   className={`cnd-dos-type ${toneClass(tone)} ${selected ? "cnd-dos-type--selected" : ""}`}
                   onClick={() => selectType(key)}
                 >
@@ -262,15 +276,14 @@ export default function TaskFormModal({
           {form.type !== "note" ? (
             <div className="cnd-field cnd-dos-form__full">
               <span className="cnd-label" id="cnd-task-status-label">{tf("statusLabel")}</span>
-              <div className="cnd-seg cnd-dos-form__status" role="radiogroup" aria-labelledby="cnd-task-status-label">
+              <div className="cnd-seg cnd-dos-form__status" role="group" aria-labelledby="cnd-task-status-label">
                 {TASK_STATUSES.map(({ key, Icon }) => {
                   const selected = form.status === key;
                   return (
                     <button
                       key={key}
                       type="button"
-                      role="radio"
-                      aria-checked={selected}
+                      aria-pressed={selected}
                       className="cnd-seg__btn"
                       onClick={() => update({ status: key, confirmDone: key === "completed" ? form.confirmDone : false })}
                     >

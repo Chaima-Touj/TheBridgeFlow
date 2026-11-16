@@ -89,6 +89,14 @@ test("completion requires explicit confirmation, except for notes", () => {
   assert.equal(validateTaskInput({ status: "completed", confirmCompletion: true }, { partial: true, existing, now: NOW }).updates.status, "completed");
   assert.deepEqual(validateTaskInput({ title: "Nouveau" }, { partial: true, existing: { type: "call", status: "completed" }, now: NOW }).updates, { title: "Nouveau" });
   assert.equal(validateTaskInput({ type: "note" }, { partial: true, existing, now: NOW }).updates.status, "completed");
+  // Une note convertie en appel ne reste pas « terminée » sans confirmation.
+  const note = { type: "note", status: "completed" };
+  assert.equal(validateTaskInput({ type: "call" }, { partial: true, existing: note, now: NOW }).updates.status, "pending");
+  assert.throws(
+    () => validateTaskInput({ type: "whatsapp", status: "completed" }, { partial: true, existing: note, now: NOW }),
+    { code: "COMPLETION_CONFIRMATION_REQUIRED" },
+  );
+  assert.equal(validateTaskInput({ type: "email", status: "completed", confirmCompletion: true }, { partial: true, existing: note, now: NOW }).updates.status, "completed");
 });
 
 test("validateTaskInput partial update handling", () => {

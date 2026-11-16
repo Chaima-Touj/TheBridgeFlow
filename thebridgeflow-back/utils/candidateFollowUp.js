@@ -186,13 +186,19 @@ export function validateTaskInput(body, { partial = false, existing = null, now 
   // Une note interne est un simple enregistrement : toujours « terminée ».
   if (finalType === "note") updates.status = "completed";
 
+  // Une note transformée en appel / WhatsApp / email… n'a jamais été
+  // « réalisée » : elle repart à « à faire » sauf confirmation explicite.
+  const leavingNote = existing?.type === "note" && finalType !== "note";
+  if (leavingNote && !updates.status) updates.status = "pending";
+
   const previousStatus = existing?.status ?? null;
   const finalStatus = updates.status ?? previousStatus ?? "pending";
   if (!partial && !updates.status) updates.status = "pending";
 
   // Un appel, un message WhatsApp, un email… ne passe JAMAIS à « terminée »
   // sans confirmation explicite de l'administrateur.
-  if (finalStatus === "completed" && previousStatus !== "completed" && finalType !== "note" && !confirmCompletion) {
+  const becomesCompleted = finalStatus === "completed" && (previousStatus !== "completed" || leavingNote);
+  if (becomesCompleted && finalType !== "note" && !confirmCompletion) {
     throw badRequest(
       "Confirmez explicitement que l'action a bien été réalisée avant de la marquer comme terminée.",
       "COMPLETION_CONFIRMATION_REQUIRED",

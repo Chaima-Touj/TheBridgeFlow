@@ -113,23 +113,38 @@ export function initialTaskForm({ task = null, preset = {}, now = Date.now() } =
   };
 }
 
-// La confirmation explicite n'est exigée que lors du PASSAGE à « terminée ».
+// La confirmation explicite n'est exigée que lors du PASSAGE à « terminée »
+// (une note convertie en appel / WhatsApp / email compte comme un passage).
 export function needsCompletionConfirmation(form, originalTask = null) {
   if (form.type === "note") return false;
   if (form.status !== "completed") return false;
-  return !originalTask || originalTask.status !== "completed";
+  if (!originalTask || originalTask.status !== "completed") return true;
+  return originalTask.type === "note";
+}
+
+const MIN_DATE = Date.UTC(2000, 0, 1);
+const FIVE_YEARS_MS = 5 * 365 * 24 * 3600 * 1000;
+
+// Même plage que le backend (2000-01-01 → maintenant + 5 ans).
+function dateError(value, now) {
+  const iso = fromDateTimeLocalValue(value);
+  if (!iso) return "dateInvalid";
+  const time = new Date(iso).getTime();
+  return time < MIN_DATE || time > now + FIVE_YEARS_MS ? "dateOutOfRange" : null;
 }
 
 // Renvoie { field: messageKey } — vide si le formulaire est valide.
-export function validateTaskForm(form, { title, originalTask = null } = {}) {
+export function validateTaskForm(form, { title, originalTask = null, now = Date.now() } = {}) {
   const errors = {};
   if (!form.type) errors.type = "typeRequired";
   const finalTitle = (title ?? form.title ?? "").trim();
   if (!finalTitle) errors.title = "titleRequired";
   else if (finalTitle.length > MAX_TITLE) errors.title = "titleTooLong";
   if ((form.description || "").length > MAX_DESCRIPTION) errors.description = "descriptionTooLong";
-  if (!fromDateTimeLocalValue(form.activityDate)) errors.activityDate = "dateInvalid";
-  if (form.dueEnabled && form.dueDate && !fromDateTimeLocalValue(form.dueDate)) errors.dueDate = "dateInvalid";
+  const activityError = dateError(form.activityDate, now);
+  if (activityError) errors.activityDate = activityError;
+  const dueError = form.dueEnabled && form.dueDate ? dateError(form.dueDate, now) : null;
+  if (dueError) errors.dueDate = dueError;
   if (needsCompletionConfirmation(form, originalTask) && !form.confirmDone) errors.confirmDone = "confirmRequired";
   return errors;
 }
@@ -172,7 +187,9 @@ export function buildTaskPatch(form, originalTask, { title }) {
     if (!sameInstant(full.dueDate, originalMinute)) patch.dueDate = full.dueDate;
   }
   if ((full.applicationId || null) !== (originalTask.applicationId ? String(originalTask.applicationId) : null)) patch.applicationId = full.applicationId;
-  if (full.status && full.status !== originalTask.status) patch.status = full.status;
+  // Note convertie en autre type : le statut est toujours envoyé explicitement.
+  const leavingNote = originalTask.type === "note" && full.type !== "note";
+  if (full.status && (full.status !== originalTask.status || leavingNote)) patch.status = full.status;
   if (needsCompletionConfirmation(form, originalTask)) patch.confirmCompletion = form.confirmDone === true;
   return patch;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
@@ -23,7 +23,16 @@ export function TaskItem({ task, now, locale, highlighted, busy, canDelete, onSt
   const { t } = useTranslation();
   const tt = (key, options) => t(`adminCandidates.dossier.timeline.${key}`, options);
   const [expanded, setExpanded] = useState(false);
+  const itemRef = useRef(null);
   const overdue = isTaskOverdue(task, now);
+
+  // Tâche mise en évidence (ajout, échéance cliquée) : on l'amène à l'écran
+  // dès que la carte est montée, y compris après un changement d'onglet.
+  useEffect(() => {
+    if (!highlighted) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    itemRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  }, [highlighted]);
   const soon = !overdue && isDueSoon(task, now);
   const unknown = t("adminCandidates.common.unknownAdmin");
   const offer = task.application?.offer;
@@ -36,6 +45,7 @@ export function TaskItem({ task, now, locale, highlighted, busy, canDelete, onSt
   return (
     <motion.li
       {...itemMotion}
+      ref={itemRef}
       id={`cnd-task-${task._id}`}
       className={`cnd-dos-tl-item ${stateClass} ${highlighted ? "cnd-dos-tl-item--highlight" : ""}`}
     >
