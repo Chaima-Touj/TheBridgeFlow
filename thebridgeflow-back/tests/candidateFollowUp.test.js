@@ -116,6 +116,7 @@ test("parseListQuery coerces hostile or missing values", () => {
   assert.deepEqual(parseListQuery({ search: ["a"], filter: { $ne: 1 }, sort: "x", page: "-1", limit: "999" }),
     { search: "", filter: "all", sort: "recent", page: 1, limit: 10 });
   assert.equal(parseListQuery({ search: "x".repeat(300) }).search.length, 100);
+  assert.equal(parseListQuery({ filter: "with_tasks" }).filter, "with_tasks");
   assert.deepEqual(parseTaskQuery({ status: "completed", type: "call", applicationId: "none", overdue: "true" }),
     { status: "completed", type: "call", applicationId: "none", overdue: true });
   assert.deepEqual(parseTaskQuery({ status: { $ne: 1 }, type: "x", applicationId: "1" }),

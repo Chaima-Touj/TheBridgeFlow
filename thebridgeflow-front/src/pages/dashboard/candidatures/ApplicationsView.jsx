@@ -76,7 +76,7 @@ function exportApplicationsPDF(rows, t) {
   });
 }
 
-export default function ApplicationsView({ onDataChanged, pushToast }) {
+export default function ApplicationsView({ initialStatus = "en attente", onDataChanged, pushToast }) {
   const { t } = useTranslation();
   const tl = (key, options) => t(`adminCandidates.list.applications.${key}`, options);
   const navigate = useNavigate();
@@ -86,7 +86,8 @@ export default function ApplicationsView({ onDataChanged, pushToast }) {
   const [error,         setError]       = useState(false);
 
   const [search,       setSearch]       = useState("");
-  const [statusFilter, setStatusFilter] = useState("en attente");
+  // « en attente » par défaut (comportement historique) ; « all » depuis l'indicateur Candidatures.
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);

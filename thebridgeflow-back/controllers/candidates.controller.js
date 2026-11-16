@@ -230,6 +230,7 @@ const FILTER_MATCH = {
   accepted: { globalStatus: "accepted" },
   rejected: { globalStatus: "rejected" },
   multiple: { applicationsCount: { $gte: 2 } },
+  with_tasks: { "taskStats.open": { $gt: 0 } },
   overdue: { "taskStats.overdue": { $gt: 0 } },
 };
 
@@ -299,6 +300,7 @@ export const listCandidates = asyncHandler(async (req, res) => {
           accepted: sumIf({ $eq: ["$globalStatus", "accepted"] }),
           rejected: sumIf({ $eq: ["$globalStatus", "rejected"] }),
           multiple: sumIf({ $gte: ["$applicationsCount", 2] }),
+          with_tasks: sumIf({ $gt: ["$taskStats.open", 0] }),
           overdue: sumIf({ $gt: ["$taskStats.overdue", 0] }),
         },
       }],
@@ -324,7 +326,7 @@ export const listCandidates = asyncHandler(async (req, res) => {
   const total = result?.total?.[0]?.value || 0;
   const countsRow = result?.counts?.[0] || {};
   const counts = Object.fromEntries(
-    ["all", "new", "in_progress", "interview", "accepted", "rejected", "multiple", "overdue"].map((key) => [key, countsRow[key] || 0]),
+    ["all", "new", "in_progress", "interview", "accepted", "rejected", "multiple", "with_tasks", "overdue"].map((key) => [key, countsRow[key] || 0]),
   );
 
   const students = (result?.items || []).map((row) => {

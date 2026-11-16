@@ -2516,7 +2516,8 @@
         "accepted": "Accepted",
         "rejected": "Rejected",
         "multiple": "Several applications",
-        "overdue": "Overdue tasks"
+        "overdue": "Overdue tasks",
+        "with_tasks": "Tasks to do"
       },
       "interviewStatus": {
         "proposé": "Proposed",
@@ -2563,30 +2564,35 @@
       "stats": {
         "label": "Follow-up indicators",
         "loadError": "Unable to load the indicators.",
-        "filterHint": "Show the matching students",
         "totalStudents": {
           "label": "Students",
-          "hint": "With at least one application"
+          "hint": "With at least one application",
+          "action": "View all students"
         },
         "totalApplications": {
           "label": "Applications",
-          "hint": "Across all offers"
+          "hint": "Across all offers",
+          "action": "View all applications"
         },
         "studentsToContact": {
           "label": "To contact",
-          "hint": "No follow-up started"
+          "hint": "No follow-up started",
+          "action": "View students to contact"
         },
         "scheduledInterviews": {
           "label": "Scheduled interviews",
-          "hint": "Upcoming, proposed or confirmed"
+          "hint": "Upcoming, proposed or confirmed",
+          "action": "View scheduled interviews"
         },
         "pendingTasks": {
           "label": "Pending tasks",
-          "hint": "To do or in progress"
+          "hint": "To do or in progress",
+          "action": "View students with tasks to do"
         },
         "overdueTasks": {
           "label": "Overdue tasks",
-          "hint": "Due date passed"
+          "hint": "Due date passed",
+          "action": "View overdue tasks"
         }
       },
       "students": {

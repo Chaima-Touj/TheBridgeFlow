@@ -8,7 +8,7 @@ import path from "node:path";
 export const TASK_TYPES = ["call", "whatsapp", "email", "interview", "office_visit", "follow_up", "note", "other"];
 export const TASK_STATUSES = ["pending", "in_progress", "completed"];
 export const OPEN_TASK_STATUSES = ["pending", "in_progress"];
-export const STUDENT_FILTERS = ["all", "new", "in_progress", "interview", "accepted", "rejected", "multiple", "overdue"];
+export const STUDENT_FILTERS = ["all", "new", "in_progress", "interview", "accepted", "rejected", "multiple", "with_tasks", "overdue"];
 export const GLOBAL_STATUSES = ["new", "in_progress", "interview", "accepted", "rejected"];
 export const STUDENT_SORTS = ["recent", "name", "applications"];
 export const PAGE_SIZES = [10, 25, 50];

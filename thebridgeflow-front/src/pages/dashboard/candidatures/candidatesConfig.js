@@ -1,7 +1,7 @@
 import {
   Phone, MessageCircle, Mail, CalendarClock, Building2, BellRing, StickyNote,
   Sparkles, CircleDashed, Loader, CircleCheck, CircleAlert, Inbox, UserCheck,
-  UserX, CalendarDays, Activity, Layers, AlarmClock, Users,
+  UserX, CalendarDays, Activity, Layers, AlarmClock, Users, ClipboardList,
 } from "lucide-react";
 
 // Taille / épaisseur uniformes pour toutes les icônes de l'espace Candidatures.
@@ -64,6 +64,7 @@ export const STUDENT_FILTERS = [
   { key: "accepted",    Icon: UserCheck },
   { key: "rejected",    Icon: UserX },
   { key: "multiple",    Icon: Layers },
+  { key: "with_tasks",  Icon: ClipboardList },
   { key: "overdue",     Icon: AlarmClock },
 ];
 

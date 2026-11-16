@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
@@ -17,6 +17,8 @@ import "./candidatures/CandidaturesList.css";
    - Par étudiant (défaut) : un étudiant = une ligne, quel que soit le nombre
      de candidatures, avec accès à son dossier et à son suivi.
    - Par candidature : la vue historique, une ligne par candidature. */
+const APPLICATION_STATUSES = ["all", "en attente", "en cours", "acceptée", "refusée"];
+
 const VIEWS = [
   { key: "etudiants", Icon: Users, statKey: "totalStudents" },
   { key: "candidatures", Icon: FileText, statKey: "totalApplications" },
@@ -30,7 +32,12 @@ export default function AdminApplications() {
   const [stats, setStats] = useState(null);
   const [statsKey, setStatsKey] = useState(0);
   const [studentsKey, setStudentsKey] = useState(0);
+  const [applicationsKey, setApplicationsKey] = useState(0);
+  const [scrollRequest, setScrollRequest] = useState(0);
+  const listAnchorRef = useRef(null);
   const { toasts, pushToast, dismissToast } = useCndToast();
+  const statusParam = searchParams.get("statut");
+  const initialStatus = APPLICATION_STATUSES.includes(statusParam) ? statusParam : "en attente";
 
   const refreshStats = useCallback(() => setStatsKey((key) => key + 1), []);
 
@@ -39,11 +46,27 @@ export default function AdminApplications() {
     setSearchParams(next === "candidatures" ? { vue: "candidatures" } : {});
   };
 
-  // Clic sur un indicateur : applique le filtre correspondant à la vue étudiants.
-  const applyStudentFilter = (filter) => {
-    setSearchParams(filter && filter !== "all" ? { filtre: filter } : {});
-    setStudentsKey((key) => key + 1);
+  // Clic sur un indicateur : ouvre la vue et le filtre correspondants, puis
+  // amène la liste à l'écran.
+  const goToTarget = (target) => {
+    if (target.view === "candidatures") {
+      setSearchParams({ vue: "candidatures", statut: "all" });
+      setApplicationsKey((key) => key + 1);
+    } else {
+      setSearchParams(target.filter && target.filter !== "all" ? { filtre: target.filter } : {});
+      setStudentsKey((key) => key + 1);
+    }
+    setScrollRequest((value) => value + 1);
   };
+
+  useEffect(() => {
+    if (!scrollRequest) return undefined;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const frame = requestAnimationFrame(() => {
+      listAnchorRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [scrollRequest]);
 
   return (
     <DashboardLayout title={t("sidebar.admin.candidatures")} subtitle={t("adminCandidatures.pageSubtitle")}>
@@ -86,10 +109,11 @@ export default function AdminApplications() {
           <CandidatureStats
             refreshKey={statsKey}
             onStats={setStats}
-            onSelectFilter={applyStudentFilter}
-            activeFilter={view === "etudiants" ? searchParams.get("filtre") || "all" : null}
+            onSelect={goToTarget}
+            current={view === "etudiants" ? { view, filter: searchParams.get("filtre") || "all" } : { view }}
           />
 
+          <div ref={listAnchorRef} className="cnd-list-anchor">
           <AnimatePresence mode="wait" initial={false}>
             <motion.section
               key={view}
@@ -107,10 +131,16 @@ export default function AdminApplications() {
                   setSearchParams={setSearchParams}
                 />
               ) : (
-                <ApplicationsView onDataChanged={refreshStats} pushToast={pushToast} />
+                <ApplicationsView
+                  key={applicationsKey}
+                  initialStatus={initialStatus}
+                  onDataChanged={refreshStats}
+                  pushToast={pushToast}
+                />
               )}
             </motion.section>
           </AnimatePresence>
+          </div>
         </div>
         <CndToastViewport toasts={toasts} onDismiss={dismissToast} />
       </MotionConfig>

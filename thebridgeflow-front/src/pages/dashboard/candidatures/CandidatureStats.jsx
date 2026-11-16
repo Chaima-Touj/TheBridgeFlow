@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
-import { Users, FileText, PhoneCall, CalendarClock, ClipboardList, AlarmClock, RotateCw, TriangleAlert } from "lucide-react";
+import {
+  Users, FileText, PhoneCall, CalendarClock, ClipboardList, AlarmClock, RotateCw, TriangleAlert, ArrowRight,
+} from "lucide-react";
 import { candidatesService } from "../../../services/candidates.service.js";
 import { ICON_STROKE, toneClass } from "./candidatesConfig.js";
 import { isCanceledError, isNetworkError, resolveLocale } from "./candidatesUtils.js";
 import Skeleton from "./shared/Skeleton.jsx";
 
-// Indicateurs calculés côté backend (GET /api/admin/candidates/stats).
+/* Indicateurs calculés côté backend (GET /api/admin/candidates/stats).
+   Chaque carte mène à la liste correspondante : `target` = vue + filtre. */
 const CARDS = [
-  { key: "totalStudents",       Icon: Users,         tone: "blue" },
-  { key: "totalApplications",   Icon: FileText,      tone: "indigo" },
-  { key: "studentsToContact",   Icon: PhoneCall,     tone: "amber",  filter: "new" },
-  { key: "scheduledInterviews", Icon: CalendarClock, tone: "violet", filter: "interview" },
-  { key: "pendingTasks",        Icon: ClipboardList, tone: "cyan" },
-  { key: "overdueTasks",        Icon: AlarmClock,    tone: "red",    filter: "overdue", alert: true },
+  { key: "totalStudents",       Icon: Users,         tone: "blue",   target: { view: "etudiants", filter: "all" } },
+  { key: "totalApplications",   Icon: FileText,      tone: "indigo", target: { view: "candidatures" } },
+  { key: "studentsToContact",   Icon: PhoneCall,     tone: "amber",  target: { view: "etudiants", filter: "new" } },
+  { key: "scheduledInterviews", Icon: CalendarClock, tone: "violet", target: { view: "etudiants", filter: "interview" } },
+  { key: "pendingTasks",        Icon: ClipboardList, tone: "cyan",   target: { view: "etudiants", filter: "with_tasks" } },
+  { key: "overdueTasks",        Icon: AlarmClock,    tone: "red",    target: { view: "etudiants", filter: "overdue" }, alert: true },
 ];
 
 function AnimatedNumber({ value, locale }) {
@@ -34,7 +37,14 @@ function AnimatedNumber({ value, locale }) {
   return <motion.span>{display}</motion.span>;
 }
 
-export default function CandidatureStats({ refreshKey = 0, onStats, onSelectFilter, activeFilter }) {
+// La carte correspondant à la vue/filtre affichés est marquée comme active.
+function isActive(target, current) {
+  if (!current) return false;
+  if (target.view !== current.view) return false;
+  return target.view === "candidatures" || target.filter === current.filter;
+}
+
+export default function CandidatureStats({ refreshKey = 0, onStats, onSelect, current }) {
   const { t, i18n } = useTranslation();
   const tl = (key, options) => t(`adminCandidates.list.stats.${key}`, options);
   const locale = resolveLocale(i18n.resolvedLanguage || i18n.language);
@@ -81,51 +91,50 @@ export default function CandidatureStats({ refreshKey = 0, onStats, onSelectFilt
 
   return (
     <div className="cnd-list-stats-wrap">
-    <section className="cnd-list-stats" aria-label={tl("label")} aria-busy={loading}>
-      {CARDS.map(({ key, Icon, tone, filter, alert }, index) => {
-        const value = stats?.[key] ?? 0;
-        const isAlert = alert && value > 0;
-        const clickable = Boolean(filter && onSelectFilter && stats);
-        const content = (
-          <>
-            <span className={`cnd-icon-tile cnd-list-stat__icon ${toneClass(isAlert || !alert ? tone : "slate")}`} aria-hidden="true">
-              <Icon size={18} strokeWidth={ICON_STROKE} />
-            </span>
-            <span className="cnd-list-stat__body">
-              <span className="cnd-list-stat__value cnd-num">
-                {stats ? <AnimatedNumber value={value} locale={locale} /> : <Skeleton width={44} height={24} />}
-              </span>
-              <span className="cnd-list-stat__label">{tl(`${key}.label`)}</span>
-              <span className="cnd-list-stat__hint">{tl(`${key}.hint`)}</span>
-            </span>
-          </>
-        );
-        const className = `cnd-list-stat ${isAlert ? "cnd-list-stat--alert" : ""} ${clickable ? "cnd-list-stat--clickable" : ""} ${activeFilter && activeFilter === filter ? "cnd-list-stat--active" : ""}`;
-        return (
-          <motion.div
-            key={key}
-            className="cnd-list-stat-wrap"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: index * 0.04 }}
-          >
-            {clickable ? (
+      <section className="cnd-list-stats" aria-label={tl("label")} aria-busy={loading}>
+        {CARDS.map(({ key, Icon, tone, target, alert }, index) => {
+          const value = stats?.[key] ?? 0;
+          const isAlert = alert && value > 0;
+          const active = isActive(target, current);
+          const className = [
+            "cnd-list-stat",
+            "cnd-list-stat--clickable",
+            isAlert ? "cnd-list-stat--alert" : "",
+            active ? "cnd-list-stat--active" : "",
+          ].filter(Boolean).join(" ");
+          return (
+            <motion.div
+              key={key}
+              className="cnd-list-stat-wrap"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: index * 0.04 }}
+            >
               <button
                 type="button"
                 className={className}
-                onClick={() => onSelectFilter(filter)}
-                aria-pressed={activeFilter === filter}
-                title={tl("filterHint")}
+                onClick={() => onSelect?.(target)}
+                aria-pressed={active}
+                aria-label={`${tl(`${key}.label`)} : ${value}. ${tl(`${key}.action`)}`}
+                title={tl(`${key}.action`)}
+                disabled={!stats}
               >
-                {content}
+                <span className={`cnd-icon-tile cnd-list-stat__icon ${toneClass(isAlert || !alert ? tone : "slate")}`} aria-hidden="true">
+                  <Icon size={18} strokeWidth={ICON_STROKE} />
+                </span>
+                <span className="cnd-list-stat__body">
+                  <span className="cnd-list-stat__value cnd-num">
+                    {stats ? <AnimatedNumber value={value} locale={locale} /> : <Skeleton width={44} height={24} />}
+                  </span>
+                  <span className="cnd-list-stat__label">{tl(`${key}.label`)}</span>
+                  <span className="cnd-list-stat__hint">{tl(`${key}.hint`)}</span>
+                </span>
+                <ArrowRight className="cnd-list-stat__go cnd-flip-rtl" size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />
               </button>
-            ) : (
-              <div className={className}>{content}</div>
-            )}
-          </motion.div>
-        );
-      })}
-    </section>
+            </motion.div>
+          );
+        })}
+      </section>
     </div>
   );
 }

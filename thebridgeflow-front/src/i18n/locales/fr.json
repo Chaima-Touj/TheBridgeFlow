@@ -2516,7 +2516,8 @@
         "accepted": "Acceptés",
         "rejected": "Refusés",
         "multiple": "Plusieurs candidatures",
-        "overdue": "Tâches en retard"
+        "overdue": "Tâches en retard",
+        "with_tasks": "Tâches à faire"
       },
       "interviewStatus": {
         "proposé": "Proposé",
@@ -2563,30 +2564,35 @@
       "stats": {
         "label": "Indicateurs de suivi",
         "loadError": "Impossible de charger les indicateurs.",
-        "filterHint": "Afficher les étudiants concernés",
         "totalStudents": {
           "label": "Étudiants",
-          "hint": "Avec au moins une candidature"
+          "hint": "Avec au moins une candidature",
+          "action": "Voir tous les étudiants"
         },
         "totalApplications": {
           "label": "Candidatures",
-          "hint": "Toutes offres confondues"
+          "hint": "Toutes offres confondues",
+          "action": "Voir toutes les candidatures"
         },
         "studentsToContact": {
           "label": "À contacter",
-          "hint": "Aucun suivi engagé"
+          "hint": "Aucun suivi engagé",
+          "action": "Voir les étudiants à contacter"
         },
         "scheduledInterviews": {
           "label": "Entretiens programmés",
-          "hint": "À venir, proposés ou confirmés"
+          "hint": "À venir, proposés ou confirmés",
+          "action": "Voir les entretiens programmés"
         },
         "pendingTasks": {
           "label": "Tâches en attente",
-          "hint": "À faire ou en cours"
+          "hint": "À faire ou en cours",
+          "action": "Voir les étudiants avec des tâches à faire"
         },
         "overdueTasks": {
           "label": "Tâches en retard",
-          "hint": "Échéance dépassée"
+          "hint": "Échéance dépassée",
+          "action": "Voir les tâches en retard"
         }
       },
       "students": {

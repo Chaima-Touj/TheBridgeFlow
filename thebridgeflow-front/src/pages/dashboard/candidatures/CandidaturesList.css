@@ -74,10 +74,29 @@
   background: radial-gradient(circle, color-mix(in srgb, var(--primary) 9%, transparent), transparent 70%);
   pointer-events: none;
 }
-.cnd-list-stat--clickable { cursor: pointer; }
+.cnd-list-stat--clickable { cursor: pointer; padding-inline-end: 2.2rem; }
+.cnd-list-stat:disabled { cursor: default; }
+/* Flèche « aller vers » : discrète au repos, affirmée au survol / actif. */
+.cnd-list-stat__go {
+  position: absolute;
+  inset-block-start: .9rem;
+  inset-inline-end: .85rem;
+  color: var(--text-muted);
+  opacity: .45;
+  transition: opacity .18s ease, color .18s ease, translate .18s var(--cnd-ease);
+}
+.cnd-list-stat--clickable:hover .cnd-list-stat__go,
+.cnd-list-stat--clickable:focus-visible .cnd-list-stat__go,
+.cnd-list-stat--active .cnd-list-stat__go { opacity: 1; color: var(--primary); }
+.cnd-list-stat--clickable:hover .cnd-list-stat__go { translate: 3px 0; }
+[dir="rtl"] .cnd-list-stat--clickable:hover .cnd-list-stat__go { translate: -3px 0; }
+.cnd-list-stat:active:not(:disabled) { transform: translateY(0) scale(.99); }
+/* Ancre de défilement : la liste arrive sous le haut de la zone visible. */
+.cnd-list-anchor { min-width: 0; scroll-margin-top: 1rem; }
+@media (max-width: 900px) { .cnd-list-anchor { scroll-margin-top: 78px; } }
 .cnd-list-stat--clickable:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); box-shadow: var(--cnd-shadow); }
 .cnd-list-stat--clickable:focus-visible { outline: none; box-shadow: var(--cnd-ring); }
-.cnd-list-stat--active { border-color: color-mix(in srgb, var(--primary) 50%, var(--border)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent) inset, var(--cnd-shadow-sm); }
+.cnd-list-stat--active { border-color: color-mix(in srgb, var(--primary) 55%, var(--border)); background: color-mix(in srgb, var(--primary) 4%, var(--bg-card)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent) inset, var(--cnd-shadow-sm); }
 .cnd-list-stat--alert { border-color: color-mix(in srgb, #dc2626 30%, var(--border)); }
 .cnd-list-stat--alert::after { background: radial-gradient(circle, rgb(220 38 38 / 10%), transparent 70%); }
 .cnd-list-stat__icon { box-shadow: 0 8px 18px -12px var(--tone); }
