@@ -64,6 +64,7 @@ import AdminFeedbacks           from "./pages/dashboard/AdminFeedbacks.jsx";
 import AdminUsers               from "./pages/dashboard/AdminUsers.jsx";
 import AdminUserDetail          from "./pages/dashboard/AdminUserDetail.jsx";
 import AdminApplications        from "./pages/dashboard/AdminApplications.jsx";
+import AdminCandidateDossier    from "./pages/dashboard/AdminCandidateDossier.jsx";
 import AdminEnrollmentRequests  from "./pages/dashboard/AdminEnrollmentRequests.jsx";
 import AdminEnrollments         from "./pages/dashboard/AdminEnrollments.jsx";
 import AdminStatistics          from "./pages/dashboard/AdminStatistics.jsx";
@@ -203,6 +204,9 @@ export default function App() {
       }/>
       <Route path="/dashboard/admin/candidatures" element={
         <ProtectedRoute role="admin"><AdminApplications/></ProtectedRoute>
+      }/>
+      <Route path="/dashboard/admin/candidatures/etudiants/:studentId" element={
+        <ProtectedRoute role="admin"><AdminCandidateDossier/></ProtectedRoute>
       }/>
       <Route path="/dashboard/admin/demandes" element={
         <ProtectedRoute role="admin"><AdminEnrollmentRequests/></ProtectedRoute>

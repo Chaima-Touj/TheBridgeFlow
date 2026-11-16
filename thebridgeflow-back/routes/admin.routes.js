@@ -16,6 +16,7 @@ import {
   updateUserRole,
   deleteUser,
 } from "../controllers/admin.controller.js";
+import candidatesRoutes from "./candidates.routes.js";
 
 const router = express.Router();
 
@@ -38,5 +39,8 @@ router.get("/users/:id",           validateObjectId(), getUserById);
 router.patch("/users/:id/status",  validateObjectId(), updateUserStatus);
 router.patch("/users/:id/role",    validateObjectId(), updateUserRole);
 router.delete("/users/:id",        validateObjectId(), deleteUser);
+
+// Espace « Candidatures » : étudiants regroupés, dossiers, suivi partagé.
+router.use("/candidates", candidatesRoutes);
 
 export default router;

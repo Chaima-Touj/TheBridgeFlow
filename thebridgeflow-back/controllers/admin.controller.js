@@ -7,6 +7,7 @@ import EnrollmentRequest from "../models/enrollmentRequest.model.js";
 import Application       from "../models/applications.model.js";
 import Interview         from "../models/interview.model.js";
 import Conversation      from "../models/conversation.model.js";
+import FollowUpTask      from "../models/followUpTask.model.js";
 import PageVisit        from "../models/pageVisit.model.js";
 import VideoView        from "../models/videoView.model.js";
 import asyncHandler      from "../utils/asyncHandler.js";
@@ -411,17 +412,19 @@ export const deleteUser = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const [applicationCount, interviewCount, conversationCount] = await Promise.all([
+  const [applicationCount, interviewCount, conversationCount, followUpTaskCount] = await Promise.all([
     Application.countDocuments({ studentId: user._id }),
     Interview.countDocuments({ $or: [{ studentId: user._id }, { companyId: user._id }] }),
     Conversation.countDocuments({ participants: user._id }),
+    FollowUpTask.countDocuments({ studentId: user._id }),
   ]);
 
-  if (applicationCount > 0 || interviewCount > 0 || conversationCount > 0) {
+  if (applicationCount > 0 || interviewCount > 0 || conversationCount > 0 || followUpTaskCount > 0) {
     const parts = [];
     if (applicationCount > 0)  parts.push(`${applicationCount} candidature(s)`);
     if (interviewCount > 0)    parts.push(`${interviewCount} entretien(s)`);
     if (conversationCount > 0) parts.push(`${conversationCount} conversation(s)`);
+    if (followUpTaskCount > 0) parts.push(`${followUpTaskCount} tâche(s) de suivi`);
     const err = new Error(`Impossible de supprimer : ${parts.join(", ")} lié(s) à ce compte.`);
     err.statusCode = 409;
     throw err;

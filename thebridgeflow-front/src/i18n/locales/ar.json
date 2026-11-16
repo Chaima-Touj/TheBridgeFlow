@@ -2476,5 +2476,431 @@
       "imageInvalid": "تعذّرت معالجة هذه الصورة.",
       "createFailed": "تعذّر إنشاء المشروع."
     }
+  },
+  "adminCandidates": {
+    "common": {
+      "globalStatus": {
+        "new": "جديد",
+        "in_progress": "قيد المتابعة",
+        "interview": "مقابلة مبرمجة",
+        "accepted": "مقبول",
+        "rejected": "مرفوض"
+      },
+      "taskStatus": {
+        "pending": "للإنجاز",
+        "in_progress": "قيد الإنجاز",
+        "completed": "منجزة",
+        "overdue": "متأخرة"
+      },
+      "taskType": {
+        "call": "مكالمة هاتفية",
+        "whatsapp": "واتساب",
+        "email": "بريد إلكتروني",
+        "interview": "مقابلة",
+        "office_visit": "موعد في المكتب",
+        "follow_up": "تذكير",
+        "note": "ملاحظة داخلية",
+        "other": "إجراء آخر"
+      },
+      "taskAction": {
+        "call": "الاتصال بالطالب",
+        "whatsapp": "التواصل عبر واتساب",
+        "email": "إرسال بريد إلكتروني",
+        "interview": "اقتراح مقابلة",
+        "office_visit": "موعد في المكتب",
+        "follow_up": "إرسال تذكير",
+        "note": "إضافة ملاحظة داخلية",
+        "other": "إجراء مخصص"
+      },
+      "filters": {
+        "all": "كل الطلبة",
+        "new": "جدد",
+        "in_progress": "قيد المتابعة",
+        "interview": "مقابلة مبرمجة",
+        "accepted": "مقبولون",
+        "rejected": "مرفوضون",
+        "multiple": "عدة ترشحات",
+        "overdue": "مهام متأخرة"
+      },
+      "interviewStatus": {
+        "proposé": "مقترحة",
+        "confirmé": "مؤكدة",
+        "annulé": "ملغاة",
+        "terminé": "منتهية"
+      },
+      "system": "النظام",
+      "unknownAdmin": "مسؤول محذوف",
+      "deletedOffer": "عرض محذوف",
+      "applicationsCount_zero": "{{count}} ترشح",
+      "applicationsCount_one": "ترشح واحد",
+      "applicationsCount_two": "ترشحان",
+      "applicationsCount_few": "{{count}} ترشحات",
+      "applicationsCount_many": "{{count}} ترشحًا",
+      "applicationsCount_other": "{{count}} ترشح",
+      "openTasks_zero": "لا مهام للإنجاز",
+      "openTasks_one": "مهمة واحدة للإنجاز",
+      "openTasks_two": "مهمتان للإنجاز",
+      "openTasks_few": "{{count}} مهام للإنجاز",
+      "openTasks_many": "{{count}} مهمة للإنجاز",
+      "openTasks_other": "{{count}} مهمة للإنجاز",
+      "overdueTasks_zero": "{{count}} متأخرة",
+      "overdueTasks_one": "{{count}} متأخرة",
+      "overdueTasks_two": "{{count}} متأخرتان",
+      "overdueTasks_few": "{{count}} متأخرة",
+      "overdueTasks_many": "{{count}} متأخرة",
+      "overdueTasks_other": "{{count}} متأخرة",
+      "actions": {
+        "retry": "إعادة المحاولة",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "close": "إغلاق",
+        "back": "رجوع",
+        "refresh": "تحديث",
+        "openDossier": "فتح الملف",
+        "dismiss": "إغلاق الإشعار"
+      },
+      "errors": {
+        "network": "تعذر الاتصال بالخادم. تحقق من الشبكة ثم أعد المحاولة.",
+        "generic": "حدث خطأ. أعد المحاولة بعد لحظات.",
+        "forbidden": "ليست لديك صلاحية القيام بهذا الإجراء.",
+        "notFound": "العنصر غير موجود. ربما تم حذفه.",
+        "conflict": "تم تعديل هذه المهمة من قبل مسؤول آخر. تم تحديث البيانات.",
+        "completionConfirm": "أكد صراحةً أن الإجراء قد تم فعلًا قبل وسمه كمنجز.",
+        "rateLimited": "عدد كبير من الطلبات في وقت قصير. انتظر قليلًا ثم أعد المحاولة."
+      }
+    },
+    "list": {
+      "pageDescription": "تابع كل طالب وترشحاته وسجل المتابعة المشترك بين كامل الفريق.",
+      "viewSwitchLabel": "طريقة العرض",
+      "views": {
+        "etudiants": "حسب الطالب",
+        "candidatures": "حسب الترشح"
+      },
+      "stats": {
+        "label": "مؤشرات المتابعة",
+        "loadError": "تعذر تحميل المؤشرات.",
+        "filterHint": "عرض الطلبة المعنيين",
+        "totalStudents": {
+          "label": "الطلبة",
+          "hint": "لديهم ترشح واحد على الأقل"
+        },
+        "totalApplications": {
+          "label": "الترشحات",
+          "hint": "لكل العروض"
+        },
+        "studentsToContact": {
+          "label": "للتواصل معهم",
+          "hint": "لم تبدأ أي متابعة"
+        },
+        "scheduledInterviews": {
+          "label": "مقابلات مبرمجة",
+          "hint": "قادمة، مقترحة أو مؤكدة"
+        },
+        "pendingTasks": {
+          "label": "مهام في الانتظار",
+          "hint": "للإنجاز أو قيد الإنجاز"
+        },
+        "overdueTasks": {
+          "label": "مهام متأخرة",
+          "hint": "تجاوزت الأجل"
+        }
+      },
+      "students": {
+        "loadError": "تعذر تحميل قائمة الطلبة.",
+        "emptyTitle": "لا توجد ترشحات حاليًا",
+        "emptyText": "سيظهر الطلبة هنا بمجرد ترشحهم لأحد العروض.",
+        "emptyFilteredTitle": "لا يوجد طالب مطابق",
+        "emptyFilteredText": "عدّل البحث أو اختر مرشحًا آخر.",
+        "resetFilters": "إعادة تعيين المرشحات",
+        "colStudent": "الطالب",
+        "colApplications": "الترشحات",
+        "colLastActivity": "آخر نشاط",
+        "colStatus": "حالة المتابعة",
+        "colTasks": "المهام",
+        "nextDue": "الأجل القادم: {{date}}",
+        "noOpenTask": "لا توجد مهمة جارية",
+        "searchLabel": "البحث عن طالب",
+        "searchPlaceholder": "الاسم أو البريد الإلكتروني أو عنوان العرض",
+        "clearSearch": "مسح البحث",
+        "sortLabel": "الترتيب حسب",
+        "sort": {
+          "recent": "النشاط الأحدث",
+          "name": "الاسم (أ-ي)",
+          "applications": "عدد الترشحات"
+        },
+        "pageSizeLabel": "عرض",
+        "filtersLabel": "تصفية الطلبة",
+        "paginationLabel": "ترقيم صفحات الطلبة",
+        "range": "{{from}}–{{to}} من {{total}}",
+        "previousPage": "الصفحة السابقة",
+        "nextPage": "الصفحة التالية"
+      },
+      "applications": {
+        "title": "كل الترشحات",
+        "acceptedToast": "تم قبول ترشح {{name}}. تم إشعار الطالب.",
+        "rejectedToast": "تم رفض ترشح {{name}}. تم إشعار الطالب.",
+        "interviewToast": "تم اقتراح مقابلة على {{name}}.",
+        "openFullDossier": "فتح الملف الكامل"
+      }
+    },
+    "dossier": {
+      "pageTitle": "ملف الطالب",
+      "back": "العودة إلى الترشحات",
+      "addTask": "إضافة مهمة",
+      "notFoundTitle": "الملف غير موجود",
+      "notFoundText": "هذا الطالب غير موجود أو لم يقدّم أي ترشح.",
+      "loadErrorTitle": "تعذر تحميل الملف",
+      "tabsLabel": "أقسام الملف",
+      "tabs": {
+        "suivi": "المتابعة",
+        "candidatures": "الترشحات",
+        "profil": "الملف الشخصي",
+        "documents": "الوثائق"
+      },
+      "banner": {
+        "text": "هل تواصلت مع {{name}} عبر {{channel}}؟ سجّل هذا التواصل في السجل.",
+        "log": "تسجيل",
+        "dismiss": "تجاهل",
+        "channel": {
+          "call": "الهاتف",
+          "whatsapp": "واتساب",
+          "email": "البريد الإلكتروني"
+        }
+      },
+      "toast": {
+        "taskCreated": "تمت إضافة المهمة إلى ملف {{name}}.",
+        "taskUpdated": "تم تحديث المهمة.",
+        "taskAlreadySaved": "هذه المهمة مسجّلة مسبقًا.",
+        "taskDeleted": "تم حذف المهمة.",
+        "statusChanged": "تم تحديث الحالة: {{status}}.",
+        "deleteForbidden": "وحده المسؤول الذي أنشأ هذه المهمة يمكنه حذفها.",
+        "accepted": "تم قبول الترشح. تم إشعار الطالب.",
+        "rejected": "تم رفض الترشح. تم إشعار الطالب.",
+        "interviewProposed": "تم اقتراح مقابلة على {{name}}."
+      },
+      "delete": {
+        "title": "حذف المهمة",
+        "description": "أنت على وشك حذف المهمة نهائيًا",
+        "consequence": "ستختفي من السجل المشترك لدى جميع المسؤولين.",
+        "confirm": "حذف",
+        "loading": "جارٍ الحذف..."
+      },
+      "hero": {
+        "memberSince": "مسجّل منذ {{date}}",
+        "contactGroup": "التواصل مع الطالب",
+        "call": "اتصال",
+        "whatsapp": "واتساب",
+        "email": "بريد إلكتروني",
+        "noPhone": "لا يوجد رقم هاتف",
+        "noEmail": "لا يوجد بريد إلكتروني صالح",
+        "kpi": {
+          "applications": "الترشحات",
+          "openTasks": "مهام للإنجاز",
+          "overdue": "متأخرة",
+          "completed": "منجزة",
+          "nextDue": "الأجل القادم"
+        }
+      },
+      "timeline": {
+        "changeStatus": "تغيير الحالة",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "dueOn": "الأجل: {{date}}",
+        "overdueSince": "متأخرة منذ {{date}}",
+        "filterByOffer": "تصفية السجل حسب هذا العرض",
+        "createdBy": "أنشأها {{name}} · {{date}}",
+        "showDetails": "التفاصيل",
+        "hideDetails": "إخفاء",
+        "detailActivity": "تاريخ الإجراء",
+        "detailCreated": "الإنشاء",
+        "detailUpdated": "آخر تعديل",
+        "detailCompleted": "تأكيد الإنجاز",
+        "detailApplication": "الترشح المعني",
+        "byOn": "{{name}}، بتاريخ {{date}}",
+        "proposedBy": "اقترحها {{name}}",
+        "system": {
+          "application_received": "تم استلام الترشح — {{offer}}",
+          "interview_proposed": "تم اقتراح مقابلة — {{offer}}",
+          "interview_scheduled": "مقابلة مبرمجة — {{offer}}",
+          "application_accepted": "تم قبول الترشح — {{offer}}",
+          "application_rejected": "تم رفض الترشح — {{offer}}"
+        },
+        "statusFilter": "التصفية حسب الحالة",
+        "statusAll": "الكل",
+        "typeFilter": "التصفية حسب نوع الإجراء",
+        "typeAll": "كل الأنواع",
+        "offerFilter": "التصفية حسب العرض",
+        "offerAll": "كل العروض",
+        "offerNone": "دون ترشح مرتبط",
+        "orderDesc": "الأحدث أولًا",
+        "orderAsc": "الأقدم أولًا",
+        "orderDescAria": "الترتيب: الأحدث أولًا. عكس الترتيب الزمني",
+        "orderAscAria": "الترتيب: الأقدم أولًا. عكس الترتيب الزمني",
+        "showSystem": "إظهار الأحداث",
+        "hideSystem": "إخفاء الأحداث",
+        "resetFilters": "إعادة التعيين",
+        "emptyTitle": "لا يوجد سجل لهذا الطالب",
+        "emptyText": "أضف أول إجراء متابعة: مكالمة، رسالة واتساب، بريد إلكتروني، موعد أو ملاحظة داخلية.",
+        "noTaskYet": "لم تُسجَّل بعد أي مهمة متابعة لهذا الطالب.",
+        "emptyFilteredTitle": "لا يوجد عنصر مطابق",
+        "emptyFilteredText": "عدّل المرشحات أو أعد تعيينها لعرض السجل كاملًا.",
+        "day": {
+          "today": "اليوم",
+          "yesterday": "أمس",
+          "tomorrow": "غدًا"
+        }
+      },
+      "form": {
+        "createTitle": "إضافة مهمة",
+        "editTitle": "تعديل المهمة",
+        "forStudent": "الملف المعني",
+        "studentLocked": "الطالب هو صاحب الملف المفتوح ولا يمكن تغييره.",
+        "typeLabel": "نوع الإجراء",
+        "contactHint": "فتح تطبيق التواصل لا يجعل المهمة منجزة: ستؤكد الإنجاز بنفسك.",
+        "contact": {
+          "call": "اتصل الآن",
+          "whatsapp": "فتح واتساب",
+          "email": "كتابة بريد إلكتروني",
+          "noPhone": "لا يوجد رقم هاتف في الملف الشخصي.",
+          "noEmail": "لا يوجد بريد إلكتروني صالح في الملف الشخصي."
+        },
+        "interviewHint": "هذه المهمة للمتابعة الداخلية. تُرسل الدعوة الرسمية (إشعار وبريد إلكتروني للطالب) عبر «اقتراح مقابلة» في الترشح المعني.",
+        "sendInvitation": "إرسال الدعوة الرسمية",
+        "titleLabel": "العنوان",
+        "titlePlaceholder": "مثال: مكالمة تأهيلية",
+        "activityDateLabel": "تاريخ الإجراء",
+        "dueDateLabel": "الأجل",
+        "addDueDate": "إضافة أجل",
+        "removeDueDate": "إزالة الأجل",
+        "applicationLabel": "الترشح المعني (اختياري)",
+        "applicationNone": "لا شيء — الملف العام",
+        "statusLabel": "الحالة",
+        "confirmLabel": "أؤكد أن هذا الإجراء قد تم فعلًا",
+        "confirmHelp": "إلزامي لتسجيل المهمة كمنجزة.",
+        "noteHint": "تُسجَّل الملاحظة الداخلية مباشرة في السجل.",
+        "descriptionLabel": "الوصف",
+        "descriptionPlaceholder": "تفاصيل التواصل، الخطوات القادمة، معلومات مفيدة...",
+        "submit": "إضافة إلى الملف",
+        "saveChanges": "حفظ التعديلات",
+        "saving": "جارٍ الحفظ...",
+        "errors": {
+          "typeRequired": "اختر نوع الإجراء.",
+          "titleRequired": "العنوان إلزامي.",
+          "titleTooLong": "يجب ألا يتجاوز العنوان {{max}} حرفًا.",
+          "descriptionTooLong": "يجب ألا يتجاوز الوصف {{max}} حرفًا.",
+          "dateInvalid": "تاريخ غير صالح.",
+          "confirmRequired": "حدّد خانة التأكيد لوسم المهمة كمنجزة."
+        }
+      },
+      "completion": {
+        "title": "تأكيد الإنجاز",
+        "question": "هل تؤكد أن «{{title}}» قد تم فعلًا؟",
+        "confirm": "وسم كمنجزة"
+      },
+      "decision": {
+        "acceptTitle": "قبول الترشح",
+        "rejectTitle": "رفض الترشح",
+        "acceptText": "قبول ترشح {{name}} لعرض «{{offer}}»؟",
+        "rejectText": "رفض ترشح {{name}} لعرض «{{offer}}»؟",
+        "acceptConfirm": "قبول",
+        "rejectConfirm": "رفض",
+        "notifyNote": "سيتم إشعار الطالب في التطبيق وعبر البريد الإلكتروني."
+      },
+      "applications": {
+        "emptyTitle": "لا توجد ترشحات",
+        "offerClosed": "عرض مغلق",
+        "showMore": "عرض المزيد",
+        "showLess": "عرض أقل",
+        "appliedOn": "تاريخ الترشح",
+        "lastActivity": "آخر نشاط",
+        "linkedTasks": "المهام المرتبطة",
+        "interviews": "المقابلات",
+        "showCoverLetter": "قراءة رسالة التحفيز",
+        "hideCoverLetter": "إخفاء الرسالة",
+        "profileCvUsed": "تم استخدام السيرة الذاتية للملف",
+        "applicationCv": "سيرة ذاتية مرفقة",
+        "coverLetterFile": "رسالة مرفقة",
+        "showHistory": "عرض السجل",
+        "addLinkedTask": "مهمة مرتبطة"
+      },
+      "profile": {
+        "notProvided": "غير مُدخل",
+        "identity": "المعلومات الشخصية",
+        "fullName": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "gender": "الجنس",
+        "genderMale": "ذكر",
+        "genderFemale": "أنثى",
+        "academic": "المسار الأكاديمي",
+        "university": "المؤسسة",
+        "specialty": "الاختصاص",
+        "institution": "مؤسسة التكوين",
+        "degree": "الشهادة / المستوى",
+        "fieldOfStudy": "مجال الدراسة",
+        "period": "الفترة",
+        "present": "حتى الآن",
+        "grade": "الملاحظة",
+        "bio": "نبذة",
+        "experience": "الخبرات",
+        "skills": "المهارات",
+        "languages": "اللغات",
+        "links": "روابط مهنية",
+        "link": {
+          "linkedin": "LinkedIn",
+          "github": "GitHub",
+          "portfolio": "معرض الأعمال"
+        },
+        "account": "الحساب",
+        "joinedAt": "التسجيل",
+        "lastLoginAt": "آخر دخول",
+        "lastActiveAt": "آخر نشاط",
+        "emailVerified": "البريد الإلكتروني مؤكد",
+        "accountActive": "حساب نشط",
+        "yes": "نعم",
+        "no": "لا"
+      },
+      "documents": {
+        "emptyTitle": "لا توجد وثائق",
+        "emptyText": "لا يملك هذا الطالب سيرة ذاتية في ملفه ولا وثائق مرفقة بترشحاته.",
+        "group": {
+          "profile": "السيرة الذاتية للملف",
+          "applicationCv": "سير ذاتية مرفقة بالترشحات",
+          "coverLetters": "رسائل التحفيز"
+        },
+        "source": {
+          "profile": "ملف الطالب",
+          "application": "الترشح"
+        },
+        "forOffer": "الترشح: {{offer}}",
+        "externalFile": "رابط خارجي",
+        "missingFile": "الملف غير موجود على الخادم",
+        "preview": "معاينة",
+        "previewAria": "معاينة {{name}}",
+        "download": "تنزيل",
+        "downloadAria": "تنزيل {{name}}",
+        "openLink": "فتح الرابط",
+        "openTab": "فتح في علامة تبويب",
+        "previewFrame": "معاينة {{name}}",
+        "noPreviewTitle": "المعاينة غير متاحة",
+        "noPreviewText": "لا يمكن عرض صيغة {{ext}} في المتصفح. نزّل الملف للاطلاع عليه.",
+        "unavailable": "هذه الوثيقة غير متاحة على الخادم."
+      },
+      "aside": {
+        "label": "ملخص المتابعة",
+        "upcoming": "الآجال القادمة",
+        "due": "الأجل {{when}}",
+        "overdue": "متأخرة ({{when}})",
+        "nothingDue": "لا توجد آجال في الانتظار.",
+        "cv": "السيرة الذاتية",
+        "noCv": "لا توجد سيرة ذاتية في الملف الشخصي.",
+        "otherDocuments_zero": "لا توجد وثائق أخرى",
+        "otherDocuments_one": "وثيقة أخرى في قسم الوثائق",
+        "otherDocuments_two": "وثيقتان أخريان في قسم الوثائق",
+        "otherDocuments_few": "{{count}} وثائق أخرى في قسم الوثائق",
+        "otherDocuments_many": "{{count}} وثيقة أخرى في قسم الوثائق",
+        "otherDocuments_other": "{{count}} وثيقة أخرى في قسم الوثائق"
+      }
+    }
   }
 }

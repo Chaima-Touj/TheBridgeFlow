@@ -2472,5 +2472,415 @@
       "imageInvalid": "Impossible de traiter cette image.",
       "createFailed": "Impossible de créer le projet."
     }
+  },
+  "adminCandidates": {
+    "common": {
+      "globalStatus": {
+        "new": "Nouveau",
+        "in_progress": "En cours de suivi",
+        "interview": "Entretien programmé",
+        "accepted": "Accepté",
+        "rejected": "Refusé"
+      },
+      "taskStatus": {
+        "pending": "À faire",
+        "in_progress": "En cours",
+        "completed": "Terminée",
+        "overdue": "En retard"
+      },
+      "taskType": {
+        "call": "Appel téléphonique",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "interview": "Entretien",
+        "office_visit": "Rendez-vous au bureau",
+        "follow_up": "Relance",
+        "note": "Note interne",
+        "other": "Autre action"
+      },
+      "taskAction": {
+        "call": "Appeler l'étudiant",
+        "whatsapp": "Contacter via WhatsApp",
+        "email": "Envoyer un email",
+        "interview": "Proposer un entretien",
+        "office_visit": "Rendez-vous au bureau",
+        "follow_up": "Envoyer une relance",
+        "note": "Ajouter une note interne",
+        "other": "Action personnalisée"
+      },
+      "filters": {
+        "all": "Tous les étudiants",
+        "new": "Nouveaux",
+        "in_progress": "En cours de suivi",
+        "interview": "Entretien programmé",
+        "accepted": "Acceptés",
+        "rejected": "Refusés",
+        "multiple": "Plusieurs candidatures",
+        "overdue": "Tâches en retard"
+      },
+      "interviewStatus": {
+        "proposé": "Proposé",
+        "confirmé": "Confirmé",
+        "annulé": "Annulé",
+        "terminé": "Terminé"
+      },
+      "system": "Système",
+      "unknownAdmin": "Administrateur supprimé",
+      "deletedOffer": "Offre supprimée",
+      "applicationsCount_one": "{{count}} candidature",
+      "applicationsCount_other": "{{count}} candidatures",
+      "openTasks_one": "{{count}} tâche à faire",
+      "openTasks_other": "{{count}} tâches à faire",
+      "overdueTasks_one": "{{count}} en retard",
+      "overdueTasks_other": "{{count}} en retard",
+      "actions": {
+        "retry": "Réessayer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "close": "Fermer",
+        "back": "Retour",
+        "refresh": "Actualiser",
+        "openDossier": "Ouvrir le dossier",
+        "dismiss": "Fermer la notification"
+      },
+      "errors": {
+        "network": "Connexion au serveur impossible. Vérifiez votre réseau puis réessayez.",
+        "generic": "Une erreur est survenue. Réessayez dans un instant.",
+        "forbidden": "Vous n'avez pas l'autorisation d'effectuer cette action.",
+        "notFound": "Élément introuvable. Il a peut-être été supprimé.",
+        "conflict": "Cette tâche a été modifiée par un autre administrateur. Les données ont été actualisées.",
+        "completionConfirm": "Confirmez explicitement que l'action a bien été réalisée avant de la marquer comme terminée.",
+        "rateLimited": "Trop de requêtes en peu de temps. Patientez quelques instants puis réessayez."
+      }
+    },
+    "list": {
+      "pageDescription": "Suivez chaque étudiant, ses candidatures et l'historique des échanges partagé par toute l'équipe.",
+      "viewSwitchLabel": "Mode d'affichage",
+      "views": {
+        "etudiants": "Par étudiant",
+        "candidatures": "Par candidature"
+      },
+      "stats": {
+        "label": "Indicateurs de suivi",
+        "loadError": "Impossible de charger les indicateurs.",
+        "filterHint": "Afficher les étudiants concernés",
+        "totalStudents": {
+          "label": "Étudiants",
+          "hint": "Avec au moins une candidature"
+        },
+        "totalApplications": {
+          "label": "Candidatures",
+          "hint": "Toutes offres confondues"
+        },
+        "studentsToContact": {
+          "label": "À contacter",
+          "hint": "Aucun suivi engagé"
+        },
+        "scheduledInterviews": {
+          "label": "Entretiens programmés",
+          "hint": "À venir, proposés ou confirmés"
+        },
+        "pendingTasks": {
+          "label": "Tâches en attente",
+          "hint": "À faire ou en cours"
+        },
+        "overdueTasks": {
+          "label": "Tâches en retard",
+          "hint": "Échéance dépassée"
+        }
+      },
+      "students": {
+        "loadError": "Impossible de charger la liste des étudiants.",
+        "emptyTitle": "Aucune candidature pour le moment",
+        "emptyText": "Les étudiants apparaîtront ici dès qu'ils auront postulé à une offre.",
+        "emptyFilteredTitle": "Aucun étudiant ne correspond",
+        "emptyFilteredText": "Modifiez la recherche ou choisissez un autre filtre.",
+        "resetFilters": "Réinitialiser les filtres",
+        "colStudent": "Étudiant",
+        "colApplications": "Candidatures",
+        "colLastActivity": "Dernière activité",
+        "colStatus": "Statut de suivi",
+        "colTasks": "Tâches",
+        "nextDue": "Prochaine échéance : {{date}}",
+        "noOpenTask": "Aucune tâche en cours",
+        "searchLabel": "Rechercher un étudiant",
+        "searchPlaceholder": "Nom, email ou intitulé d'offre",
+        "clearSearch": "Effacer la recherche",
+        "sortLabel": "Trier par",
+        "sort": {
+          "recent": "Activité récente",
+          "name": "Nom (A-Z)",
+          "applications": "Nombre de candidatures"
+        },
+        "pageSizeLabel": "Afficher",
+        "filtersLabel": "Filtrer les étudiants",
+        "paginationLabel": "Pagination des étudiants",
+        "range": "{{from}}–{{to}} sur {{total}}",
+        "previousPage": "Page précédente",
+        "nextPage": "Page suivante"
+      },
+      "applications": {
+        "title": "Toutes les candidatures",
+        "acceptedToast": "Candidature de {{name}} acceptée. L'étudiant a été notifié.",
+        "rejectedToast": "Candidature de {{name}} refusée. L'étudiant a été notifié.",
+        "interviewToast": "Entretien proposé à {{name}}.",
+        "openFullDossier": "Ouvrir le dossier complet"
+      }
+    },
+    "dossier": {
+      "pageTitle": "Dossier étudiant",
+      "back": "Retour aux candidatures",
+      "addTask": "Ajouter une tâche",
+      "notFoundTitle": "Dossier introuvable",
+      "notFoundText": "Cet étudiant n'existe pas ou n'a déposé aucune candidature.",
+      "loadErrorTitle": "Impossible de charger le dossier",
+      "tabsLabel": "Sections du dossier",
+      "tabs": {
+        "suivi": "Suivi",
+        "candidatures": "Candidatures",
+        "profil": "Profil",
+        "documents": "Documents"
+      },
+      "banner": {
+        "text": "Vous avez contacté {{name}} par {{channel}} ? Consignez cette interaction dans l'historique.",
+        "log": "Consigner",
+        "dismiss": "Ignorer",
+        "channel": {
+          "call": "téléphone",
+          "whatsapp": "WhatsApp",
+          "email": "email"
+        }
+      },
+      "toast": {
+        "taskCreated": "Tâche ajoutée au dossier de {{name}}.",
+        "taskUpdated": "Tâche mise à jour.",
+        "taskAlreadySaved": "Cette tâche était déjà enregistrée.",
+        "taskDeleted": "Tâche supprimée.",
+        "statusChanged": "Statut mis à jour : {{status}}.",
+        "deleteForbidden": "Seul l'administrateur qui a créé cette tâche peut la supprimer.",
+        "accepted": "Candidature acceptée. L'étudiant a été notifié.",
+        "rejected": "Candidature refusée. L'étudiant a été notifié.",
+        "interviewProposed": "Entretien proposé à {{name}}."
+      },
+      "delete": {
+        "title": "Supprimer la tâche",
+        "description": "Vous allez supprimer définitivement la tâche",
+        "consequence": "Elle disparaîtra de l'historique partagé pour tous les administrateurs.",
+        "confirm": "Supprimer",
+        "loading": "Suppression..."
+      },
+      "hero": {
+        "memberSince": "Inscrit le {{date}}",
+        "contactGroup": "Contacter l'étudiant",
+        "call": "Appeler",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "noPhone": "Aucun numéro de téléphone renseigné",
+        "noEmail": "Aucune adresse email valide",
+        "kpi": {
+          "applications": "Candidatures",
+          "openTasks": "Tâches à faire",
+          "overdue": "En retard",
+          "completed": "Terminées",
+          "nextDue": "Prochaine échéance"
+        }
+      },
+      "timeline": {
+        "changeStatus": "Changer le statut",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "dueOn": "Échéance : {{date}}",
+        "overdueSince": "En retard depuis le {{date}}",
+        "filterByOffer": "Filtrer l'historique sur cette offre",
+        "createdBy": "Créée par {{name}} · {{date}}",
+        "showDetails": "Détails",
+        "hideDetails": "Masquer",
+        "detailActivity": "Date de l'action",
+        "detailCreated": "Création",
+        "detailUpdated": "Dernière modification",
+        "detailCompleted": "Réalisation confirmée",
+        "detailApplication": "Candidature concernée",
+        "byOn": "{{name}}, le {{date}}",
+        "proposedBy": "Proposé par {{name}}",
+        "system": {
+          "application_received": "Candidature reçue — {{offer}}",
+          "interview_proposed": "Entretien proposé — {{offer}}",
+          "interview_scheduled": "Entretien programmé — {{offer}}",
+          "application_accepted": "Candidature acceptée — {{offer}}",
+          "application_rejected": "Candidature refusée — {{offer}}"
+        },
+        "statusFilter": "Filtrer par statut",
+        "statusAll": "Toutes",
+        "typeFilter": "Filtrer par type d'action",
+        "typeAll": "Tous les types",
+        "offerFilter": "Filtrer par offre",
+        "offerAll": "Toutes les offres",
+        "offerNone": "Sans candidature liée",
+        "orderDesc": "Plus récent d'abord",
+        "orderAsc": "Plus ancien d'abord",
+        "orderDescAria": "Ordre : plus récent d'abord. Inverser l'ordre chronologique",
+        "orderAscAria": "Ordre : plus ancien d'abord. Inverser l'ordre chronologique",
+        "showSystem": "Afficher les événements",
+        "hideSystem": "Masquer les événements",
+        "resetFilters": "Réinitialiser",
+        "emptyTitle": "Aucun historique pour cet étudiant",
+        "emptyText": "Ajoutez la première action de suivi : appel, message WhatsApp, email, rendez-vous ou note interne.",
+        "noTaskYet": "Aucune tâche de suivi n'a encore été enregistrée pour cet étudiant.",
+        "emptyFilteredTitle": "Aucun élément ne correspond",
+        "emptyFilteredText": "Modifiez ou réinitialisez les filtres pour revoir tout l'historique.",
+        "day": {
+          "today": "Aujourd'hui",
+          "yesterday": "Hier",
+          "tomorrow": "Demain"
+        }
+      },
+      "form": {
+        "createTitle": "Ajouter une tâche",
+        "editTitle": "Modifier la tâche",
+        "forStudent": "Dossier concerné",
+        "studentLocked": "L'étudiant est celui du dossier ouvert et ne peut pas être modifié.",
+        "typeLabel": "Type d'action",
+        "contactHint": "Ouvrir l'application de contact ne marque pas la tâche comme terminée : vous confirmerez vous-même la réalisation.",
+        "contact": {
+          "call": "Appeler maintenant",
+          "whatsapp": "Ouvrir WhatsApp",
+          "email": "Écrire un email",
+          "noPhone": "Aucun numéro de téléphone n'est renseigné dans le profil.",
+          "noEmail": "Aucune adresse email valide dans le profil."
+        },
+        "interviewHint": "Cette tâche sert au suivi interne. L'invitation officielle (notification et email à l'étudiant) s'envoie avec « Proposer un entretien » sur la candidature concernée.",
+        "sendInvitation": "Envoyer l'invitation officielle",
+        "titleLabel": "Titre",
+        "titlePlaceholder": "Ex. Appel de qualification",
+        "activityDateLabel": "Date de l'action",
+        "dueDateLabel": "Échéance",
+        "addDueDate": "Ajouter une échéance",
+        "removeDueDate": "Retirer l'échéance",
+        "applicationLabel": "Candidature concernée (facultatif)",
+        "applicationNone": "Aucune — dossier général",
+        "statusLabel": "Statut",
+        "confirmLabel": "Je confirme que cette action a réellement été effectuée",
+        "confirmHelp": "Obligatoire pour enregistrer une tâche comme terminée.",
+        "noteHint": "Une note interne est enregistrée directement dans l'historique.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Détails de l'échange, prochaines étapes, informations utiles...",
+        "submit": "Ajouter au dossier",
+        "saveChanges": "Enregistrer les modifications",
+        "saving": "Enregistrement...",
+        "errors": {
+          "typeRequired": "Choisissez un type d'action.",
+          "titleRequired": "Le titre est obligatoire.",
+          "titleTooLong": "Le titre ne doit pas dépasser {{max}} caractères.",
+          "descriptionTooLong": "La description ne doit pas dépasser {{max}} caractères.",
+          "dateInvalid": "Date invalide.",
+          "confirmRequired": "Cochez la confirmation pour marquer la tâche comme terminée."
+        }
+      },
+      "completion": {
+        "title": "Confirmer la réalisation",
+        "question": "Confirmez-vous que « {{title}} » a réellement été effectuée ?",
+        "confirm": "Marquer comme terminée"
+      },
+      "decision": {
+        "acceptTitle": "Accepter la candidature",
+        "rejectTitle": "Refuser la candidature",
+        "acceptText": "Accepter la candidature de {{name}} pour « {{offer}} » ?",
+        "rejectText": "Refuser la candidature de {{name}} pour « {{offer}} » ?",
+        "acceptConfirm": "Accepter",
+        "rejectConfirm": "Refuser",
+        "notifyNote": "L'étudiant sera notifié dans l'application et par email."
+      },
+      "applications": {
+        "emptyTitle": "Aucune candidature",
+        "offerClosed": "Offre clôturée",
+        "showMore": "Voir plus",
+        "showLess": "Voir moins",
+        "appliedOn": "Candidature",
+        "lastActivity": "Dernière activité",
+        "linkedTasks": "Tâches liées",
+        "interviews": "Entretiens",
+        "showCoverLetter": "Lire la lettre de motivation",
+        "hideCoverLetter": "Masquer la lettre",
+        "profileCvUsed": "CV du profil utilisé",
+        "applicationCv": "CV joint",
+        "coverLetterFile": "Lettre jointe",
+        "showHistory": "Voir l'historique",
+        "addLinkedTask": "Tâche liée"
+      },
+      "profile": {
+        "notProvided": "Non renseigné",
+        "identity": "Informations personnelles",
+        "fullName": "Nom complet",
+        "email": "Email",
+        "phone": "Téléphone",
+        "gender": "Genre",
+        "genderMale": "Homme",
+        "genderFemale": "Femme",
+        "academic": "Parcours académique",
+        "university": "Établissement",
+        "specialty": "Spécialité",
+        "institution": "Établissement de formation",
+        "degree": "Diplôme / niveau",
+        "fieldOfStudy": "Domaine d'études",
+        "period": "Période",
+        "present": "Aujourd'hui",
+        "grade": "Mention",
+        "bio": "À propos",
+        "experience": "Expériences",
+        "skills": "Compétences",
+        "languages": "Langues",
+        "links": "Liens professionnels",
+        "link": {
+          "linkedin": "LinkedIn",
+          "github": "GitHub",
+          "portfolio": "Portfolio"
+        },
+        "account": "Compte",
+        "joinedAt": "Inscription",
+        "lastLoginAt": "Dernière connexion",
+        "lastActiveAt": "Dernière activité",
+        "emailVerified": "Email vérifié",
+        "accountActive": "Compte actif",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "documents": {
+        "emptyTitle": "Aucun document",
+        "emptyText": "Cet étudiant n'a ni CV de profil ni document joint à ses candidatures.",
+        "group": {
+          "profile": "CV du profil",
+          "applicationCv": "CV joints aux candidatures",
+          "coverLetters": "Lettres de motivation"
+        },
+        "source": {
+          "profile": "Profil de l'étudiant",
+          "application": "Candidature"
+        },
+        "forOffer": "Candidature : {{offer}}",
+        "externalFile": "lien externe",
+        "missingFile": "fichier introuvable sur le serveur",
+        "preview": "Consulter",
+        "previewAria": "Consulter {{name}}",
+        "download": "Télécharger",
+        "downloadAria": "Télécharger {{name}}",
+        "openLink": "Ouvrir le lien",
+        "openTab": "Ouvrir dans un onglet",
+        "previewFrame": "Aperçu de {{name}}",
+        "noPreviewTitle": "Aperçu indisponible",
+        "noPreviewText": "Le format {{ext}} ne peut pas être affiché dans le navigateur. Téléchargez le fichier pour le consulter.",
+        "unavailable": "Ce document n'est pas disponible sur le serveur."
+      },
+      "aside": {
+        "label": "Résumé du suivi",
+        "upcoming": "Prochaines échéances",
+        "due": "Échéance {{when}}",
+        "overdue": "En retard ({{when}})",
+        "nothingDue": "Aucune échéance en attente.",
+        "cv": "CV",
+        "noCv": "Aucun CV dans le profil.",
+        "otherDocuments_one": "{{count}} autre document dans l'onglet Documents",
+        "otherDocuments_other": "{{count}} autres documents dans l'onglet Documents"
+      }
+    }
   }
 }

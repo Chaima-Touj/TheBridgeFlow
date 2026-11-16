@@ -2472,5 +2472,415 @@
       "imageInvalid": "Unable to process this image.",
       "createFailed": "Unable to create the project."
     }
+  },
+  "adminCandidates": {
+    "common": {
+      "globalStatus": {
+        "new": "New",
+        "in_progress": "In follow-up",
+        "interview": "Interview scheduled",
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+      },
+      "taskStatus": {
+        "pending": "To do",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "overdue": "Overdue"
+      },
+      "taskType": {
+        "call": "Phone call",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "interview": "Interview",
+        "office_visit": "Office appointment",
+        "follow_up": "Follow-up",
+        "note": "Internal note",
+        "other": "Other action"
+      },
+      "taskAction": {
+        "call": "Call the student",
+        "whatsapp": "Contact via WhatsApp",
+        "email": "Send an email",
+        "interview": "Propose an interview",
+        "office_visit": "Office appointment",
+        "follow_up": "Send a follow-up",
+        "note": "Add an internal note",
+        "other": "Custom action"
+      },
+      "filters": {
+        "all": "All students",
+        "new": "New",
+        "in_progress": "In follow-up",
+        "interview": "Interview scheduled",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "multiple": "Several applications",
+        "overdue": "Overdue tasks"
+      },
+      "interviewStatus": {
+        "proposé": "Proposed",
+        "confirmé": "Confirmed",
+        "annulé": "Cancelled",
+        "terminé": "Completed"
+      },
+      "system": "System",
+      "unknownAdmin": "Deleted administrator",
+      "deletedOffer": "Deleted offer",
+      "applicationsCount_one": "{{count}} application",
+      "applicationsCount_other": "{{count}} applications",
+      "openTasks_one": "{{count}} task to do",
+      "openTasks_other": "{{count}} tasks to do",
+      "overdueTasks_one": "{{count}} overdue",
+      "overdueTasks_other": "{{count}} overdue",
+      "actions": {
+        "retry": "Try again",
+        "cancel": "Cancel",
+        "save": "Save",
+        "close": "Close",
+        "back": "Back",
+        "refresh": "Refresh",
+        "openDossier": "Open file",
+        "dismiss": "Dismiss notification"
+      },
+      "errors": {
+        "network": "Unable to reach the server. Check your connection and try again.",
+        "generic": "Something went wrong. Please try again in a moment.",
+        "forbidden": "You are not allowed to perform this action.",
+        "notFound": "Item not found. It may have been deleted.",
+        "conflict": "This task was modified by another administrator. The data has been refreshed.",
+        "completionConfirm": "Explicitly confirm that the action was actually carried out before marking it as completed.",
+        "rateLimited": "Too many requests in a short time. Please wait a moment and try again."
+      }
+    },
+    "list": {
+      "pageDescription": "Follow each student, their applications and the follow-up history shared by the whole team.",
+      "viewSwitchLabel": "Display mode",
+      "views": {
+        "etudiants": "By student",
+        "candidatures": "By application"
+      },
+      "stats": {
+        "label": "Follow-up indicators",
+        "loadError": "Unable to load the indicators.",
+        "filterHint": "Show the matching students",
+        "totalStudents": {
+          "label": "Students",
+          "hint": "With at least one application"
+        },
+        "totalApplications": {
+          "label": "Applications",
+          "hint": "Across all offers"
+        },
+        "studentsToContact": {
+          "label": "To contact",
+          "hint": "No follow-up started"
+        },
+        "scheduledInterviews": {
+          "label": "Scheduled interviews",
+          "hint": "Upcoming, proposed or confirmed"
+        },
+        "pendingTasks": {
+          "label": "Pending tasks",
+          "hint": "To do or in progress"
+        },
+        "overdueTasks": {
+          "label": "Overdue tasks",
+          "hint": "Due date passed"
+        }
+      },
+      "students": {
+        "loadError": "Unable to load the student list.",
+        "emptyTitle": "No applications yet",
+        "emptyText": "Students will appear here as soon as they apply to an offer.",
+        "emptyFilteredTitle": "No matching student",
+        "emptyFilteredText": "Change the search or pick another filter.",
+        "resetFilters": "Reset filters",
+        "colStudent": "Student",
+        "colApplications": "Applications",
+        "colLastActivity": "Last activity",
+        "colStatus": "Follow-up status",
+        "colTasks": "Tasks",
+        "nextDue": "Next due date: {{date}}",
+        "noOpenTask": "No open task",
+        "searchLabel": "Search for a student",
+        "searchPlaceholder": "Name, email or offer title",
+        "clearSearch": "Clear search",
+        "sortLabel": "Sort by",
+        "sort": {
+          "recent": "Recent activity",
+          "name": "Name (A-Z)",
+          "applications": "Number of applications"
+        },
+        "pageSizeLabel": "Show",
+        "filtersLabel": "Filter students",
+        "paginationLabel": "Student pagination",
+        "range": "{{from}}–{{to}} of {{total}}",
+        "previousPage": "Previous page",
+        "nextPage": "Next page"
+      },
+      "applications": {
+        "title": "All applications",
+        "acceptedToast": "{{name}}'s application accepted. The student has been notified.",
+        "rejectedToast": "{{name}}'s application rejected. The student has been notified.",
+        "interviewToast": "Interview proposed to {{name}}.",
+        "openFullDossier": "Open the full file"
+      }
+    },
+    "dossier": {
+      "pageTitle": "Student file",
+      "back": "Back to applications",
+      "addTask": "Add a task",
+      "notFoundTitle": "File not found",
+      "notFoundText": "This student does not exist or has not submitted any application.",
+      "loadErrorTitle": "Unable to load the file",
+      "tabsLabel": "File sections",
+      "tabs": {
+        "suivi": "Follow-up",
+        "candidatures": "Applications",
+        "profil": "Profile",
+        "documents": "Documents"
+      },
+      "banner": {
+        "text": "Did you contact {{name}} by {{channel}}? Record this interaction in the history.",
+        "log": "Record",
+        "dismiss": "Dismiss",
+        "channel": {
+          "call": "phone",
+          "whatsapp": "WhatsApp",
+          "email": "email"
+        }
+      },
+      "toast": {
+        "taskCreated": "Task added to {{name}}'s file.",
+        "taskUpdated": "Task updated.",
+        "taskAlreadySaved": "This task was already saved.",
+        "taskDeleted": "Task deleted.",
+        "statusChanged": "Status updated: {{status}}.",
+        "deleteForbidden": "Only the administrator who created this task can delete it.",
+        "accepted": "Application accepted. The student has been notified.",
+        "rejected": "Application rejected. The student has been notified.",
+        "interviewProposed": "Interview proposed to {{name}}."
+      },
+      "delete": {
+        "title": "Delete task",
+        "description": "You are about to permanently delete the task",
+        "consequence": "It will disappear from the shared history for all administrators.",
+        "confirm": "Delete",
+        "loading": "Deleting..."
+      },
+      "hero": {
+        "memberSince": "Joined on {{date}}",
+        "contactGroup": "Contact the student",
+        "call": "Call",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "noPhone": "No phone number provided",
+        "noEmail": "No valid email address",
+        "kpi": {
+          "applications": "Applications",
+          "openTasks": "Tasks to do",
+          "overdue": "Overdue",
+          "completed": "Completed",
+          "nextDue": "Next due date"
+        }
+      },
+      "timeline": {
+        "changeStatus": "Change status",
+        "edit": "Edit",
+        "delete": "Delete",
+        "dueOn": "Due: {{date}}",
+        "overdueSince": "Overdue since {{date}}",
+        "filterByOffer": "Filter the history on this offer",
+        "createdBy": "Created by {{name}} · {{date}}",
+        "showDetails": "Details",
+        "hideDetails": "Hide",
+        "detailActivity": "Action date",
+        "detailCreated": "Created",
+        "detailUpdated": "Last updated",
+        "detailCompleted": "Completion confirmed",
+        "detailApplication": "Related application",
+        "byOn": "{{name}}, on {{date}}",
+        "proposedBy": "Proposed by {{name}}",
+        "system": {
+          "application_received": "Application received — {{offer}}",
+          "interview_proposed": "Interview proposed — {{offer}}",
+          "interview_scheduled": "Interview scheduled — {{offer}}",
+          "application_accepted": "Application accepted — {{offer}}",
+          "application_rejected": "Application rejected — {{offer}}"
+        },
+        "statusFilter": "Filter by status",
+        "statusAll": "All",
+        "typeFilter": "Filter by action type",
+        "typeAll": "All types",
+        "offerFilter": "Filter by offer",
+        "offerAll": "All offers",
+        "offerNone": "Not linked to an application",
+        "orderDesc": "Newest first",
+        "orderAsc": "Oldest first",
+        "orderDescAria": "Order: newest first. Reverse the chronological order",
+        "orderAscAria": "Order: oldest first. Reverse the chronological order",
+        "showSystem": "Show events",
+        "hideSystem": "Hide events",
+        "resetFilters": "Reset",
+        "emptyTitle": "No history for this student",
+        "emptyText": "Add the first follow-up action: call, WhatsApp message, email, appointment or internal note.",
+        "noTaskYet": "No follow-up task has been recorded for this student yet.",
+        "emptyFilteredTitle": "Nothing matches",
+        "emptyFilteredText": "Change or reset the filters to see the whole history.",
+        "day": {
+          "today": "Today",
+          "yesterday": "Yesterday",
+          "tomorrow": "Tomorrow"
+        }
+      },
+      "form": {
+        "createTitle": "Add a task",
+        "editTitle": "Edit task",
+        "forStudent": "Student file",
+        "studentLocked": "The student is the one of the open file and cannot be changed.",
+        "typeLabel": "Action type",
+        "contactHint": "Opening the contact app does not mark the task as completed: you will confirm it yourself.",
+        "contact": {
+          "call": "Call now",
+          "whatsapp": "Open WhatsApp",
+          "email": "Write an email",
+          "noPhone": "No phone number in the profile.",
+          "noEmail": "No valid email address in the profile."
+        },
+        "interviewHint": "This task is for internal follow-up. The official invitation (notification and email to the student) is sent with \"Propose an interview\" on the related application.",
+        "sendInvitation": "Send the official invitation",
+        "titleLabel": "Title",
+        "titlePlaceholder": "E.g. Screening call",
+        "activityDateLabel": "Action date",
+        "dueDateLabel": "Due date",
+        "addDueDate": "Add a due date",
+        "removeDueDate": "Remove the due date",
+        "applicationLabel": "Related application (optional)",
+        "applicationNone": "None — general file",
+        "statusLabel": "Status",
+        "confirmLabel": "I confirm this action was actually carried out",
+        "confirmHelp": "Required to save a task as completed.",
+        "noteHint": "An internal note is recorded directly in the history.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Details of the exchange, next steps, useful information...",
+        "submit": "Add to the file",
+        "saveChanges": "Save changes",
+        "saving": "Saving...",
+        "errors": {
+          "typeRequired": "Choose an action type.",
+          "titleRequired": "The title is required.",
+          "titleTooLong": "The title must not exceed {{max}} characters.",
+          "descriptionTooLong": "The description must not exceed {{max}} characters.",
+          "dateInvalid": "Invalid date.",
+          "confirmRequired": "Tick the confirmation to mark the task as completed."
+        }
+      },
+      "completion": {
+        "title": "Confirm completion",
+        "question": "Do you confirm that \"{{title}}\" was actually carried out?",
+        "confirm": "Mark as completed"
+      },
+      "decision": {
+        "acceptTitle": "Accept the application",
+        "rejectTitle": "Reject the application",
+        "acceptText": "Accept {{name}}'s application for \"{{offer}}\"?",
+        "rejectText": "Reject {{name}}'s application for \"{{offer}}\"?",
+        "acceptConfirm": "Accept",
+        "rejectConfirm": "Reject",
+        "notifyNote": "The student will be notified in the app and by email."
+      },
+      "applications": {
+        "emptyTitle": "No applications",
+        "offerClosed": "Offer closed",
+        "showMore": "Show more",
+        "showLess": "Show less",
+        "appliedOn": "Applied",
+        "lastActivity": "Last activity",
+        "linkedTasks": "Linked tasks",
+        "interviews": "Interviews",
+        "showCoverLetter": "Read the cover letter",
+        "hideCoverLetter": "Hide the letter",
+        "profileCvUsed": "Profile CV used",
+        "applicationCv": "Attached CV",
+        "coverLetterFile": "Attached letter",
+        "showHistory": "View history",
+        "addLinkedTask": "Linked task"
+      },
+      "profile": {
+        "notProvided": "Not provided",
+        "identity": "Personal information",
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "gender": "Gender",
+        "genderMale": "Male",
+        "genderFemale": "Female",
+        "academic": "Academic background",
+        "university": "Institution",
+        "specialty": "Specialty",
+        "institution": "School",
+        "degree": "Degree / level",
+        "fieldOfStudy": "Field of study",
+        "period": "Period",
+        "present": "Present",
+        "grade": "Grade",
+        "bio": "About",
+        "experience": "Experience",
+        "skills": "Skills",
+        "languages": "Languages",
+        "links": "Professional links",
+        "link": {
+          "linkedin": "LinkedIn",
+          "github": "GitHub",
+          "portfolio": "Portfolio"
+        },
+        "account": "Account",
+        "joinedAt": "Signed up",
+        "lastLoginAt": "Last login",
+        "lastActiveAt": "Last activity",
+        "emailVerified": "Email verified",
+        "accountActive": "Active account",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "documents": {
+        "emptyTitle": "No documents",
+        "emptyText": "This student has neither a profile CV nor documents attached to their applications.",
+        "group": {
+          "profile": "Profile CV",
+          "applicationCv": "CVs attached to applications",
+          "coverLetters": "Cover letters"
+        },
+        "source": {
+          "profile": "Student profile",
+          "application": "Application"
+        },
+        "forOffer": "Application: {{offer}}",
+        "externalFile": "external link",
+        "missingFile": "file not found on the server",
+        "preview": "View",
+        "previewAria": "View {{name}}",
+        "download": "Download",
+        "downloadAria": "Download {{name}}",
+        "openLink": "Open link",
+        "openTab": "Open in a tab",
+        "previewFrame": "Preview of {{name}}",
+        "noPreviewTitle": "Preview unavailable",
+        "noPreviewText": "The {{ext}} format cannot be displayed in the browser. Download the file to view it.",
+        "unavailable": "This document is not available on the server."
+      },
+      "aside": {
+        "label": "Follow-up summary",
+        "upcoming": "Upcoming due dates",
+        "due": "Due {{when}}",
+        "overdue": "Overdue ({{when}})",
+        "nothingDue": "No pending due date.",
+        "cv": "CV",
+        "noCv": "No CV in the profile.",
+        "otherDocuments_one": "{{count}} other document in the Documents tab",
+        "otherDocuments_other": "{{count}} other documents in the Documents tab"
+      }
+    }
   }
 }
