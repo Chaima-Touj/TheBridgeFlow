@@ -13,6 +13,7 @@ import { offersService, localizeOffer } from "../../services/offers.service.js";
 import { favoritesService }      from "../../services/favorites.service.js";
 import { applicationsService }   from "../../services/applications.service.js";
 import { useFormationsTechMap }  from "../../hooks/useFormationsTechMap.js";
+import { usePhoneRequirement }   from "../../hooks/usePhoneRequirement.jsx";
 import { buildSkillFormationMatcher } from "../../utils/techMatch.js";
 import "./OfferDetail.css";
 
@@ -136,6 +137,7 @@ export default function OfferDetail() {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage || i18n.language || "fr";
   const { user }   = useAuth();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
   const [offer,        setOffer]       = useState(null);
   const [similar,      setSimilar]     = useState([]);
@@ -208,7 +210,12 @@ export default function OfferDetail() {
   }, [id, language]);
 
   /* handlers */
-  const handleApply = () => navigate(`/dashboard/student/offers/${id}/apply`);
+  // Étudiant sans numéro : la saisie du téléphone s'ouvre ici, avant le
+  // formulaire de candidature ; il y est conduit une fois le numéro enregistré.
+  const handleApply = () => runWithPhone(
+    () => navigate(`/dashboard/student/offers/${id}/apply`),
+    { title: t("phoneRequirement.applyTitle"), message: t("phoneRequirement.applyMessage") },
+  );
 
   const handleSave = async () => {
     setSaved((v) => !v);
@@ -261,6 +268,7 @@ export default function OfferDetail() {
   /* ── Render ──────────────────────────────────────────────────────────── */
   return (
     <DashboardLayout>
+      {phoneRequiredModal}
       <div className="od-page">
 
         {/* Back */}

@@ -136,7 +136,7 @@ export default function ApplyOffer() {
   const navigate = useNavigate();
   const { t }    = useTranslation();
   const { user } = useAuth();
-  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
+  const { runWithPhone, askForPhone, phoneRequiredModal } = usePhoneRequirement();
 
   /* state ─────────────────────────────────────────────────────────────────── */
   const [offer,          setOffer]         = useState(null);
@@ -204,10 +204,18 @@ export default function ApplyOffer() {
       setSubmitted(true);
     } catch (err) {
       const status  = err?.response?.status;
+      const code    = err?.response?.data?.code;
       const message = err?.response?.data?.message || "";
 
       if (status === 409 || message.toLowerCase().includes("déjà postulé")) {
         setAlreadyApplied(true);
+      } else if (code === "STUDENT_PHONE_REQUIRED") {
+        // Le serveur exige un numéro valide (profil incomplet ou numéro non
+        // conforme) : on ouvre la saisie au lieu d'afficher une erreur brute.
+        setError(t("apply.errorPhoneRequired"));
+        askForPhone(null, { title: t("phoneRequirement.applyTitle"), message: t("phoneRequirement.applyMessage") });
+      } else if (status === 404) {
+        setError(t("apply.errorOfferUnavailable"));
       } else {
         setError(message || "Erreur lors de l'envoi de la candidature.");
       }
@@ -229,7 +237,7 @@ export default function ApplyOffer() {
       setError(t("captcha.required"));
       return;
     }
-    await runWithPhone(submitApplication);
+    await runWithPhone(submitApplication, { title: t("phoneRequirement.applyTitle"), message: t("phoneRequirement.applyMessage") });
   };
 
   /* file handler ──────────────────────────────────────────────────────────── */
@@ -312,6 +320,9 @@ export default function ApplyOffer() {
   /* ── Main form ───────────────────────────────────────────────────────────── */
   return (
     <DashboardLayout title={t("apply.title")}>
+      {/* Saisie obligatoire du numéro (étudiant sans téléphone dans son profil) :
+          doit être rendue ICI, c'est depuis ce formulaire qu'elle est déclenchée. */}
+      {phoneRequiredModal}
       <div className="ao-page">
 
         {/* Back */}

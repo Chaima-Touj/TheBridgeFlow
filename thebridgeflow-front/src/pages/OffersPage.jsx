@@ -11,6 +11,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { offersService, localizeOffer } from "../services/offers.service.js";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import "./OffersPage.css";
 
 const OFFER_TYPES = ["stage", "PFE", "alternance", "formation", "vidéo"];
@@ -100,6 +101,7 @@ const OffersPage = () => {
   const { user }               = useAuth();
   const navigate               = useNavigate();
   const location               = useLocation();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
   useDocumentMeta({
     title: t("offers.seoTitle"),
@@ -183,7 +185,10 @@ const OffersPage = () => {
     if (!user) {
       navigate("/login", { state: { from: location.pathname, offerId } });
     } else {
-      navigate(`/dashboard/student/offers/${offerId}/apply`);
+      runWithPhone(
+        () => navigate(`/dashboard/student/offers/${offerId}/apply`),
+        { title: t("phoneRequirement.applyTitle"), message: t("phoneRequirement.applyMessage") },
+      );
     }
   };
 
@@ -191,6 +196,7 @@ const OffersPage = () => {
 
   return (
     <div className="op-page">
+      {phoneRequiredModal}
 
       <SiteNavbar />
 

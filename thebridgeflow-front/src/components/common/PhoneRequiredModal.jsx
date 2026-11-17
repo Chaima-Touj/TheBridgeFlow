@@ -6,7 +6,7 @@ import { profileService } from "../../services/profile.service.js";
 import { normalizeTunisianPhone } from "../../utils/tunisianPhone.js";
 import "./PhoneRequiredModal.css";
 
-export default function PhoneRequiredModal({ onClose, onSaved }) {
+export default function PhoneRequiredModal({ title, message, onClose, onSaved }) {
   const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
   const [phone, setPhone] = useState(user?.phone || "");
@@ -40,8 +40,8 @@ export default function PhoneRequiredModal({ onClose, onSaved }) {
   return createPortal(
     <div className="phone-required-overlay" role="presentation">
       <section className="phone-required-modal" role="dialog" aria-modal="true" aria-labelledby="phone-required-title">
-        <h2 id="phone-required-title">{t("phoneRequirement.modalTitle")}</h2>
-        <p>{t("phoneRequirement.modalMessage")}</p>
+        <h2 id="phone-required-title">{title || t("phoneRequirement.modalTitle")}</h2>
+        <p>{message || t("phoneRequirement.modalMessage")}</p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="required-student-phone">{t("phoneRequirement.phoneLabel")}</label>
           <input

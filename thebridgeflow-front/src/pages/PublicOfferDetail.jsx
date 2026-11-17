@@ -13,6 +13,7 @@ import { useFormationsTechMap } from "../hooks/useFormationsTechMap.js";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { buildSkillFormationMatcher } from "../utils/techMatch.js";
 import { offersService, localizeOffer } from "../services/offers.service.js";
+import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import "./PublicOfferDetail.css";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ const PublicOfferDetail = () => {
   const { user }               = useAuth();
   const navigate               = useNavigate();
   const location               = useLocation();
+  const { runWithPhone, phoneRequiredModal } = usePhoneRequirement();
 
   const [offer,   setOffer]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -117,7 +119,10 @@ const PublicOfferDetail = () => {
     if (!user) {
       navigate("/login", { state: { from: location.pathname } });
     } else {
-      navigate(`/dashboard/student/offers/${id}/apply`);
+      runWithPhone(
+        () => navigate(`/dashboard/student/offers/${id}/apply`),
+        { title: t("phoneRequirement.applyTitle"), message: t("phoneRequirement.applyMessage") },
+      );
     }
   };
 
@@ -127,6 +132,7 @@ const PublicOfferDetail = () => {
 
   return (
     <div className="pod-page">
+      {phoneRequiredModal}
 
       <SiteNavbar />
 

@@ -100,20 +100,14 @@ export const createApplication = asyncHandler(async (req, res) => {
     },
   });
 
-  await notifyAdmins((admin) => ({
+  // Administrateurs : notification dans le tableau de bord uniquement, plus
+  // d'email à chaque nouvelle candidature (sans emailMethod, aucun envoi).
+  await notifyAdmins(() => ({
     notification: {
       title: "Nouvelle candidature",
       message: `${req.user.name} a postulé à l'offre "${offer.title}".`,
       type: "info",
       link: "/dashboard/admin/candidatures",
-    },
-    emailMethod: "sendApplicationReceived",
-    emailData: {
-      companyName: admin.name,
-      studentName: req.user.name,
-      studentEmail: req.user.email,
-      studentPhone: req.user.phone,
-      offerTitle: offer.title,
     },
   }));
 
