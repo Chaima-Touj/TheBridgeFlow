@@ -450,6 +450,7 @@
       "ceremony": "Cérémonie",
       "feedbacks": "Feedbacks",
       "contactMessages": "Messages du site",
+      "participationRequests": "Demandes de participation",
       "pfePack": "Pack PFE",
       "messages": "Messagerie",
       "notifications": "Notifications",
@@ -2894,5 +2895,120 @@
         "otherDocuments_other": "{{count}} autres documents dans l'onglet Documents"
       }
     }
+  },
+  "eventParticipation": {
+    "title": "Participer à nos événements",
+    "description": "Vous souhaitez participer à nos événements, ateliers ou rencontres ? Remplissez le formulaire ci-dessous et notre équipe vous contactera prochainement pour vous communiquer toutes les informations.",
+    "formBadge": "Inscription",
+    "formHeading": "Laissez-nous vos coordonnées",
+    "requiredHint": "Les champs marqués d'un astérisque sont obligatoires.",
+    "optional": "facultatif",
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Adresse e-mail",
+      "phone": "Numéro de téléphone",
+      "university": "Université / Établissement",
+      "studyLevel": "Niveau d'études",
+      "event": "Événement qui vous intéresse"
+    },
+    "placeholders": {
+      "firstName": "Votre prénom",
+      "lastName": "Votre nom",
+      "email": "exemple@email.com",
+      "phone": "20 123 456",
+      "university": "Ex. ISET Rades, ESPRIT, FST…",
+      "studyLevel": "Sélectionnez votre niveau",
+      "event": "Choisir un événement (facultatif)"
+    },
+    "levels": {
+      "bac": "Bac",
+      "bac1": "Bac +1",
+      "bac2": "Bac +2",
+      "bac3": "Bac +3",
+      "bac4": "Bac +4",
+      "bac5": "Bac +5",
+      "other": "Autre"
+    },
+    "upcomingOption": "Je souhaite être informé des prochains événements",
+    "eventsLoading": "Chargement des événements…",
+    "eventsUnavailable": "Les événements n'ont pas pu être chargés. Vous pouvez tout de même envoyer le formulaire.",
+    "submit": "Envoyer mes informations",
+    "submitting": "Envoi en cours…",
+    "privacy": "Vos informations servent uniquement à vous contacter au sujet de nos événements.",
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "email": "Saisissez une adresse e-mail valide.",
+      "phone": "Saisissez un numéro tunisien valide (8 chiffres, ex. 20 123 456).",
+      "tooLong": "Ce texte est trop long.",
+      "fixFields": "Veuillez corriger les champs indiqués avant l'envoi.",
+      "network": "Connexion au serveur impossible. Vérifiez votre connexion puis réessayez.",
+      "rateLimited": "Trop d'envois en peu de temps. Patientez quelques minutes puis réessayez.",
+      "eventUnavailable": "Cet événement n'est plus disponible. Choisissez-en un autre ou l'option « prochains événements ».",
+      "generic": "L'envoi a échoué. Veuillez réessayer.",
+      "captcha": "La vérification anti-robot a échoué. Cochez de nouveau la case puis réessayez.",
+      "invalid": "Cette valeur n'a pas été acceptée. Vérifiez-la puis réessayez."
+    },
+    "success": {
+      "title": "Merci pour votre intérêt !",
+      "message": "Vos informations ont été envoyées avec succès. Notre équipe vous contactera dans les plus brefs délais pour vous communiquer les détails de nos prochains événements.",
+      "duplicateNote": "Votre demande était déjà enregistrée : inutile de la renvoyer.",
+      "close": "Parfait, merci !"
+    }
+  },
+  "adminParticipation": {
+    "title": "Demandes de participation",
+    "subtitle": "Étudiants intéressés par nos événements, ateliers et rencontres",
+    "statuses": {
+      "all": "Toutes",
+      "new": "Nouveau",
+      "contacted": "Contacté",
+      "confirmed": "Confirmé"
+    },
+    "searchLabel": "Rechercher une demande",
+    "searchPlaceholder": "Nom, e-mail, téléphone, université…",
+    "statusFilter": "Filtrer par statut",
+    "eventFilter": "Filtrer par événement",
+    "eventAll": "Tous les événements",
+    "eventUpcoming": "Prochains événements (sans choix précis)",
+    "eventNone": "Sans événement choisi",
+    "refresh": "Actualiser",
+    "loading": "Chargement des demandes…",
+    "loadError": "Impossible de charger les demandes.",
+    "retry": "Réessayer",
+    "emptyTitle": "Aucune demande pour le moment",
+    "emptyText": "Les demandes envoyées depuis le formulaire « Participer à nos événements » apparaîtront ici.",
+    "emptyFilteredTitle": "Aucune demande ne correspond",
+    "emptyFilteredText": "Modifiez la recherche ou les filtres.",
+    "resetFilters": "Réinitialiser les filtres",
+    "range": "{{from}}–{{to}} sur {{total}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "listLabel": "Liste des demandes",
+    "paginationLabel": "Pagination des demandes",
+    "filtersLabel": "Filtres des demandes",
+    "submittedAt": "Envoyée le",
+    "interestUpcoming": "Prochains événements",
+    "interestNone": "Aucun événement choisi",
+    "detailTitle": "Détails de la demande",
+    "selectHint": "Sélectionnez une demande pour afficher ses détails.",
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "university": "Université / Établissement",
+      "studyLevel": "Niveau d'études",
+      "event": "Événement",
+      "submittedAt": "Date de soumission",
+      "status": "Statut"
+    },
+    "statusLabel": "Modifier le statut",
+    "statusUpdated": "Statut mis à jour : {{status}}.",
+    "statusError": "Le statut n'a pas pu être modifié. Réessayez.",
+    "updatedBy": "Modifié par {{name}} le {{date}}",
+    "contactEmail": "Écrire un e-mail",
+    "contactPhone": "Appeler",
+    "close": "Fermer"
   }
 }

@@ -1,0 +1,153 @@
+/* Formulaire « Participer à nos événements » (section Contact de l'accueil
+   et page /contact) — reprend les codes visuels TheBridgeFlow : bleu/blanc,
+   bordures fines, coins arrondis, champs sur fond var(--bg). */
+
+.epf-form { display: grid; gap: 1rem; min-width: 0; container: epf / inline-size; }
+.epf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.1rem; }
+.epf-full { grid-column: 1 / -1; min-width: 0; }
+@container epf (max-width: 520px) {
+  .epf-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.epf-field { display: grid; gap: .45rem; min-width: 0; }
+/* display:block : neutralise les styles de label des pages hôtes (ex. .pi-contact label en grille). */
+.epf-form .epf-field > label { display: block; color: var(--text); font-size: .82rem; font-weight: 650; text-align: start; }
+.epf-required { color: var(--primary); }
+.epf-optional { color: var(--text-muted); font-weight: 500; }
+
+.epf-control { position: relative; display: flex; align-items: center; min-width: 0; }
+.epf-control__icon { position: absolute; inset-inline-start: .9rem; color: var(--text-muted); pointer-events: none; transition: color .2s; }
+.epf-control__chevron { position: absolute; inset-inline-end: .85rem; color: var(--text-muted); pointer-events: none; }
+.epf-form .epf-control input,
+.epf-form .epf-control select {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding: .8rem 1rem;
+  padding-inline-start: 2.65rem;
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  color: var(--text);
+  background: var(--bg);
+  font: inherit;
+  font-size: .9rem;
+  transition: border-color .2s, box-shadow .2s, background-color .2s;
+}
+.epf-form .epf-control input::placeholder { color: var(--text-muted); }
+.epf-form .epf-control--select select { padding-inline-end: 2.4rem; appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; }
+.epf-form .epf-control select:invalid { color: var(--text-muted); }
+.epf-form .epf-control select option { color: var(--text); background: var(--bg-card); }
+.epf-form .epf-control input:focus,
+.epf-form .epf-control select:focus { outline: none; border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent); }
+.epf-control:focus-within .epf-control__icon { color: var(--primary); }
+.epf-form .epf-control input:disabled,
+.epf-form .epf-control select:disabled { opacity: .7; cursor: not-allowed; }
+/* E-mail / téléphone restent en dir="ltr" : en arabe, l'icône est à droite,
+   donc l'espace réservé à l'icône passe aussi à droite. */
+[dir="rtl"] .epf-form .epf-control input[dir="ltr"] { text-align: right; padding-left: 1rem; padding-right: 2.65rem; }
+[data-theme="dark"] .epf-form .epf-control input,
+[data-theme="dark"] .epf-form .epf-control select { color-scheme: dark; }
+
+.epf-form .epf-field--error .epf-control input,
+.epf-form .epf-field--error .epf-control select { border-color: #dc2626; }
+.epf-form .epf-field--error .epf-control__icon { color: #dc2626; }
+.epf-error { margin: 0; color: #dc2626; font-size: .76rem; font-weight: 600; text-align: start; }
+[data-theme="dark"] .epf-error,
+[data-theme="dark"] .epf-field--error .epf-control__icon { color: #f87171; }
+.epf-hint { margin: 0; color: var(--text-muted); font-size: .76rem; text-align: start; }
+.epf-required-hint { margin: -.25rem 0 0; color: var(--text-muted); font-size: .76rem; text-align: start; }
+
+.epf-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  overflow: hidden;
+  padding: .8rem 1rem;
+  border: 1px solid #fecaca;
+  border-radius: .75rem;
+  color: #991b1b;
+  background: #fef2f2;
+  font-size: .86rem;
+  line-height: 1.5;
+  text-align: start;
+}
+.epf-alert svg { flex: 0 0 auto; margin-top: .1rem; }
+[data-theme="dark"] .epf-alert { color: #fca5a5; border-color: rgb(248 113 113 / 30%); background: rgb(220 38 38 / 14%); }
+
+.epf-submit { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; width: 100%; min-height: 3.1rem; font-size: .95rem; }
+.epf-form .epf-submit:disabled { opacity: .75; cursor: wait; transform: none; }
+.epf-spin { animation: epf-spin .9s linear infinite; }
+@keyframes epf-spin { to { transform: rotate(360deg); } }
+.epf-privacy { display: flex; align-items: center; justify-content: center; gap: .4rem; margin: 0; color: var(--text-muted); font-size: .76rem; text-align: center; }
+
+/* ── Popup de confirmation ───────────────────────────────────────────────── */
+.epf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgb(15 23 42 / 55%);
+  backdrop-filter: blur(4px);
+}
+.epf-modal {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: .85rem;
+  width: min(100%, 460px);
+  max-height: calc(100dvh - 2.5rem);
+  overflow-y: auto;
+  padding: 2.25rem 2rem 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 1.35rem;
+  color: var(--text);
+  background: var(--bg-card);
+  box-shadow: 0 30px 80px rgb(15 23 42 / 30%);
+  text-align: center;
+}
+.epf-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 110px;
+  border-radius: 1.35rem 1.35rem 0 0;
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.epf-modal__icon {
+  position: relative;
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(140deg, #22c55e, #059669);
+  box-shadow: 0 14px 30px -12px rgb(5 150 105 / 70%);
+}
+.epf-modal__icon::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid rgb(34 197 94 / 35%);
+  border-radius: 50%;
+  animation: epf-ring 1.8s ease-out .4s 2;
+}
+@keyframes epf-ring { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
+.epf-modal h2 { position: relative; margin: .4rem 0 0; color: var(--text); font-size: 1.4rem; font-weight: 800; }
+.epf-modal__body { position: relative; display: grid; gap: .85rem; }
+.epf-modal p { position: relative; margin: 0; color: var(--text-secondary); font-size: .93rem; line-height: 1.65; }
+.epf-modal .epf-modal__note { padding: .55rem .8rem; border-radius: .6rem; color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--bg-card)); font-size: .84rem; }
+.epf-modal__close { justify-content: center; width: 100%; min-height: 3rem; margin-top: .6rem; font-size: .95rem; }
+.epf-modal__close:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 40%, transparent); outline-offset: 2px; }
+
+@media (max-width: 480px) {
+  .epf-modal { padding: 2rem 1.25rem 1.4rem; }
+  .epf-modal h2 { font-size: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .epf-spin, .epf-modal__icon::after { animation: none; }
+}

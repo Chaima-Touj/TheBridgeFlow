@@ -39,15 +39,4 @@
 .pi-contact__form-heading { margin-bottom: 1.5rem; }
 .pi-contact__form-heading > span { color: var(--primary); }
 .pi-contact__form-heading h2 { margin: .45rem 0; color: var(--text); font-size: 1.65rem; }
-.pi-contact form { display: grid; gap: 1rem; }
-.pi-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.pi-contact label { display: grid; gap: .45rem; color: var(--text); font-size: .8rem; font-weight: 650; }
-.pi-contact input, .pi-contact textarea { width: 100%; min-width: 0; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: .7rem; background: var(--bg); color: var(--text); font: inherit; font-size: .9rem; transition: border-color .2s, box-shadow .2s; }
-.pi-contact input:focus, .pi-contact textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent); }
-.pi-contact textarea { min-height: 9rem; resize: vertical; }
-.pi-contact form > button { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 3rem; }
-.pi-contact form > button:disabled { opacity: .7; cursor: wait; }
-.pi-contact__notice { margin: 0; padding: .8rem 1rem; border-radius: .7rem; font-size: .88rem; }
-.pi-contact__notice--success { color: #166534; border: 1px solid #bbf7d0; background: #f0fdf4; }
-.pi-contact__notice--error { color: #991b1b; border: 1px solid #fecaca; background: #fef2f2; }
-@media (max-width: 760px) { .pi-contact { grid-template-columns: 1fr; } .pi-contact__details { padding: 1.5rem; } .pi-form-row { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .pi-contact { grid-template-columns: 1fr; } .pi-contact__details { padding: 1.5rem; } }

@@ -451,6 +451,7 @@
       "feedbacks": "Feedbacks",
       "messages": "Messaging",
       "contactMessages": "Website messages",
+      "participationRequests": "Participation requests",
       "pfePack": "PFE Pack",
       "notifications": "Notifications",
       "candidatures": "Applications",
@@ -2894,5 +2895,120 @@
         "otherDocuments_other": "{{count}} other documents in the Documents tab"
       }
     }
+  },
+  "eventParticipation": {
+    "title": "Join our events",
+    "description": "Would you like to attend our events, workshops or meetups? Fill in the form below and our team will contact you soon with all the details.",
+    "formBadge": "Registration",
+    "formHeading": "Leave us your details",
+    "requiredHint": "Fields marked with an asterisk are required.",
+    "optional": "optional",
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "university": "University / School",
+      "studyLevel": "Level of study",
+      "event": "Event you are interested in"
+    },
+    "placeholders": {
+      "firstName": "Your first name",
+      "lastName": "Your last name",
+      "email": "example@email.com",
+      "phone": "20 123 456",
+      "university": "E.g. ISET Rades, ESPRIT, FST…",
+      "studyLevel": "Select your level",
+      "event": "Choose an event (optional)"
+    },
+    "levels": {
+      "bac": "Baccalaureate",
+      "bac1": "Bac +1",
+      "bac2": "Bac +2",
+      "bac3": "Bac +3",
+      "bac4": "Bac +4",
+      "bac5": "Bac +5",
+      "other": "Other"
+    },
+    "upcomingOption": "I would like to be informed about upcoming events",
+    "eventsLoading": "Loading events…",
+    "eventsUnavailable": "Events could not be loaded. You can still send the form.",
+    "submit": "Send my details",
+    "submitting": "Sending…",
+    "privacy": "Your details are only used to contact you about our events.",
+    "errors": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "phone": "Enter a valid Tunisian number (8 digits, e.g. 20 123 456).",
+      "tooLong": "This text is too long.",
+      "fixFields": "Please fix the highlighted fields before sending.",
+      "network": "Unable to reach the server. Check your connection and try again.",
+      "rateLimited": "Too many submissions in a short time. Wait a few minutes and try again.",
+      "eventUnavailable": "This event is no longer available. Choose another one or the upcoming events option.",
+      "generic": "Sending failed. Please try again.",
+      "captcha": "The anti-robot check failed. Tick the box again and retry.",
+      "invalid": "This value was not accepted. Check it and try again."
+    },
+    "success": {
+      "title": "Thank you for your interest!",
+      "message": "Your details have been sent successfully. Our team will contact you as soon as possible with the details of our upcoming events.",
+      "duplicateNote": "Your request was already recorded: no need to send it again.",
+      "close": "Great, thanks!"
+    }
+  },
+  "adminParticipation": {
+    "title": "Participation requests",
+    "subtitle": "Students interested in our events, workshops and meetups",
+    "statuses": {
+      "all": "All",
+      "new": "New",
+      "contacted": "Contacted",
+      "confirmed": "Confirmed"
+    },
+    "searchLabel": "Search a request",
+    "searchPlaceholder": "Name, email, phone, university…",
+    "statusFilter": "Filter by status",
+    "eventFilter": "Filter by event",
+    "eventAll": "All events",
+    "eventUpcoming": "Upcoming events (no specific choice)",
+    "eventNone": "No event selected",
+    "refresh": "Refresh",
+    "loading": "Loading requests…",
+    "loadError": "Unable to load the requests.",
+    "retry": "Try again",
+    "emptyTitle": "No requests yet",
+    "emptyText": "Requests sent from the \"Join our events\" form will appear here.",
+    "emptyFilteredTitle": "No matching request",
+    "emptyFilteredText": "Change the search or the filters.",
+    "resetFilters": "Reset filters",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "listLabel": "Request list",
+    "paginationLabel": "Request pagination",
+    "filtersLabel": "Request filters",
+    "submittedAt": "Sent on",
+    "interestUpcoming": "Upcoming events",
+    "interestNone": "No event selected",
+    "detailTitle": "Request details",
+    "selectHint": "Select a request to see its details.",
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "university": "University / School",
+      "studyLevel": "Level of study",
+      "event": "Event",
+      "submittedAt": "Submission date",
+      "status": "Status"
+    },
+    "statusLabel": "Change status",
+    "statusUpdated": "Status updated: {{status}}.",
+    "statusError": "The status could not be changed. Try again.",
+    "updatedBy": "Changed by {{name}} on {{date}}",
+    "contactEmail": "Send an email",
+    "contactPhone": "Call",
+    "close": "Close"
   }
 }

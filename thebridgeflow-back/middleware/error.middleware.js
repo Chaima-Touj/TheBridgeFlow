@@ -19,6 +19,9 @@ export function errorHandler(err, req, res, next) {
   // frontend de distinguer un cas attendu d'une erreur générique sans avoir à
   // comparer le texte du message.
   if (err.code && typeof err.code === "string") payload.code = err.code;
+  // Champ en erreur (validations qui le précisent) : le frontend peut alors
+  // afficher un message traduit sous le bon champ.
+  if (statusCode === 400 && typeof err.field === "string") payload.field = err.field;
   if (process.env.NODE_ENV === "development") payload.stack = err.stack;
   res.status(statusCode).json(payload);
 }

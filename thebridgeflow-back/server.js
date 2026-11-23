@@ -42,6 +42,7 @@ import eventsRoutes                from "./routes/events.routes.js";
 import newsletterRoutes            from "./routes/newsletter.routes.js";
 import contactMessagesRoutes       from "./routes/contactMessages.routes.js";
 import pfePackRegistrationRoutes   from "./routes/pfePackRegistration.routes.js";
+import eventParticipationRoutes   from "./routes/eventParticipationRequests.routes.js";
 import { startNewsletterWorker } from "./services/newsletter.service.js";
 import { startEventReminderWorker } from "./services/eventReminder.service.js";
 
@@ -205,6 +206,7 @@ app.use("/api/events",              apiLimiter, eventsRoutes);
 app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
 app.use("/api/contact-messages",    apiLimiter, contactMessagesRoutes);
 app.use("/api/pfe-pack/registrations", apiLimiter, pfePackRegistrationRoutes);
+app.use("/api/event-participation-requests", apiLimiter, eventParticipationRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────

@@ -2,12 +2,24 @@ import nodemailer from "nodemailer";
 import User from "../models/users.model.js";
 import { normalizeTunisianPhone } from "../utils/tunisianPhone.js";
 
-// ─── Configuration Gmail SMTP ──────────────────────────────────────────────────
-// Toute la communication passe par smtp.gmail.com:465 (SMTPS), via Nodemailer,
-// avec un compte Gmail + mot de passe d'application (App Password).
+// ─── Configuration SMTP ────────────────────────────────────────────────────────
+// Serveur configurable par .env (SMTP_HOST, SMTP_PORT, SMTP_SECURE) afin de
+// pouvoir passer à un service transactionnel (ex. Brevo :
+// smtp-relay.brevo.com:587) sans modifier le code. Sans ces variables, le
+// comportement historique est conservé : smtp.gmail.com:465 en SMTPS.
 const REQUIRED_ENV = ["SMTP_USER", "SMTP_PASS", "EMAIL_FROM"];
 
 const getMissingEnv = () => REQUIRED_ENV.filter((key) => !process.env[key]);
+
+export const getSmtpSettings = (env = process.env) => {
+  const host = (env.SMTP_HOST || "").trim() || "smtp.gmail.com";
+  const parsedPort = Number.parseInt(env.SMTP_PORT, 10);
+  const port = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 465;
+  // 465 = TLS implicite (SMTPS) ; 587 / 2525 = STARTTLS (secure:false, TLS exigé).
+  const secureSetting = String(env.SMTP_SECURE || "").trim().toLowerCase();
+  const secure = secureSetting === "true" ? true : secureSetting === "false" ? false : port === 465;
+  return { host, port, secure, requireTLS: !secure };
+};
 
 // ─── Transporter Nodemailer singleton ──────────────────────────────────────────
 let _transporter = null;
@@ -15,12 +27,14 @@ let _transporter = null;
 const getTransporter = () => {
   if (_transporter) return _transporter;
 
-  console.log(`📨 [email] Initialisation du transporter Nodemailer (Gmail SMTP)`);
+  const { host, port, secure, requireTLS } = getSmtpSettings();
+  console.log(`📨 [email] Initialisation du transporter Nodemailer — ${host}:${port} (${secure ? "SMTPS" : "STARTTLS"})`);
 
   _transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    host,
+    port,
+    secure,
+    requireTLS,
     family: 4, // le réseau sortant de Render ne supporte pas l'IPv6 (ENETUNREACH sur l'IP AAAA de Gmail)
     connectionTimeout: 10000,
     greetingTimeout:   10000,
@@ -39,17 +53,17 @@ const getTransporter = () => {
 export const verifyEmailConfig = async () => {
   const missing = getMissingEnv();
   if (missing.length) {
-    console.error(`❌ [email] Vérification SMTP Gmail ignorée — variable(s) manquante(s) : ${missing.join(", ")}`);
+    console.error(`❌ [email] Vérification SMTP ignorée — variable(s) manquante(s) : ${missing.join(", ")}`);
     return false;
   }
 
   try {
     const transporter = getTransporter();
     await transporter.verify();
-    console.log(`✅ [email] Connexion SMTP Gmail vérifiée — compte=${process.env.SMTP_USER}`);
+    console.log(`✅ [email] Connexion SMTP vérifiée — serveur=${getSmtpSettings().host} compte=${process.env.SMTP_USER}`);
     return true;
   } catch (err) {
-    console.error(`❌ [email] Échec de la vérification SMTP Gmail :`, {
+    console.error(`❌ [email] Échec de la vérification SMTP (${getSmtpSettings().host}) :`, {
       message: err.message,
       code:    err.code,
       stack:   err.stack,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FiArrowUpRight, FiFacebook, FiInstagram, FiLinkedin, FiMail, FiMapPin, FiPhone, FiSend,
+  FiArrowUpRight, FiFacebook, FiInstagram, FiLinkedin, FiMail, FiMapPin, FiPhone,
 } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import AboutSection from "../components/common/AboutSection.jsx";
@@ -9,22 +9,16 @@ import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarou
 import TestimonialsScreenshotCarousel from "../components/common/TestimonialsScreenshotCarousel.jsx";
 import { settingsService } from "../services/settings.service.js";
 import { feedbacksService } from "../services/feedbacks.service.js";
-import { contactMessagesService } from "../services/contactMessages.service.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
-import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
+import EventParticipationForm from "../components/common/EventParticipationForm.jsx";
 import "./PublicInfoPages.css";
 
 export default function PublicInfoPage({ type }) {
   const { t } = useTranslation();
   const [videos, setVideos] = useState([]);
   const [screenshots, setScreenshots] = useState([]);
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
-  const captcha = useRecaptchaCheckbox();
-  const title = type === "about" ? t("landing.aboutTitle") : type === "testimonials" ? t("nav.testimonials") : t("landing.contactTitle");
+  const title = type === "about" ? t("landing.aboutTitle") : type === "testimonials" ? t("nav.testimonials") : t("eventParticipation.title");
   useDocumentMeta({ title: `${title} — TheBridgeFlow`, description: title });
 
   useEffect(() => {
@@ -33,32 +27,13 @@ export default function PublicInfoPage({ type }) {
     feedbacksService.getScreenshots().then(({ data }) => setScreenshots(data.map((item) => ({ id: item._id, src: item.imageUrl })))).catch(() => setScreenshots([]));
   }, [type]);
 
-  const handleContact = async (event) => {
-    event.preventDefault();
-    if (captcha.missing) {
-      setError(t("captcha.required"));
-      return;
-    }
-    setSending(true); setError("");
-    try {
-      await contactMessagesService.submit(form, captcha.requestConfig);
-      setSent(true);
-      setForm({ name: "", email: "", subject: "", message: "" });
-    } catch (submitError) {
-      setError(submitError.response?.data?.message || t("landing.contactError"));
-    } finally {
-      setSending(false);
-      captcha.reset();
-    }
-  };
-
   return <div className="public-info-page">
     <SiteNavbar />
     {type === "about" ? <AboutSection id="about-page" /> : <>
       <header className={`public-info-hero${type === "contact" ? " public-info-hero--contact" : ""}${type === "testimonials" ? " public-info-hero--testimonials" : ""}`}>
         <span>{type === "testimonials" ? title : t("landing.contactBadge")}</span>
         <h1>{title}</h1>
-        {type === "contact" && <p>{t("landing.contactSub")}</p>}
+        {type === "contact" && <p>{t("eventParticipation.description")}</p>}
       </header>
       <main className={`public-info-content${type === "testimonials" ? " public-info-content--testimonials" : ""}`}>
         {type === "testimonials" && <section className="pi-testimonials">
@@ -92,23 +67,12 @@ export default function PublicInfoPage({ type }) {
           </aside>
           <div className="pi-contact__form-panel">
             <div className="pi-contact__form-heading">
-              <span>{t("landing.contactBadge")}</span>
-              <h2>{t("landing.contactSend")}</h2>
+              <span>{t("eventParticipation.formBadge")}</span>
+              <h2>{t("eventParticipation.formHeading")}</h2>
             </div>
-            <form onSubmit={handleContact}>
-              <div className="pi-form-row">
-                <label>{t("landing.contactName")}<input required autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("landing.contactName")} /></label>
-                <label>{t("landing.contactEmail")}<input required type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t("landing.contactEmail")} /></label>
-              </div>
-              <label>{t("landing.contactSubject")}<input required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder={t("landing.contactSubject")} /></label>
-              <label>{t("landing.contactMessage")}<textarea required rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={t("landing.contactMessage")} /></label>
-              {sent && <p className="pi-contact__notice pi-contact__notice--success" role="status">{t("landing.contactSuccess")}</p>}
-              {error && <p className="pi-contact__notice pi-contact__notice--error" role="alert">{error}</p>}
-              {captcha.widget}
-              <button className="btn btn-primary" type="submit" disabled={sending}>
-                {sending ? t("landing.contactSending") : t("landing.contactSend")} <FiSend aria-hidden="true" />
-              </button>
-            </form>
+            {/* Formulaire « Participer à nos événements » (enregistré en base,
+                géré dans Dashboard Admin → Demandes de participation). */}
+            <EventParticipationForm />
           </div>
         </section>}
       </main>
