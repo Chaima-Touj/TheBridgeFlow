@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   Search, X, RefreshCw, Mail, Phone, CalendarDays, CalendarClock, GraduationCap, School, Inbox, SearchX,
   CircleAlert, ChevronLeft, ChevronRight, LoaderCircle, UserRound, Sparkles, CircleDashed, PhoneCall, CircleCheck,
+  MessageSquareText,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import { eventParticipationService } from "../../services/eventParticipation.service.js";
@@ -16,6 +17,8 @@ const STATUS_META = {
   confirmed: { Icon: CircleCheck, tone: "emerald" },
 };
 const SEARCH_DEBOUNCE_MS = 350;
+// Ancien message du formulaire de contact (repris par la migration).
+const isLegacy = (item) => item?.source === "contact";
 
 function initials(first = "", last = "") {
   return `${first.trim()[0] || ""}${last.trim()[0] || ""}`.toUpperCase();
@@ -115,9 +118,22 @@ export default function AdminParticipationRequests() {
   const from = pagination.total ? (pagination.page - 1) * pagination.limit + 1 : 0;
   const to = Math.min(pagination.total, pagination.page * pagination.limit);
 
-  const interestLabel = (item) => (item.eventTitle
-    ? item.eventTitle
-    : item.notifyUpcoming ? ta("interestUpcoming") : ta("interestNone"));
+  const interestLabel = (item) => {
+    if (isLegacy(item)) return ta("sourceContact");
+    if (item.eventTitle) return item.eventTitle;
+    return item.notifyUpcoming ? ta("interestUpcoming") : ta("interestNone");
+  };
+  // Valeur absente (ancien message du site) : « Non renseigné ».
+  const factValue = (value, props = {}) => (value
+    ? <dd {...props}>{value}</dd>
+    : <dd className="apr-facts__empty">{ta("notProvided")}</dd>);
+  // E-mail encodé (aucun paramètre injecté) ; réponse à un ancien message : « Re : objet ».
+  const mailtoHref = (item) => {
+    const address = encodeURIComponent(item.email).replace(/%40/g, "@");
+    return isLegacy(item) && item.subject
+      ? `mailto:${address}?subject=${encodeURIComponent(`${ta("replyPrefix")} ${item.subject}`)}`
+      : `mailto:${address}`;
+  };
 
   const selectRequest = (item) => {
     setSelectedId(item._id);
@@ -218,9 +234,11 @@ export default function AdminParticipationRequests() {
                 <strong>{item.firstName} {item.lastName}</strong>
                 <small dir="ltr">{item.email}</small>
               </span>
-              <span className="apr-row__event">
-                {item.eventTitle ? <CalendarDays size={14} aria-hidden="true" /> : item.notifyUpcoming ? <Sparkles size={14} aria-hidden="true" /> : null}
-                <span>{interestLabel(item)}</span>
+              <span className={`apr-row__event ${isLegacy(item) ? "apr-row__event--legacy" : ""}`}>
+                {isLegacy(item) ? <MessageSquareText size={14} aria-hidden="true" />
+                  : item.eventTitle ? <CalendarDays size={14} aria-hidden="true" />
+                    : item.notifyUpcoming ? <Sparkles size={14} aria-hidden="true" /> : null}
+                <span>{isLegacy(item) && item.subject ? item.subject : interestLabel(item)}</span>
               </span>
               <span className="apr-row__date">{formatDate(item.createdAt, false)}</span>
               <StatusBadge status={item.status} />
@@ -273,6 +291,7 @@ export default function AdminParticipationRequests() {
                 ))}
                 <option value="upcoming">{ta("eventUpcoming")}</option>
                 <option value="none">{ta("eventNone")}</option>
+                <option value="contact">{ta("eventContact")}</option>
               </select>
             </label>
             <button type="button" className="btn btn-ghost apr-refresh" onClick={() => setReloadKey((value) => value + 1)} disabled={loading}>
@@ -323,14 +342,25 @@ export default function AdminParticipationRequests() {
                   <button type="button" className="apr-detail__close" onClick={closeDetail} aria-label={ta("close")}><X size={16} aria-hidden="true" /></button>
                 </header>
                 <div className="apr-detail__actions">
-                  <a className="btn btn-ghost" href={`mailto:${encodeURIComponent(selected.email).replace(/%40/g, "@")}`}><Mail size={16} aria-hidden="true" />{ta("contactEmail")}</a>
-                  <a className="btn btn-ghost" href={`tel:${selected.phone.replace(/\s/g, "")}`}><Phone size={16} aria-hidden="true" />{ta("contactPhone")}</a>
+                  <a className="btn btn-ghost" href={mailtoHref(selected)}><Mail size={16} aria-hidden="true" />{ta("contactEmail")}</a>
+                  {selected.phone && (
+                    <a className="btn btn-ghost" href={`tel:${selected.phone.replace(/\s/g, "")}`}><Phone size={16} aria-hidden="true" />{ta("contactPhone")}</a>
+                  )}
                 </div>
+                {isLegacy(selected) && (
+                  <section className="apr-message" aria-label={ta("fields.message")}>
+                    <span className="apr-message__label"><MessageSquareText size={14} aria-hidden="true" />{ta("fields.subject")}</span>
+                    <h3>{selected.subject || "—"}</h3>
+                    <span className="apr-message__label">{ta("fields.message")}</span>
+                    <p>{selected.message || "—"}</p>
+                    <small>{ta("legacyNote")}</small>
+                  </section>
+                )}
                 <dl className="apr-facts">
                   <div><dt><Mail size={14} aria-hidden="true" />{ta("fields.email")}</dt><dd dir="ltr">{selected.email}</dd></div>
-                  <div><dt><Phone size={14} aria-hidden="true" />{ta("fields.phone")}</dt><dd dir="ltr">{selected.phone}</dd></div>
-                  <div><dt><School size={14} aria-hidden="true" />{ta("fields.university")}</dt><dd>{selected.university}</dd></div>
-                  <div><dt><GraduationCap size={14} aria-hidden="true" />{ta("fields.studyLevel")}</dt><dd>{t(`eventParticipation.levels.${selected.studyLevel}`)}</dd></div>
+                  <div><dt><Phone size={14} aria-hidden="true" />{ta("fields.phone")}</dt>{factValue(selected.phone, { dir: "ltr" })}</div>
+                  <div><dt><School size={14} aria-hidden="true" />{ta("fields.university")}</dt>{factValue(selected.university)}</div>
+                  <div><dt><GraduationCap size={14} aria-hidden="true" />{ta("fields.studyLevel")}</dt>{factValue(selected.studyLevel && t(`eventParticipation.levels.${selected.studyLevel}`))}</div>
                   <div className="apr-facts__wide">
                     <dt><CalendarDays size={14} aria-hidden="true" />{ta("fields.event")}</dt>
                     <dd>

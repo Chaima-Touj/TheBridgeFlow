@@ -40,11 +40,11 @@ import { warmDriveVideoCache }     from "./services/driveVideoCache.service.js";
 import ceremonyRoutes              from "./routes/ceremony.routes.js";
 import eventsRoutes                from "./routes/events.routes.js";
 import newsletterRoutes            from "./routes/newsletter.routes.js";
-import contactMessagesRoutes       from "./routes/contactMessages.routes.js";
 import pfePackRegistrationRoutes   from "./routes/pfePackRegistration.routes.js";
 import eventParticipationRoutes   from "./routes/eventParticipationRequests.routes.js";
 import { startNewsletterWorker } from "./services/newsletter.service.js";
 import { startEventReminderWorker } from "./services/eventReminder.service.js";
+import { migrateLegacyContactMessages } from "./services/legacyContactMigration.service.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -127,7 +127,7 @@ app.use(cookieParser());
 // ─── Protection NoSQL injection (compatible Express 5) ────────────────────────
 app.use(mongoSanitize);
 // reCAPTCHA : appliqué route par route (connexion, inscription, formulaires publics),
-// voir verifyRecaptcha dans routes/auth, contactMessages, newsletter et pfePackRegistration.
+// voir verifyRecaptcha dans routes/auth, eventParticipationRequests, newsletter et pfePackRegistration.
 
 // ─── Uploads statiques ───────────────────────────────────────────────────────
 // helmet() applique par défaut Cross-Origin-Resource-Policy: same-origin, ce
@@ -204,7 +204,6 @@ app.use("/api/drive-video",         videoLimiter, driveVideoRoutes);
 app.use("/api/ceremony",            apiLimiter, ceremonyRoutes);
 app.use("/api/events",              apiLimiter, eventsRoutes);
 app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
-app.use("/api/contact-messages",    apiLimiter, contactMessagesRoutes);
 app.use("/api/pfe-pack/registrations", apiLimiter, pfePackRegistrationRoutes);
 app.use("/api/event-participation-requests", apiLimiter, eventParticipationRoutes);
 
@@ -224,6 +223,13 @@ const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   startNewsletterWorker();
   startEventReminderWorker();
+  // Anciens « Messages du site » → demandes de participation (une seule fois,
+  // idempotent, en arrière-plan : ne bloque pas le démarrage).
+  migrateLegacyContactMessages()
+    .then((report) => {
+      if (report.total) console.log("[migration] Messages du site :", report);
+    })
+    .catch((error) => console.error("[migration] Messages du site : échec", { message: error.message }));
   app.listen(PORT, () => {
     console.log("─────────────────────────────────────");
     console.log(`🚀 Server running on port ${PORT}`);

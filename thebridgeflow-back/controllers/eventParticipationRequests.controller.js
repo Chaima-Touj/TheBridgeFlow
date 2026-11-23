@@ -22,12 +22,16 @@ const isDedupConflict = (error) => error?.code === 11000 && Boolean(error.keyPat
 function serialize(request) {
   return {
     _id: request._id,
+    // "contact" = ancien message du site repris par la migration.
+    source: request.source === "contact" ? "contact" : "form",
     firstName: request.firstName,
-    lastName: request.lastName,
+    lastName: request.lastName || "",
     email: request.email,
-    phone: request.phone,
-    university: request.university,
-    studyLevel: request.studyLevel,
+    phone: request.phone || "",
+    university: request.university || "",
+    studyLevel: request.studyLevel || "",
+    subject: request.subject || "",
+    message: request.message || "",
     eventId: request.eventId || null,
     eventTitle: request.eventTitle || "",
     eventStartsAt: request.eventStartsAt || null,
@@ -107,7 +111,7 @@ export const createParticipationRequest = asyncHandler(async (req, res) => {
 // req.query n'est pas nettoyé par mongoSanitize : chaque valeur est forcée en chaîne.
 const queryString = (value) => (typeof value === "string" ? value : "");
 
-const SEARCH_FIELDS = ["firstName", "lastName", "email", "phone", "university", "eventTitle"];
+const SEARCH_FIELDS = ["firstName", "lastName", "email", "phone", "university", "eventTitle", "subject", "message"];
 
 /* Chaque mot doit apparaître dans au moins un champ (« Sarra Haddad » trouve
    prénom + nom). Un numéro saisi sans espaces ou avec l'indicatif
@@ -134,7 +138,9 @@ function buildFilters(query) {
   if (search) Object.assign(base, buildSearchFilter(search));
   const event = queryString(query.event);
   if (event === UPCOMING_INTEREST) base.notifyUpcoming = true;
-  else if (event === "none") Object.assign(base, { eventId: null, notifyUpcoming: false });
+  else if (event === "contact") base.source = "contact";
+  // Les demandes créées avant l'ajout du champ source n'en ont pas : $ne les inclut.
+  else if (event === "none") Object.assign(base, { eventId: null, notifyUpcoming: false, source: { $ne: "contact" } });
   else if (mongoose.Types.ObjectId.isValid(event) && /^[a-f\d]{24}$/i.test(event)) base.eventId = new mongoose.Types.ObjectId(event);
 
   const status = queryString(query.status);
@@ -197,7 +203,10 @@ export const updateParticipationStatus = asyncHandler(async (req, res) => {
   const set = { status, statusUpdatedAt: new Date(), statusUpdatedBy: req.user._id };
   const open = OPEN_STATUSES.includes(status);
   const update = open ? { $set: set } : { $set: set, $unset: { dedupKey: 1 } };
-  if (open && !current.dedupKey) update.$set.dedupKey = participationDedupKey(current, current.interestKey);
+  // Pas d'empreinte pour un ancien message du site (pas de doublon possible via le formulaire).
+  if (open && !current.dedupKey && current.source !== "contact") {
+    update.$set.dedupKey = participationDedupKey(current, current.interestKey);
+  }
 
   const save = (changes) => EventParticipationRequest.findByIdAndUpdate(
     req.params.id, changes, { returnDocument: "after", runValidators: true },

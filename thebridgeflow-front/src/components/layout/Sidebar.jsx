@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  FiHome, FiBriefcase, FiBookOpen, FiCpu, FiFileText, FiMail,
+  FiHome, FiBriefcase, FiBookOpen, FiCpu, FiFileText,
   FiCalendar, FiMessageSquare, FiBell, FiUser,
   FiSettings, FiLogOut,
   FiUsers, FiPieChart, FiCheckSquare, FiChevronLeft, FiMenu, FiX,
@@ -37,7 +37,6 @@ const MENUS = {
     { to: "/dashboard/admin/ceremonie",    Icon: FiAward,         labelKey: "sidebar.admin.ceremony" },
     { to: "/dashboard/admin/feedbacks",    Icon: FiStar,          labelKey: "sidebar.admin.feedbacks" },
     { to: "/dashboard/admin/messages",     Icon: FiMessageSquare, labelKey: "sidebar.admin.messages" },
-    { to: "/dashboard/admin/contact-messages", Icon: FiMail, labelKey: "sidebar.admin.contactMessages" },
     { to: "/dashboard/admin/demandes-participation", Icon: FiUserPlus, labelKey: "sidebar.admin.participationRequests" },
     { to: "/dashboard/admin/pack-pfe",     Icon: FiCode,          labelKey: "sidebar.admin.pfePack" },
     { to: "/dashboard/admin/notifications",Icon: FiBell,          labelKey: "sidebar.admin.notifications", badgeKey: "notif" },

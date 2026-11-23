@@ -158,6 +158,14 @@
 .apr-detail__close:hover { color: var(--text); background: var(--bg); }
 .apr-detail__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
 .apr-detail__actions .btn { flex: 1 1 140px; justify-content: center; border: 1px solid var(--border); }
+/* Ancien message du site : objet et contenu d'origine. */
+.apr-message { display: grid; gap: .3rem; min-width: 0; margin-bottom: 1rem; padding: .9rem 1rem; border: 1px solid var(--border); border-inline-start: 3px solid var(--primary); border-radius: var(--radius-sm); background: var(--bg); }
+.apr-message__label { display: inline-flex; align-items: center; gap: .35rem; color: var(--text-muted); font-size: .72rem; font-weight: 650; }
+.apr-message__label svg { color: var(--primary); }
+.apr-message h3 { margin: 0 0 .45rem; color: var(--text); font-size: .95rem; font-weight: 700; overflow-wrap: anywhere; }
+.apr-message p { max-height: 22rem; margin: 0; overflow-y: auto; color: var(--text); font-size: .88rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.apr-message small { margin-top: .4rem; color: var(--text-muted); font-size: .72rem; }
+.apr-facts dd.apr-facts__empty { color: var(--text-muted); font-weight: 500; font-style: italic; }
 .apr-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 0; }
 .apr-facts > div { min-width: 0; padding: .65rem .75rem; border-radius: var(--radius-sm); background: var(--bg); }
 .apr-facts__wide { grid-column: 1 / -1; }

@@ -70,7 +70,6 @@ import AdminEnrollments         from "./pages/dashboard/AdminEnrollments.jsx";
 import AdminStatistics          from "./pages/dashboard/AdminStatistics.jsx";
 import AdminProfile             from "./pages/dashboard/AdminProfile.jsx";
 import AdminSettings            from "./pages/dashboard/AdminSettings.jsx";
-import AdminContactMessages     from "./pages/dashboard/AdminContactMessages.jsx";
 import AdminParticipationRequests from "./pages/dashboard/AdminParticipationRequests.jsx";
 
 
@@ -194,9 +193,8 @@ export default function App() {
       <Route path="/dashboard/admin/messages" element={
         <ProtectedRoute role="admin"><MessagingPage/></ProtectedRoute>
       }/>
-      <Route path="/dashboard/admin/contact-messages" element={
-        <ProtectedRoute role="admin"><AdminContactMessages/></ProtectedRoute>
-      }/>
+      {/* Ancienne page « Messages du site » : ses messages sont désormais dans les demandes de participation. */}
+      <Route path="/dashboard/admin/contact-messages" element={<Navigate to="/dashboard/admin/demandes-participation" replace />} />
       <Route path="/dashboard/admin/demandes-participation" element={
         <ProtectedRoute role="admin"><AdminParticipationRequests/></ProtectedRoute>
       }/>
