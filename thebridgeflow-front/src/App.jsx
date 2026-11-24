@@ -193,11 +193,12 @@ export default function App() {
       <Route path="/dashboard/admin/messages" element={
         <ProtectedRoute role="admin"><MessagingPage/></ProtectedRoute>
       }/>
-      {/* Ancienne page « Messages du site » : ses messages sont désormais dans les demandes de participation. */}
-      <Route path="/dashboard/admin/contact-messages" element={<Navigate to="/dashboard/admin/demandes-participation" replace />} />
-      <Route path="/dashboard/admin/demandes-participation" element={
+      {/* Messages du site : formulaire de contact + demandes de participation. */}
+      <Route path="/dashboard/admin/contact-messages" element={
         <ProtectedRoute role="admin"><AdminParticipationRequests/></ProtectedRoute>
       }/>
+      {/* Ancienne adresse (liens des notifications déjà envoyées). */}
+      <Route path="/dashboard/admin/demandes-participation" element={<Navigate to="/dashboard/admin/contact-messages" replace />} />
       <Route path="/dashboard/admin/pack-pfe" element={
         <ProtectedRoute role="admin"><AdminPfePack/></ProtectedRoute>
       }/>

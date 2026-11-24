@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   FiArrowRight, FiPlay, FiVideo, FiX, FiExternalLink,
-  FiMapPin, FiPhone, FiMail, FiSend,
+  FiMapPin, FiPhone, FiMail, FiSend, FiUser, FiEdit3,
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
   FiUsers, FiAward, FiTarget, FiBookOpen,
   FiClock, FiCheckCircle, FiTrendingUp, FiMessageCircle,
@@ -37,8 +37,8 @@ import NewsSection from "../components/common/NewsSection.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
 import { newsletterService } from "../services/newsletter.service.js";
+import { contactMessagesService } from "../services/contactMessages.service.js";
 import Modal from "../components/common/Modal.jsx";
-import EventParticipationForm from "../components/common/EventParticipationForm.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
@@ -108,11 +108,15 @@ export default function LandingPage() {
   const navigate                    = useNavigate();
   const location                    = useLocation();
 
+  const [form,        setForm]        = useState({ name: "", email: "", subject: "", message: "" });
+  const [sent,        setSent]        = useState(false);
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState("");
   const [newsletter,  setNewsletter]  = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState(null);
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
-  // Case « Je ne suis pas un robot » de la newsletter (le formulaire de
-  // participation de la section Contact gère la sienne).
+  // Une case « Je ne suis pas un robot » par formulaire (contact et newsletter).
+  const contactCaptcha = useRecaptchaCheckbox();
   const newsletterCaptcha = useRecaptchaCheckbox();
   const [allFormations, setAllFormations] = useState([]);
   const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
@@ -155,6 +159,32 @@ export default function LandingPage() {
       window.removeEventListener("keydown", onKey);
     };
   }, [promoOpen]);
+
+  const handleContact = async (e) => {
+    e.preventDefault();
+    if (contactSending) return;
+    if (contactCaptcha.missing) {
+      setContactError(t("captcha.required"));
+      return;
+    }
+    setContactSending(true);
+    setContactError("");
+    try {
+      await contactMessagesService.submit(form, contactCaptcha.requestConfig);
+      setSent(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setTimeout(() => setSent(false), 4000);
+    } catch (error) {
+      // Message du serveur seulement pour une erreur 4xx (validation, captcha,
+      // trop d'envois) ; réseau ou 5xx : message générique traduit.
+      const status = error.response?.status;
+      const serverMessage = status >= 400 && status < 500 ? error.response?.data?.message : "";
+      setContactError(serverMessage || t("landing.contactError"));
+    } finally {
+      setContactSending(false);
+      contactCaptcha.reset();
+    }
+  };
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -804,12 +834,66 @@ export default function LandingPage() {
           {/* Left: form */}
           <div className="lp-contact__form-wrap">
             <span className="lp-section-badge">{t("landing.contactBadge")}</span>
-            <h2 className="lp-contact__title">{t("eventParticipation.title")}</h2>
-            <p className="lp-contact__sub">{t("eventParticipation.description")}</p>
+            <h2 className="lp-contact__title">{t("landing.contactTitle")}</h2>
+            <p className="lp-contact__sub">{t("landing.contactSub")}</p>
 
-            {/* Formulaire « Participer à nos événements » (enregistré en base,
-                géré dans Dashboard Admin → Demandes de participation). */}
-            <EventParticipationForm />
+            {sent && (
+              <div className="lp-contact__success">
+                <FiCheckCircle aria-hidden="true" /> {t("landing.contactSuccess")}
+              </div>
+            )}
+            {contactError && <div className="lp-contact__success lp-contact__error" role="alert">{contactError}</div>}
+
+            <form className="lp-contact__form" onSubmit={handleContact}>
+              <div className="lp-form-row">
+                <div className="lp-input-wrap">
+                  <span className="lp-input-icon"><FiUser aria-hidden="true" /></span>
+                  <input
+                    required
+                    value={form.name}
+                    onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                    className="lp-input"
+                    placeholder={t("landing.contactName")}
+                  />
+                </div>
+                <div className="lp-input-wrap">
+                  <span className="lp-input-icon"><FiMail aria-hidden="true" /></span>
+                  <input
+                    required
+                    type="email"
+                    value={form.email}
+                    onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                    className="lp-input"
+                    placeholder={t("landing.contactEmail")}
+                  />
+                </div>
+              </div>
+              <div className="lp-input-wrap">
+                <span className="lp-input-icon"><FiMapPin aria-hidden="true" /></span>
+                <input
+                  required
+                  value={form.subject}
+                  onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
+                  className="lp-input"
+                  placeholder={t("landing.contactSubject")}
+                />
+              </div>
+              <div className="lp-input-wrap lp-input-wrap--textarea">
+                <span className="lp-input-icon lp-input-icon--top"><FiEdit3 aria-hidden="true" /></span>
+                <textarea
+                  required
+                  rows={5}
+                  value={form.message}
+                  onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
+                  className="lp-input lp-textarea"
+                  placeholder={t("landing.contactMessage")}
+                />
+              </div>
+              {contactCaptcha.widget}
+              <button type="submit" className="btn btn-primary lp-contact__submit" disabled={contactSending}>
+                {contactSending ? t("landing.contactSending") : t("landing.contactSend")} <FiSend size={16} />
+              </button>
+            </form>
           </div>
 
           {/* Right: info + map */}

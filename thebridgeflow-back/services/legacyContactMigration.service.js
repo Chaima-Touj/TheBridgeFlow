@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 import EventParticipationRequest from "../models/eventParticipationRequest.model.js";
 
-/* Reprise des anciens « Messages du site » (collection contactsubmissions,
-   formulaire de contact supprimé) dans les demandes de participation, avec
-   source = "contact". Exécutée au démarrage du serveur :
+/* Reprise des anciens « Messages du site » (collection contactsubmissions de
+   l'ancienne version du formulaire de contact) dans le modèle
+   EventParticipationRequest, avec source = "contact" : ils apparaissent avec
+   les nouveaux messages dans Dashboard Admin → Messages du site.
+   Exécutée au démarrage du serveur :
    - les messages de robots (texte aléatoire sans espaces) sont ignorés ;
    - un même message envoyé plusieurs fois n'est importé qu'une fois ;
    - la date d'envoi d'origine est conservée ;
@@ -28,12 +30,14 @@ export function isLikelySpamContact({ name, subject, message } = {}) {
   return randomFields >= 2 || (text.length >= 20 && looksRandom(text));
 }
 
-// « Gara Raouaa » → { firstName: "Gara", lastName: "Raouaa" }.
+// « Gara Raouaa » → { firstName: "Gara", lastName: "Raouaa" }. Sert aussi aux
+// nouveaux messages du formulaire de contact (nom de 120 caractères au plus,
+// limite du modèle : rien n'est tronqué).
 export function splitFullName(name) {
   const parts = String(name ?? "").trim().split(/\s+/).filter(Boolean);
   return {
-    firstName: (parts[0] || "").slice(0, 80),
-    lastName: parts.slice(1).join(" ").slice(0, 80),
+    firstName: (parts[0] || "").slice(0, 120),
+    lastName: parts.slice(1).join(" ").slice(0, 120),
   };
 }
 
@@ -48,7 +52,7 @@ export function legacyContactToRequest(doc) {
   return {
     source: "contact",
     legacyContactId: doc._id,
-    firstName: firstName || email.split("@")[0].slice(0, 80) || "—",
+    firstName: firstName || email.split("@")[0].slice(0, 120) || "—",
     lastName,
     email,
     subject: String(doc.subject ?? "").trim().slice(0, 180),

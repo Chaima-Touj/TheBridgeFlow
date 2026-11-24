@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { REQUEST_STATUSES } from "../utils/requestStatuses.js";
 
 const pfePackRegistrationSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true, maxlength: 80 },
@@ -12,6 +13,14 @@ const pfePackRegistrationSchema = new mongoose.Schema({
   preferredLocation: { type: String, trim: true, maxlength: 200, default: "" },
   subject: { type: String, trim: true, maxlength: 3000 },
   consentConfirmed: { type: Boolean, required: true, validate: [(value) => value === true, "Confirmez votre accord avant l’envoi."] },
+  // Suivi par l'équipe (modifié uniquement par un administrateur). Les
+  // demandes enregistrées avant l'ajout du suivi n'ont pas de statut : elles
+  // sont traitées comme « new » (voir serializePfePackRegistration).
+  status: { type: String, enum: REQUEST_STATUSES, default: "new" },
+  statusUpdatedAt: { type: Date, default: null },
+  statusUpdatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 }, { timestamps: true });
+
+pfePackRegistrationSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model("PfePackRegistration", pfePackRegistrationSchema);

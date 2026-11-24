@@ -1,25 +1,29 @@
 import mongoose from "mongoose";
-import { PARTICIPATION_STATUSES, STUDY_LEVELS } from "../utils/validateEventParticipationRequest.js";
+import { PARTICIPATION_STATUSES, STUDY_LEVEL_MAX_LENGTH } from "../utils/validateEventParticipationRequest.js";
 
-// Origine d'une demande : formulaire « Participer à nos événements », ou
-// ancien message du formulaire de contact repris par la migration
-// (services/legacyContactMigration.service.js).
+// Origine : "form" = demande de participation (ancien formulaire « Participer
+// à nos événements ») ; "contact" = message du formulaire de contact, envoyé
+// depuis le site (POST /api/contact-messages) ou repris de l'ancienne
+// collection par la migration (services/legacyContactMigration.service.js).
 export const PARTICIPATION_SOURCES = ["form", "contact"];
 const fromForm = function () { return this.source !== "contact"; };
 
-// Demande de participation envoyée depuis le formulaire « Participer à nos
-// événements » (pages Contact). La date de soumission est createdAt.
+// Messages du site : messages du formulaire de contact et demandes de
+// participation aux événements. La date de réception est createdAt.
 const eventParticipationRequestSchema = new mongoose.Schema({
   source: { type: String, enum: PARTICIPATION_SOURCES, default: "form" },
-  firstName: { type: String, required: true, trim: true, maxlength: 80 },
-  // Un ancien message ne contenait qu'un nom complet : nom, téléphone,
-  // établissement et niveau n'y sont pas toujours renseignés.
-  lastName: { type: String, required: fromForm, trim: true, maxlength: 80, default: "" },
+  // Un message du site ne contient qu'un nom complet (premier mot = firstName,
+  // reste = lastName, 120 caractères au plus comme le formulaire) ; téléphone,
+  // établissement et niveau n'y sont pas renseignés.
+  firstName: { type: String, required: true, trim: true, maxlength: 120 },
+  lastName: { type: String, required: fromForm, trim: true, maxlength: 120, default: "" },
   email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
   phone: { type: String, required: fromForm, trim: true, maxlength: 32, default: "" },
   university: { type: String, required: fromForm, trim: true, maxlength: 160, default: "" },
-  studyLevel: { type: String, enum: STUDY_LEVELS, required: fromForm },
-  // Ancien message du site : objet et contenu d'origine.
+  // Facultatif, saisi librement (ex. « Licence 2 »). Les demandes plus
+  // anciennes contiennent un code de l'ancienne liste (bac, bac1…bac5, other).
+  studyLevel: { type: String, trim: true, maxlength: STUDY_LEVEL_MAX_LENGTH, default: "" },
+  // Message du site : sujet et contenu.
   subject: { type: String, trim: true, maxlength: 180, default: "" },
   message: { type: String, trim: true, maxlength: 5000, default: "" },
   legacyContactId: { type: mongoose.Schema.Types.ObjectId },
@@ -32,8 +36,10 @@ const eventParticipationRequestSchema = new mongoose.Schema({
   notifyUpcoming: { type: Boolean, default: false },
   // "general" | "upcoming" | "contact" | <id d'événement>.
   interestKey: { type: String, required: true, maxlength: 40 },
-  // Empreinte anti-doublon (participationDedupKey) : présente uniquement tant
-  // que la demande est ouverte (Nouveau / Contacté). Jamais renvoyée au client.
+  // Empreinte anti-doublon (contactDedupKey, utils/validateContactMessage.js) :
+  // uniquement pour un message envoyé par le formulaire de contact, tant qu'il
+  // est ouvert (Nouveau / Contacté). Les demandes de participation plus
+  // anciennes peuvent encore en avoir une. Jamais renvoyée au client.
   dedupKey: { type: String },
   status: { type: String, enum: PARTICIPATION_STATUSES, default: "new" },
   statusUpdatedAt: { type: Date, default: null },

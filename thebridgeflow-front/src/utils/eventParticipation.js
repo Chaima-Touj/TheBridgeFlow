@@ -1,73 +1,27 @@
-import { normalizeTunisianPhone } from "./tunisianPhone.js";
+/* Dashboard Admin → Messages du site : fonctions pures (testées dans
+   eventParticipation.test.js). Statuts : components/common/RequestStatus.jsx. */
 
-/* Formulaire « Participer à nos événements » : mêmes règles que le backend
-   (utils/validateEventParticipationRequest.js). Fonctions pures. */
+// Message du formulaire de contact (envoyé depuis le site ou repris de
+// l'ancienne collection) ; sinon demande de participation à un événement.
+export const isContactMessage = (item) => item?.source === "contact";
 
-export const STUDY_LEVELS = ["bac", "bac1", "bac2", "bac3", "bac4", "bac5", "other"];
-export const UPCOMING_INTEREST = "upcoming";
-export const PARTICIPATION_STATUSES = ["new", "contacted", "confirmed"];
+// Codes de l'ancienne liste déroulante, encore présents dans les demandes de
+// participation envoyées avant le passage au texte libre (affichés traduits).
+export const LEGACY_STUDY_LEVELS = ["bac", "bac1", "bac2", "bac3", "bac4", "bac5", "other"];
 
-// Identique au backend : lettres, chiffres et « . _ + - » avant @, domaine en
-// labels [a-z0-9-] ; refuse ? & % < > " (pas d'injection dans un lien mailto:).
-const EMAIL_PATTERN = /^[a-z0-9_+-]+(?:\.[a-z0-9_+-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,24}|xn--[a-z0-9-]{1,59})$/i;
-const LIMITS = { firstName: 80, lastName: 80, university: 160 };
-const FORM_FIELDS = ["firstName", "lastName", "email", "phone", "university", "studyLevel", "interest"];
-
-export const EMPTY_PARTICIPATION_FORM = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  university: "",
-  studyLevel: "",
-  interest: "",
-};
-
-// Renvoie { champ: "required" | "email" | "phone" | "tooLong" } (vide = valide).
-export function validateParticipationForm(form) {
-  const errors = {};
-  for (const field of ["firstName", "lastName", "university"]) {
-    const value = String(form[field] || "").trim();
-    if (!value) errors[field] = "required";
-    else if (value.length > LIMITS[field]) errors[field] = "tooLong";
-  }
-  const email = String(form.email || "").trim();
-  if (!email) errors.email = "required";
-  else if (email.length > 254 || !EMAIL_PATTERN.test(email)) errors.email = "email";
-  const phone = String(form.phone || "").trim();
-  if (!phone) errors.phone = "required";
-  else if (!normalizeTunisianPhone(phone)) errors.phone = "phone";
-  if (!STUDY_LEVELS.includes(form.studyLevel)) errors.studyLevel = "required";
-  return errors;
+// Libellé affiché d'un niveau d'études : texte saisi, ou code de l'ancienne liste traduit.
+export function studyLevelLabel(value, t) {
+  const text = String(value || "").trim();
+  return LEGACY_STUDY_LEVELS.includes(text) ? t(`adminParticipation.levels.${text}`) : text;
 }
 
-export function buildParticipationPayload(form) {
-  return {
-    firstName: form.firstName.trim(),
-    lastName: form.lastName.trim(),
-    email: form.email.trim().toLowerCase(),
-    phone: normalizeTunisianPhone(form.phone.trim()) || form.phone.trim(),
-    university: form.university.trim(),
-    studyLevel: form.studyLevel,
-    interest: form.interest || "",
-  };
-}
-
-/* Clé i18n (eventParticipation.errors.*) d'une erreur d'envoi. Le texte brut
-   du serveur (français uniquement, parfois technique sur une erreur 500)
-   n'est jamais affiché au visiteur. */
-export function participationErrorKey(error) {
-  const response = error?.response;
-  if (!response) return "network";
-  if (response.status === 429) return "rateLimited";
-  if (response.data?.code === "EVENT_UNAVAILABLE") return "eventUnavailable";
-  if (response.data?.code === "VALIDATION_ERROR") return "fixFields";
-  if (response.status === 403) return "captcha"; // case anti-robot absente ou refusée
-  return "generic";
-}
-
-// Champ du formulaire signalé par le serveur (validation), sinon null.
-export function participationErrorField(error) {
-  const field = error?.response?.data?.field;
-  return FORM_FIELDS.includes(field) ? field : null;
+/* Lien « Répondre par e-mail » : adresse encodée (aucun paramètre ne peut être
+   injecté dans le lien mailto:) ; réponse à un message du site avec son
+   sujet (« Re : sujet »). */
+export function replyMailtoHref(item, replyPrefix) {
+  const address = encodeURIComponent(String(item?.email || "")).replace(/%40/g, "@");
+  const subject = String(item?.subject || "").trim();
+  return isContactMessage(item) && subject
+    ? `mailto:${address}?subject=${encodeURIComponent(`${replyPrefix} ${subject}`)}`
+    : `mailto:${address}`;
 }
