@@ -1,4 +1,4 @@
-/* Design commun des emails 9antra.tn_the_bridge — reproduit le kit officiel :
+/* Design commun des emails 9antra.tn — reproduit le kit officiel :
    barre blanche avec le logo, en-tête bleu royal, corps blanc, tableau de
    détails, encadré d'information, bouton bleu et pied de page gris clair.
 
@@ -9,12 +9,14 @@
    Convention : un paramètre dont le nom finit par « Html » est inséré tel quel
    (déjà échappé par l'appelant) ; tous les autres textes sont échappés ici. */
 
-export const EMAIL_BRAND = "9antra.tn_the_bridge";
+export const EMAIL_BRAND = "9antra.tn";
 // Nom affiché comme expéditeur dans la boîte de réception.
 export const DEFAULT_SENDER_NAME = "9antra.tn";
 // Servi par le frontend (thebridgeflow-front/public/email/) : Gmail bloque les
-// images intégrées en data:, le logo doit donc être hébergé.
-export const DEFAULT_EMAIL_LOGO_URL = "https://9antra.tn/email/logo-9antra-the-bridge.png";
+// images intégrées en data:, le logo doit donc être hébergé. « ?v= » à
+// incrémenter à chaque nouveau logo : Gmail et les navigateurs gardent
+// l'ancienne image en cache pour une même adresse.
+export const DEFAULT_EMAIL_LOGO_URL = "https://9antra.tn/email/logo-9antra-the-bridge.png?v=2";
 
 const SITE_URL = "https://9antra.tn";
 const PROGRAMS_URL = "https://9antra.tn/pack-pfe";
@@ -58,6 +60,10 @@ export function safeUrl(value) {
     return "";
   }
 }
+
+// Typographie française : « envoyée ! » ne laisse jamais le « ! » seul sur
+// une ligne (espace insécable avant ! ? : ;).
+const keepPunctuationAttached = (html) => String(html).replace(/ ([!?:;])/g, "&nbsp;$1");
 
 const isRtl = (dir) => dir === "rtl";
 const startSide = (dir) => (isRtl(dir) ? "right" : "left");
@@ -427,7 +433,7 @@ export function renderEmail({
                 &#9679;&nbsp; ${escapeHtml(hero.badge)}
               </div>` : ""}
               <h1 style="margin:0 0 10px 0; color:#FFFFFF; font-size:27px; font-weight:800; line-height:1.25; letter-spacing:-0.4px;">
-                ${escapeHtml(hero.title || title || "")}
+                ${keepPunctuationAttached(escapeHtml(hero.title || title || ""))}
               </h1>
               ${hero.subtitleHtml ? `<p style="margin:0; color:#DBEAFE; font-size:15px; line-height:1.6;">
                 ${hero.subtitleHtml}

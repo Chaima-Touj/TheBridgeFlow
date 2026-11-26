@@ -39,14 +39,14 @@
     "summerCamp": "Summer Camp"
   },
   "pfePack": {
-    "eyebrow": "PFE Pack · 9antra.tn_the_bridge",
+    "eyebrow": "PFE Pack · 9antra.tn",
     "heroTitle": "Your final-year project deserves the right support.",
     "heroDescription": "Turn your idea into a concrete project with guidance tailored to your topic, goals, and the technologies you want to use.",
     "register": "Apply now",
     "whatsappLabel": "Contact us on WhatsApp",
     "whatsappPrefill": "Hello, I would like to ask about the PFE Pack.",
     "watchTestimonials": "Explore testimonials",
-    "independentNotice": "An information request, with no 9antra.tn_the_bridge account required.",
+    "independentNotice": "An information request, with no 9antra.tn account required.",
     "personalizedSupport": "Guidance tailored to your topic",
     "codeSuccess": "PFE Pack registration successful!",
     "codeExcellent": "Result: EXCELLENT",
@@ -71,7 +71,7 @@
     "ctaDescription": "Share the main points of your topic so the team can learn about your needs and goals.",
     "formTitle": "Information request — PFE Pack",
     "formBadge": "Training – Mentoring – Follow-up + Free Internship",
-    "formNotice": "This form is only for the PFE Pack. It does not create a 9antra.tn_the_bridge account.",
+    "formNotice": "This form is only for the PFE Pack. It does not create a 9antra.tn account.",
     "firstName": "First name",
     "lastName": "Last name",
     "phone": "Phone number",
@@ -79,12 +79,12 @@
     "university": "Institute / University",
     "city": "City",
     "technologies": "Technologies used",
-    "technologyInstructions": "Select the technologies used in your PFE. Choose at least two.",
+    "technologyInstructions": "Select the technologies used in your PFE. Choose one or more.",
     "technologyPlaceholder": "Choose trainings and technologies",
     "addTechnology": "Add",
     "removeTechnologyNamed": "Remove {{technology}}",
-    "technologyRequired": "Please choose at least two technologies.",
-    "technologyMinimum": "{{count}} selected — 2 minimum",
+    "technologyRequired": "Please choose at least one technology.",
+    "technologyMinimum": "{{count}} selected — 1 minimum",
     "otherTechnology": "Other",
     "otherTechnologyHint": "Separate several technologies with a space, a comma, / or \\.",
     "otherTechnologyRequired": "Type the other technology you used, or untick \"Other\".",
@@ -118,7 +118,8 @@
       "city": "Your city",
       "otherTechnology": "Your other technologies",
       "customLocation": "Your preferred internship location"
-    }
+    },
+    "locationModeRequired": "Please choose your internship location: remote or on-site."
   },
   "adminPfePack": {
     "title": "PFE Pack & Summer Camp",
@@ -172,9 +173,9 @@
     "showAllPrograms": "Show all programs"
   },
   "events": {
-    "badge": "9antra.tn_the_bridge Events",
+    "badge": "9antra.tn Events",
     "title": "Events",
-    "description": "Find 9antra.tn_the_bridge community events here.",
+    "description": "Find 9antra.tn community events here.",
     "periodLabel": "Event period",
     "period": { "upcoming": "Upcoming", "past": "Past" },
     "loadError": "Unable to load events.",
@@ -392,16 +393,16 @@
     "faq": "Frequently asked questions",
     "faqSubtitle": "Everything you need to know before enrolling.",
     "ctaTitle": "Ready to start your career?",
-    "ctaSubtitle": "Join thousands of students who transformed their path with 9antra.tn_the_bridge.",
+    "ctaSubtitle": "Join thousands of students who transformed their path with 9antra.tn.",
     "ctaBtn": "Enroll now",
     "ctaLogin": "Sign in to enroll"
   },
   "news": {
     "badge": "News",
     "title": "Our Latest News",
-    "description": "Follow the latest news, announcements, and highlights from 9antra.tn_the_bridge.",
-    "seoTitle": "9antra.tn_the_bridge News — Latest updates",
-    "seoDescription": "Discover the latest news, announcements, and initiatives from 9antra.tn_the_bridge.",
+    "description": "Follow the latest news, announcements, and highlights from 9antra.tn.",
+    "seoTitle": "9antra.tn News — Latest updates",
+    "seoDescription": "Discover the latest news, announcements, and initiatives from 9antra.tn.",
     "loading": "Loading news...",
     "empty": "There is no news available at the moment.",
     "loadError": "Unable to load the news. Please try again later.",
@@ -441,7 +442,7 @@
     "close": "Close",
     "back": "Back",
     "clearSearch": "Clear search",
-    "whatsappPrefill": "Hello, welcome to 9antra.tn_the_bridge!\n- I'm interested in your platform, could you tell me more?\n- What exactly is 9antra.tn_the_bridge?\n- What trainings do you offer?"
+    "whatsappPrefill": "Hello, welcome to 9antra.tn!\n- I'm interested in your platform, could you tell me more?\n- What exactly is 9antra.tn?\n- What trainings do you offer?"
   },
   "sidebar": {
     "roles": {
@@ -555,7 +556,7 @@
       "unknownCompany": "Company",
       "interviewFallback": "Interview",
       "aiWidget": {
-        "greeting": "Hello {{name}}!\nI'm SAGE, 9antra.tn_the_bridge's AI assistant. I can help you with:\n• Internship recommendations\n• Advice on your profile and career\n\nWhat can I do for you?",
+        "greeting": "Hello {{name}}!\nI'm SAGE, 9antra.tn's AI assistant. I can help you with:\n• Internship recommendations\n• Advice on your profile and career\n\nWhat can I do for you?",
         "recsFallback": "Here are my internship recommendations for you!",
         "chatFallback": "I couldn't process your request.",
         "connectionError": "Connection error. Please try again in a moment.",
@@ -968,11 +969,11 @@
     "terminé": "Done"
   },
   "landing": {
-    "seoTitle": "9antra.tn_the_bridge | Training, Internships and Capstone Project Mentoring",
-    "seoDescription": "Explore 9antra.tn_the_bridge training programs, find internship and capstone project opportunities, and get personalized support to complete your projects and develop your professional skills.",
+    "seoTitle": "9antra.tn | Training, Internships and Capstone Project Mentoring",
+    "seoDescription": "Explore 9antra.tn training programs, find internship and capstone project opportunities, and get personalized support to complete your projects and develop your professional skills.",
     "heroBadge": "Training · Internships · Capstone Mentoring",
     "heroTitle1": "Develop your skills",
-    "heroTitle2": "and succeed in your professional journey with 9antra.tn_the_bridge",
+    "heroTitle2": "and succeed in your professional journey with 9antra.tn",
     "heroDesc": "Explore training programs aligned with your goals, get personalized support for your final-year project, and find internship opportunities to prepare for your career.",
     "ctaFormations": "Discover training programs",
     "ctaStart": "Explore opportunities",
@@ -1021,7 +1022,7 @@
     "testiSummerCampTitle": "Inside the training experience",
     "testiSummerCampSub": "The atmosphere and experience of our summer camps, seen by our participants.",
     "testiPfeTitle": "PFE experiences",
-    "testiPfeSub": "They landed their final-year internship thanks to 9antra.tn_the_bridge.",
+    "testiPfeSub": "They landed their final-year internship thanks to 9antra.tn.",
     "testiFormationTitle": "Summer Camp Feedback",
     "testiFormationSub": "What our students say about our trainings.",
     "techMarqueeTitle": "The technologies you'll master",
@@ -1056,10 +1057,10 @@
     "newsletterSuccess": "Your newsletter subscription is confirmed.",
     "newsletterError": "Your subscription could not be completed. Please try again.",
     "unsubscribeTitle": "Newsletter unsubscribe",
-    "unsubscribeDescription": "Confirm that you want to unsubscribe from 9antra.tn_the_bridge newsletter.",
+    "unsubscribeDescription": "Confirm that you want to unsubscribe from 9antra.tn newsletter.",
     "unsubscribeAction": "Confirm unsubscribe",
     "unsubscribeSuccess": "You have been unsubscribed.",
-    "footerTagline": "9antra.tn_the_bridge supports students and young professionals with training programs, internship and capstone opportunities, and personalized final-year project guidance.",
+    "footerTagline": "9antra.tn supports students and young professionals with training programs, internship and capstone opportunities, and personalized final-year project guidance.",
     "footerNav": "Navigation",
     "footerResources": "Resources",
     "footerLegal": "Legal",
@@ -1079,14 +1080,14 @@
     "backToTop": "Back to top",
     "themeToggleAriaLabel": "Toggle theme",
     "menuAriaLabel": "Menu",
-    "heroImgAlt": "9antra.tn_the_bridge illustration",
-    "promoBadge": "Discover 9antra.tn_the_bridge",
-    "promoTitle": "See 9antra.tn_the_bridge in action",
+    "heroImgAlt": "9antra.tn illustration",
+    "promoBadge": "Discover 9antra.tn",
+    "promoTitle": "See 9antra.tn in action",
     "promoSub": "A unique teaching approach, passionate mentors, and a community that propels you toward employment.",
     "promoVideoLabel": "Video presentation",
     "promoVideoSub": "Discover our method and our training programs",
     "promoPlayAriaLabel": "Play the presentation video",
-    "promoModalAriaLabel": "9antra.tn_the_bridge presentation video",
+    "promoModalAriaLabel": "9antra.tn presentation video",
     "contactTitle": "Let's talk about your project",
     "contactName": "Your name",
     "contactEmail": "Your email",
@@ -1107,7 +1108,7 @@
       "notifications": "Notifications",
       "confidentialite": "Privacy",
       "securite": "Security",
-      "ia": "AI 9antra.tn_the_bridge",
+      "ia": "AI 9antra.tn",
       "preferences": "Stage Prefs",
       "danger": "Danger Zone"
     },
@@ -1191,7 +1192,7 @@
       "sessionActive": "Active"
     },
     "ai": {
-      "title": "AI 9antra.tn_the_bridge",
+      "title": "AI 9antra.tn",
       "desc": "SAGE assistant settings",
       "recommendations": "Personalized AI recommendations",
       "recommendationsDesc": "SAGE analyzes your profile to suggest relevant offers",
@@ -1305,7 +1306,7 @@
   },
   "register": {
     "title": "Create an account",
-    "subtitle": "Join 9antra.tn_the_bridge",
+    "subtitle": "Join 9antra.tn",
     "firstName": "First name",
     "firstNamePlaceholder": "Sarra",
     "lastName": "Last name",
@@ -1395,7 +1396,7 @@
     "colWeeks": "Weeks",
     "csvOnsitePrice": "On-site price",
     "csvOnlinePrice": "Online price",
-    "pdfTitle": "Training list — 9antra.tn_the_bridge",
+    "pdfTitle": "Training list — 9antra.tn",
     "pdfExportedOn": "Exported on {{date}}",
     "actionsAriaLabel": "Actions",
     "editAction": "Edit",
@@ -1577,7 +1578,7 @@
     "subscribedAt": "Subscription date",
     "export": "Export PDF",
     "exporting": "Preparing PDF…",
-    "pdfTitle": "9antra.tn_the_bridge newsletter subscribers",
+    "pdfTitle": "9antra.tn newsletter subscribers",
     "pdfExportedOn": "Exported on {{date}}",
     "pdfCount": "{{count}} address(es) included",
     "loadError": "Unable to load subscribers.",
@@ -1701,7 +1702,7 @@
     "csvColRole": "Role",
     "csvColStatus": "Status",
     "csvColJoined": "Join date",
-    "pdfTitle": "User list — 9antra.tn_the_bridge",
+    "pdfTitle": "User list — 9antra.tn",
     "actionsAriaLabel": "Actions",
     "viewDetailAction": "View details",
     "activateAction": "Activate",
@@ -1768,7 +1769,7 @@
     "acceptAction": "Accept",
     "rejectAction": "Reject",
     "emptyState": "No applications for this filter.",
-    "pdfTitle": "Applications — 9antra.tn_the_bridge",
+    "pdfTitle": "Applications — 9antra.tn",
     "csvColEmail": "Email",
     "interviewModalTitle": "Propose an interview",
     "interviewDateLabel": "Date and time",
@@ -1801,7 +1802,7 @@
     "acceptAction": "Accept",
     "rejectAction": "Reject",
     "emptyState": "No requests for this filter.",
-    "pdfTitle": "Enrollment requests — 9antra.tn_the_bridge",
+    "pdfTitle": "Enrollment requests — 9antra.tn",
     "csvColStudent": "Student",
     "csvColEmail": "Email",
     "errors": {
@@ -1838,7 +1839,7 @@
     "acceptAction": "Approve",
     "rejectAction": "Reject",
     "emptyState": "No project for this filter.",
-    "pdfTitle": "Ceremony — Projects — 9antra.tn_the_bridge",
+    "pdfTitle": "Ceremony — Projects — 9antra.tn",
     "csvColProject": "Project",
     "csvColAuthor": "Student",
     "csvColVotes": "Votes",
@@ -1879,7 +1880,7 @@
     "viewDetailAction": "View detail",
     "cancelAction": "Cancel enrollment",
     "emptyState": "No enrollments for this filter.",
-    "pdfTitle": "Enrollments — 9antra.tn_the_bridge",
+    "pdfTitle": "Enrollments — 9antra.tn",
     "csvColStudent": "Student",
     "csvColEmail": "Email",
     "detailModalTitle": "Enrollment detail",
@@ -1919,7 +1920,7 @@
     "byFormationChartTitle": "Enrollments by training",
     "noData": "Not enough data yet.",
     "errorStats": "Unable to load statistics.",
-    "pdfTitle": "Statistics — 9antra.tn_the_bridge",
+    "pdfTitle": "Statistics — 9antra.tn",
     "pdfColIndicator": "Indicator",
     "pdfColValue": "Value",
     "pdfColMonth": "Month",
@@ -2019,7 +2020,7 @@
     "pageSubtitle": "Your smart assistant to succeed in your career",
     "eyebrow": "SAGE — Artificial Intelligence",
     "greeting": "Hello",
-    "introLine1": "I'm your 9antra.tn_the_bridge-specialized AI assistant.",
+    "introLine1": "I'm your 9antra.tn-specialized AI assistant.",
     "introLine2": "How can I help you today?",
     "profileBadge": "Profile {{pct}}%",
     "actionsHeading": "What can I do for you?",
@@ -2060,8 +2061,8 @@
     "actionInterviewDescDefault": "Common questions and tips",
     "actionInterviewPrompt": "Help me prepare for my internship interview. Give me the 10 most common questions and how to answer them effectively.",
     "actionFormationsLabel": "Available trainings",
-    "actionFormationsDesc": "Trainings on 9antra.tn_the_bridge",
-    "actionFormationsPrompt": "Which trainings available on 9antra.tn_the_bridge match my specialty ({{specialty}}) and my career goals?",
+    "actionFormationsDesc": "Trainings on 9antra.tn",
+    "actionFormationsPrompt": "Which trainings available on 9antra.tn match my specialty ({{specialty}}) and my career goals?",
     "actionSkillsLabel": "Skills to develop",
     "actionSkillsDesc": "Skills in demand for {{specialty}}",
     "actionSkillsPrompt": "What technical skills and soft skills should I prioritize developing to land an internship in {{specialty}}? Base your answer on current market trends."
@@ -2207,7 +2208,7 @@
       "name": "Online",
       "desc": "Follow your training remotely, at your own pace, with full support.",
       "features": [
-        "Full access to the 9antra.tn_the_bridge platform",
+        "Full access to the 9antra.tn platform",
         "Personalized week-by-week progress tracking",
         "Guidance from a dedicated mentor",
         "Support via messaging and the SAGE AI assistant",
@@ -2241,7 +2242,7 @@
   "guides": {
     "badge": "Guides",
     "title": "Guides & tutorials",
-    "subtitle": "Short, practical explanations to get the most out of 9antra.tn_the_bridge.",
+    "subtitle": "Short, practical explanations to get the most out of 9antra.tn.",
     "guide1": {
       "title": "Create your student account",
       "steps": [
@@ -2290,7 +2291,7 @@
     "title": "Help Center",
     "subtitle": "Answers to the most frequently asked questions.",
     "faq1": {
-      "q": "How do I create an account on 9antra.tn_the_bridge?",
+      "q": "How do I create an account on 9antra.tn?",
       "a": "Click \"Get started\" from the homepage, enter your details, then confirm your e-mail via the link you receive."
     },
     "faq2": {
@@ -2302,7 +2303,7 @@
       "a": "Browse the training catalog, choose the Online or On-site plan, then follow the enrollment instructions from your dashboard."
     },
     "faq4": {
-      "q": "How do I contact the 9antra.tn_the_bridge team?",
+      "q": "How do I contact the 9antra.tn team?",
       "a": "By e-mail at contact@9antra.tn, via WhatsApp at +216 58 840 064, or through the contact form at the bottom of the homepage."
     },
     "contactTitle": "Need more help?",
@@ -2316,14 +2317,14 @@
   "mentionsLegales": {
     "title": "Legal Notice",
     "editorTitle": "Site Publisher",
-    "editorIntro": "The 9antra.tn_the_bridge platform is published by 9antra.tn — The Bridge, whose registered office is located at Lac 1, Tunis (Level 1), with a second location in Sahloul, Sousse (Rockets).",
+    "editorIntro": "The 9antra.tn platform is published by 9antra.tn — The Bridge, whose registered office is located at Lac 1, Tunis (Level 1), with a second location in Sahloul, Sousse (Rockets).",
     "addressLabel": "Address:",
     "phoneLabel": "Phone:",
     "emailLabel": "E-mail:",
     "hostingTitle": "Hosting",
     "hostingText": "Information about the site's hosting provider is available on request at contact@9antra.tn, in accordance with applicable regulations.",
     "ipTitle": "Intellectual Property",
-    "ipText": "All content on 9antra.tn_the_bridge (text, logos, visuals, videos, site structure) is protected by intellectual property law. Any reproduction or representation, in whole or in part, without prior authorization, is prohibited.",
+    "ipText": "All content on 9antra.tn (text, logos, visuals, videos, site structure) is protected by intellectual property law. Any reproduction or representation, in whole or in part, without prior authorization, is prohibited.",
     "contactTitle": "Contact",
     "contactText": "For any question regarding the site or its content, you can contact us at contact@9antra.tn or on +216 58 840 064."
   },
@@ -2336,8 +2337,8 @@
     "accountsText2": "You are responsible for safeguarding the password you use to access the Service and for any activity or action performed with your password, whether on our Service or a third-party service.",
     "accountsText3": "You agree not to disclose your password to any third party. You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.",
     "linksTitle": "Links to Other Websites",
-    "linksText1": "Our Service may contain links to third-party websites or services that are not owned or controlled by 9antra.tn_the_bridge.",
-    "linksText2": "9antra.tn_the_bridge has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third-party websites or services. You further acknowledge and agree that 9antra.tn_the_bridge shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods, or services available on or through any such websites or services.",
+    "linksText1": "Our Service may contain links to third-party websites or services that are not owned or controlled by 9antra.tn.",
+    "linksText2": "9antra.tn has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third-party websites or services. You further acknowledge and agree that 9antra.tn shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods, or services available on or through any such websites or services.",
     "linksText3": "We strongly advise you to read the terms and conditions and privacy policies of any third-party websites or services you visit.",
     "terminationTitle": "Termination",
     "terminationText1": "We may suspend or terminate access to our Service immediately, without prior notice or liability, for any reason whatsoever, including, without limitation, if you breach the Terms.",
@@ -2347,7 +2348,7 @@
   },
   "confidentialite": {
     "title": "Privacy Policy",
-    "intro": "Welcome to 9antra.tn_the_bridge! We place great importance on your privacy and are committed to protecting your personal information. This Privacy Policy describes how we collect, use, and protect your data when you visit our website.",
+    "intro": "Welcome to 9antra.tn! We place great importance on your privacy and are committed to protecting your personal information. This Privacy Policy describes how we collect, use, and protect your data when you visit our website.",
     "collectTitle": "Information We Collect",
     "personalTitle": "Personal Information",
     "personalText": "When you register on our site, subscribe to our newsletter, or fill out a form, we may collect personal information such as your name, e-mail address, phone number, and other details you provide.",
@@ -2356,7 +2357,7 @@
     "cookiesTitle": "Cookies and Tracking Technologies",
     "cookiesText": "Our site uses cookies and local storage technologies for several purposes: audience measurement via Google Analytics (anonymized visit statistics), sign-in via a Google or Facebook account (\"Sign in with...\"), and remembering your preferences (theme, language, login session). You can configure your browser to refuse cookies, but some site features (social sign-in, statistics) may then stop working correctly.",
     "useTitle": "How We Use the Information We Collect",
-    "useIntro": "9antra.tn_the_bridge may collect and use users' personal information for the following purposes:",
+    "useIntro": "9antra.tn may collect and use users' personal information for the following purposes:",
     "useItems": [
       {
         "label": "To improve customer service:",
@@ -2403,7 +2404,7 @@
     "voteError": "An error occurred while sending your vote.",
     "confirmVote": "Confirm my vote ({{count}}/3)",
     "submitting": "Sending...",
-    "unknownAuthor": "9antra.tn_the_bridge student",
+    "unknownAuthor": "9antra.tn student",
     "voteCount_one": "{{count}} vote",
     "voteCount_other": "{{count}} votes",
     "votes": "votes",
@@ -2956,7 +2957,7 @@
     "updateError": "The status could not be changed. Try again."
   },
   "summerCamp": {
-    "eyebrow": "Summer Camp · 9antra.tn_the_bridge",
+    "eyebrow": "Summer Camp · 9antra.tn",
     "heroTitle": "Your summer internship deserves the right support.",
     "heroDescription": "Make the most of your summer and turn your idea into a concrete project, with guidance tailored to your goals and the technologies you want to use.",
     "whatsappPrefill": "Hello, I would like to ask about the Summer Camp.",
@@ -2975,8 +2976,8 @@
     "ctaTitle": "Let’s talk about your Summer Camp.",
     "ctaDescription": "Share your goals and the technologies you are interested in so the team can learn about your needs.",
     "formTitle": "Information request — Summer Camp",
-    "formNotice": "This form is only for the Summer Camp. It does not create a 9antra.tn_the_bridge account.",
-    "technologyInstructions": "Select the technologies you want to work with during the Summer Camp. Choose at least two.",
+    "formNotice": "This form is only for the Summer Camp. It does not create a 9antra.tn account.",
+    "technologyInstructions": "Select the technologies you want to work with during the Summer Camp. Choose one or more.",
     "successDescription": "Thank you for your interest. Your Summer Camp request has been sent to the team."
   }
 }

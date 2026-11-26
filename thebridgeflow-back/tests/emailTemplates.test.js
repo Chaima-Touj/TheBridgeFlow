@@ -89,13 +89,16 @@ for (const [name, samples] of Object.entries(SAMPLES)) {
   test(`${name}: kit layout, brand and no missing values`, () => {
     for (const data of samples) {
       const { subject, html } = render(name, data);
-      assert.ok(subject && !/TheBridgeFlow|undefined|null|NaN/.test(subject), subject);
+      assert.ok(subject && !/TheBridgeFlow|_the_bridge|undefined|null|NaN/.test(subject), subject);
       assert.ok(html.startsWith("<!DOCTYPE html>"));
       assert.ok(html.includes(`src="${DEFAULT_EMAIL_LOGO_URL}"`), "logo");
-      assert.ok(html.includes(EMAIL_BRAND), "brand");
+      assert.equal(EMAIL_BRAND, "9antra.tn");
+      // Pastille de la barre du haut et nom en gras du pied de page.
+      assert.match(html, />\s*9antra\.tn\s*<\/span>/, "brand pill");
+      assert.match(html, /font-weight:800; color:#0F172A;">\s*<span dir="ltr">9antra\.tn<\/span>/, "footer brand");
       assert.ok(html.includes("linear-gradient(135deg, #0F2557 0%, #1D4ED8 55%, #2563EB 100%)"), "royal blue hero");
       assert.ok(html.includes("contact@9antra.tn") && html.includes("+216 58 840 064"), "footer contact");
-      assert.doesNotMatch(html, /TheBridgeFlow|undefined|\bnull\b|NaN|Invalid Date|\[object Object\]/);
+      assert.doesNotMatch(html, /TheBridgeFlow|_the_bridge|undefined|\bnull\b|NaN|Invalid Date|\[object Object\]/);
       const text = htmlToPlainText(html);
       assert.doesNotMatch(text, /<[a-z/!]/i, "plain text has no tags");
       assert.ok(text.includes(EMAIL_BRAND));

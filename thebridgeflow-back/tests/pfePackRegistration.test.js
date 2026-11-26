@@ -42,8 +42,8 @@ test("rejects malformed or incomplete registration fields", () => {
     { ...validInput, firstName: " " },
     { ...validInput, email: "not-an-email" },
     { ...validInput, technologies: [] },
-    { ...validInput, technologies: ["React"] },
-    { ...validInput, technologies: ["React", "React"] },
+    { ...validInput, technologies: ["  ", ""] },
+    { ...validInput, technologies: Array.from({ length: 21 }, (_, index) => `Tech ${index}`) },
     { ...validInput, university: "" },
     { ...validInput, city: "" },
     { ...validInput, locationMode: "onsite", preferredLocation: "" },
@@ -52,6 +52,18 @@ test("rejects malformed or incomplete registration fields", () => {
   ]) {
     assert.throws(() => validatePfePackRegistration(input), { statusCode: 400 });
   }
+});
+
+test("one technology is enough, for Pack PFE and Summer Camp", async () => {
+  for (const program of ["pfe-pack", "summer-camp"]) {
+    const result = validatePfePackRegistration({ ...validInput, program, technologies: [" React "] });
+    assert.deepEqual(result.technologies, ["React"]);
+    assert.equal(result.program, program);
+    await new PfePackRegistration(result).validate();
+  }
+  // Doublons fusionnés : une seule technologie retenue, toujours acceptée.
+  assert.deepEqual(validatePfePackRegistration({ ...validInput, technologies: ["React", "React"] }).technologies, ["React"]);
+  await assert.rejects(new PfePackRegistration({ ...validatePfePackRegistration(validInput), technologies: [] }).validate(), { name: "ValidationError" });
 });
 
 test("remote requests do not keep an onsite location", () => {
@@ -277,7 +289,7 @@ test("a Summer Camp request keeps every other rule and still cannot set its stat
   assert.equal(result.program, "summer-camp");
   assert.equal("status" in result, false);
   assert.equal("statusUpdatedBy" in result, false);
-  assert.throws(() => validatePfePackRegistration({ ...validInput, program: "summer-camp", technologies: ["React"] }), { statusCode: 400 });
+  assert.throws(() => validatePfePackRegistration({ ...validInput, program: "summer-camp", technologies: [] }), { statusCode: 400 });
   assert.throws(() => validatePfePackRegistration({ ...validInput, program: "summer-camp", consentConfirmed: false }), { statusCode: 400 });
 });
 

@@ -39,14 +39,14 @@
     "summerCamp": "المخيم الصيفي"
   },
   "pfePack": {
-    "eyebrow": "باقة مشروع التخرج · 9antra.tn_the_bridge",
+    "eyebrow": "باقة مشروع التخرج · 9antra.tn",
     "heroTitle": "مشروع تخرجك يستحق مرافقة حقيقية.",
     "heroDescription": "حوّل فكرتك إلى مشروع ملموس بمرافقة تناسب موضوعك وأهدافك والتقنيات التي ترغب في استخدامها.",
     "register": "قدّم طلبك الآن",
     "whatsappLabel": "تواصل معنا عبر واتساب",
     "whatsappPrefill": "مرحبًا، أودّ الاستفسار عن Pack PFE.",
     "watchTestimonials": "اكتشف تجارب الطلاب",
-    "independentNotice": "طلب معلومات فقط، دون إنشاء حساب على منصة 9antra.tn_the_bridge.",
+    "independentNotice": "طلب معلومات فقط، دون إنشاء حساب على منصة 9antra.tn.",
     "personalizedSupport": "مرافقة تناسب موضوعك",
     "codeSuccess": "تم التسجيل في باقة مشروع التخرج بنجاح!",
     "codeExcellent": "النتيجة: ممتازة",
@@ -71,7 +71,7 @@
     "ctaDescription": "شارك الخطوط العريضة لموضوعك حتى يتعرف الفريق على احتياجاتك وأهدافك.",
     "formTitle": "طلب معلومات — باقة مشروع التخرج",
     "formBadge": "تكوين – تأطير – متابعة + تدريب مجاني",
-    "formNotice": "هذا النموذج خاص بباقة مشروع التخرج ولا ينشئ حساباً على 9antra.tn_the_bridge.",
+    "formNotice": "هذا النموذج خاص بباقة مشروع التخرج ولا ينشئ حساباً على 9antra.tn.",
     "firstName": "الاسم",
     "lastName": "اللقب",
     "phone": "رقم الهاتف",
@@ -79,12 +79,12 @@
     "university": "المعهد / الجامعة",
     "city": "المدينة",
     "technologies": "التقنيات المستخدمة",
-    "technologyInstructions": "اختر التقنيات المستخدمة في مشروعك. يجب اختيار تقنيتين على الأقل.",
+    "technologyInstructions": "اختر التقنيات المستخدمة في مشروعك. يمكنك اختيار تقنية واحدة أو أكثر.",
     "technologyPlaceholder": "اختر التكوينات والتقنيات",
     "addTechnology": "إضافة",
     "removeTechnologyNamed": "حذف {{technology}}",
-    "technologyRequired": "يرجى اختيار تقنيتين على الأقل.",
-    "technologyMinimum": "تم اختيار {{count}} — الحد الأدنى 2",
+    "technologyRequired": "يرجى اختيار تقنية واحدة على الأقل.",
+    "technologyMinimum": "تم اختيار {{count}} — الحد الأدنى 1",
     "otherTechnology": "أخرى",
     "otherTechnologyHint": "افصل بين عدة تقنيات بمسافة أو فاصلة أو / أو \\.",
     "otherTechnologyRequired": "اكتب التقنية الأخرى المستعملة، أو ألغِ تحديد « أخرى ».",
@@ -118,7 +118,8 @@
       "city": "مدينتك",
       "otherTechnology": "تقنياتك الأخرى",
       "customLocation": "مكان التدريب الذي تفضّله"
-    }
+    },
+    "locationModeRequired": "يرجى اختيار مكان التدريب: عن بُعد أو حضوري."
   },
   "adminPfePack": {
     "title": "باقة مشروع التخرج والمخيم الصيفي",
@@ -172,9 +173,9 @@
     "showAllPrograms": "عرض جميع البرامج"
   },
   "events": {
-    "badge": "فعاليات 9antra.tn_the_bridge",
+    "badge": "فعاليات 9antra.tn",
     "title": "الفعاليات",
-    "description": "اكتشف هنا فعاليات مجتمع 9antra.tn_the_bridge.",
+    "description": "اكتشف هنا فعاليات مجتمع 9antra.tn.",
     "periodLabel": "فترة الفعاليات",
     "period": { "upcoming": "القادمة", "past": "السابقة" },
     "loadError": "تعذر تحميل الفعاليات.",
@@ -396,16 +397,16 @@
     "faq": "الأسئلة الشائعة",
     "faqSubtitle": "كل ما تحتاج معرفته قبل التسجيل.",
     "ctaTitle": "هل أنت مستعد لبدء مسيرتك؟",
-    "ctaSubtitle": "انضم إلى آلاف الطلاب الذين حوّلوا مسارهم مع 9antra.tn_the_bridge.",
+    "ctaSubtitle": "انضم إلى آلاف الطلاب الذين حوّلوا مسارهم مع 9antra.tn.",
     "ctaBtn": "سجّل الآن",
     "ctaLogin": "سجّل الدخول للتسجيل"
   },
   "news": {
     "badge": "الأخبار",
     "title": "آخر أخبارنا",
-    "description": "تابع آخر أخبار وإعلانات وأبرز مستجدات 9antra.tn_the_bridge.",
-    "seoTitle": "أخبار 9antra.tn_the_bridge — آخر المستجدات",
-    "seoDescription": "اكتشف آخر أخبار وإعلانات ومبادرات 9antra.tn_the_bridge.",
+    "description": "تابع آخر أخبار وإعلانات وأبرز مستجدات 9antra.tn.",
+    "seoTitle": "أخبار 9antra.tn — آخر المستجدات",
+    "seoDescription": "اكتشف آخر أخبار وإعلانات ومبادرات 9antra.tn.",
     "loading": "جارٍ تحميل الأخبار...",
     "empty": "لا توجد أخبار متاحة حاليًا.",
     "loadError": "تعذر تحميل الأخبار. يرجى المحاولة مرة أخرى لاحقًا.",
@@ -445,7 +446,7 @@
     "close": "إغلاق",
     "back": "رجوع",
     "clearSearch": "مسح البحث",
-    "whatsappPrefill": "مرحبًا، أهلًا بكم في 9antra.tn_the_bridge!\n- أنا مهتم(ة) بمنصتكم، هل يمكنكم إخباري بالمزيد؟\n- ما هي 9antra.tn_the_bridge بالتحديد؟\n- ما هي التدريبات التي تقدمونها؟"
+    "whatsappPrefill": "مرحبًا، أهلًا بكم في 9antra.tn!\n- أنا مهتم(ة) بمنصتكم، هل يمكنكم إخباري بالمزيد؟\n- ما هي 9antra.tn بالتحديد؟\n- ما هي التدريبات التي تقدمونها؟"
   },
   "sidebar": {
     "roles": {
@@ -559,7 +560,7 @@
       "unknownCompany": "شركة",
       "interviewFallback": "مقابلة",
       "aiWidget": {
-        "greeting": "مرحباً {{name}}!\nأنا SAGE، المساعد الذكي لـ 9antra.tn_the_bridge. يمكنني مساعدتك في:\n• توصيات التدريب\n• نصائح حول ملفك الشخصي ومسيرتك المهنية\n\nكيف يمكنني مساعدتك؟",
+        "greeting": "مرحباً {{name}}!\nأنا SAGE، المساعد الذكي لـ 9antra.tn. يمكنني مساعدتك في:\n• توصيات التدريب\n• نصائح حول ملفك الشخصي ومسيرتك المهنية\n\nكيف يمكنني مساعدتك؟",
         "recsFallback": "إليك توصياتي للتدريبات المناسبة لك!",
         "chatFallback": "لم أتمكن من معالجة طلبك.",
         "connectionError": "خطأ في الاتصال. أعد المحاولة خلال لحظات.",
@@ -972,11 +973,11 @@
     "terminé": "منتهٍ"
   },
   "landing": {
-    "seoTitle": "9antra.tn_the_bridge | التكوينات والتدريب وتأطير مشاريع التخرج",
-    "seoDescription": "اكتشف برامج التكوين في 9antra.tn_the_bridge، واعثر على فرص التدريب ومشاريع التخرج، واستفد من مرافقة شخصية لإنجاز مشاريعك وتطوير مهاراتك المهنية.",
+    "seoTitle": "9antra.tn | التكوينات والتدريب وتأطير مشاريع التخرج",
+    "seoDescription": "اكتشف برامج التكوين في 9antra.tn، واعثر على فرص التدريب ومشاريع التخرج، واستفد من مرافقة شخصية لإنجاز مشاريعك وتطوير مهاراتك المهنية.",
     "heroBadge": "التكوين · التدريب · تأطير مشاريع التخرج",
     "heroTitle1": "طوّر مهاراتك",
-    "heroTitle2": "وحقّق النجاح في مسارك المهني مع 9antra.tn_the_bridge",
+    "heroTitle2": "وحقّق النجاح في مسارك المهني مع 9antra.tn",
     "heroDesc": "اكتشف برامج تكوين تناسب أهدافك، واستفد من مرافقة شخصية لمشروعك الختامي (PFE)، واطّلع على عروض التدريب استعدادًا لمستقبلك المهني.",
     "ctaFormations": "اكتشف برامج التكوين",
     "ctaStart": "استكشف العروض",
@@ -1025,7 +1026,7 @@
     "testiSummerCampTitle": "في أجواء تكويناتنا",
     "testiSummerCampSub": "أجواء وتجربة معسكراتنا الصيفية، كما يراها المشاركون.",
     "testiPfeTitle": "تجارب مشاريع التخرج",
-    "testiPfeSub": "حصلوا على تدريب نهاية الدراسة بفضل 9antra.tn_the_bridge.",
+    "testiPfeSub": "حصلوا على تدريب نهاية الدراسة بفضل 9antra.tn.",
     "testiFormationTitle": "آراء حول Summer Camp",
     "testiFormationSub": "ما يقوله طلابنا عن تكويناتنا.",
     "techMarqueeTitle": "التقنيات التي ستتقنها",
@@ -1060,10 +1061,10 @@
     "newsletterSuccess": "تم تأكيد اشتراكك في النشرة.",
     "newsletterError": "تعذر إتمام الاشتراك. يرجى المحاولة مرة أخرى.",
     "unsubscribeTitle": "إلغاء الاشتراك في النشرة",
-    "unsubscribeDescription": "أكّد رغبتك في إلغاء الاشتراك في نشرة 9antra.tn_the_bridge.",
+    "unsubscribeDescription": "أكّد رغبتك في إلغاء الاشتراك في نشرة 9antra.tn.",
     "unsubscribeAction": "تأكيد إلغاء الاشتراك",
     "unsubscribeSuccess": "تم إلغاء اشتراكك.",
-    "footerTagline": "ترافق 9antra.tn_the_bridge الطلاب والمهنيين الشباب من خلال برامج التكوين وعروض التدريب ومشاريع التخرج، إضافة إلى متابعة شخصية لمشاريع نهاية الدراسة.",
+    "footerTagline": "ترافق 9antra.tn الطلاب والمهنيين الشباب من خلال برامج التكوين وعروض التدريب ومشاريع التخرج، إضافة إلى متابعة شخصية لمشاريع نهاية الدراسة.",
     "footerNav": "التنقل",
     "footerResources": "الموارد",
     "footerLegal": "قانوني",
@@ -1083,14 +1084,14 @@
     "backToTop": "العودة إلى الأعلى",
     "themeToggleAriaLabel": "تبديل المظهر",
     "menuAriaLabel": "القائمة",
-    "heroImgAlt": "رسم توضيحي 9antra.tn_the_bridge",
-    "promoBadge": "اكتشف 9antra.tn_the_bridge",
-    "promoTitle": "اكتشف 9antra.tn_the_bridge في العمل",
+    "heroImgAlt": "رسم توضيحي 9antra.tn",
+    "promoBadge": "اكتشف 9antra.tn",
+    "promoTitle": "اكتشف 9antra.tn في العمل",
     "promoSub": "منهج تربوي فريد، مرشدون شغوفون، ومجتمع يدفعك نحو التوظيف.",
     "promoVideoLabel": "عرض فيديو",
     "promoVideoSub": "اكتشف منهجنا وبرامجنا التدريبية",
     "promoPlayAriaLabel": "تشغيل فيديو العرض",
-    "promoModalAriaLabel": "فيديو تقديم 9antra.tn_the_bridge",
+    "promoModalAriaLabel": "فيديو تقديم 9antra.tn",
     "contactTitle": "لنتحدث عن مشروعك",
     "contactName": "اسمك",
     "contactEmail": "بريدك الإلكتروني",
@@ -1111,7 +1112,7 @@
       "notifications": "الإشعارات",
       "confidentialite": "الخصوصية",
       "securite": "الأمان",
-      "ia": "ذكاء 9antra.tn_the_bridge",
+      "ia": "ذكاء 9antra.tn",
       "preferences": "تفضيلات التدريب",
       "danger": "منطقة الخطر"
     },
@@ -1195,7 +1196,7 @@
       "sessionActive": "نشطة"
     },
     "ai": {
-      "title": "ذكاء 9antra.tn_the_bridge",
+      "title": "ذكاء 9antra.tn",
       "desc": "إعدادات المساعد SAGE",
       "recommendations": "توصيات ذكاء اصطناعي مخصصة",
       "recommendationsDesc": "يحلل SAGE ملفك الشخصي لاقتراح عروض مناسبة",
@@ -1309,7 +1310,7 @@
   },
   "register": {
     "title": "إنشاء حساب",
-    "subtitle": "انضم إلى 9antra.tn_the_bridge",
+    "subtitle": "انضم إلى 9antra.tn",
     "firstName": "الاسم الأول",
     "firstNamePlaceholder": "سارة",
     "lastName": "اسم العائلة",
@@ -1399,7 +1400,7 @@
     "colWeeks": "الأسابيع",
     "csvOnsitePrice": "سعر الحضوري",
     "csvOnlinePrice": "سعر عبر الإنترنت",
-    "pdfTitle": "قائمة التكوينات — 9antra.tn_the_bridge",
+    "pdfTitle": "قائمة التكوينات — 9antra.tn",
     "pdfExportedOn": "تم التصدير في {{date}}",
     "actionsAriaLabel": "إجراءات",
     "editAction": "تعديل",
@@ -1581,7 +1582,7 @@
     "subscribedAt": "تاريخ الاشتراك",
     "export": "تصدير PDF",
     "exporting": "جارٍ إعداد PDF…",
-    "pdfTitle": "مشتركو نشرة 9antra.tn_the_bridge",
+    "pdfTitle": "مشتركو نشرة 9antra.tn",
     "pdfExportedOn": "تم التصدير في {{date}}",
     "pdfCount": "عدد العناوين المدرجة: {{count}}",
     "loadError": "تعذر تحميل المشتركين.",
@@ -1705,7 +1706,7 @@
     "csvColRole": "الدور",
     "csvColStatus": "الحالة",
     "csvColJoined": "تاريخ التسجيل",
-    "pdfTitle": "قائمة المستخدمين — 9antra.tn_the_bridge",
+    "pdfTitle": "قائمة المستخدمين — 9antra.tn",
     "actionsAriaLabel": "إجراءات",
     "viewDetailAction": "عرض التفاصيل",
     "activateAction": "تفعيل",
@@ -1772,7 +1773,7 @@
     "acceptAction": "قبول",
     "rejectAction": "رفض",
     "emptyState": "لا توجد ترشحات لهذا الفلتر.",
-    "pdfTitle": "الترشحات — 9antra.tn_the_bridge",
+    "pdfTitle": "الترشحات — 9antra.tn",
     "csvColEmail": "البريد الإلكتروني",
     "interviewModalTitle": "اقتراح مقابلة",
     "interviewDateLabel": "التاريخ والوقت",
@@ -1805,7 +1806,7 @@
     "acceptAction": "قبول",
     "rejectAction": "رفض",
     "emptyState": "لا توجد طلبات لهذا الفلتر.",
-    "pdfTitle": "طلبات التسجيل — 9antra.tn_the_bridge",
+    "pdfTitle": "طلبات التسجيل — 9antra.tn",
     "csvColStudent": "الطالب",
     "csvColEmail": "البريد الإلكتروني",
     "errors": {
@@ -1842,7 +1843,7 @@
     "acceptAction": "موافقة",
     "rejectAction": "رفض",
     "emptyState": "لا يوجد مشروع لهذا الفلتر.",
-    "pdfTitle": "الحفل — المشاريع — 9antra.tn_the_bridge",
+    "pdfTitle": "الحفل — المشاريع — 9antra.tn",
     "csvColProject": "المشروع",
     "csvColAuthor": "الطالب",
     "csvColVotes": "الأصوات",
@@ -1883,7 +1884,7 @@
     "viewDetailAction": "عرض التفاصيل",
     "cancelAction": "إلغاء التسجيل",
     "emptyState": "لا توجد تسجيلات لهذا الفلتر.",
-    "pdfTitle": "التسجيلات — 9antra.tn_the_bridge",
+    "pdfTitle": "التسجيلات — 9antra.tn",
     "csvColStudent": "الطالب",
     "csvColEmail": "البريد الإلكتروني",
     "detailModalTitle": "تفاصيل التسجيل",
@@ -1908,7 +1909,7 @@
     "byFormationChartTitle": "توزيع التسجيلات حسب التكوين",
     "noData": "لا توجد بيانات كافية بعد.",
     "errorStats": "تعذّر تحميل الإحصائيات.",
-    "pdfTitle": "الإحصائيات — 9antra.tn_the_bridge",
+    "pdfTitle": "الإحصائيات — 9antra.tn",
     "pdfColIndicator": "المؤشر",
     "pdfColValue": "القيمة",
     "pdfColMonth": "الشهر",
@@ -2023,7 +2024,7 @@
     "pageSubtitle": "مساعدك الذكي لإنجاح مسيرتك المهنية",
     "eyebrow": "SAGE — الذكاء الاصطناعي",
     "greeting": "مرحباً",
-    "introLine1": "أنا مساعدك الذكي المتخصص في 9antra.tn_the_bridge.",
+    "introLine1": "أنا مساعدك الذكي المتخصص في 9antra.tn.",
     "introLine2": "كيف يمكنني مساعدتك اليوم؟",
     "profileBadge": "الملف الشخصي {{pct}}%",
     "actionsHeading": "ماذا يمكنني أن أفعل من أجلك؟",
@@ -2064,8 +2065,8 @@
     "actionInterviewDescDefault": "أسئلة شائعة ونصائح",
     "actionInterviewPrompt": "ساعدني في التحضير لمقابلة التدريب. أعطني الأسئلة العشرة الأكثر شيوعاً وكيفية الإجابة عليها بفعالية.",
     "actionFormationsLabel": "التكوينات المتاحة",
-    "actionFormationsDesc": "تكوينات على 9antra.tn_the_bridge",
-    "actionFormationsPrompt": "ما هي التكوينات المتاحة على 9antra.tn_the_bridge التي تناسب تخصصي ({{specialty}}) وأهدافي المهنية؟",
+    "actionFormationsDesc": "تكوينات على 9antra.tn",
+    "actionFormationsPrompt": "ما هي التكوينات المتاحة على 9antra.tn التي تناسب تخصصي ({{specialty}}) وأهدافي المهنية؟",
     "actionSkillsLabel": "مهارات يجب تطويرها",
     "actionSkillsDesc": "مهارات مطلوبة في {{specialty}}",
     "actionSkillsPrompt": "ما هي المهارات التقنية والشخصية التي يجب أن أطورها أولاً للحصول على تدريب في {{specialty}}؟ استند إلى اتجاهات السوق الحالية."
@@ -2211,7 +2212,7 @@
       "name": "عن بُعد",
       "desc": "تابع تدريبك عن بُعد، وفق وتيرتك الخاصة، مع مرافقة كاملة.",
       "features": [
-        "وصول كامل إلى منصة 9antra.tn_the_bridge",
+        "وصول كامل إلى منصة 9antra.tn",
         "متابعة شخصية للتقدّم أسبوعًا بأسبوع",
         "إشراف من طرف موجّه مخصّص",
         "دعم عبر الرسائل والمساعد الذكي SAGE",
@@ -2245,7 +2246,7 @@
   "guides": {
     "badge": "الأدلة",
     "title": "أدلة ودروس تعليمية",
-    "subtitle": "شروحات قصيرة وعملية للاستفادة القصوى من 9antra.tn_the_bridge.",
+    "subtitle": "شروحات قصيرة وعملية للاستفادة القصوى من 9antra.tn.",
     "guide1": {
       "title": "إنشاء حساب طالب",
       "steps": [
@@ -2294,7 +2295,7 @@
     "title": "مركز المساعدة",
     "subtitle": "إجابات على الأسئلة الأكثر شيوعًا.",
     "faq1": {
-      "q": "كيف أنشئ حسابًا على 9antra.tn_the_bridge؟",
+      "q": "كيف أنشئ حسابًا على 9antra.tn؟",
       "a": "اضغط على «ابدأ الآن» من الصفحة الرئيسية، أدخل بياناتك، ثم أكّد بريدك الإلكتروني عبر الرابط المُستلم."
     },
     "faq2": {
@@ -2306,7 +2307,7 @@
       "a": "تصفّح كتالوج التدريبات، اختر باقة عن بُعد أو حضوري، ثم اتّبع تعليمات التسجيل من لوحة التحكم."
     },
     "faq4": {
-      "q": "كيف أتواصل مع فريق 9antra.tn_the_bridge؟",
+      "q": "كيف أتواصل مع فريق 9antra.tn؟",
       "a": "عبر البريد الإلكتروني contact@9antra.tn، عبر واتساب على +216 58 840 064، أو عبر نموذج الاتصال أسفل الصفحة الرئيسية."
     },
     "contactTitle": "بحاجة إلى مساعدة إضافية؟",
@@ -2320,14 +2321,14 @@
   "mentionsLegales": {
     "title": "الإشعار القانوني",
     "editorTitle": "ناشر الموقع",
-    "editorIntro": "منصة 9antra.tn_the_bridge ينشرها 9antra.tn — The Bridge، ويقع مقرها الاجتماعي في Lac 1, Tunis (Level 1)، مع فضاء ثانٍ في Sahloul, Sousse (Rockets).",
+    "editorIntro": "منصة 9antra.tn ينشرها 9antra.tn — The Bridge، ويقع مقرها الاجتماعي في Lac 1, Tunis (Level 1)، مع فضاء ثانٍ في Sahloul, Sousse (Rockets).",
     "addressLabel": "العنوان:",
     "phoneLabel": "الهاتف:",
     "emailLabel": "البريد الإلكتروني:",
     "hostingTitle": "الاستضافة",
     "hostingText": "يمكن الحصول على المعلومات المتعلقة باستضافة الموقع عند الطلب عبر contact@9antra.tn، وفقًا للتشريعات المعمول بها.",
     "ipTitle": "الملكية الفكرية",
-    "ipText": "جميع المحتويات الموجودة على 9antra.tn_the_bridge (النصوص، الشعارات، الصور، الفيديوهات، هيكلة الموقع) محمية بموجب قانون الملكية الفكرية. يُمنع أي استنساخ أو إعادة تمثيل، كليًا أو جزئيًا، دون إذن مسبق.",
+    "ipText": "جميع المحتويات الموجودة على 9antra.tn (النصوص، الشعارات، الصور، الفيديوهات، هيكلة الموقع) محمية بموجب قانون الملكية الفكرية. يُمنع أي استنساخ أو إعادة تمثيل، كليًا أو جزئيًا، دون إذن مسبق.",
     "contactTitle": "الاتصال",
     "contactText": "لأي سؤال يتعلق بالموقع أو محتواه، يمكنكم التواصل معنا عبر contact@9antra.tn أو على الرقم +216 58 840 064."
   },
@@ -2340,8 +2341,8 @@
     "accountsText2": "أنتم مسؤولون عن الحفاظ على سرية كلمة المرور التي تستخدمونها للوصول إلى الخدمة، وعن أي نشاط أو إجراء يتم باستخدام كلمة مروركم، سواء على خدمتنا أو على خدمة تابعة لطرف ثالث.",
     "accountsText3": "توافقون على عدم إفشاء كلمة مروركم لأي طرف ثالث. يجب عليكم إخطارنا فورًا عند علمكم بأي خرق أمني أو استخدام غير مصرح به لحسابكم.",
     "linksTitle": "روابط إلى مواقع إلكترونية أخرى",
-    "linksText1": "قد تحتوي خدمتنا على روابط لمواقع إلكترونية أو خدمات تابعة لأطراف ثالثة لا تملكها 9antra.tn_the_bridge ولا تتحكم فيها.",
-    "linksText2": "لا تملك 9antra.tn_the_bridge أي سيطرة على محتوى أو سياسات الخصوصية أو ممارسات أي موقع إلكتروني أو خدمة تابعة لطرف ثالث، ولا تتحمّل أي مسؤولية تجاهها. كما تقرّون وتوافقون على أن 9antra.tn_the_bridge لن تكون مسؤولة، بشكل مباشر أو غير مباشر، عن أي ضرر أو خسارة ناتجة أو يُزعم أنها ناتجة عن أو مرتبطة باستخدام أو الاعتماد على أي محتوى أو سلعة أو خدمة متاحة على هذه المواقع أو الخدمات أو من خلالها.",
+    "linksText1": "قد تحتوي خدمتنا على روابط لمواقع إلكترونية أو خدمات تابعة لأطراف ثالثة لا تملكها 9antra.tn ولا تتحكم فيها.",
+    "linksText2": "لا تملك 9antra.tn أي سيطرة على محتوى أو سياسات الخصوصية أو ممارسات أي موقع إلكتروني أو خدمة تابعة لطرف ثالث، ولا تتحمّل أي مسؤولية تجاهها. كما تقرّون وتوافقون على أن 9antra.tn لن تكون مسؤولة، بشكل مباشر أو غير مباشر، عن أي ضرر أو خسارة ناتجة أو يُزعم أنها ناتجة عن أو مرتبطة باستخدام أو الاعتماد على أي محتوى أو سلعة أو خدمة متاحة على هذه المواقع أو الخدمات أو من خلالها.",
     "linksText3": "ننصحكم بشدة بقراءة الشروط العامة وسياسات الخصوصية الخاصة بأي موقع إلكتروني أو خدمة تابعة لطرف ثالث تزورونها.",
     "terminationTitle": "الإنهاء",
     "terminationText1": "يجوز لنا تعليق أو إنهاء الوصول إلى خدمتنا فورًا، دون إشعار مسبق أو أي مسؤولية، لأي سبب كان، بما في ذلك على سبيل المثال لا الحصر، إخلالكم بالشروط.",
@@ -2351,7 +2352,7 @@
   },
   "confidentialite": {
     "title": "سياسة الخصوصية",
-    "intro": "مرحبًا بكم في 9antra.tn_the_bridge! نولي أهمية كبيرة لخصوصيتكم ونلتزم بحماية معلوماتكم الشخصية. تصف سياسة الخصوصية هذه كيفية جمعنا لبياناتكم واستخدامها وحمايتها عند زيارتكم لموقعنا الإلكتروني.",
+    "intro": "مرحبًا بكم في 9antra.tn! نولي أهمية كبيرة لخصوصيتكم ونلتزم بحماية معلوماتكم الشخصية. تصف سياسة الخصوصية هذه كيفية جمعنا لبياناتكم واستخدامها وحمايتها عند زيارتكم لموقعنا الإلكتروني.",
     "collectTitle": "المعلومات التي نجمعها",
     "personalTitle": "المعلومات الشخصية",
     "personalText": "عند التسجيل في موقعنا، أو الاشتراك في نشرتنا الإخبارية، أو تعبئة نموذج، قد نجمع معلومات شخصية مثل اسمكم وعنوان بريدكم الإلكتروني ورقم هاتفكم وتفاصيل أخرى تقدّمونها.",
@@ -2360,7 +2361,7 @@
     "cookiesTitle": "ملفات تعريف الارتباط وتقنيات التتبّع",
     "cookiesText": "يستخدم موقعنا ملفات تعريف الارتباط وتقنيات التخزين المحلي لعدة أغراض: قياس عدد الزوار عبر Google Analytics (إحصاءات زيارات مجهولة الهوية)، وتسجيل الدخول عبر حساب Google أو Facebook («تسجيل الدخول باستخدام...»)، بالإضافة إلى حفظ تفضيلاتكم (السمة، اللغة، جلسة الدخول). يمكنكم ضبط متصفحكم لرفض ملفات تعريف الارتباط، لكن بعض ميزات الموقع (تسجيل الدخول عبر وسائل التواصل، الإحصاءات) قد تتوقف عندئذ عن العمل بشكل صحيح.",
     "useTitle": "كيف نستخدم المعلومات التي نجمعها",
-    "useIntro": "يجوز لـ 9antra.tn_the_bridge جمع واستخدام المعلومات الشخصية للمستخدمين للأغراض التالية:",
+    "useIntro": "يجوز لـ 9antra.tn جمع واستخدام المعلومات الشخصية للمستخدمين للأغراض التالية:",
     "useItems": [
       {
         "label": "تحسين خدمة العملاء:",
@@ -2407,7 +2408,7 @@
     "voteError": "حدث خطأ أثناء إرسال تصويتك.",
     "confirmVote": "تأكيد تصويتي ({{count}}/3)",
     "submitting": "جارٍ الإرسال...",
-    "unknownAuthor": "طالب 9antra.tn_the_bridge",
+    "unknownAuthor": "طالب 9antra.tn",
     "voteCount_one": "{{count}} صوت",
     "voteCount_other": "{{count}} أصوات",
     "votes": "أصوات",
@@ -2976,7 +2977,7 @@
     "updateError": "تعذر تغيير الحالة. أعد المحاولة."
   },
   "summerCamp": {
-    "eyebrow": "Summer Camp · 9antra.tn_the_bridge",
+    "eyebrow": "Summer Camp · 9antra.tn",
     "heroTitle": "تدريبك الصيفي يستحق مرافقة حقيقية.",
     "heroDescription": "استفد من الصيف لتحويل فكرتك إلى مشروع ملموس، بمرافقة تناسب أهدافك والتقنيات التي ترغب في استخدامها.",
     "whatsappPrefill": "مرحبًا، أودّ الاستفسار عن Summer Camp.",
@@ -2995,8 +2996,8 @@
     "ctaTitle": "لنتحدث عن مشاركتك في Summer Camp.",
     "ctaDescription": "شارك أهدافك والتقنيات التي تهمّك حتى يتعرّف الفريق على احتياجاتك.",
     "formTitle": "طلب معلومات — Summer Camp",
-    "formNotice": "هذا النموذج خاص ببرنامج Summer Camp ولا ينشئ حساباً على 9antra.tn_the_bridge.",
-    "technologyInstructions": "اختر التقنيات التي ترغب في العمل عليها خلال Summer Camp. يجب اختيار تقنيتين على الأقل.",
+    "formNotice": "هذا النموذج خاص ببرنامج Summer Camp ولا ينشئ حساباً على 9antra.tn.",
+    "technologyInstructions": "اختر التقنيات التي ترغب في العمل عليها خلال Summer Camp. يمكنك اختيار تقنية واحدة أو أكثر.",
     "successDescription": "شكراً لاهتمامك. تم إرسال طلب Summer Camp إلى الفريق."
   }
 }

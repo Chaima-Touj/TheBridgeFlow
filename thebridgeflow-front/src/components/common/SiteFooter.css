@@ -14,9 +14,7 @@
   gap: 0.3rem;
   font-weight: 800;
   font-size: 0.95rem;
-  /* Nom complet « 9antra.tn_the_bridge » sur une seule ligne : la colonne
-     marque (2fr, puis pleine largeur sous 1100px) a toujours la place. */
-  letter-spacing: -0.01em;
+  /* « 9antra.tn » toujours sur une seule ligne. */
   white-space: nowrap;
   color: #fff;
   text-decoration: none;

@@ -30,8 +30,9 @@ export function validatePfePackRegistration(input) {
     error.statusCode = 400;
     throw error;
   }
-  if (!Array.isArray(technologies) || technologies.length < 2 || technologies.length > 20) {
-    const error = new Error("Indiquez entre 2 et 20 technologies.");
+  // Une technologie au minimum (Pack PFE comme Summer Camp), 20 au maximum.
+  if (!Array.isArray(technologies) || technologies.length < 1 || technologies.length > 20) {
+    const error = new Error("Indiquez entre 1 et 20 technologies.");
     error.statusCode = 400;
     throw error;
   }
@@ -44,8 +45,8 @@ export function validatePfePackRegistration(input) {
     }
     return technology.trim();
   }).filter(Boolean))];
-  if (cleanedTechnologies.length < 2) {
-    const error = new Error("Indiquez au moins deux technologies différentes.");
+  if (cleanedTechnologies.length < 1) {
+    const error = new Error("Indiquez au moins une technologie.");
     error.statusCode = 400;
     throw error;
   }

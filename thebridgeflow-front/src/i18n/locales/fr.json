@@ -39,7 +39,7 @@
     "summerCamp": "Summer Camp"
   },
   "pfePack": {
-    "eyebrow": "Pack PFE · 9antra.tn_the_bridge",
+    "eyebrow": "Pack PFE · 9antra.tn",
     "heroTitle": "Ton projet de fin d’études mérite un vrai accompagnement.",
     "heroDescription": "Passe de l’idée à un projet concret avec un accompagnement adapté à ton sujet, tes objectifs et les technologies que tu souhaites utiliser.",
     "register": "Postuler maintenant",
@@ -71,7 +71,7 @@
     "ctaDescription": "Partage les grandes lignes de ton sujet : l’équipe pourra découvrir ton besoin et tes objectifs.",
     "formTitle": "Demande d’information — Pack PFE",
     "formBadge": "Formation – Encadrement – Suivi + Stage Gratuit",
-    "formNotice": "Ce formulaire concerne uniquement le Pack PFE. Il ne crée pas de compte 9antra.tn_the_bridge.",
+    "formNotice": "Ce formulaire concerne uniquement le Pack PFE. Il ne crée pas de compte 9antra.tn.",
     "firstName": "Prénom",
     "lastName": "Nom",
     "phone": "Numéro de téléphone",
@@ -79,12 +79,12 @@
     "university": "Institut / Université",
     "city": "Ville",
     "technologies": "Technologies utilisées",
-    "technologyInstructions": "Sélectionnez les technologies utilisées dans votre PFE. Choisissez-en au moins deux.",
+    "technologyInstructions": "Sélectionnez les technologies utilisées dans votre PFE. Choisissez-en une ou plusieurs.",
     "technologyPlaceholder": "Choisir les formations et technologies",
     "addTechnology": "Ajouter",
     "removeTechnologyNamed": "Supprimer {{technology}}",
-    "technologyRequired": "Veuillez choisir au moins deux technologies.",
-    "technologyMinimum": "{{count}} sélectionnée(s) — 2 minimum",
+    "technologyRequired": "Veuillez choisir au moins une technologie.",
+    "technologyMinimum": "{{count}} sélectionnée(s) — 1 minimum",
     "otherTechnology": "Autre",
     "otherTechnologyHint": "Séparez plusieurs technologies par un espace, une virgule, / ou \\.",
     "otherTechnologyRequired": "Écrivez l’autre technologie utilisée, ou décochez « Autre ».",
@@ -118,7 +118,8 @@
       "city": "Votre ville",
       "otherTechnology": "Vos autres technologies",
       "customLocation": "Votre lieu de stage souhaité"
-    }
+    },
+    "locationModeRequired": "Veuillez choisir votre lieu de stage : à distance ou en présentiel."
   },
   "adminPfePack": {
     "title": "Pack PFE & Summer Camp",
@@ -172,9 +173,9 @@
     "showAllPrograms": "Afficher tous les programmes"
   },
   "events": {
-    "badge": "Événements 9antra.tn_the_bridge",
+    "badge": "Événements 9antra.tn",
     "title": "Événements",
-    "description": "Retrouvez ici les événements de la communauté 9antra.tn_the_bridge.",
+    "description": "Retrouvez ici les événements de la communauté 9antra.tn.",
     "periodLabel": "Période des événements",
     "period": { "upcoming": "À venir", "past": "Passés" },
     "loadError": "Impossible de charger les événements.",
@@ -392,16 +393,16 @@
     "faq": "Questions fréquentes",
     "faqSubtitle": "Tout ce que vous devez savoir avant de vous inscrire.",
     "ctaTitle": "Prêt à démarrer votre carrière ?",
-    "ctaSubtitle": "Rejoignez des milliers d'étudiants qui ont transformé leur parcours avec 9antra.tn_the_bridge.",
+    "ctaSubtitle": "Rejoignez des milliers d'étudiants qui ont transformé leur parcours avec 9antra.tn.",
     "ctaBtn": "S'inscrire maintenant",
     "ctaLogin": "Se connecter pour s'inscrire"
   },
   "news": {
     "badge": "Actualités",
     "title": "Nos Dernières Actualités",
-    "description": "Suivez les actualités, annonces et temps forts de 9antra.tn_the_bridge.",
-    "seoTitle": "Actualités 9antra.tn_the_bridge — Nos dernières nouvelles",
-    "seoDescription": "Découvrez les dernières actualités, annonces et initiatives de 9antra.tn_the_bridge.",
+    "description": "Suivez les actualités, annonces et temps forts de 9antra.tn.",
+    "seoTitle": "Actualités 9antra.tn — Nos dernières nouvelles",
+    "seoDescription": "Découvrez les dernières actualités, annonces et initiatives de 9antra.tn.",
     "loading": "Chargement des actualités...",
     "empty": "Aucune actualité n'est disponible pour le moment.",
     "loadError": "Impossible de charger les actualités. Veuillez réessayer plus tard.",
@@ -441,7 +442,7 @@
     "close": "Fermer",
     "back": "Retour",
     "clearSearch": "Effacer la recherche",
-    "whatsappPrefill": "Bonjour, bienvenue chez 9antra.tn_the_bridge !\n- Je suis intéressé(e) par votre plateforme, pouvez-vous m'en dire plus ?\n- Qu'est-ce que 9antra.tn_the_bridge exactement ?\n- Quelles formations proposez-vous ?"
+    "whatsappPrefill": "Bonjour, bienvenue chez 9antra.tn !\n- Je suis intéressé(e) par votre plateforme, pouvez-vous m'en dire plus ?\n- Qu'est-ce que 9antra.tn exactement ?\n- Quelles formations proposez-vous ?"
   },
   "sidebar": {
     "roles": {
@@ -555,7 +556,7 @@
       "unknownCompany": "Entreprise",
       "interviewFallback": "Entretien",
       "aiWidget": {
-        "greeting": "Bonjour {{name}} !\nJe suis SAGE, l'assistant IA de 9antra.tn_the_bridge. Je peux vous aider avec :\n• Recommandations de stages\n• Conseils sur votre profil et votre carrière\n\nQue puis-je faire pour vous ?",
+        "greeting": "Bonjour {{name}} !\nJe suis SAGE, l'assistant IA de 9antra.tn. Je peux vous aider avec :\n• Recommandations de stages\n• Conseils sur votre profil et votre carrière\n\nQue puis-je faire pour vous ?",
         "recsFallback": "Voici mes recommandations de stages pour vous !",
         "chatFallback": "Je n'ai pas pu traiter votre demande.",
         "connectionError": "Erreur de connexion. Réessayez dans quelques instants.",
@@ -968,11 +969,11 @@
     "terminé": "Terminé"
   },
   "landing": {
-    "seoTitle": "9antra.tn_the_bridge | Formations, Stages et Encadrement PFE - 9antra.tn",
-    "seoDescription": "Découvrez les formations 9antra.tn_the_bridge, trouvez des offres de stage et de PFE et bénéficiez d’un accompagnement personnalisé pour réussir vos projets et développer vos compétences professionnelles.",
+    "seoTitle": "9antra.tn | Formations, Stages et Encadrement PFE",
+    "seoDescription": "Découvrez les formations 9antra.tn, trouvez des offres de stage et de PFE et bénéficiez d’un accompagnement personnalisé pour réussir vos projets et développer vos compétences professionnelles.",
     "heroBadge": "Formation · Stage · Encadrement PFE",
     "heroTitle1": "Développez vos compétences",
-    "heroTitle2": "et réussissez votre projet professionnel avec 9antra.tn_the_bridge",
+    "heroTitle2": "et réussissez votre projet professionnel avec 9antra.tn",
     "heroDesc": "Découvrez des formations adaptées à vos objectifs, bénéficiez d’un accompagnement personnalisé pour votre projet de fin d’études (PFE) et accédez à des offres de stage pour préparer votre avenir professionnel.",
     "ctaFormations": "Découvrir les formations",
     "ctaStart": "Explorer les offres",
@@ -1021,7 +1022,7 @@
     "testiSummerCampTitle": "Dans l'ambiance de nos formations",
     "testiSummerCampSub": "L'ambiance et l'expérience de nos summer camps, vues par nos participants.",
     "testiPfeTitle": "Expériences PFE",
-    "testiPfeSub": "Ils ont décroché leur stage de fin d'études grâce à 9antra.tn_the_bridge.",
+    "testiPfeSub": "Ils ont décroché leur stage de fin d'études grâce à 9antra.tn.",
     "testiFormationTitle": "Feedbacks Summer Camp",
     "testiFormationSub": "Ce que nos étudiants disent de nos formations.",
     "techMarqueeTitle": "Les technologies que vous allez maîtriser",
@@ -1056,10 +1057,10 @@
     "newsletterSuccess": "Votre inscription à la newsletter est confirmée.",
     "newsletterError": "L'inscription n'a pas pu être effectuée. Réessayez.",
     "unsubscribeTitle": "Désabonnement à la newsletter",
-    "unsubscribeDescription": "Confirmez votre désabonnement de la newsletter 9antra.tn_the_bridge.",
+    "unsubscribeDescription": "Confirmez votre désabonnement de la newsletter 9antra.tn.",
     "unsubscribeAction": "Confirmer mon désabonnement",
     "unsubscribeSuccess": "Votre désabonnement est confirmé.",
-    "footerTagline": "9antra.tn_the_bridge accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études.",
+    "footerTagline": "9antra.tn accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études.",
     "footerNav": "Navigation",
     "footerResources": "Ressources",
     "footerLegal": "Légal",
@@ -1079,14 +1080,14 @@
     "backToTop": "Retour en haut",
     "themeToggleAriaLabel": "Changer de thème",
     "menuAriaLabel": "Menu",
-    "heroImgAlt": "Illustration 9antra.tn_the_bridge",
-    "promoBadge": "Découvrez 9antra.tn_the_bridge",
-    "promoTitle": "Découvrez 9antra.tn_the_bridge en action",
+    "heroImgAlt": "Illustration 9antra.tn",
+    "promoBadge": "Découvrez 9antra.tn",
+    "promoTitle": "Découvrez 9antra.tn en action",
     "promoSub": "Une approche pédagogique unique, des mentors passionnés et une communauté qui vous propulse vers l'emploi.",
     "promoVideoLabel": "Présentation vidéo",
     "promoVideoSub": "Découvrez notre méthode et nos formations",
     "promoPlayAriaLabel": "Lancer la vidéo de présentation",
-    "promoModalAriaLabel": "Vidéo de présentation 9antra.tn_the_bridge",
+    "promoModalAriaLabel": "Vidéo de présentation 9antra.tn",
     "contactTitle": "Parlons de votre projet",
     "contactName": "Votre nom",
     "contactEmail": "Votre email",
@@ -1107,7 +1108,7 @@
       "notifications": "Notifications",
       "confidentialite": "Confidentialité",
       "securite": "Sécurité",
-      "ia": "IA 9antra.tn_the_bridge",
+      "ia": "IA 9antra.tn",
       "preferences": "Préf. Stage",
       "danger": "Zone Danger"
     },
@@ -1191,7 +1192,7 @@
       "sessionActive": "Active"
     },
     "ai": {
-      "title": "IA 9antra.tn_the_bridge",
+      "title": "IA 9antra.tn",
       "desc": "Paramètres de l'assistant SAGE",
       "recommendations": "Recommandations IA personnalisées",
       "recommendationsDesc": "SAGE analyse votre profil pour suggérer des offres adaptées",
@@ -1305,7 +1306,7 @@
   },
   "register": {
     "title": "Créer un compte",
-    "subtitle": "Rejoignez 9antra.tn_the_bridge",
+    "subtitle": "Rejoignez 9antra.tn",
     "firstName": "Prénom",
     "firstNamePlaceholder": "Sarra",
     "lastName": "Nom",
@@ -1395,7 +1396,7 @@
     "colWeeks": "Semaines",
     "csvOnsitePrice": "Tarif présentiel",
     "csvOnlinePrice": "Tarif en ligne",
-    "pdfTitle": "Liste des formations — 9antra.tn_the_bridge",
+    "pdfTitle": "Liste des formations — 9antra.tn",
     "pdfExportedOn": "Exporté le {{date}}",
     "actionsAriaLabel": "Actions",
     "editAction": "Modifier",
@@ -1577,7 +1578,7 @@
     "subscribedAt": "Date d'inscription",
     "export": "Exporter en PDF",
     "exporting": "Préparation du PDF…",
-    "pdfTitle": "Abonnés à la newsletter 9antra.tn_the_bridge",
+    "pdfTitle": "Abonnés à la newsletter 9antra.tn",
     "pdfExportedOn": "Exporté le {{date}}",
     "pdfCount": "{{count}} adresse(s) incluse(s)",
     "loadError": "Impossible de charger les abonnés.",
@@ -1701,7 +1702,7 @@
     "csvColRole": "Rôle",
     "csvColStatus": "Statut",
     "csvColJoined": "Date d'inscription",
-    "pdfTitle": "Liste des utilisateurs — 9antra.tn_the_bridge",
+    "pdfTitle": "Liste des utilisateurs — 9antra.tn",
     "actionsAriaLabel": "Actions",
     "viewDetailAction": "Voir le détail",
     "activateAction": "Activer",
@@ -1768,7 +1769,7 @@
     "acceptAction": "Accepter",
     "rejectAction": "Refuser",
     "emptyState": "Aucune candidature pour ce filtre.",
-    "pdfTitle": "Candidatures — 9antra.tn_the_bridge",
+    "pdfTitle": "Candidatures — 9antra.tn",
     "csvColEmail": "Email",
     "interviewModalTitle": "Proposer un entretien",
     "interviewDateLabel": "Date et heure",
@@ -1801,7 +1802,7 @@
     "acceptAction": "Accepter",
     "rejectAction": "Refuser",
     "emptyState": "Aucune demande pour ce filtre.",
-    "pdfTitle": "Demandes d'inscription — 9antra.tn_the_bridge",
+    "pdfTitle": "Demandes d'inscription — 9antra.tn",
     "csvColStudent": "Étudiant",
     "csvColEmail": "Email",
     "errors": {
@@ -1838,7 +1839,7 @@
     "acceptAction": "Approuver",
     "rejectAction": "Refuser",
     "emptyState": "Aucun projet pour ce filtre.",
-    "pdfTitle": "Cérémonie — Projets — 9antra.tn_the_bridge",
+    "pdfTitle": "Cérémonie — Projets — 9antra.tn",
     "csvColProject": "Projet",
     "csvColAuthor": "Étudiant",
     "csvColVotes": "Votes",
@@ -1879,7 +1880,7 @@
     "viewDetailAction": "Voir le détail",
     "cancelAction": "Annuler l'inscription",
     "emptyState": "Aucune inscription pour ce filtre.",
-    "pdfTitle": "Inscriptions — 9antra.tn_the_bridge",
+    "pdfTitle": "Inscriptions — 9antra.tn",
     "csvColStudent": "Étudiant",
     "csvColEmail": "Email",
     "detailModalTitle": "Détail de l'inscription",
@@ -1919,7 +1920,7 @@
     "byFormationChartTitle": "Répartition des inscriptions par formation",
     "noData": "Pas encore assez de données.",
     "errorStats": "Impossible de charger les statistiques.",
-    "pdfTitle": "Statistiques — 9antra.tn_the_bridge",
+    "pdfTitle": "Statistiques — 9antra.tn",
     "pdfColIndicator": "Indicateur",
     "pdfColValue": "Valeur",
     "pdfColMonth": "Mois",
@@ -2019,7 +2020,7 @@
     "pageSubtitle": "Votre assistant intelligent pour réussir votre carrière",
     "eyebrow": "SAGE — Intelligence Artificielle",
     "greeting": "Bonjour",
-    "introLine1": "Je suis votre assistant IA spécialisé 9antra.tn_the_bridge.",
+    "introLine1": "Je suis votre assistant IA spécialisé 9antra.tn.",
     "introLine2": "Comment puis-je vous aider aujourd'hui ?",
     "profileBadge": "Profil {{pct}}%",
     "actionsHeading": "Que puis-je faire pour vous ?",
@@ -2060,8 +2061,8 @@
     "actionInterviewDescDefault": "Questions types et conseils",
     "actionInterviewPrompt": "Aide-moi à préparer mon entretien de stage. Donne-moi les 10 questions les plus fréquentes et comment y répondre efficacement.",
     "actionFormationsLabel": "Formations disponibles",
-    "actionFormationsDesc": "Formations sur 9antra.tn_the_bridge",
-    "actionFormationsPrompt": "Quelles formations disponibles sur 9antra.tn_the_bridge correspondent à ma spécialité ({{specialty}}) et à mes objectifs professionnels ?",
+    "actionFormationsDesc": "Formations sur 9antra.tn",
+    "actionFormationsPrompt": "Quelles formations disponibles sur 9antra.tn correspondent à ma spécialité ({{specialty}}) et à mes objectifs professionnels ?",
     "actionSkillsLabel": "Compétences à développer",
     "actionSkillsDesc": "Skills demandés en {{specialty}}",
     "actionSkillsPrompt": "Quelles compétences techniques et soft skills dois-je développer en priorité pour décrocher un stage en {{specialty}} ? Base-toi sur les tendances actuelles du marché."
@@ -2207,7 +2208,7 @@
       "name": "En ligne",
       "desc": "Suivez votre formation à distance, à votre rythme, avec un accompagnement complet.",
       "features": [
-        "Accès complet à la plateforme 9antra.tn_the_bridge",
+        "Accès complet à la plateforme 9antra.tn",
         "Suivi personnalisé de la progression semaine par semaine",
         "Encadrement par un mentor dédié",
         "Support via messagerie et assistant IA SAGE",
@@ -2241,7 +2242,7 @@
   "guides": {
     "badge": "Guides",
     "title": "Guides & tutoriels",
-    "subtitle": "Des explications courtes et pratiques pour tirer le meilleur parti de 9antra.tn_the_bridge.",
+    "subtitle": "Des explications courtes et pratiques pour tirer le meilleur parti de 9antra.tn.",
     "guide1": {
       "title": "Créer son compte étudiant",
       "steps": [
@@ -2290,7 +2291,7 @@
     "title": "Centre d'aide",
     "subtitle": "Les réponses aux questions les plus fréquentes.",
     "faq1": {
-      "q": "Comment créer un compte sur 9antra.tn_the_bridge ?",
+      "q": "Comment créer un compte sur 9antra.tn ?",
       "a": "Cliquez sur « Commencer maintenant » depuis la page d'accueil, renseignez vos informations puis confirmez votre e-mail via le lien reçu."
     },
     "faq2": {
@@ -2302,7 +2303,7 @@
       "a": "Parcourez le catalogue de formations, choisissez la formule En ligne ou Présentiel, puis suivez les instructions d'inscription depuis votre tableau de bord."
     },
     "faq4": {
-      "q": "Comment contacter l'équipe 9antra.tn_the_bridge ?",
+      "q": "Comment contacter l'équipe 9antra.tn ?",
       "a": "Par e-mail à contact@9antra.tn, par WhatsApp au +216 58 840 064, ou via le formulaire de contact en bas de la page d'accueil."
     },
     "contactTitle": "Besoin d'aide supplémentaire ?",
@@ -2316,14 +2317,14 @@
   "mentionsLegales": {
     "title": "Mentions légales",
     "editorTitle": "Éditeur du site",
-    "editorIntro": "La plateforme 9antra.tn_the_bridge est éditée par 9antra.tn — The Bridge, dont le siège social est situé à Lac 1, Tunis (Level 1), avec un second espace à Sahloul, Sousse (Rockets).",
+    "editorIntro": "La plateforme 9antra.tn est éditée par 9antra.tn — The Bridge, dont le siège social est situé à Lac 1, Tunis (Level 1), avec un second espace à Sahloul, Sousse (Rockets).",
     "addressLabel": "Adresse :",
     "phoneLabel": "Téléphone :",
     "emailLabel": "E-mail :",
     "hostingTitle": "Hébergement",
     "hostingText": "Les informations relatives à l'hébergement du site peuvent être obtenues sur simple demande auprès de contact@9antra.tn, conformément à la réglementation en vigueur.",
     "ipTitle": "Propriété intellectuelle",
-    "ipText": "L'ensemble des contenus présents sur 9antra.tn_the_bridge (textes, logos, visuels, vidéos, structure du site) est protégé par le droit de la propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation préalable, est interdite.",
+    "ipText": "L'ensemble des contenus présents sur 9antra.tn (textes, logos, visuels, vidéos, structure du site) est protégé par le droit de la propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation préalable, est interdite.",
     "contactTitle": "Contact",
     "contactText": "Pour toute question relative au site ou à son contenu, vous pouvez nous contacter à l'adresse contact@9antra.tn ou au +216 58 840 064."
   },
@@ -2336,8 +2337,8 @@
     "accountsText2": "Vous êtes responsable de la sécurité du mot de passe que vous utilisez pour accéder au Service et de toute activité ou action effectuée avec votre mot de passe, que ce soit sur notre Service ou un service tiers.",
     "accountsText3": "Vous acceptez de ne pas divulguer votre mot de passe à un tiers. Vous devez nous informer immédiatement dès que vous prenez connaissance d'une violation de la sécurité ou d'une utilisation non autorisée de votre compte.",
     "linksTitle": "Liens vers d'autres sites web",
-    "linksText1": "Notre Service peut contenir des liens vers des sites web ou des services tiers qui ne sont pas détenus ou contrôlés par 9antra.tn_the_bridge.",
-    "linksText2": "9antra.tn_the_bridge n'a aucun contrôle sur, et n'assume aucune responsabilité quant au contenu, aux politiques de confidentialité ou aux pratiques de tout site web ou service tiers. Vous reconnaissez et acceptez également que 9antra.tn_the_bridge ne sera pas responsable, directement ou indirectement, de tout dommage ou perte causé ou supposé être causé par ou en relation avec l'utilisation ou la dépendance à tout contenu, bien ou service disponible sur ou via ces sites web ou services.",
+    "linksText1": "Notre Service peut contenir des liens vers des sites web ou des services tiers qui ne sont pas détenus ou contrôlés par 9antra.tn.",
+    "linksText2": "9antra.tn n'a aucun contrôle sur, et n'assume aucune responsabilité quant au contenu, aux politiques de confidentialité ou aux pratiques de tout site web ou service tiers. Vous reconnaissez et acceptez également que 9antra.tn ne sera pas responsable, directement ou indirectement, de tout dommage ou perte causé ou supposé être causé par ou en relation avec l'utilisation ou la dépendance à tout contenu, bien ou service disponible sur ou via ces sites web ou services.",
     "linksText3": "Nous vous conseillons fortement de lire les conditions générales et les politiques de confidentialité de tout site web ou service tiers que vous visitez.",
     "terminationTitle": "Résiliation",
     "terminationText1": "Nous pouvons suspendre ou résilier l'accès à notre Service immédiatement, sans préavis ni responsabilité, pour quelque raison que ce soit, y compris, sans s'y limiter, si vous violez les Conditions.",
@@ -2347,7 +2348,7 @@
   },
   "confidentialite": {
     "title": "Politique de confidentialité",
-    "intro": "Bienvenue sur 9antra.tn_the_bridge ! Nous accordons une grande importance à votre vie privée et nous engageons à protéger vos informations personnelles. Cette politique de confidentialité décrit comment nous collectons, utilisons et protégeons vos données lorsque vous visitez notre site web.",
+    "intro": "Bienvenue sur 9antra.tn ! Nous accordons une grande importance à votre vie privée et nous engageons à protéger vos informations personnelles. Cette politique de confidentialité décrit comment nous collectons, utilisons et protégeons vos données lorsque vous visitez notre site web.",
     "collectTitle": "Informations que nous collectons",
     "personalTitle": "Informations personnelles",
     "personalText": "Lorsque vous vous inscrivez sur notre site, souscrivez à notre newsletter ou remplissez un formulaire, nous pouvons collecter des informations personnelles telles que votre nom, votre adresse e-mail, votre numéro de téléphone et d'autres détails que vous fournissez.",
@@ -2356,7 +2357,7 @@
     "cookiesTitle": "Cookies et technologies de suivi",
     "cookiesText": "Notre site utilise des cookies et des technologies de stockage local pour plusieurs finalités : mesure d'audience via Google Analytics (statistiques de visite anonymisées), connexion via un compte Google ou Facebook (« Se connecter avec... »), ainsi que la mémorisation de vos préférences (thème, langue, session de connexion). Vous pouvez configurer votre navigateur pour refuser les cookies, mais certaines fonctionnalités du site (connexion sociale, statistiques) pourraient alors ne plus fonctionner correctement.",
     "useTitle": "Comment nous utilisons les informations collectées",
-    "useIntro": "9antra.tn_the_bridge peut collecter et utiliser les informations personnelles des utilisateurs aux fins suivantes :",
+    "useIntro": "9antra.tn peut collecter et utiliser les informations personnelles des utilisateurs aux fins suivantes :",
     "useItems": [
       {
         "label": "Améliorer le service client :",
@@ -2403,7 +2404,7 @@
     "voteError": "Une erreur est survenue lors de l'envoi de votre vote.",
     "confirmVote": "Confirmer mon vote ({{count}}/3)",
     "submitting": "Envoi en cours...",
-    "unknownAuthor": "Étudiant 9antra.tn_the_bridge",
+    "unknownAuthor": "Étudiant 9antra.tn",
     "voteCount_one": "{{count}} vote",
     "voteCount_other": "{{count}} votes",
     "votes": "votes",
@@ -2956,7 +2957,7 @@
     "updateError": "Le statut n'a pas pu être modifié. Réessayez."
   },
   "summerCamp": {
-    "eyebrow": "Summer Camp · 9antra.tn_the_bridge",
+    "eyebrow": "Summer Camp · 9antra.tn",
     "heroTitle": "Ton stage d’été mérite un vrai accompagnement.",
     "heroDescription": "Profite de l’été pour passer de l’idée à un projet concret, avec un accompagnement adapté à tes objectifs et aux technologies que tu souhaites utiliser.",
     "whatsappPrefill": "Bonjour, je souhaite me renseigner sur le Summer Camp.",
@@ -2975,8 +2976,8 @@
     "ctaTitle": "Parlons de ton Summer Camp.",
     "ctaDescription": "Partage tes objectifs et les technologies qui t’intéressent : l’équipe pourra découvrir ton besoin.",
     "formTitle": "Demande d’information — Summer Camp",
-    "formNotice": "Ce formulaire concerne uniquement le Summer Camp. Il ne crée pas de compte 9antra.tn_the_bridge.",
-    "technologyInstructions": "Sélectionnez les technologies que vous souhaitez pratiquer pendant le Summer Camp. Choisissez-en au moins deux.",
+    "formNotice": "Ce formulaire concerne uniquement le Summer Camp. Il ne crée pas de compte 9antra.tn.",
+    "technologyInstructions": "Sélectionnez les technologies que vous souhaitez pratiquer pendant le Summer Camp. Choisissez-en une ou plusieurs.",
     "successDescription": "Merci pour ton intérêt. Ta demande Summer Camp a bien été transmise à l’équipe."
   }
 }

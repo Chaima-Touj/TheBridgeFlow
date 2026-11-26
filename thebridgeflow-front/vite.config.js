@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png'],
       manifest: {
-        name: 'TheBridgeFlow',
-        short_name: 'TheBridgeFlow',
-        description: 'TheBridgeFlow accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études.',
+        name: '9antra.tn',
+        short_name: '9antra.tn',
+        description: '9antra.tn accompagne les étudiants et jeunes professionnels grâce à des formations, des offres de stage et de PFE, ainsi qu’un suivi personnalisé des projets de fin d’études.',
         lang: 'fr',
         theme_color: '#2563EB',
         background_color: '#2563EB',

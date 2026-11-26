@@ -6,7 +6,7 @@
 import { getFeaturedFormationTestimonials, getFeaturedPfeTestimonials, getFeaturedSummerCampTestimonials } from "./testimonials.js";
 import { BRAND_NAME } from "./brand.js";
 
-// Commentaire en tête de la carte de code : « // 9ANTRA.TN_THE_BRIDGE / PACK PFE ».
+// Commentaire en tête de la carte de code : « // 9ANTRA.TN / PACK PFE ».
 const CODE_BANNER_BRAND = BRAND_NAME.toUpperCase();
 
 export const DEFAULT_PROGRAM = "pfe-pack";

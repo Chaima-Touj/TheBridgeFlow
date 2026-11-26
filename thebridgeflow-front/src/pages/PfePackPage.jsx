@@ -59,7 +59,8 @@ export default function PfePackPage({ program = DEFAULT_PROGRAM }) {
     university: "",
     city: "",
     technologies: [],
-    locationMode: "remote",
+    // Aucun mode présélectionné : l'étudiant choisit « À distance » ou « Présentiel ».
+    locationMode: "",
     preferredLocation: "",
     customLocation: "",
     consentConfirmed: false,
@@ -141,12 +142,13 @@ export default function PfePackPage({ program = DEFAULT_PROGRAM }) {
     const technologies = [...new Set([...formData.technologies, ...otherTechnologies]
       .map((technology) => technology.trim())
       .filter(Boolean))];
-    if (technologies.length < 2) {
+    // Une seule technologie suffit (Pack PFE comme Summer Camp).
+    if (technologies.length < 1) {
       setFormError(t("pfePack.technologyRequired"));
       return;
     }
-    if (!formData.consentConfirmed) {
-      setFormError(t("pfePack.consentRequired"));
+    if (formData.locationMode !== "remote" && formData.locationMode !== "onsite") {
+      setFormError(t("pfePack.locationModeRequired"));
       return;
     }
     const preferredLocation = formData.locationMode === "remote"
@@ -158,6 +160,10 @@ export default function PfePackPage({ program = DEFAULT_PROGRAM }) {
       setFormError(t("pfePack.locationRequired"));
       return;
     }
+    if (!formData.consentConfirmed) {
+      setFormError(t("pfePack.consentRequired"));
+      return;
+    }
     if (captcha.missing) {
       setFormError(t("captcha.required"));
       return;
@@ -167,7 +173,7 @@ export default function PfePackPage({ program = DEFAULT_PROGRAM }) {
     try {
       await pfePackService.register({ ...formData, technologies, preferredLocation, program: programId }, captcha.requestConfig);
       setSubmitted(true);
-      setFormData({ firstName: "", lastName: "", phone: "", email: "", university: "", city: "", technologies: [], locationMode: "remote", preferredLocation: "", customLocation: "", consentConfirmed: false });
+      setFormData({ firstName: "", lastName: "", phone: "", email: "", university: "", city: "", technologies: [], locationMode: "", preferredLocation: "", customLocation: "", consentConfirmed: false });
       setOtherTechSelected(false);
       setOtherTechnology("");
     } catch (error) {
@@ -364,13 +370,13 @@ export default function PfePackPage({ program = DEFAULT_PROGRAM }) {
                     {otherTechnologies.map((technology) => <span key={technology}>{technology}</span>)}
                   </div>}
                 </div>
-                <span className={`pfe-form__field-hint${selectedTechnologyCount < 2 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: selectedTechnologyCount })}</span>
+                <span className={`pfe-form__field-hint${selectedTechnologyCount < 1 ? " is-required" : ""}`}>{t("pfePack.technologyMinimum", { count: selectedTechnologyCount })}</span>
                 {formationsError && <span className="pfe-form__offers-status" role="status">{t("pfePack.technologiesLoadError")}</span>}
               </div>
               <div className="pfe-form__wide pfe-location-field">
                 <span className="pfe-form__field-label"><MapPin size={16} aria-hidden="true" /> {t("pfePack.locationHeading")}</span>
                 <div className="pfe-location-options">
-                  <button type="button" className={`pfe-location-card${formData.locationMode === "remote" ? " is-selected" : ""}`} onClick={() => setFormData((current) => ({ ...current, locationMode: "remote", preferredLocation: "", customLocation: "" }))}>
+                  <button type="button" aria-pressed={formData.locationMode === "remote"} className={`pfe-location-card${formData.locationMode === "remote" ? " is-selected" : ""}`} onClick={() => setFormData((current) => ({ ...current, locationMode: "remote", preferredLocation: "", customLocation: "" }))}>
                     <Monitor size={22} aria-hidden="true" /><span><strong>{t("pfePack.remote")}</strong><small>{t("pfePack.remoteDescription")}</small></span>
                   </button>
                   <div className={`pfe-location-card pfe-location-card--onsite${formData.locationMode === "onsite" ? " is-selected" : ""}`}>

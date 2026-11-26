@@ -100,7 +100,7 @@ export const verifyEmailConfig = async () => {
   }
 };
 
-// ─── Design commun (kit 9antra.tn_the_bridge) ─────────────────────────────────
+// ─── Design commun (kit 9antra.tn) ─────────────────────────────────
 // Mise en page, composants et version texte : voir services/emailLayout.js.
 const BRAND = EMAIL_BRAND;
 const TIMEZONE = "Africa/Tunis";

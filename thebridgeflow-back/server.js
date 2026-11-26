@@ -148,7 +148,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
 }));
 
 app.get("/", (req, res) => {
-  res.json({ message: "🚀 9antra.tn_the_bridge API is running!" });
+  res.json({ message: "🚀 9antra.tn API is running!" });
 });
 
 // ─── Sitemap XML — public, sans middleware protect, régénéré à chaque
