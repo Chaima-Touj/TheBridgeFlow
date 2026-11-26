@@ -1599,9 +1599,9 @@
     "pageSubtitle": "Gérez les témoignages vidéo, les captures d’écran et les avis des événements affichés sur le site.",
     "landingVideo": {
       "description": "Cette vidéo est affichée dans la section de présentation de la page d'accueil.",
-      "urlLabel": "Lien de la vidéo (Google Drive ou URL directe)",
-      "saved": "Le lien de la vidéo de la page d'accueil a été enregistré.",
-      "saveFailed": "Impossible d'enregistrer le lien de la vidéo."
+      "urlLabel": "Vidéo de présentation",
+      "saved": "La vidéo de la page d'accueil a été enregistrée.",
+      "saveFailed": "Impossible d'enregistrer la vidéo."
     },
     "tabs": {
       "landingVideo": "Vidéo de la page d'accueil",
@@ -1630,11 +1630,13 @@
     "deleteScreenshotTitle": "Supprimer la capture",
     "confirmDeleteScreenshot": "Voulez-vous vraiment supprimer cette capture d'écran ?",
     "errors": {
-      "driveUrlRequired": "Le lien vidéo est requis",
+      "driveUrlRequired": "Le lien Google Drive de la vidéo est requis",
       "imageRequired": "Une image est requise",
       "generic": "Une erreur est survenue. Réessayez.",
       "deleteFailed": "Impossible de supprimer cet élément.",
-      "loadFailed": "Impossible de charger les données."
+      "loadFailed": "Impossible de charger les données.",
+      "videoUploadRequired": "Choisissez une vidéo depuis votre PC.",
+      "videoUploadPending": "Attendez la fin de l'envoi de la vidéo."
     },
     "eventFeedbacks": {
       "description": "Les avis reçus restent privés jusqu'à leur publication sur la page de l'événement.",
@@ -1663,6 +1665,23 @@
       "readReview": "Lire l'avis",
       "reviewDetails": "Détail de l'avis",
       "reviewImage": "Photo ajoutée à l'avis"
+    },
+    "video": {
+      "label": "Vidéo *",
+      "modeDrive": "Lien Google Drive",
+      "modeUpload": "Uploader depuis mon PC",
+      "choose": "Choisir une vidéo",
+      "formats": "MP4, WebM ou MOV — 300 Mo maximum",
+      "uploading": "Envoi… {{percent}} %",
+      "uploaded": "Vidéo envoyée",
+      "replace": "Remplacer la vidéo",
+      "cancelUpload": "Annuler l'envoi",
+      "uploadFailed": "L'envoi de la vidéo a échoué. Vérifiez votre connexion et réessayez.",
+      "tooLarge": "La vidéo dépasse 300 Mo.",
+      "typeInvalid": "Format non pris en charge : MP4, WebM ou MOV.",
+      "posterAuto": "Miniature prise automatiquement dans la vidéo. Vous pouvez la remplacer.",
+      "sourceDrive": "Google Drive",
+      "sourceUpload": "Vidéo importée"
     }
   },
   "adminUsers": {

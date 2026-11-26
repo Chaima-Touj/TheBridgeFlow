@@ -14,6 +14,7 @@ import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import BrandName from "../components/common/BrandName.jsx";
+import { toTestimonialItem } from "../utils/testimonialMedia.js";
 import { BRAND_NAME } from "../constants/brand.js";
 import "./PublicInfoPages.css";
 
@@ -68,7 +69,7 @@ export default function PublicInfoPage({ type }) {
       </header>
       <main className={`public-info-content${type === "testimonials" ? " public-info-content--testimonials" : ""}`}>
         {type === "testimonials" && <section className="pi-testimonials">
-          {[["formation", t("landing.testiFormationTitle"), t("landing.testiFormationSub")], ["summer-camp", t("landing.testiSummerCampTitle"), t("landing.testiSummerCampSub")], ["pfe", t("landing.testiPfeTitle"), t("landing.testiPfeSub")]].map(([category, sectionTitle, subtitle]) => <VideoTestimonialCarousel key={category} sectionId={`public-testimonials-${category}`} items={videos.filter((item) => item.category === category).map((item) => ({ id: item._id, videoUrl: item.url, posterUrl: item.thumbnail, category }))} title={sectionTitle} subtitle={subtitle} ctaLabel={t("testimonials.ctaDefault")} ctaHref="/formations" />)}
+          {[["formation", t("landing.testiFormationTitle"), t("landing.testiFormationSub")], ["summer-camp", t("landing.testiSummerCampTitle"), t("landing.testiSummerCampSub")], ["pfe", t("landing.testiPfeTitle"), t("landing.testiPfeSub")]].map(([category, sectionTitle, subtitle]) => <VideoTestimonialCarousel key={category} sectionId={`public-testimonials-${category}`} items={videos.filter((item) => item.category === category).map((item) => toTestimonialItem(item))} title={sectionTitle} subtitle={subtitle} ctaLabel={t("testimonials.ctaDefault")} ctaHref="/formations" />)}
           <TestimonialsScreenshotCarousel title={t("landing.screenshotTestiTitle")} subtitle={t("landing.screenshotTestiSub")} items={screenshots} />
         </section>}
         {type === "contact" && <section className="pi-contact">

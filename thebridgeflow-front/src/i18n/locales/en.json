@@ -1599,9 +1599,9 @@
     "pageSubtitle": "Manage video testimonials, screenshots, and event reviews displayed on the site.",
     "landingVideo": {
       "description": "This video appears in the presentation section of the homepage.",
-      "urlLabel": "Video link (Google Drive or direct URL)",
-      "saved": "The homepage video link was saved.",
-      "saveFailed": "Unable to save the video link."
+      "urlLabel": "Presentation video",
+      "saved": "The homepage video was saved.",
+      "saveFailed": "Unable to save the video."
     },
     "tabs": {
       "landingVideo": "Homepage video",
@@ -1630,11 +1630,13 @@
     "deleteScreenshotTitle": "Delete screenshot",
     "confirmDeleteScreenshot": "Are you sure you want to delete this screenshot?",
     "errors": {
-      "driveUrlRequired": "Video link is required",
+      "driveUrlRequired": "The Google Drive video link is required",
       "imageRequired": "An image is required",
       "generic": "An error occurred. Please try again.",
       "deleteFailed": "Unable to delete this item.",
-      "loadFailed": "Unable to load the data."
+      "loadFailed": "Unable to load the data.",
+      "videoUploadRequired": "Choose a video from your computer.",
+      "videoUploadPending": "Wait for the video upload to finish."
     },
     "eventFeedbacks": {
       "description": "Event reviews stay private until an administrator publishes them on the event page.",
@@ -1663,6 +1665,23 @@
       "readReview": "Read review",
       "reviewDetails": "Review details",
       "reviewImage": "Photo attached to the review"
+    },
+    "video": {
+      "label": "Video *",
+      "modeDrive": "Google Drive link",
+      "modeUpload": "Upload from my computer",
+      "choose": "Choose a video",
+      "formats": "MP4, WebM or MOV — 300 MB maximum",
+      "uploading": "Uploading… {{percent}}%",
+      "uploaded": "Video uploaded",
+      "replace": "Replace the video",
+      "cancelUpload": "Cancel upload",
+      "uploadFailed": "The video upload failed. Check your connection and try again.",
+      "tooLarge": "The video is larger than 300 MB.",
+      "typeInvalid": "Unsupported format: MP4, WebM or MOV.",
+      "posterAuto": "Thumbnail taken automatically from the video. You can replace it.",
+      "sourceDrive": "Google Drive",
+      "sourceUpload": "Uploaded video"
     }
   },
   "adminUsers": {

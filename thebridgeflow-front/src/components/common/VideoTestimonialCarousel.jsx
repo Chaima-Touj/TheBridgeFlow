@@ -305,7 +305,8 @@ function TestimonialModal({ items, activeIndex, onClose, onNavigate }) {
               key={item.id}
               className="vtc-modal__video"
               src={item.videoUrl}
-              poster={item.posterUrl || undefined}
+              // Vidéo envoyée depuis le PC : miniature base64, ou lien Drive via notre proxy.
+              poster={getPosterSrc(item, false)}
               controls
               controlsList="nodownload"
               onContextMenu={(event) => event.preventDefault()}

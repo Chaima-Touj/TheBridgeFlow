@@ -3,9 +3,11 @@ import mongoose from "mongoose";
 // Même structure que les champs média du modèle Formation (trailer, weeks,
 // videos) : url = lien normalisé (/preview) utilisé pour la lecture,
 // driveUrl = lien brut collé par l'admin, conservé pour référence.
+// provider "upload" : vidéo envoyée depuis le PC de l'admin, url =
+// /uploads/testimonials/<id>.<ext> (voir services/mediaUpload.service.js).
 const mediaSchema = new mongoose.Schema({
   url:       { type: String, default: "" },
-  provider:  { type: String, enum: ["cloudinary", "google_drive"], default: "google_drive" },
+  provider:  { type: String, enum: ["cloudinary", "google_drive", "upload"], default: "google_drive" },
   driveUrl:  { type: String, default: "" },
   thumbnail: { type: String, default: "" },
 }, { _id: false });
@@ -19,7 +21,7 @@ const mediaSchema = new mongoose.Schema({
 // siteSettings.controller.js).
 const testimonialVideoSchema = new mongoose.Schema({
   url:       { type: String, default: "" },
-  provider:  { type: String, enum: ["cloudinary", "google_drive"], default: "google_drive" },
+  provider:  { type: String, enum: ["cloudinary", "google_drive", "upload"], default: "google_drive" },
   driveUrl:  { type: String, default: "" },
   thumbnail: { type: String, default: "" },
   category:  { type: String, enum: ["summer-camp", "pfe", "formation", "unknown"], default: "unknown" },

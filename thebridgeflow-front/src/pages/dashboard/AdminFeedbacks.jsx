@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiPlus, FiAlertTriangle, FiImage,
   FiExternalLink, FiVideo, FiStar, FiEye, FiEyeOff, FiDownload,
   FiCheckCircle, FiCalendar, FiMessageSquare, FiArrowLeft, FiChevronRight,
+  FiUpload, FiX, FiHardDrive,
 } from "react-icons/fi";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import Modal from "../../components/common/Modal.jsx";
@@ -15,6 +16,9 @@ import { eventsService } from "../../services/events.service.js";
 import { compressImageToBase64 } from "../../utils/imageCompression.js";
 import { downloadCSV } from "../../utils/exportTable.js";
 import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl } from "../../constants/videoUrls.js";
+import { resolveMediaUrl } from "../../utils/testimonialMedia.js";
+import { captureVideoPoster } from "../../utils/videoPoster.js";
+import { uploadVideoInChunks, videoFileProblem, VIDEO_UPLOAD_ACCEPT } from "../../services/mediaUpload.service.js";
 import "./StudentDashboard.css";
 import "./AdminFormations.css";
 import "./AdminNews.css";
@@ -375,11 +379,12 @@ function EventFeedbacksPanel() {
 /* ─── Champ image réutilisable — bascule lien Google Drive / upload local
      (base64, compression client canvas 800px, voir imageCompression.js).
      Même pattern que le champ image des formations/actualités. ─────────────── */
-function DriveOrUploadField({ value, onChange, label }) {
+function DriveOrUploadField({ value, onChange, label, hint }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState(value?.startsWith("data:image/") ? "upload" : "drive");
   const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -411,8 +416,16 @@ function DriveOrUploadField({ value, onChange, label }) {
 
       {mode === "upload" ? (
         <>
-          <label className="an-image-upload">
-            {value ? (
+          {/* Bouton + champ fichier caché (même modèle que l'image des
+              actualités) : un <label> séparé du champ n'ouvrait jamais le
+              sélecteur de fichiers. */}
+          <button
+            type="button"
+            className="an-image-upload"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={compressing}
+          >
+            {value?.startsWith("data:image/") || (value && !isGoogleDriveUrl(value)) ? (
               <img src={value} alt="" className="an-image-preview" />
             ) : (
               <div className="an-image-placeholder">
@@ -421,8 +434,8 @@ function DriveOrUploadField({ value, onChange, label }) {
               </div>
             )}
             {compressing && <div className="af-video-thumb-uploading">{t("adminFormations.inProgress")}</div>}
-          </label>
-          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} hidden />
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} hidden />
         </>
       ) : (
         <>
@@ -444,22 +457,157 @@ function DriveOrUploadField({ value, onChange, label }) {
           )}
         </>
       )}
+      {hint && !error && <span className="afd-field-hint">{hint}</span>}
       {error && <span className="af-field-error">{error}</span>}
+    </div>
+  );
+}
+
+/* ─── Champ vidéo — bascule lien Google Drive / vidéo envoyée depuis le PC.
+     value : { mode: "drive" | "upload", driveUrl, uploadUrl }. L'envoi
+     commence dès le choix du fichier (en morceaux, avec progression) ;
+     uploadUrl reçoit alors /uploads/testimonials/<id>.<ext>. onBusyChange
+     signale un envoi en cours (bouton Enregistrer bloqué), onVideoFile reçoit
+     le fichier choisi (miniature automatique). ──────────────────────────────── */
+function VideoSourceField({ id, label, value, onChange, onBusyChange, onVideoFile, error }) {
+  const { t } = useTranslation();
+  const fileInputRef = useRef(null);
+  const abortRef = useRef(null);
+  const [progress, setProgress] = useState(null);
+  const [uploadError, setUploadError] = useState("");
+  const [fileName, setFileName] = useState("");
+  const uploading = progress !== null;
+
+  // Fenêtre fermée pendant un envoi : on l'interrompt.
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const setMode = (mode) => onChange({ ...value, mode });
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    const problem = videoFileProblem(file);
+    if (problem) {
+      setUploadError(t(problem === "size" ? "adminFeedbacks.video.tooLarge" : "adminFeedbacks.video.typeInvalid"));
+      return;
+    }
+    setUploadError("");
+    setFileName(file.name);
+    onVideoFile?.(file);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setProgress(0);
+    onBusyChange?.(true);
+    try {
+      const uploadUrl = await uploadVideoInChunks(file, { signal: controller.signal, onProgress: setProgress });
+      onChange({ ...value, mode: "upload", uploadUrl });
+    } catch (err) {
+      if (!controller.signal.aborted) setUploadError(err?.response?.data?.message || t("adminFeedbacks.video.uploadFailed"));
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
+      setProgress(null);
+      onBusyChange?.(false);
+    }
+  };
+
+  const cancelUpload = () => abortRef.current?.abort();
+  const percent = Math.round((progress || 0) * 100);
+
+  return (
+    <div className="af-form-row">
+      {label && <span className="label" id={`${id}-label`}>{label}</span>}
+      <div className="af-thumb-mode-toggle" role="group" aria-labelledby={label ? `${id}-label` : undefined}>
+        <button type="button" aria-pressed={value.mode === "drive"} className={`af-thumb-mode-btn${value.mode === "drive" ? " af-thumb-mode-btn--active" : ""}`} onClick={() => setMode("drive")} disabled={uploading}>
+          {t("adminFeedbacks.video.modeDrive")}
+        </button>
+        <button type="button" aria-pressed={value.mode === "upload"} className={`af-thumb-mode-btn${value.mode === "upload" ? " af-thumb-mode-btn--active" : ""}`} onClick={() => setMode("upload")}>
+          {t("adminFeedbacks.video.modeUpload")}
+        </button>
+      </div>
+
+      {value.mode === "drive" ? (
+        <input
+          id={id}
+          className="input"
+          placeholder="https://drive.google.com/file/d/..."
+          value={value.driveUrl}
+          onChange={(event) => onChange({ ...value, driveUrl: event.target.value })}
+        />
+      ) : (
+        <div className="afd-video-upload">
+          <input ref={fileInputRef} id={id} type="file" accept={VIDEO_UPLOAD_ACCEPT} onChange={handleFileChange} hidden />
+          {uploading ? (
+            <div className="afd-video-upload__progress" role="status" aria-live="polite">
+              <div className="afd-video-upload__progress-head">
+                <span className="afd-video-upload__file">{fileName}</span>
+                <strong>{t("adminFeedbacks.video.uploading", { percent })}</strong>
+              </div>
+              <div className="afd-video-upload__bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+                <span style={{ width: `${percent}%` }} />
+              </div>
+              <button type="button" className="btn btn-ghost afd-video-upload__cancel" onClick={cancelUpload}>
+                <FiX size={14} /> {t("adminFeedbacks.video.cancelUpload")}
+              </button>
+            </div>
+          ) : value.uploadUrl ? (
+            <div className="afd-video-upload__done">
+              <video className="afd-video-upload__preview" src={resolveMediaUrl(value.uploadUrl)} controls preload="metadata" playsInline />
+              <div className="afd-video-upload__done-row">
+                <span><FiCheckCircle size={14} /> {fileName || t("adminFeedbacks.video.uploaded")}</span>
+                <button type="button" className="btn btn-ghost" onClick={() => fileInputRef.current?.click()}>
+                  <FiUpload size={14} /> {t("adminFeedbacks.video.replace")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className="afd-video-upload__pick" onClick={() => fileInputRef.current?.click()}>
+              <FiUpload size={20} />
+              <strong>{t("adminFeedbacks.video.choose")}</strong>
+              <span>{t("adminFeedbacks.video.formats")}</span>
+            </button>
+          )}
+        </div>
+      )}
+      {(uploadError || error) && <span className="af-field-error" role="alert">{uploadError || error}</span>}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Formulaire — Témoignage vidéo (SiteSettings.testimonialVideos[])
+   Vidéo : lien Google Drive ou envoi depuis le PC ; miniature : lien Drive ou
+   image du PC (prise automatiquement dans la vidéo envoyée si vide).
    ═══════════════════════════════════════════════════════════════════════════ */
 function TestimonialVideoForm({ initial, categoryLabel, submitting, formError, onSubmit, onCancel }) {
   const { t } = useTranslation();
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [videoBusy, setVideoBusy] = useState(false);
+  // Le champ miniature choisit son mode (lien / image) à l'affichage : on le
+  // remonte quand une miniature est prise automatiquement dans la vidéo.
+  const [thumbnailFieldKey, setThumbnailFieldKey] = useState(0);
+
+  const video = { mode: form.videoMode, driveUrl: form.driveUrl, uploadUrl: form.uploadUrl };
+  const setVideo = (next) => {
+    setForm((f) => ({ ...f, videoMode: next.mode, driveUrl: next.driveUrl, uploadUrl: next.uploadUrl }));
+    setFieldErrors((prev) => ({ ...prev, video: undefined }));
+  };
+
+  // Miniature prise dans la vidéo choisie : seulement si aucune miniature n'a
+  // été choisie à la main (une miniature automatique précédente est remplacée).
+  const handleVideoFile = async (file) => {
+    const poster = await captureVideoPoster(file);
+    if (!poster) return;
+    setForm((f) => (f.thumbnail && !f.thumbnailIsAuto ? f : { ...f, thumbnail: poster, thumbnailIsAuto: true }));
+    setThumbnailFieldKey((key) => key + 1);
+  };
 
   const validate = () => {
     const errors = {};
-    if (!form.driveUrl.trim()) errors.driveUrl = t("adminFeedbacks.errors.driveUrlRequired");
+    if (videoBusy) errors.video = t("adminFeedbacks.errors.videoUploadPending");
+    else if (form.videoMode === "upload" && !form.uploadUrl) errors.video = t("adminFeedbacks.errors.videoUploadRequired");
+    else if (form.videoMode !== "upload" && !form.driveUrl.trim()) errors.video = t("adminFeedbacks.errors.driveUrlRequired");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -467,10 +615,9 @@ function TestimonialVideoForm({ initial, categoryLabel, submitting, formError, o
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-    onSubmit({
-      driveUrl:  form.driveUrl.trim(),
-      thumbnail: form.thumbnail,
-    });
+    onSubmit(form.videoMode === "upload"
+      ? { videoUpload: form.uploadUrl, thumbnail: form.thumbnail }
+      : { driveUrl: form.driveUrl.trim(), thumbnail: form.thumbnail });
   };
 
   return (
@@ -484,29 +631,29 @@ function TestimonialVideoForm({ initial, categoryLabel, submitting, formError, o
 
       <p className="afd-category-hint">{t("adminFeedbacks.testimonialCategoryHint", { category: categoryLabel })}</p>
 
-      <div className="af-form-row">
-        <label className="label" htmlFor="afd-testi-drive">{t("adminFeedbacks.testimonialDriveUrlLabel")}</label>
-        <input
-          id="afd-testi-drive"
-          className="input"
-          placeholder="https://drive.google.com/file/d/..."
-          value={form.driveUrl}
-          onChange={(e) => setForm((f) => ({ ...f, driveUrl: e.target.value }))}
-        />
-        {fieldErrors.driveUrl && <span className="af-field-error">{fieldErrors.driveUrl}</span>}
-      </div>
+      <VideoSourceField
+        id="afd-testi-video"
+        label={t("adminFeedbacks.video.label")}
+        value={video}
+        onChange={setVideo}
+        onBusyChange={setVideoBusy}
+        onVideoFile={handleVideoFile}
+        error={fieldErrors.video}
+      />
 
       <DriveOrUploadField
+        key={thumbnailFieldKey}
         label={t("adminFeedbacks.testimonialThumbnailLabel")}
         value={form.thumbnail}
-        onChange={(thumbnail) => setForm((f) => ({ ...f, thumbnail }))}
+        hint={form.thumbnailIsAuto ? t("adminFeedbacks.video.posterAuto") : ""}
+        onChange={(thumbnail) => setForm((f) => ({ ...f, thumbnail, thumbnailIsAuto: false }))}
       />
 
       <div className="modal-footer" style={{ padding: "16px 0 0", borderTop: "none" }}>
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
           {t("common.cancel")}
         </button>
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
+        <button type="submit" className="btn btn-primary" disabled={submitting || videoBusy}>
           {submitting ? t("adminFormations.inProgress") : t("common.save")}
         </button>
       </div>
@@ -602,7 +749,9 @@ export default function AdminFeedbacks() {
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [testimonialsError, setTestimonialsError] = useState(false);
-  const [landingVideoUrl, setLandingVideoUrl] = useState("");
+  // Vidéo de présentation : lien Drive ou vidéo envoyée depuis le PC.
+  const [landingVideo, setLandingVideo] = useState({ mode: "drive", driveUrl: "", uploadUrl: "" });
+  const [landingVideoBusy, setLandingVideoBusy] = useState(false);
   const [landingVideoSaving, setLandingVideoSaving] = useState(false);
   const [landingVideoMessage, setLandingVideoMessage] = useState("");
   const [landingVideoError, setLandingVideoError] = useState("");
@@ -632,7 +781,10 @@ export default function AdminFeedbacks() {
     settingsService.get()
       .then(({ data }) => {
         setTestimonials(data.testimonialVideos || []);
-        setLandingVideoUrl(data.actionVideo?.driveUrl || data.actionVideo?.url || "");
+        const action = data.actionVideo || {};
+        setLandingVideo(action.provider === "upload"
+          ? { mode: "upload", driveUrl: "", uploadUrl: action.url || "" }
+          : { mode: "drive", driveUrl: action.driveUrl || action.url || "", uploadUrl: "" });
         setTestimonialsError(false);
       })
       .catch(() => setTestimonialsError(true))
@@ -749,9 +901,16 @@ export default function AdminFeedbacks() {
     event.preventDefault();
     setLandingVideoMessage("");
     setLandingVideoError("");
+    if (landingVideoBusy) return setLandingVideoError(t("adminFeedbacks.errors.videoUploadPending"));
+    if (landingVideo.mode === "upload" && !landingVideo.uploadUrl) return setLandingVideoError(t("adminFeedbacks.errors.videoUploadRequired"));
+    if (landingVideo.mode !== "upload" && !landingVideo.driveUrl.trim()) return setLandingVideoError(t("adminFeedbacks.errors.driveUrlRequired"));
     setLandingVideoSaving(true);
     try {
-      await settingsService.update({ actionVideo: { driveUrl: landingVideoUrl.trim(), provider: "google_drive" } });
+      await settingsService.update({
+        actionVideo: landingVideo.mode === "upload"
+          ? { videoUpload: landingVideo.uploadUrl }
+          : { driveUrl: landingVideo.driveUrl.trim(), provider: "google_drive" },
+      });
       setLandingVideoMessage(t("adminFeedbacks.landingVideo.saved"));
     } catch (error) {
       setLandingVideoError(error?.response?.data?.message || t("adminFeedbacks.landingVideo.saveFailed"));
@@ -792,24 +951,21 @@ export default function AdminFeedbacks() {
           </div>
 
           {activeTab === "landing-video" && (
-            <form className="afd-landing-video" onSubmit={saveLandingVideo}>
+            <form className="afd-landing-video" onSubmit={saveLandingVideo} noValidate>
               <p>{t("adminFeedbacks.landingVideo.description")}</p>
-              <label htmlFor="afd-landing-video-url">{t("adminFeedbacks.landingVideo.urlLabel")}</label>
-              <input
+              <VideoSourceField
                 id="afd-landing-video-url"
-                className="input"
-                type="url"
-                required
-                value={landingVideoUrl}
-                onChange={(event) => setLandingVideoUrl(event.target.value)}
-                placeholder="https://drive.google.com/file/d/.../view"
+                label={t("adminFeedbacks.landingVideo.urlLabel")}
+                value={landingVideo}
+                onChange={(next) => { setLandingVideo(next); setLandingVideoMessage(""); }}
+                onBusyChange={setLandingVideoBusy}
               />
               {landingVideoError && <p className="af-form-error" role="alert">{landingVideoError}</p>}
               {landingVideoMessage && <p className="afd-landing-video__success" role="status">{landingVideoMessage}</p>}
-              <button type="submit" className="btn btn-primary" disabled={landingVideoSaving}>
+              <button type="submit" className="btn btn-primary" disabled={landingVideoSaving || landingVideoBusy}>
                 {landingVideoSaving ? t("adminFormations.inProgress") : t("common.save")}
               </button>
-              {landingVideoUrl && <a href={landingVideoUrl} target="_blank" rel="noopener noreferrer" className="afd-card-link"><FiExternalLink size={14} />{t("adminFeedbacks.viewVideo")}</a>}
+              {landingVideo.mode === "drive" && landingVideo.driveUrl && <a href={landingVideo.driveUrl} target="_blank" rel="noopener noreferrer" className="afd-card-link"><FiExternalLink size={14} />{t("adminFeedbacks.viewVideo")}</a>}
             </form>
           )}
 
@@ -836,15 +992,20 @@ export default function AdminFeedbacks() {
                   // Drive de la vidéo, via le proxy backend (évite le blocage
                   // cross-origin du endpoint /thumbnail de Drive sur un <img>).
                   const posterSrc = item.thumbnail || (isGoogleDriveUrl(item.url) ? resolveDriveThumbnailProxyUrl(item.url) : null);
+                  const uploaded = item.provider === "upload";
                   return (
                   <div className="afd-card" key={item._id}>
                     <div className="afd-card-thumb">
                       {posterSrc
                         ? <img src={posterSrc} alt="" />
                         : <div className="afd-card-thumb--placeholder"><FiVideo size={22} /></div>}
+                      <span className={`afd-card-source${uploaded ? " afd-card-source--upload" : ""}`}>
+                        {uploaded ? <FiHardDrive size={11} aria-hidden="true" /> : <FiExternalLink size={11} aria-hidden="true" />}
+                        {t(uploaded ? "adminFeedbacks.video.sourceUpload" : "adminFeedbacks.video.sourceDrive")}
+                      </span>
                     </div>
                     <div className="afd-card-body">
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="afd-card-link">
+                      <a href={resolveMediaUrl(item.url)} target="_blank" rel="noopener noreferrer" className="afd-card-link">
                         <FiExternalLink size={12} /> {t("adminFeedbacks.viewVideo")}
                       </a>
                       <AdminRowActions ariaLabel={t("adminFormations.actionsAriaLabel")} actions={[
@@ -907,8 +1068,10 @@ export default function AdminFeedbacks() {
         >
           <TestimonialVideoForm
             initial={testimonialModal === "create"
-              ? { driveUrl: "", thumbnail: "" }
-              : { driveUrl: testimonialModal.driveUrl || testimonialModal.url || "", thumbnail: testimonialModal.thumbnail || "" }}
+              ? { videoMode: "drive", driveUrl: "", uploadUrl: "", thumbnail: "", thumbnailIsAuto: false }
+              : testimonialModal.provider === "upload"
+                ? { videoMode: "upload", driveUrl: "", uploadUrl: testimonialModal.url || "", thumbnail: testimonialModal.thumbnail || "", thumbnailIsAuto: false }
+                : { videoMode: "drive", driveUrl: testimonialModal.driveUrl || testimonialModal.url || "", uploadUrl: "", thumbnail: testimonialModal.thumbnail || "", thumbnailIsAuto: false }}
             categoryLabel={t(TABS.find((tb) => tb.id === activeTab).labelKey)}
             submitting={testimonialSubmitting}
             formError={testimonialFormError}

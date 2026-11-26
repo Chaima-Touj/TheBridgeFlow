@@ -1603,9 +1603,9 @@
     "pageSubtitle": "إدارة شهادات الفيديو ولقطات الشاشة وآراء الفعاليات المعروضة على الموقع.",
     "landingVideo": {
       "description": "يظهر هذا الفيديو في قسم التعريف بالصفحة الرئيسية.",
-      "urlLabel": "رابط الفيديو (Google Drive أو رابط مباشر)",
-      "saved": "تم حفظ رابط فيديو الصفحة الرئيسية.",
-      "saveFailed": "تعذر حفظ رابط الفيديو."
+      "urlLabel": "فيديو التعريف",
+      "saved": "تم حفظ فيديو الصفحة الرئيسية.",
+      "saveFailed": "تعذر حفظ الفيديو."
     },
     "tabs": {
       "landingVideo": "فيديو الصفحة الرئيسية",
@@ -1634,11 +1634,13 @@
     "deleteScreenshotTitle": "حذف لقطة الشاشة",
     "confirmDeleteScreenshot": "هل تريد فعلاً حذف لقطة الشاشة هذه؟",
     "errors": {
-      "driveUrlRequired": "رابط الفيديو مطلوب",
+      "driveUrlRequired": "رابط Google Drive للفيديو مطلوب",
       "imageRequired": "الصورة مطلوبة",
       "generic": "حدث خطأ ما. حاول مرة أخرى.",
       "deleteFailed": "تعذّر حذف هذا العنصر.",
-      "loadFailed": "تعذّر تحميل البيانات."
+      "loadFailed": "تعذّر تحميل البيانات.",
+      "videoUploadRequired": "اختر فيديو من حاسوبك.",
+      "videoUploadPending": "انتظر انتهاء رفع الفيديو."
     },
     "eventFeedbacks": {
       "description": "تبقى آراء الفعاليات خاصة إلى أن تنشرها الإدارة في صفحة الفعالية.",
@@ -1667,6 +1669,23 @@
       "readReview": "قراءة الرأي",
       "reviewDetails": "تفاصيل الرأي",
       "reviewImage": "الصورة المرفقة بالرأي"
+    },
+    "video": {
+      "label": "الفيديو *",
+      "modeDrive": "رابط Google Drive",
+      "modeUpload": "رفع من حاسوبي",
+      "choose": "اختر فيديو",
+      "formats": "MP4 أو WebM أو MOV — 300 ميغابايت كحد أقصى",
+      "uploading": "جارٍ الرفع… {{percent}}٪",
+      "uploaded": "تم رفع الفيديو",
+      "replace": "استبدال الفيديو",
+      "cancelUpload": "إلغاء الرفع",
+      "uploadFailed": "فشل رفع الفيديو. تحقّق من اتصالك وحاول مرة أخرى.",
+      "tooLarge": "حجم الفيديو يتجاوز 300 ميغابايت.",
+      "typeInvalid": "صيغة غير مدعومة: MP4 أو WebM أو MOV.",
+      "posterAuto": "تم أخذ الصورة المصغرة تلقائيًا من الفيديو. يمكنك استبدالها.",
+      "sourceDrive": "Google Drive",
+      "sourceUpload": "فيديو مرفوع"
     }
   },
   "adminUsers": {

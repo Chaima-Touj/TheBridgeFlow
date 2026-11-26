@@ -43,6 +43,8 @@ import newsletterRoutes            from "./routes/newsletter.routes.js";
 import contactMessagesRoutes       from "./routes/contactMessages.routes.js";
 import pfePackRegistrationRoutes   from "./routes/pfePackRegistration.routes.js";
 import eventParticipationRoutes   from "./routes/eventParticipationRequests.routes.js";
+import mediaUploadRoutes          from "./routes/mediaUpload.routes.js";
+import { cleanupUnusedUploads }   from "./controllers/siteSettings.controller.js";
 import { startNewsletterWorker } from "./services/newsletter.service.js";
 import { startEventReminderWorker } from "./services/eventReminder.service.js";
 import { migrateLegacyContactMessages } from "./services/legacyContactMigration.service.js";
@@ -124,6 +126,15 @@ const videoLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Envoi des vidéos de témoignages depuis le PC (admin) : morceaux de 8 Mo, soit
+// ~40 requêtes pour une vidéo de 300 Mo — plafond dédié, indépendant de apiLimiter.
+const mediaUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // ─── Parsers ──────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -141,6 +152,15 @@ app.use(mongoSanitize);
 // Un <a href> de téléchargement direct n'est pas concerné (navigation, pas
 // sous-ressource) — d'où le bug resté invisible jusqu'à l'ajout d'images
 // news affichées en <img>. On ré-ouvre CORP uniquement sur /uploads.
+// Vidéos de témoignages envoyées depuis le PC : nom unique et jamais modifié
+// (une nouvelle vidéo = un nouveau fichier), donc mises en cache longtemps.
+app.use("/uploads/testimonials", express.static(path.join(__dirname, "uploads", "testimonials"), {
+  immutable: true,
+  maxAge: "30d",
+  setHeaders: (res) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  },
+}));
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
   setHeaders: (res) => {
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -212,6 +232,7 @@ app.use("/api/newsletter",          apiLimiter, newsletterRoutes);
 app.use("/api/contact-messages",    apiLimiter, contactMessagesRoutes);
 app.use("/api/pfe-pack/registrations", apiLimiter, pfePackRegistrationRoutes);
 app.use("/api/event-participation-requests", apiLimiter, eventParticipationRoutes);
+app.use("/api/media-uploads",       mediaUploadLimiter, mediaUploadRoutes);
 
 
 // ─── Gestion des erreurs ──────────────────────────────────────────────────────
@@ -236,6 +257,12 @@ connectDB().then(() => {
       if (report.total) console.log("[migration] Messages du site :", report);
     })
     .catch((error) => console.error("[migration] Messages du site : échec", { message: error.message }));
+  // Vidéos envoyées depuis le PC puis jamais enregistrées (formulaire annulé).
+  cleanupUnusedUploads()
+    .then((removed) => {
+      if (removed.videos || removed.parts) console.log("[media-uploads] Fichiers inutilisés supprimés :", removed);
+    })
+    .catch((error) => console.error("[media-uploads] Nettoyage : échec", { message: error.message }));
   app.listen(PORT, () => {
     console.log("─────────────────────────────────────");
     console.log(`🚀 Server running on port ${PORT}`);

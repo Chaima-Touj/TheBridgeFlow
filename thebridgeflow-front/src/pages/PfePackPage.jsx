@@ -12,6 +12,8 @@ import { TbBrandWhatsapp } from "react-icons/tb";
 import { formationsService } from "../services/formations.service.js";
 import { pfePackService } from "../services/pfePack.service.js";
 import { settingsService } from "../services/settings.service.js";
+// Vidéo de SiteSettings.testimonialVideos → format attendu par VideoTestimonialCarousel (même mapping que LandingPage).
+import { toTestimonialItem } from "../utils/testimonialMedia.js";
 import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
 import "./PfePackPage.css";
 
@@ -38,8 +40,6 @@ function splitTechnologies(value) {
   return [...new Set(value.split(/[\s,;/\\]+/).map((item) => item.trim()).filter(Boolean))];
 }
 
-// Vidéo de SiteSettings.testimonialVideos → format attendu par VideoTestimonialCarousel (même mapping que LandingPage).
-const toTestimonialItem = (video) => ({ id: video._id, videoUrl: video.url, posterUrl: video.thumbnail, category: video.category });
 const getFallbackTestimonials = (config) => config.testimonialGroups.flatMap((group) => group.fallback());
 
 // Page publique d'un programme : « pfe-pack » (/pack-pfe) ou « summer-camp » (/summer-camp).

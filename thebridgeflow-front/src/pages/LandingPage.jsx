@@ -35,6 +35,7 @@ import FormationCategories from "../components/common/FormationCategories.jsx";
 import CeremonySection from "../components/common/CeremonySection.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import BrandName from "../components/common/BrandName.jsx";
+import { resolveMediaUrl, toTestimonialItem } from "../utils/testimonialMedia.js";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
 import { newsletterService } from "../services/newsletter.service.js";
@@ -134,7 +135,8 @@ function PromoVideoSection({ actionVideo }) {
     isMobile ? [0.97, 0.99, 1, 1] : [0.92, 0.97, 1, 1]
   );
 
-  const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
+  // Lien Drive, YouTube ou vidéo envoyée depuis le PC (/uploads/…, servie par l'API).
+  const promoVideoUrl = resolveMediaUrl(actionVideo?.url) || VIDEO_URLS["/stageflow-promo.mp4"];
   const promoIsDrive  = promoVideoUrl.includes("drive.google.com");
   const promoYouTubeId = getYouTubeId(promoVideoUrl);
   const promoIsYouTube = Boolean(promoYouTubeId);
@@ -533,7 +535,6 @@ export default function LandingPage() {
       .catch(() => setTestimonialVideos([])); // actionVideo garde son fallback VIDEO_URLS
   }, []);
 
-  const toTestimonialItem = (v) => ({ id: v._id, videoUrl: v.url, posterUrl: v.thumbnail, category: v.category });
   const summerCampTestimonials = testimonialVideos?.filter((v) => v.category === "summer-camp").map(toTestimonialItem) ?? null;
   const pfeTestimonials        = testimonialVideos?.filter((v) => v.category === "pfe").map(toTestimonialItem) ?? null;
   const formationTestimonials  = testimonialVideos?.filter((v) => v.category === "formation").map(toTestimonialItem) ?? null;
