@@ -5,6 +5,7 @@ import SiteNavbar from "../../components/common/SiteNavbar.jsx";
 import { withIsolatedPhone } from "../../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../../utils/whatsapp.js";
 import { useDocumentMeta } from "../../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../../constants/brand.js";
 import "../FormationsPage.css";
 import "./LegalPage.css";
 
@@ -14,8 +15,8 @@ export default function HelpPage() {
   const { t } = useTranslation();
 
   useDocumentMeta({
-    title: "Aide & FAQ — TheBridgeFlow",
-    description: "Besoin d'aide ? Retrouvez les réponses aux questions fréquentes sur TheBridgeFlow ou contactez notre équipe.",
+    title: `Aide & FAQ — ${BRAND_NAME}`,
+    description: `Besoin d'aide ? Retrouvez les réponses aux questions fréquentes sur ${BRAND_NAME} ou contactez notre équipe.`,
   });
 
   return (

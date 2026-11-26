@@ -13,6 +13,8 @@ import { contactMessagesService } from "../services/contactMessages.service.js";
 import { PHONE_NUMBER } from "../utils/phoneDisplay.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
 import { useRecaptchaCheckbox } from "../hooks/useRecaptchaCheckbox.jsx";
+import BrandName from "../components/common/BrandName.jsx";
+import { BRAND_NAME } from "../constants/brand.js";
 import "./PublicInfoPages.css";
 
 export default function PublicInfoPage({ type }) {
@@ -25,7 +27,7 @@ export default function PublicInfoPage({ type }) {
   const [error, setError] = useState("");
   const captcha = useRecaptchaCheckbox();
   const title = type === "about" ? t("landing.aboutTitle") : type === "testimonials" ? t("nav.testimonials") : t("landing.contactTitle");
-  useDocumentMeta({ title: `${title} — TheBridgeFlow`, description: title });
+  useDocumentMeta({ title: `${title} — ${BRAND_NAME}`, description: title });
 
   useEffect(() => {
     if (type !== "testimonials") return;
@@ -71,8 +73,7 @@ export default function PublicInfoPage({ type }) {
         </section>}
         {type === "contact" && <section className="pi-contact">
           <aside className="pi-contact__details">
-            <span className="pi-contact__eyebrow">{t("landing.contactBadge")}</span>
-            <h2>TheBridgeFlow</h2>
+            <h2><BrandName /></h2>
             <p>{t("landing.contactSub")}</p>
             <div className="pi-contact__methods">
               <a href={`mailto:contact@9antra.tn`}><span><FiMail aria-hidden="true" /></span><span><strong>{t("profile.email")}</strong><small>contact@9antra.tn</small></span><FiArrowUpRight className="pi-contact__external" aria-hidden="true" /></a>
@@ -96,7 +97,6 @@ export default function PublicInfoPage({ type }) {
           </aside>
           <div className="pi-contact__form-panel">
             <div className="pi-contact__form-heading">
-              <span>{t("landing.contactBadge")}</span>
               <h2>{t("landing.contactSend")}</h2>
             </div>
             <form onSubmit={handleContact}>

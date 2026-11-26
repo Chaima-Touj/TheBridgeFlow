@@ -4,7 +4,8 @@ import mongoose from "mongoose";
 import { validatePfePackRegistration } from "../utils/validatePfePackRegistration.js";
 import PfePackRegistration from "../models/pfePackRegistration.model.js";
 import {
-  serializePfePackRegistration, updatePfePackRegistrationStatus, getPfePackRegistrationById,
+  createPfePackRegistration, getPfePackRegistrations, serializePfePackRegistration, updatePfePackRegistrationStatus,
+  getPfePackRegistrationById,
 } from "../controllers/pfePackRegistration.controller.js";
 
 const validInput = {
@@ -31,6 +32,7 @@ test("normalizes a valid Pack PFE request", () => {
     city: "Tunis",
     technologies: ["React", "Node.js"],
     consentConfirmed: true,
+    program: "pfe-pack",
     subject: "Application de gestion",
   });
 });
@@ -130,6 +132,7 @@ test("the list item contains what the dashboard list needs, and nothing more", (
     technologies: ["React", "Node.js"],
     locationMode: "onsite",
     preferredLocation: "LAC1 – Tunis",
+    program: "pfe-pack",
     status: "new",
     statusUpdatedAt: null,
     createdAt: storedRegistration.createdAt,
@@ -243,6 +246,108 @@ test("GET /:id rejects a bad id and serialises an old request as new", async () 
     assert.equal(result.body.status, "new");
     assert.equal(result.body.statusUpdatedBy, null);
     assert.equal(result.body.consentConfirmed, true);
+  } finally {
+    restore();
+  }
+});
+
+/* ── Programme : Pack PFE ou Summer Camp (même formulaire, même collection) ── */
+test("the program is optional and defaults to the PFE Pack", () => {
+  assert.equal(validatePfePackRegistration(validInput).program, "pfe-pack");
+  for (const program of [undefined, "", "   "]) {
+    assert.equal(validatePfePackRegistration({ ...validInput, program }).program, "pfe-pack", JSON.stringify(program));
+  }
+  assert.equal(validatePfePackRegistration({ ...validInput, program: "pfe-pack" }).program, "pfe-pack");
+  assert.equal(validatePfePackRegistration({ ...validInput, program: "summer-camp" }).program, "summer-camp");
+  assert.equal(validatePfePackRegistration({ ...validInput, program: " summer-camp " }).program, "summer-camp");
+});
+
+test("an unknown program or a non-string value is rejected", () => {
+  for (const program of ["summer", "Summer-Camp", "all", null, 1, true, ["summer-camp"], { $ne: "pfe-pack" }]) {
+    assert.throws(
+      () => validatePfePackRegistration({ ...validInput, program }),
+      { statusCode: 400, message: "Programme invalide." },
+      JSON.stringify(program),
+    );
+  }
+});
+
+test("a Summer Camp request keeps every other rule and still cannot set its status", () => {
+  const result = validatePfePackRegistration({ ...validInput, program: "summer-camp", status: "confirmed", statusUpdatedBy: adminId.toString() });
+  assert.equal(result.program, "summer-camp");
+  assert.equal("status" in result, false);
+  assert.equal("statusUpdatedBy" in result, false);
+  assert.throws(() => validatePfePackRegistration({ ...validInput, program: "summer-camp", technologies: ["React"] }), { statusCode: 400 });
+  assert.throws(() => validatePfePackRegistration({ ...validInput, program: "summer-camp", consentConfirmed: false }), { statusCode: 400 });
+});
+
+test("the model stores the program and only accepts the two programs", async () => {
+  const { program, ...withoutProgram } = validatePfePackRegistration(validInput);
+  assert.equal(program, "pfe-pack");
+  assert.equal(new PfePackRegistration(withoutProgram).program, "pfe-pack");
+  await new PfePackRegistration({ ...withoutProgram, program: "summer-camp" }).validate();
+  await assert.rejects(new PfePackRegistration({ ...withoutProgram, program: "bootcamp" }).validate(), { name: "ValidationError" });
+  assert.ok(PfePackRegistration.schema.indexes().some(([fields]) => fields.program === 1 && fields.createdAt === -1));
+});
+
+test("requests saved before the program existed are serialised as PFE Pack", () => {
+  assert.equal(serializePfePackRegistration(storedRegistration).program, "pfe-pack");
+  assert.equal(serializePfePackRegistration({ ...storedRegistration, program: "unknown" }).program, "pfe-pack");
+  assert.equal(serializePfePackRegistration({ ...storedRegistration, program: null }).program, "pfe-pack");
+  assert.equal(serializePfePackRegistration({ ...storedRegistration, program: "summer-camp" }).program, "summer-camp");
+  assert.equal(serializePfePackRegistration({ ...storedRegistration, program: "summer-camp" }, { detail: true }).program, "summer-camp");
+  assert.equal(serializePfePackRegistration(storedRegistration, { detail: true }).program, "pfe-pack");
+});
+
+test("POST / stores the program and answers with a message for that program", async () => {
+  const created = [];
+  const restore = stubModel("create", async (data) => { created.push(data); return { _id: registrationId, ...data }; });
+  try {
+    const pack = await run(createPfePackRegistration, { body: { ...validInput } });
+    assert.equal(pack.statusCode, 201);
+    assert.equal(pack.body.message, "Votre demande pour le Pack PFE a bien été envoyée.");
+    assert.deepEqual(pack.body.registration, { id: registrationId });
+
+    const camp = await run(createPfePackRegistration, { body: { ...validInput, program: "summer-camp", status: "confirmed" } });
+    assert.equal(camp.statusCode, 201);
+    assert.equal(camp.body.message, "Votre demande pour le Summer Camp a bien été envoyée.");
+
+    assert.deepEqual(created.map((data) => data.program), ["pfe-pack", "summer-camp"]);
+    assert.equal("status" in created[1], false);
+  } finally {
+    restore();
+  }
+});
+
+test("POST / rejects an invalid program before touching the database", async () => {
+  let calls = 0;
+  const restore = stubModel("create", async () => { calls += 1; return { _id: registrationId }; });
+  try {
+    const result = await run(createPfePackRegistration, { body: { ...validInput, program: "bootcamp" } });
+    assert.equal(result.error.statusCode, 400);
+    assert.equal(result.error.message, "Programme invalide.");
+    assert.equal(calls, 0);
+  } finally {
+    restore();
+  }
+});
+
+test("GET / returns a JSON array of every program, each with its program", async () => {
+  let selected = "";
+  const restore = stubModel("find", () => ({
+    sort: () => ({
+      select: (fields) => {
+        selected = fields;
+        return { lean: async () => [{ ...storedRegistration, program: "summer-camp" }, storedRegistration] };
+      },
+    }),
+  }));
+  try {
+    const result = await run(getPfePackRegistrations, {});
+    assert.ok(Array.isArray(result.body));
+    assert.deepEqual(result.body.map((item) => item.program), ["summer-camp", "pfe-pack"]);
+    assert.ok(selected.split(" ").includes("program"));
+    assert.equal("subject" in result.body[0], false);
   } finally {
     restore();
   }

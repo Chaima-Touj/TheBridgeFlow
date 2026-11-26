@@ -3,9 +3,11 @@
    grille "Formations Populaires" au clic.
 ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Bandeau léger : padding vertical "compact" du rythme partagé (index.css),
+   en-tête aux mêmes tailles que toutes les autres sections publiques. */
 .fcat-section {
   background: var(--bg-card);
-  padding: 2.25rem 2rem;
+  padding: var(--section-pad-y-compact) var(--section-pad-x);
 }
 .fcat-section__inner {
   max-width: 1280px;
@@ -18,14 +20,16 @@
   margin: 0 auto 1.25rem;
 }
 .fcat-header__title {
-  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  font-size: var(--section-title-size);
   font-weight: 800;
+  line-height: var(--section-title-lh);
   color: var(--text);
-  margin: 0 0 0.35rem;
+  margin: 0 0 var(--section-title-gap);
 }
 .fcat-header__sub {
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: var(--section-sub-size);
+  line-height: var(--section-sub-lh);
   margin: 0;
 }
 
@@ -36,7 +40,7 @@
   background: var(--border);
   border-radius: 999px;
   max-width: 200px;
-  margin: 0 auto 1.25rem;
+  margin: 0 auto 1rem;
   overflow: hidden;
 }
 .fcat-progress__thumb {
@@ -73,7 +77,7 @@
 .fcat-track {
   flex: 1 1 auto;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.25rem;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -97,8 +101,8 @@
 }
 
 .fcat-item__circle {
-  width: 112px;
-  height: 112px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -117,7 +121,7 @@
 }
 
 .fcat-item__label {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
 }
@@ -144,10 +148,9 @@
 }
 
 @media (max-width: 640px) {
-  .fcat-section { padding: 1.75rem 1.25rem; }
-  .fcat-track { gap: 1.1rem; justify-content: flex-start; }
-  .fcat-item__circle { width: 88px; height: 88px; }
-  .fcat-item__label { font-size: 0.9rem; }
+  .fcat-track { gap: 1rem; justify-content: flex-start; }
+  .fcat-item__circle { width: 80px; height: 80px; }
+  .fcat-item__label { font-size: 0.85rem; }
   .fcat-item__count { font-size: 0.75rem; }
   .fcat-arrow { width: 34px; height: 34px; }
 }

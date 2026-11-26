@@ -2,8 +2,8 @@
 // (Landing + FormationDetail) et par la grille "Formations Populaires" pour
 // les badges technos.
 //
-// Tous les logos sont des icônes vectorielles react-icons/si (simple-icons).
-// Le type "image" (PNG de public/images/course-placeholders/) a été
+// Tous les logos sont des icônes vectorielles react-icons/si (simple-icons),
+// sauf SQL et Power BI (icônes Feather génériques, aucun logo dédié). Le type "image" (PNG de public/images/course-placeholders/) a été
 // abandonné : ces PNG sont en réalité des ARRIÈRE-PLANS de miniature vidéo
 // (16:9, dégradé + cercles décoratifs), pas des logos autonomes — le mark de
 // marque y est délavé/à faible contraste, illisible en petit badge. Un cas
@@ -17,12 +17,6 @@
 //   - Photoshop, Illustrator, Lightroom, Premiere Pro, After Effects : licence
 //     Adobe non distribuée par simple-icons.
 //   - Microsoft : aucun logo générique Microsoft dans simple-icons.
-//   - Power BI : aucune icône "Power BI" dans simple-icons (vérifié, re-vérifié
-//     dans devicons/bootstrap-icons/fontawesome — rien nulle part dans le
-//     projet). Le slug "powerbi" existe quand même sur la formation "bi", mais
-//     uniquement pour le matching techno→formation (voir techMatch.js) : privé
-//     d'entrée ici, il est filtré silencieusement par TechMarquee et n'affiche
-//     donc aucun badge, plutôt que d'afficher un logo faux.
 //   - SonarQube : aucune icône dans simple-icons (vérifié).
 //   - VS Code : aucune icône fiable trouvée. `SiVsco` existe mais correspond
 //     très probablement à l'application photo "VSCO" (collision de nom, pas
@@ -36,8 +30,9 @@ import {
   SiArduino, SiEspressif, SiMqtt,
   SiKubernetes, SiJenkins, SiGithubactions, SiAnsible, SiTerraform, SiArgo,
   SiKalilinux, SiOpenai, SiTensorflow, SiNextdotjs,
+  SiTalend, SiDart, SiFlask, SiPostman, SiCanva, SiMeta, SiOwasp,
 } from "react-icons/si";
-import { FiDatabase } from "react-icons/fi";
+import { FiDatabase, FiBarChart2 } from "react-icons/fi";
 
 export const TECH_LOGOS = {
   react:      { type: "icon", Comp: SiReact,      label: "React",      color: "#61DAFB" },
@@ -65,13 +60,30 @@ export const TECH_LOGOS = {
   // projet (ICON_MAP de LandingPage/FormationDetail), donc sûres.
   flutter:    { type: "icon", Comp: SiFlutter,    label: "Flutter",    color: "#54C5F8" },
   springboot: { type: "icon", Comp: SiSpringboot, label: "Spring Boot",color: "#6DB33F" },
+  // Formation Flutter — Dart, le langage de Flutter (programme : « Prise en
+  // main de Dart », « Configuration Flutter & Dart »).
+  dart:       { type: "icon", Comp: SiDart,       label: "Dart",       color: "#0175C2" },
 
   // Formation IoT — technologies réellement enseignées (weeks[].content).
-  // Pas d'icône "ESP32" dédiée dans simple-icons -> Espressif (fabricant de
-  // l'ESP32) est le logo le plus proche disponible.
+  // Pas d'icône "ESP32" dédiée dans simple-icons -> logo Espressif (fabricant
+  // de l'ESP32) avec le libellé "ESP32", la carte réellement utilisée. Le slug
+  // reste "espressif" : c'est celui enregistré dans formation.technologies.
+  // Postman : test des API IoT avant le développement mobile (programme).
   arduino:   { type: "icon", Comp: SiArduino,   label: "Arduino",   color: "#00979D" },
-  espressif: { type: "icon", Comp: SiEspressif, label: "Espressif", color: "#E7352C" },
+  espressif: { type: "icon", Comp: SiEspressif, label: "ESP32",     color: "#E7352C" },
   mqtt:      { type: "icon", Comp: SiMqtt,      label: "MQTT",      color: "#660066" },
+  postman:   { type: "icon", Comp: SiPostman,   label: "Postman",   color: "#FF6C37" },
+
+  // Formation BI — Talend (préparation des données) et Power BI (tableaux de
+  // bord). Aucune icône "Power BI" dans simple-icons : icône de graphique
+  // générique aux couleurs de Power BI, comme "sql" avec FiDatabase. Le slug
+  // "powerbi" est celui enregistré dans formation.technologies (formation "bi").
+  talend:  { type: "icon", Comp: SiTalend,    label: "Talend",   color: "#FF6D70" },
+  powerbi: { type: "icon", Comp: FiBarChart2, label: "Power BI", color: "#F2C811" },
+
+  // Formation Marketing Digital — Meta Ads (campagnes) et Canva (design).
+  metaads: { type: "icon", Comp: SiMeta,  label: "Meta Ads", color: "#0467DF" },
+  canva:   { type: "icon", Comp: SiCanva, label: "Canva",    color: "#00C4CC" },
 
   // Formation DevOps — technologies réellement enseignées. SonarQube n'a pas
   // d'icône dans simple-icons, omis.
@@ -83,43 +95,53 @@ export const TECH_LOGOS = {
   argocd:        { type: "icon", Comp: SiArgo,          label: "ArgoCD",         color: "#EF7B4D" },
 
   // Cybersécurité — Kali Linux (distribution de référence en pentesting,
-  // effectivement utilisée dans le programme de la formation).
+  // effectivement utilisée dans le programme de la formation) et OWASP
+  // (« OWASP Top 10 », « OWASP en pratique »). Logo OWASP monochrome (noir) :
+  // var(--text) le garde lisible en thème clair comme en thème sombre.
   kalilinux: { type: "icon", Comp: SiKalilinux, label: "Kali Linux", color: "#557C94" },
+  owasp:     { type: "icon", Comp: SiOwasp,     label: "OWASP",      color: "var(--text)" },
 
   // IA / Chatbot / Recommandation — deux logos reconnaissables plutôt qu'une
-  // icône robot générique, comme demandé si disponible.
+  // icône robot générique, comme demandé si disponible. Flask : déploiement
+  // des modèles d'IA dans une application web (programme) ; logo monochrome,
+  // même traitement var(--text) qu'OWASP.
   openai:     { type: "icon", Comp: SiOpenai,     label: "OpenAI",     color: "#412991" },
   tensorflow: { type: "icon", Comp: SiTensorflow, label: "TensorFlow", color: "#FF6F00" },
+  flask:      { type: "icon", Comp: SiFlask,      label: "Flask",      color: "var(--text)" },
 };
 
-// Liste ordonnée pour la bande statique de la Landing Page — vitrine
-// complète de toutes les catégories de formations, indépendante de
-// formation.technologies (qui reste utilisé uniquement sur FormationDetail,
-// voir Feature 3B). Adobe Suite, Microsoft, Power BI, SonarQube et VS Code
-// omis (voir note en tête de fichier).
+// Liste ordonnée pour la bande statique de la Landing Page — vitrine des
+// technologies enseignées dans les formations de la plateforme, indépendante
+// de formation.technologies (qui reste utilisé uniquement sur FormationDetail,
+// voir Feature 3B). Adobe Suite, Microsoft, SonarQube et VS Code omis (voir
+// note en tête de fichier).
+// PHP, Next.js, Vue.js, WordPress et Arduino sont retirés de cette bande à la
+// demande du propriétaire, mais gardent leur entrée dans TECH_LOGOS :
+// FormationDetail affiche formation.technologies (base de données), qui
+// contient encore nextjs, wordpress et arduino.
 export const LANDING_MARQUEE_SLUGS = [
   // MERN stack
-  "mongodb", "express", "react", "nodejs", "nextjs",
+  "mongodb", "express", "react", "nodejs",
   // Angular + Spring Boot
   "angular", "springboot",
-  // Flutter
-  "flutter",
-  // JavaScript / HTML5 / CSS3
+  // Flutter / Dart
+  "flutter", "dart",
+  // JavaScript / HTML5 / CSS3 / TypeScript
   "javascript", "html", "css3", "typescript",
   // IA / Chatbot / Recommandation
-  "openai", "tensorflow",
+  "openai", "tensorflow", "flask",
   // Cybersécurité
-  "kalilinux",
+  "kalilinux", "owasp",
   // IoT
-  "arduino", "espressif", "mqtt",
+  "espressif", "mqtt", "postman",
   // BI / Business Intelligence
-  "sql",
+  "sql", "powerbi", "talend",
   // DevOps
   "docker", "kubernetes", "jenkins", "githubactions", "ansible", "terraform", "argocd",
   // Marketing Digital
-  "wordpress", "googleads",
-  // Autres technos déjà couvertes
-  "php", "python", "vue",
+  "googleads", "metaads", "canva",
+  // Python — utilisé dans plusieurs formations (IA, BI, Cybersécurité)
+  "python",
 ];
 
 export function getTechLogo(slug) {

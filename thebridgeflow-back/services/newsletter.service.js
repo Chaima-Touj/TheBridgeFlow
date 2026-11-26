@@ -76,12 +76,19 @@ async function queueSubscriptionMessages(subscriber, token, version) {
 
 async function loadPublication(sourceType, sourceId) {
   if (sourceType === "event") {
-    const event = await Event.findById(sourceId).select("title description status").lean();
+    const event = await Event.findById(sourceId)
+      .select("title description status startsAt timezone location mode")
+      .lean();
     if (!event || event.status !== "published") return null;
     return {
       title: event.title,
       excerpt: event.description,
       url: `${getClientBaseUrl()}/events/${event._id}`,
+      // Encadré « Date | Lieu » de l'email (kit Nouveauté).
+      startsAt: event.startsAt,
+      timezone: event.timezone,
+      location: event.location,
+      mode: event.mode,
     };
   }
   const news = await News.findOne({

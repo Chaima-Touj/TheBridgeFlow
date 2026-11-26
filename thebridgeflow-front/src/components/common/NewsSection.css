@@ -4,19 +4,21 @@
 
 .news-section {
   background: var(--bg);
-  padding: 5.5rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
 }
-/* +64px : compense la navbar fixe (SiteNavbar) sur /blog. */
-.news-section--standalone { padding-top: calc(64px + 3rem); }
+/* Navbar fixe (SiteNavbar) compensée sur /blog, où la section fait office
+   d'en-tête de page. */
+.news-section--standalone { padding-top: calc(var(--public-nav-h) + 3rem); }
 .news-section__inner {
   max-width: 1280px;
   margin: 0 auto;
 }
 
+/* En-tête : tokens partagés --section-* (index.css). */
 .news-header {
   text-align: center;
   max-width: 640px;
-  margin: 0 auto 3rem;
+  margin: 0 auto var(--section-head-gap);
 }
 .news-header__badge {
   display: inline-flex;
@@ -26,22 +28,24 @@
   color: var(--primary);
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.4rem 0.9rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 .news-header__title {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: var(--section-title-size);
   font-weight: 800;
   color: var(--text);
-  margin: 0 0 0.6rem;
-  line-height: 1.15;
+  margin: 0 0 var(--section-title-gap);
+  line-height: var(--section-title-lh);
 }
+/* /blog : le titre est le h1 de la page, il garde sa taille d'avant. */
+.news-section--standalone .news-header__title { font-size: clamp(1.5rem, 3vw, 2.1rem); }
 .news-header__sub {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: var(--section-sub-size);
   margin: 0;
-  line-height: 1.7;
+  line-height: var(--section-sub-lh);
 }
 
 .news-grid {
@@ -55,7 +59,7 @@
   min-width: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 10px 32px rgba(15, 23, 42, .08);
   transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
@@ -83,7 +87,7 @@
 }
 
 .news-card--skeleton {
-  min-height: 390px;
+  min-height: 360px;
   background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg) 50%, var(--bg-card) 70%);
   background-size: 200% 100%;
   animation: news-skeleton-pulse 1.4s ease-in-out infinite;
@@ -136,10 +140,10 @@
 }
 
 .news-card__body {
-  padding: 1.25rem 1.35rem 1.5rem;
+  padding: 1.1rem 1.25rem 1.3rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.65rem;
   flex: 1;
 }
 .news-card__meta {
@@ -155,7 +159,7 @@
   color: var(--text-muted);
 }
 .news-card__title {
-  font-size: clamp(1.2rem, 1.7vw, 1.45rem);
+  font-size: clamp(1.1rem, 1.5vw, 1.28rem);
   font-weight: 800;
   color: var(--text);
   letter-spacing: -.02em;
@@ -212,7 +216,7 @@
 .news-view-more-wrap {
   display: flex;
   justify-content: center;
-  margin-top: 2.5rem;
+  margin-top: var(--section-cta-gap);
 }
 .news-view-more {
   display: inline-flex;
@@ -235,8 +239,8 @@
 }
 
 @media (max-width: 640px) {
-  .news-section { padding: 3.5rem 1.25rem; }
-  .news-section--standalone { padding-top: calc(64px + 1.5rem); }
-  .news-header { margin-bottom: 2rem; }
-  .news-card__body { padding: 1.1rem 1.15rem 1.25rem; }
+  /* Padding de section et écart en-tête → grille : tokens --section-*
+     (déjà resserrés sur mobile). */
+  .news-section--standalone { padding-top: calc(var(--public-nav-h) + 1.5rem); }
+  .news-card__body { padding: 1rem 1.1rem 1.15rem; }
 }

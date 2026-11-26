@@ -33,4 +33,4 @@ export function isPersonaJailbreakAttempt(text = "") {
 }
 
 export const SAGE_IDENTITY_REFUSAL =
-  "Je suis SAGE, l'assistant unique de TheBridgeFlow, et je ne joue pas d'autres personnages.";
+  "Je suis SAGE, l'assistant unique de 9antra.tn_the_bridge, et je ne joue pas d'autres personnages.";

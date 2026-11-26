@@ -3,12 +3,12 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  FiArrowRight, FiPlay, FiVideo, FiX, FiExternalLink,
+  FiArrowRight, FiPlay, FiX, FiExternalLink,
   FiMapPin, FiPhone, FiMail, FiSend, FiUser, FiEdit3,
   FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
-  FiUsers, FiAward, FiTarget, FiBookOpen,
-  FiClock, FiCheckCircle, FiTrendingUp, FiMessageCircle,
-  FiGlobe, FiLink,
+  FiUsers, FiAward,
+  FiClock, FiCheckCircle, FiTrendingUp,
+  FiLink,
   // eslint-disable-next-line no-unused-vars
   FiShield,
   FiCpu, FiLock,
@@ -34,6 +34,7 @@ import TechMarquee from "../components/common/TechMarquee.jsx";
 import FormationCategories from "../components/common/FormationCategories.jsx";
 import CeremonySection from "../components/common/CeremonySection.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
+import BrandName from "../components/common/BrandName.jsx";
 import api from "../services/api.js";
 import { settingsService } from "../services/settings.service.js";
 import { newsletterService } from "../services/newsletter.service.js";
@@ -85,67 +86,22 @@ function sendYouTubeCommand(iframe, func) {
   iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), YOUTUBE_EMBED_ORIGIN);
 }
 
-/* Placeholder discret pendant le chargement des témoignages/captures depuis
-   l'API — évite un flash de section vide entre le montage et la résolution
-   du fetch (voir testimonialVideos/screenshotItems, initialisés à `null`). */
-function TestimonialsLoadingSkeleton() {
-  return (
-    <div className="lp-testi-skeleton" aria-hidden="true">
-      <div className="lp-testi-skeleton__row">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="lp-testi-skeleton__card" />)}
-      </div>
-    </div>
-  );
-}
+// Section « Découvrez TheBridgeFlow en action » (vidéo de présentation) :
+// masquée pour le moment, mais conservée telle quelle dans le code (JSX,
+// CSS et traductions). Passer à true pour la réafficher. Tant que la valeur
+// est false, PromoVideoSection n'est pas monté du tout : aucun lecteur
+// YouTube/Drive préchargé, aucune vidéo demandée, aucun IntersectionObserver,
+// aucun écouteur clavier ni de scroll (tilt 3D).
+const SHOW_PROMO_VIDEO = false;
 
-// ─────────────────────────────────────────────────────────────────────────────
-export default function LandingPage() {
-  const { t }                       = useTranslation();
-  const { lang } = useLang();
-  // eslint-disable-next-line no-unused-vars
-  const { user }                    = useAuth();
-  // eslint-disable-next-line no-unused-vars
-  const navigate                    = useNavigate();
-  const location                    = useLocation();
-
-  const [form,        setForm]        = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent,        setSent]        = useState(false);
-  const [contactSending, setContactSending] = useState(false);
-  const [contactError, setContactError] = useState("");
-  const [newsletter,  setNewsletter]  = useState("");
-  const [newsletterStatus, setNewsletterStatus] = useState(null);
-  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
-  // Une case « Je ne suis pas un robot » par formulaire (contact et newsletter).
-  const contactCaptcha = useRecaptchaCheckbox();
-  const newsletterCaptcha = useRecaptchaCheckbox();
-  const [allFormations, setAllFormations] = useState([]);
-  const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
-  const [promoOpen,   setPromoOpen]   = useState(false);
-
-  useDocumentMeta({
-    title: t("landing.seoTitle"),
-    description: t("landing.seoDescription"),
-    lang,
-  });
-
-  // Smart scroll: when landing via navigate('/', { state: { scrollTo: 'about' } })
-  useEffect(() => {
-    const target = location.state?.scrollTo;
-    if (!target) return;
-    // Small delay to let page render
-    const t = setTimeout(() => scrollToSection(target), 120);
-    return () => clearTimeout(t);
-  }, [location.state]);
-
-  // Fetch all formations once — filtering/slicing happens client-side below
-  useEffect(() => {
-    api.get("/formations")
-      .then(res => setAllFormations(res.data || []))
-      .catch(() => {});
-  }, []);
-
-  // Formations Populaires : 4 premières formations
-  const displayedFormations = useMemo(() => allFormations.slice(0, 4), [allFormations]);
+/* ── Présentation vidéo « Découvrez TheBridgeFlow en action » ───────────────
+   Composant à part pour que tout son état (lecture, modale, préchargement des
+   lecteurs, tilt 3D au scroll) n'existe que lorsqu'il est monté — voir
+   SHOW_PROMO_VIDEO. `actionVideo` vient de SiteSettings (MongoDB) ; repli sur
+   VIDEO_URLS tant que le fetch n'a pas répondu ou s'il échoue. */
+function PromoVideoSection({ actionVideo }) {
+  const { t } = useTranslation();
+  const [promoOpen, setPromoOpen] = useState(false);
 
   /* Promo modal: ESC to close + scroll lock */
   useEffect(() => {
@@ -159,56 +115,6 @@ export default function LandingPage() {
       window.removeEventListener("keydown", onKey);
     };
   }, [promoOpen]);
-
-  const handleContact = async (e) => {
-    e.preventDefault();
-    if (contactSending) return;
-    if (contactCaptcha.missing) {
-      setContactError(t("captcha.required"));
-      return;
-    }
-    setContactSending(true);
-    setContactError("");
-    try {
-      await contactMessagesService.submit(form, contactCaptcha.requestConfig);
-      setSent(true);
-      setForm({ name: "", email: "", subject: "", message: "" });
-      setTimeout(() => setSent(false), 4000);
-    } catch (error) {
-      // Message du serveur seulement pour une erreur 4xx (validation, captcha,
-      // trop d'envois) ; réseau ou 5xx : message générique traduit.
-      const status = error.response?.status;
-      const serverMessage = status >= 400 && status < 500 ? error.response?.data?.message : "";
-      setContactError(serverMessage || t("landing.contactError"));
-    } finally {
-      setContactSending(false);
-      contactCaptcha.reset();
-    }
-  };
-
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    if (newsletterSubmitting) return;
-    if (newsletterCaptcha.missing) {
-      setNewsletterStatus({ type: "error", message: t("captcha.required") });
-      return;
-    }
-    setNewsletterSubmitting(true);
-    setNewsletterStatus(null);
-    try {
-      const { data } = await newsletterService.subscribe(newsletter, lang, newsletterCaptcha.requestConfig);
-      setNewsletterStatus({ type: "success", message: data.message || t("landing.newsletterSuccess") });
-      setNewsletter("");
-    } catch (err) {
-      setNewsletterStatus({
-        type: "error",
-        message: err.response?.data?.message || t("landing.newsletterError"),
-      });
-    } finally {
-      setNewsletterSubmitting(false);
-      newsletterCaptcha.reset();
-    }
-  };
 
   // ── Scroll-tilt 3D effect for promo video section ─────────────────────
   const promoSectionRef = useRef(null);
@@ -228,41 +134,6 @@ export default function LandingPage() {
     isMobile ? [0.97, 0.99, 1, 1] : [0.92, 0.97, 1, 1]
   );
 
-  // ── Vidéo "Découvrez TheBridgeFlow en action" — pilotée par SiteSettings
-  // (MongoDB), plus l'ancien VIDEO_URLS["/stageflow-promo.mp4"] codé en dur.
-  // Fallback conservé si le fetch échoue ou tant qu'il n'a pas résolu.
-  const [actionVideo, setActionVideo] = useState(null);
-  // Témoignages vidéo Summer Camp/PFE/Formation — pilotés par
-  // SiteSettings.testimonialVideos (MongoDB, gérés depuis
-  // /dashboard/admin/feedbacks), plus l'ancien testimonials.js codé en dur en
-  // fallback. `null` = pas encore chargé (affiche TestimonialsLoadingSkeleton),
-  // `[]` = chargé mais vide pour cette catégorie. Un seul fetch sert les 3
-  // catégories (déjà toutes dans data.testimonialVideos), pas besoin d'un
-  // appel séparé par section.
-  const [testimonialVideos, setTestimonialVideos] = useState(null);
-  useEffect(() => {
-    settingsService.get()
-      .then(({ data }) => {
-        setActionVideo(data.actionVideo);
-        setTestimonialVideos(data.testimonialVideos || []);
-        setCeremonyEnabled(data.ceremonyEnabled === true);
-      })
-      .catch(() => setTestimonialVideos([])); // actionVideo garde son fallback VIDEO_URLS
-  }, []);
-
-  const toTestimonialItem = (v) => ({ id: v._id, videoUrl: v.url, posterUrl: v.thumbnail, category: v.category });
-  const summerCampTestimonials = testimonialVideos?.filter((v) => v.category === "summer-camp").map(toTestimonialItem) ?? null;
-  const pfeTestimonials        = testimonialVideos?.filter((v) => v.category === "pfe").map(toTestimonialItem) ?? null;
-  const formationTestimonials  = testimonialVideos?.filter((v) => v.category === "formation").map(toTestimonialItem) ?? null;
-
-  // Captures d'écran de témoignages — pilotées par TestimonialScreenshot
-  // (MongoDB), plus l'ancien screenshotTestimonials.js codé en dur en fallback.
-  const [screenshotItems, setScreenshotItems] = useState(null);
-  useEffect(() => {
-    feedbacksService.getScreenshots()
-      .then(({ data }) => setScreenshotItems(data.map((s) => ({ id: s._id, src: s.imageUrl }))))
-      .catch(() => setScreenshotItems([]));
-  }, []);
   const promoVideoUrl = actionVideo?.url || VIDEO_URLS["/stageflow-promo.mp4"];
   const promoIsDrive  = promoVideoUrl.includes("drive.google.com");
   const promoYouTubeId = getYouTubeId(promoVideoUrl);
@@ -349,6 +220,334 @@ export default function LandingPage() {
   }, [promoOpen, promoIsYouTube]);
 
   return (
+    <section className="lp-promo-video" ref={promoSectionRef}>
+      <div className="lp-promo-video__inner">
+
+        {/* Header */}
+        <motion.div
+          className="lp-section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="lp-section-title">{t("landing.promoTitle")}</h2>
+          <p className="lp-section-sub">
+            {t("landing.promoSub")}
+          </p>
+        </motion.div>
+
+        {/* Cadre "tablette" avec effet de tilt 3D au scroll — le tilt
+            s'applique à l'ensemble du cadre (bordure + vidéo), pas
+            seulement au contenu vidéo, pour un vrai effet d'appareil qui
+            se redresse. */}
+        <motion.div
+          style={{
+            perspective: "1000px",
+            rotateX,
+            scale,
+          }}
+        >
+          <div className="lp-promo-video__frame">
+            <button
+              className="lp-promo-video__card"
+              ref={promoCardRef}
+              onClick={() => setPromoOpen(true)}
+              aria-label={t("landing.promoPlayAriaLabel")}
+            >
+              {/* Autoplay preview — muted, loop, no controls. Play/pause
+                  piloté par IntersectionObserver (voir promoInView) :
+                  ne consomme des ressources que quand la section est
+                  visible à l'écran. */}
+              {promoIsDrive ? (
+                promoInView && (
+                  <iframe
+                    className="lp-promo-video__preview"
+                    src={promoDriveEmbedSrc}
+                    allow="autoplay; encrypted-media"
+                    title={t("landing.promoVideoLabel")}
+                    tabIndex={-1}
+                  />
+                )
+              ) : promoIsYouTube ? (
+                <>
+                  {/* Image de la vidéo affichée tout de suite, en attendant le lecteur. */}
+                  <img
+                    className="lp-promo-video__preview"
+                    src={`https://i.ytimg.com/vi/${promoYouTubeId}/hqdefault.jpg`}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  {/* Chargé dès que la section approche, puis jamais démonté :
+                      mis en pause/relancé selon la visibilité (voir effets). */}
+                  {promoNear && (
+                    <iframe
+                      ref={promoPreviewFrameRef}
+                      className={`lp-promo-video__preview lp-promo-video__preview--youtube${promoPreviewLoaded ? " is-loaded" : ""}`}
+                      src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${promoYouTubeId}&playsinline=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      title={t("landing.promoVideoLabel")}
+                      tabIndex={-1}
+                      onLoad={() => setTimeout(() => setPromoPreviewLoaded(true), 600)}
+                    />
+                  )}
+                </>
+              ) : (
+                <video
+                  ref={promoVideoRef}
+                  className="lp-promo-video__preview"
+                  src={promoVideoUrl}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  tabIndex={-1}
+                />
+              )}
+              {/* Subtle gradient overlay (glassmorphism feel) */}
+              <div className="lp-promo-video__card-overlay" />
+              <div className="lp-promo-video__play-ring">
+                <FiPlay size={28} />
+              </div>
+              <div className="lp-promo-video__caption">
+                <span className="lp-promo-video__caption-label">{t("landing.promoVideoLabel")}</span>
+                <span className="lp-promo-video__caption-sub">{t("landing.promoVideoSub")}</span>
+              </div>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Promo modal — pour YouTube, rendue (cachée) dès que la section
+          approche : son lecteur est déjà chargé quand on clique. */}
+      {(promoOpen || (promoIsYouTube && promoNear)) && (
+        <div
+          className={`lp-promo-video__overlay${promoOpen ? "" : " lp-promo-video__overlay--preload"}`}
+          onClick={() => setPromoOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-hidden={promoOpen ? undefined : true}
+          aria-label={t("landing.promoModalAriaLabel")}
+        >
+          <motion.div
+            className="lp-promo-video__modal"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={promoOpen ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.22 }}
+          >
+            <button
+              className="lp-promo-video__modal-close"
+              onClick={() => setPromoOpen(false)}
+              aria-label={t("applications.closeModal")}
+            >
+              <FiX size={18} />
+            </button>
+            {promoIsDrive && promoDriveViewUrl && (
+              <a
+                className="lp-promo-video__modal-external"
+                href={promoDriveViewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t("coursePreview.openExternalHint")}
+              >
+                <FiExternalLink size={13} />
+                <span>{t("coursePreview.openExternal")}</span>
+              </a>
+            )}
+            {promoIsDrive ? (
+              <iframe
+                className="lp-promo-video__modal-video"
+                src={promoVideoUrl}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title="Stageflow Coding Academy"
+              />
+            ) : promoIsYouTube ? (
+              <iframe
+                ref={promoModalFrameRef}
+                className="lp-promo-video__modal-video"
+                // Pas d'autoplay : préchargée cachée, lancée par message à l'ouverture.
+                src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title={t("landing.promoVideoLabel")}
+                tabIndex={promoOpen ? undefined : -1}
+                onLoad={() => {
+                  // Ouverte avant la fin du chargement : on lance dès que possible.
+                  if (promoOpen) [300, 1000].forEach((delay) => setTimeout(() => sendYouTubeCommand(promoModalFrameRef.current, "playVideo"), delay));
+                }}
+              />
+            ) : (
+              <video
+                className="lp-promo-video__modal-video"
+                src={promoVideoUrl}
+                controls
+                autoPlay
+                preload="metadata"
+                controlsList="nodownload"
+                disablePictureInPicture
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <track kind="captions" />
+              </video>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* Placeholder discret pendant le chargement des témoignages/captures depuis
+   l'API — évite un flash de section vide entre le montage et la résolution
+   du fetch (voir testimonialVideos/screenshotItems, initialisés à `null`). */
+function TestimonialsLoadingSkeleton() {
+  return (
+    <div className="lp-testi-skeleton" aria-hidden="true">
+      <div className="lp-testi-skeleton__row">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="lp-testi-skeleton__card" />)}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+export default function LandingPage() {
+  const { t }                       = useTranslation();
+  const { lang } = useLang();
+  // eslint-disable-next-line no-unused-vars
+  const { user }                    = useAuth();
+  // eslint-disable-next-line no-unused-vars
+  const navigate                    = useNavigate();
+  const location                    = useLocation();
+
+  const [form,        setForm]        = useState({ name: "", email: "", subject: "", message: "" });
+  const [sent,        setSent]        = useState(false);
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [newsletter,  setNewsletter]  = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState(null);
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  // Une case « Je ne suis pas un robot » par formulaire (contact et newsletter).
+  const contactCaptcha = useRecaptchaCheckbox();
+  const newsletterCaptcha = useRecaptchaCheckbox();
+  const [allFormations, setAllFormations] = useState([]);
+  const [ceremonyEnabled, setCeremonyEnabled] = useState(false);
+
+  useDocumentMeta({
+    title: t("landing.seoTitle"),
+    description: t("landing.seoDescription"),
+    lang,
+  });
+
+  // Smart scroll: when landing via navigate('/', { state: { scrollTo: 'features' } })
+  useEffect(() => {
+    const target = location.state?.scrollTo;
+    if (!target) return;
+    // Small delay to let page render
+    const t = setTimeout(() => scrollToSection(target), 120);
+    return () => clearTimeout(t);
+  }, [location.state]);
+
+  // Fetch all formations once — filtering/slicing happens client-side below
+  useEffect(() => {
+    api.get("/formations")
+      .then(res => setAllFormations(res.data || []))
+      .catch(() => {});
+  }, []);
+
+  // Formations Populaires : 4 premières formations
+  const displayedFormations = useMemo(() => allFormations.slice(0, 4), [allFormations]);
+
+  const handleContact = async (e) => {
+    e.preventDefault();
+    if (contactSending) return;
+    if (contactCaptcha.missing) {
+      setContactError(t("captcha.required"));
+      return;
+    }
+    setContactSending(true);
+    setContactError("");
+    try {
+      await contactMessagesService.submit(form, contactCaptcha.requestConfig);
+      setSent(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setTimeout(() => setSent(false), 4000);
+    } catch (error) {
+      // Message du serveur seulement pour une erreur 4xx (validation, captcha,
+      // trop d'envois) ; réseau ou 5xx : message générique traduit.
+      const status = error.response?.status;
+      const serverMessage = status >= 400 && status < 500 ? error.response?.data?.message : "";
+      setContactError(serverMessage || t("landing.contactError"));
+    } finally {
+      setContactSending(false);
+      contactCaptcha.reset();
+    }
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (newsletterSubmitting) return;
+    if (newsletterCaptcha.missing) {
+      setNewsletterStatus({ type: "error", message: t("captcha.required") });
+      return;
+    }
+    setNewsletterSubmitting(true);
+    setNewsletterStatus(null);
+    try {
+      const { data } = await newsletterService.subscribe(newsletter, lang, newsletterCaptcha.requestConfig);
+      setNewsletterStatus({ type: "success", message: data.message || t("landing.newsletterSuccess") });
+      setNewsletter("");
+    } catch (err) {
+      setNewsletterStatus({
+        type: "error",
+        message: err.response?.data?.message || t("landing.newsletterError"),
+      });
+    } finally {
+      setNewsletterSubmitting(false);
+      newsletterCaptcha.reset();
+    }
+  };
+
+  // ── Vidéo "Découvrez TheBridgeFlow en action" — pilotée par SiteSettings
+  // (MongoDB), plus l'ancien VIDEO_URLS["/stageflow-promo.mp4"] codé en dur.
+  // Fallback conservé si le fetch échoue ou tant qu'il n'a pas résolu.
+  // Transmise à PromoVideoSection, monté seulement si SHOW_PROMO_VIDEO.
+  const [actionVideo, setActionVideo] = useState(null);
+  // Témoignages vidéo Summer Camp/PFE/Formation — pilotés par
+  // SiteSettings.testimonialVideos (MongoDB, gérés depuis
+  // /dashboard/admin/feedbacks), plus l'ancien testimonials.js codé en dur en
+  // fallback. `null` = pas encore chargé (affiche TestimonialsLoadingSkeleton),
+  // `[]` = chargé mais vide pour cette catégorie. Un seul fetch sert les 3
+  // catégories (déjà toutes dans data.testimonialVideos), pas besoin d'un
+  // appel séparé par section.
+  const [testimonialVideos, setTestimonialVideos] = useState(null);
+  useEffect(() => {
+    settingsService.get()
+      .then(({ data }) => {
+        setActionVideo(data.actionVideo);
+        setTestimonialVideos(data.testimonialVideos || []);
+        setCeremonyEnabled(data.ceremonyEnabled === true);
+      })
+      .catch(() => setTestimonialVideos([])); // actionVideo garde son fallback VIDEO_URLS
+  }, []);
+
+  const toTestimonialItem = (v) => ({ id: v._id, videoUrl: v.url, posterUrl: v.thumbnail, category: v.category });
+  const summerCampTestimonials = testimonialVideos?.filter((v) => v.category === "summer-camp").map(toTestimonialItem) ?? null;
+  const pfeTestimonials        = testimonialVideos?.filter((v) => v.category === "pfe").map(toTestimonialItem) ?? null;
+  const formationTestimonials  = testimonialVideos?.filter((v) => v.category === "formation").map(toTestimonialItem) ?? null;
+
+  // Captures d'écran de témoignages — pilotées par TestimonialScreenshot
+  // (MongoDB), plus l'ancien screenshotTestimonials.js codé en dur en fallback.
+  const [screenshotItems, setScreenshotItems] = useState(null);
+  useEffect(() => {
+    feedbacksService.getScreenshots()
+      .then(({ data }) => setScreenshotItems(data.map((s) => ({ id: s._id, src: s.imageUrl }))))
+      .catch(() => setScreenshotItems([]));
+  }, []);
+
+  return (
     <div className="landing" dir={lang === "ar" ? "rtl" : "ltr"}>
 
       <SiteNavbar />
@@ -416,7 +615,6 @@ export default function LandingPage() {
         <section id="formations-populaires" className="lp-popular">
           <div className="lp-popular__inner">
             <div className="lp-section-header">
-              <span className="lp-section-badge">{t("landing.popularBadge")}</span>
               <h2 className="lp-section-title">{t("landing.popularTitle")}</h2>
               <p className="lp-section-sub">{t("landing.popularSub")}</p>
             </div>
@@ -546,264 +744,22 @@ export default function LandingPage() {
         />
       )}
 
-      {/* ── PRÉSENTATION VIDÉO ──────────────────────────────────────────── */}
-      <section className="lp-promo-video" ref={promoSectionRef}>
-        <div className="lp-promo-video__inner">
+      {/* ── PRÉSENTATION VIDÉO — masquée tant que SHOW_PROMO_VIDEO vaut false ── */}
+      {SHOW_PROMO_VIDEO && <PromoVideoSection actionVideo={actionVideo} />}
 
-          {/* Header */}
-          <motion.div
-            className="lp-section-header"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="lp-badge"><FiVideo aria-hidden="true" /> {t("landing.promoBadge")}</span>
-            <h2 className="lp-section-title" style={{ marginTop: "1rem" }}>{t("landing.promoTitle")}</h2>
-            <p className="lp-section-sub">
-              {t("landing.promoSub")}
-            </p>
-          </motion.div>
-
-          {/* Cadre "tablette" avec effet de tilt 3D au scroll — le tilt
-              s'applique à l'ensemble du cadre (bordure + vidéo), pas
-              seulement au contenu vidéo, pour un vrai effet d'appareil qui
-              se redresse. */}
-          <motion.div
-            style={{
-              perspective: "1000px",
-              rotateX,
-              scale,
-            }}
-          >
-            <div className="lp-promo-video__frame">
-              <button
-                className="lp-promo-video__card"
-                ref={promoCardRef}
-                onClick={() => setPromoOpen(true)}
-                aria-label={t("landing.promoPlayAriaLabel")}
-              >
-                {/* Autoplay preview — muted, loop, no controls. Play/pause
-                    piloté par IntersectionObserver (voir promoInView) :
-                    ne consomme des ressources que quand la section est
-                    visible à l'écran. */}
-                {promoIsDrive ? (
-                  promoInView && (
-                    <iframe
-                      className="lp-promo-video__preview"
-                      src={promoDriveEmbedSrc}
-                      allow="autoplay; encrypted-media"
-                      title={t("landing.promoVideoLabel")}
-                      tabIndex={-1}
-                    />
-                  )
-                ) : promoIsYouTube ? (
-                  <>
-                    {/* Image de la vidéo affichée tout de suite, en attendant le lecteur. */}
-                    <img
-                      className="lp-promo-video__preview"
-                      src={`https://i.ytimg.com/vi/${promoYouTubeId}/hqdefault.jpg`}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                    {/* Chargé dès que la section approche, puis jamais démonté :
-                        mis en pause/relancé selon la visibilité (voir effets). */}
-                    {promoNear && (
-                      <iframe
-                        ref={promoPreviewFrameRef}
-                        className={`lp-promo-video__preview lp-promo-video__preview--youtube${promoPreviewLoaded ? " is-loaded" : ""}`}
-                        src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${promoYouTubeId}&playsinline=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
-                        allow="autoplay; encrypted-media; picture-in-picture"
-                        title={t("landing.promoVideoLabel")}
-                        tabIndex={-1}
-                        onLoad={() => setTimeout(() => setPromoPreviewLoaded(true), 600)}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <video
-                    ref={promoVideoRef}
-                    className="lp-promo-video__preview"
-                    src={promoVideoUrl}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    tabIndex={-1}
-                  />
-                )}
-                {/* Subtle gradient overlay (glassmorphism feel) */}
-                <div className="lp-promo-video__card-overlay" />
-                <div className="lp-promo-video__play-ring">
-                  <FiPlay size={28} />
-                </div>
-                <div className="lp-promo-video__caption">
-                  <span className="lp-promo-video__caption-label">{t("landing.promoVideoLabel")}</span>
-                  <span className="lp-promo-video__caption-sub">{t("landing.promoVideoSub")}</span>
-                </div>
-              </button>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Promo modal — pour YouTube, rendue (cachée) dès que la section
-            approche : son lecteur est déjà chargé quand on clique. */}
-        {(promoOpen || (promoIsYouTube && promoNear)) && (
-          <div
-            className={`lp-promo-video__overlay${promoOpen ? "" : " lp-promo-video__overlay--preload"}`}
-            onClick={() => setPromoOpen(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-hidden={promoOpen ? undefined : true}
-            aria-label={t("landing.promoModalAriaLabel")}
-          >
-            <motion.div
-              className="lp-promo-video__modal"
-              onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={promoOpen ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.22 }}
-            >
-              <button
-                className="lp-promo-video__modal-close"
-                onClick={() => setPromoOpen(false)}
-                aria-label={t("applications.closeModal")}
-              >
-                <FiX size={18} />
-              </button>
-              {promoIsDrive && promoDriveViewUrl && (
-                <a
-                  className="lp-promo-video__modal-external"
-                  href={promoDriveViewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={t("coursePreview.openExternalHint")}
-                >
-                  <FiExternalLink size={13} />
-                  <span>{t("coursePreview.openExternal")}</span>
-                </a>
-              )}
-              {promoIsDrive ? (
-                <iframe
-                  className="lp-promo-video__modal-video"
-                  src={promoVideoUrl}
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                  title="Stageflow Coding Academy"
-                />
-              ) : promoIsYouTube ? (
-                <iframe
-                  ref={promoModalFrameRef}
-                  className="lp-promo-video__modal-video"
-                  // Pas d'autoplay : préchargée cachée, lancée par message à l'ouverture.
-                  src={`${YOUTUBE_EMBED_ORIGIN}/embed/${promoYouTubeId}?rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  title={t("landing.promoVideoLabel")}
-                  tabIndex={promoOpen ? undefined : -1}
-                  onLoad={() => {
-                    // Ouverte avant la fin du chargement : on lance dès que possible.
-                    if (promoOpen) [300, 1000].forEach((delay) => setTimeout(() => sendYouTubeCommand(promoModalFrameRef.current, "playVideo"), delay));
-                  }}
-                />
-              ) : (
-                <video
-                  className="lp-promo-video__modal-video"
-                  src={promoVideoUrl}
-                  controls
-                  autoPlay
-                  preload="metadata"
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <track kind="captions" />
-                </video>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </section>
-
-      {/* ── ABOUT ────────────────────────────────────────────────────────── */}
-      <section id="about" className="lp-about">
-        <div className="lp-about__inner">
-          <motion.div
-            className="lp-about__left"
-            initial={{ opacity: 0, x: lang === "ar" ? 40 : -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
-          >
-            <span className="lp-section-badge">{t("landing.aboutBadge")}</span>
-            <h2 className="lp-about__title">{t("landing.aboutTitle")}</h2>
-            <p className="lp-about__sub">{t("landing.aboutSub")}</p>
-
-            <div className="lp-about__pillars">
-              <div className="lp-pillar">
-                <div className="lp-pillar__icon"><FiTarget size={18} /></div>
-                <div>
-                  <div className="lp-pillar__label">{t("landing.missionLabel")}</div>
-                  <div className="lp-pillar__text">{t("landing.missionText")}</div>
-                </div>
-              </div>
-              <div className="lp-pillar">
-                <div className="lp-pillar__icon lp-pillar__icon--green"><FiTrendingUp size={18} /></div>
-                <div>
-                  <div className="lp-pillar__label">{t("landing.visionLabel")}</div>
-                  <div className="lp-pillar__text">{t("landing.visionText")}</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="lp-about__right">
-            {[
-              { title: t("landing.aboutCard1Title"), desc: t("landing.aboutCard1Desc"), icon: <FiUsers size={22} />, color: "#2563EB" },
-              { title: t("landing.aboutCard2Title"), desc: t("landing.aboutCard2Desc"), icon: <FiMessageCircle size={22} />, color: "#10B981" },
-              { title: t("landing.aboutCard3Title"), desc: t("landing.aboutCard3Desc"), icon: <FiAward size={22} />, color: "#F59E0B" },
-              { title: t("landing.aboutCard4Title"), desc: t("landing.aboutCard4Desc"), icon: <FiBookOpen size={22} />, color: "#8B5CF6" },
-            ].map((card, i) => (
-              <motion.div
-                key={card.title}
-                className="lp-about-card"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.4 }}
-              >
-                <div className="lp-about-card__icon" style={{ background: `${card.color}18`, color: card.color }}>
-                  {card.icon}
-                </div>
-                <div>
-                  <div className="lp-about-card__title">{card.title}</div>
-                  <div className="lp-about-card__desc">{card.desc}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHY CHOOSE US ────────────────────────────────────────────────── */}
+      {/* ── WHY CHOOSE US — 3 cartes (une rangée de 3 sur desktop, empilées
+          sur mobile) ────────────────────────────────────────────────────── */}
       <section id="features" className="lp-why">
         <div className="lp-why__inner">
           <div className="lp-section-header">
-            <span className="lp-section-badge">{t("landing.whyBadge")}</span>
             <h2 className="lp-section-title">{t("landing.whyTitle")}</h2>
             <p className="lp-section-sub">{t("landing.whySub")}</p>
           </div>
           <div className="lp-why__grid">
             {[
-              { key: "why1", icon: <FiCheckCircle size={24} />, color: "#2563EB" },
-              { key: "why2", icon: <FiBookOpen     size={24} />, color: "#10B981" },
-              { key: "why3", icon: <FiUsers        size={24} />, color: "#F59E0B" },
-              { key: "why4", icon: <FiTrendingUp   size={24} />, color: "#EF4444" },
-              { key: "why5", icon: <FiMessageCircle size={24}/>, color: "#8B5CF6" },
-              { key: "why6", icon: <FiAward        size={24} />, color: "#06B6D4" },
-              { key: "why7", icon: <FiGlobe        size={24} />, color: "#0EA5E9" },
-              { key: "why8", icon: <FiClock        size={24} />, color: "#F97316" },
-              { key: "why9", icon: <FiLink         size={24} />, color: "#22C55E" },
+              { key: "why3", titleKey: "landing.why3Title", descKey: "landing.why3Desc", icon: <FiUsers size={24} />, color: "#F59E0B" },
+              { key: "why6", titleKey: "landing.why6Title", descKey: "landing.why6Desc", icon: <FiAward size={24} />, color: "#06B6D4" },
+              { key: "why9", titleKey: "landing.why9Title", descKey: "landing.why9Desc", icon: <FiLink  size={24} />, color: "#22C55E" },
             ].map((f, i) => (
               <motion.div
                 key={f.key}
@@ -816,8 +772,8 @@ export default function LandingPage() {
                 <div className="lp-why-card__icon" style={{ background: `${f.color}18`, color: f.color }}>
                   {f.icon}
                 </div>
-                <h3 className="lp-why-card__title">{t(`landing.${f.key}Title`)}</h3>
-                <p className="lp-why-card__desc">{t(`landing.${f.key}Desc`)}</p>
+                <h3 className="lp-why-card__title">{t(f.titleKey)}</h3>
+                <p className="lp-why-card__desc">{t(f.descKey)}</p>
               </motion.div>
             ))}
           </div>
@@ -833,7 +789,6 @@ export default function LandingPage() {
 
           {/* Left: form */}
           <div className="lp-contact__form-wrap">
-            <span className="lp-section-badge">{t("landing.contactBadge")}</span>
             <h2 className="lp-contact__title">{t("landing.contactTitle")}</h2>
             <p className="lp-contact__sub">{t("landing.contactSub")}</p>
 
@@ -902,7 +857,7 @@ export default function LandingPage() {
               {/* Brand */}
               <div className="lp-contact__brand">
                 <img src="/favicon.png" alt="Logo" className="lp-nav__logo-icon" />
-                <span className="lp-contact__brand-name">TheBridge<span className="lp-accent">Flow</span></span>
+                <BrandName className="lp-contact__brand-name" accentClassName="lp-accent" />
               </div>
               <p className="lp-contact__info-desc">{t("landing.contactSub")}</p>
 

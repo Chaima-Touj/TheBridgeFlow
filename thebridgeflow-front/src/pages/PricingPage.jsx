@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FiCheck, FiCreditCard } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import "./FormationsPage.css";
 import "./PricingPage.css";
 
@@ -19,7 +20,7 @@ export default function PricingPage() {
   const { t } = useTranslation();
 
   useDocumentMeta({
-    title: "Tarifs — TheBridgeFlow",
+    title: `Tarifs — ${BRAND_NAME}`,
     description: "Découvrez nos formules de formation : présentiel, en ligne ou accès aux enregistrements. Choisissez celle qui vous correspond.",
   });
 

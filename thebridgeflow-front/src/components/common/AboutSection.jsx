@@ -25,7 +25,6 @@ export default function AboutSection({ id = "about" }) {
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
         >
-          <span className="lp-section-badge">{t("landing.aboutBadge")}</span>
           <h2 className="lp-about__title">{t("landing.aboutTitle")}</h2>
           <p className="lp-about__sub">{t("landing.aboutSub")}</p>
 

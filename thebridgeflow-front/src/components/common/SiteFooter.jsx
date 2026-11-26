@@ -9,6 +9,8 @@ import { TbBrandWhatsapp } from "react-icons/tb";
 import { PHONE_NUMBER } from "../../utils/phoneDisplay.jsx";
 import { buildWhatsAppLink } from "../../utils/whatsapp.js";
 import { scrollToSection } from "../../utils/scrollToSection.js";
+import { BRAND_NAME } from "../../constants/brand.js";
+import BrandName from "./BrandName.jsx";
 import "./SiteFooter.css";
 
 export default function SiteFooter() {
@@ -39,7 +41,7 @@ export default function SiteFooter() {
         <div className="lp-footer__brand">
           <Link to="/" className="lp-nav__logo">
             <img src="/favicon.png" alt="Logo" className="lp-nav__logo-icon" />
-            <span>TheBridge<span className="lp-accent">Flow</span></span>
+            <BrandName accentClassName="lp-accent" />
           </Link>
           <p className="lp-footer__tagline">{t("landing.footerTagline")}</p>
           <div className="lp-footer__socials">
@@ -54,7 +56,10 @@ export default function SiteFooter() {
         <div className="lp-footer__col">
           <h4>{t("landing.footerNav")}</h4>
           <a href="#hero" onClick={handleSectionClick("hero")}>{t("landing.footerHome")}</a>
-          <a href="#about" onClick={handleSectionClick("about")}>{t("landing.footerAbout")}</a>
+          {/* « À propos » et « Contact » ne sont plus dans la barre de
+              navigation : leurs pages restent accessibles d'ici. */}
+          <Link to="/about">{t("landing.footerAbout")}</Link>
+          <Link to="/contact">{t("landing.footerContact")}</Link>
           <a href="#features" onClick={handleSectionClick("features")}>{t("landing.footerFeatures")}</a>
           <Link to="/tarifs">{t("landing.footerPricing")}</Link>
           <Link to="/conditions">{t("landing.footerTerms")}</Link>
@@ -86,7 +91,7 @@ export default function SiteFooter() {
       </div>
 
       <div className="lp-footer__bottom">
-        © 2026 TheBridgeFlow. {t("landing.copyright")}.
+        © 2026 <bdi>{BRAND_NAME}</bdi>. {t("landing.copyright")}.
       </div>
       {showBackToTop && <button
         type="button"

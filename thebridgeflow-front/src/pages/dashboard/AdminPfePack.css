@@ -1,4 +1,4 @@
-/* Dashboard Admin → Pack PFE (préfixe .appfe-).
+/* Dashboard Admin → Pack PFE & Summer Camp (préfixe .appfe-).
    Statuts (badge, filtre, sélecteur) : components/common/RequestStatus.css. */
 .appfe-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; min-width: 0; padding-bottom: 2rem; }
 .appfe-page > * { min-width: 0; }
@@ -15,7 +15,13 @@
 .btn-primary.appfe-btn:disabled:hover { background: var(--primary); box-shadow: none; transform: none; }
 .appfe-btn svg { flex: 0 0 auto; }
 
-/* Barre d'outils : statut, recherche, actions */
+/* Couleur propre à chaque programme (icônes du filtre et des étiquettes) */
+.appfe-program-tone--pfe-pack { --program-tone: #2563eb; }
+.appfe-program-tone--summer-camp { --program-tone: #c2410c; }
+[data-theme="dark"] .appfe-program-tone--pfe-pack { --program-tone: #93c5fd; }
+[data-theme="dark"] .appfe-program-tone--summer-camp { --program-tone: #fdba74; }
+
+/* Barre d'outils : programme, actions, statut, recherche */
 .appfe-toolbar {
   display: grid;
   gap: .85rem;
@@ -27,6 +33,65 @@
 }
 .appfe-toolbar__row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
 .appfe-toolbar__actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* Filtre par programme : contrôle segmenté « Tous / Pack PFE / Summer Camp » */
+.appfe-programs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: .25rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-sm) + 4px);
+  background: var(--bg);
+}
+.appfe-program {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: .35rem .8rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 650;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s, color .15s, box-shadow .15s;
+}
+.appfe-program svg { flex: 0 0 auto; color: var(--program-tone, currentColor); }
+.appfe-program:hover { color: var(--text); }
+.appfe-program:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.appfe-program[aria-pressed="true"] { color: var(--text); border-color: var(--border); background: var(--bg-card); box-shadow: var(--shadow); }
+.appfe-program__label { min-width: 0; overflow-wrap: anywhere; }
+.appfe-program__count { flex: 0 0 auto; min-width: 1.4rem; padding: 0 .4rem; border-radius: 999px; color: var(--text-secondary); background: var(--border); font-size: .72rem; line-height: 1.5; text-align: center; }
+.appfe-program[aria-pressed="true"] .appfe-program__count { color: #fff; background: var(--primary); }
+
+/* Étiquette du programme d'une demande : discrète, distincte du badge de statut */
+.appfe-program-tag {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .25rem;
+  padding: .05rem .4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  background: var(--bg);
+  font-size: .68rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.appfe-program-tag svg { flex: 0 0 auto; color: var(--program-tone); }
+.appfe-detail__meta .appfe-program-tag { padding: .15rem .5rem; font-size: .72rem; }
+
 .appfe-search { position: relative; display: flex; align-items: center; min-width: 0; color: var(--text-muted); }
 .appfe-search > svg { position: absolute; inset-inline-start: .8rem; pointer-events: none; }
 .appfe-search input {
@@ -148,6 +213,9 @@
 .appfe-avatar--lg { width: 3.1rem; height: 3.1rem; font-size: 1rem; }
 .appfe-row__main { grid-area: main; display: grid; gap: .1rem; min-width: 0; }
 .appfe-row__main strong { overflow: hidden; color: var(--text); font-size: .9rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+/* Nom (tronqué si besoin) + étiquette du programme, toujours visible */
+.appfe-row__name { display: flex; align-items: center; gap: .45rem; min-width: 0; }
+.appfe-row__name strong { min-width: 0; }
 .appfe-row__main small { overflow: hidden; font-size: .76rem; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; text-align: start; }
 .appfe-row__email { color: var(--text-secondary); }
 .appfe-row__place { color: var(--text-muted); }
@@ -255,13 +323,18 @@
 @media (max-width: 760px) {
   .appfe-toolbar__actions { width: 100%; }
   .appfe-toolbar__actions .appfe-btn { flex: 1 1 auto; }
+  /* Programme : trois segments égaux sur toute la largeur */
+  .appfe-programs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+  .appfe-program { flex-wrap: wrap; padding-inline: .5rem; text-align: center; }
 }
 @media (max-width: 480px) {
   .appfe-toolbar { padding: .85rem; }
   .appfe-detail { padding: 1rem; }
   .appfe-row { padding: .8rem .85rem; gap: .7rem; }
+  .appfe-program { gap: .3rem; padding-inline: .35rem; font-size: .8rem; }
+  .appfe-program > svg { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .appfe-spin { animation: none; }
-  .appfe-row, .appfe-search input { transition: none; }
+  .appfe-row, .appfe-search input, .appfe-program { transition: none; }
 }

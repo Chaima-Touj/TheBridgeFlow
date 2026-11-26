@@ -14,6 +14,7 @@ import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { buildSkillFormationMatcher } from "../utils/techMatch.js";
 import { offersService, localizeOffer } from "../services/offers.service.js";
 import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
+import { BRAND_NAME } from "../constants/brand.js";
 import "./PublicOfferDetail.css";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ const PublicOfferDetail = () => {
 
   // SEO — uniquement une fois l'offre chargée.
   useDocumentMeta({
-    title:       offer ? `${offer.title} — ${offer.companyName} | TheBridgeFlow` : undefined,
+    title:       offer ? `${offer.title} — ${offer.companyName} | ${BRAND_NAME}` : undefined,
     description: offer?.description ? truncateForSEO(offer.description) : undefined,
   });
 

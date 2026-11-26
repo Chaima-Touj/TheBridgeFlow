@@ -31,6 +31,10 @@
   gap:             0.5rem;
   font-weight:     800;
   font-size:       1.2rem;
+  /* Nom complet « 9antra.tn_the_bridge » sur une ligne, jamais plus large
+     que la carte (taille réduite sur téléphone, voir Responsive). */
+  white-space:     nowrap;
+  max-width:       100%;
   color:           var(--text);
   margin-bottom:   1.75rem;
   text-decoration: none;
@@ -40,6 +44,7 @@
   height:        52px;
   border-radius: 50%;
   object-fit:    cover;
+  flex-shrink:   0;
 }
 .verify-logo__accent { color: var(--primary); }
 
@@ -165,6 +170,9 @@
 @media (max-width: 480px) {
   .verify-page   { padding: 1rem; }
   .verify-card   { padding: 1.75rem 0.85rem; }
+  /* Logo : ≈ 220px avec le nom complet, pour ≥ 300px utiles à 360px. */
+  .verify-logo       { font-size: 1.05rem; }
+  .verify-logo__icon { width: 44px; height: 44px; }
   /* 6 inputs + 5 gaps must fit inside a 320px viewport minus page+card padding
      (320 - 2*16 - 2*13.6 ≈ 261px available) — sized + gapped to fit with room
      to spare, with flex-wrap above as a defensive fallback regardless. */

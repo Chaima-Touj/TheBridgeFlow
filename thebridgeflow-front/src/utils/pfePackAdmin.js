@@ -1,14 +1,40 @@
-/* Tableau de bord admin → Pack PFE : fonctions pures (comptage par statut,
-   filtre et recherche côté client, regroupement des technologies). */
+/* Tableau de bord admin → Pack PFE & Summer Camp : fonctions pures (comptage
+   par programme et par statut, filtres et recherche côté client, regroupement
+   des technologies). */
 
 import { normalizeRequestStatus } from "./requestStatuses.js";
+
+/* Programmes servis par le même formulaire et la même collection. Mêmes
+   valeurs que le backend (thebridgeflow-back/utils/validatePfePackRegistration.js)
+   et que les pages publiques (constants/programPages.js). */
+export const PROGRAMS = ["pfe-pack", "summer-camp"];
+export const DEFAULT_PROGRAM = "pfe-pack";
+
+// Une demande enregistrée avant l'ajout du programme n'en a pas : « pfe-pack ».
+export const programOf = (registration) => (PROGRAMS.includes(registration?.program) ? registration.program : DEFAULT_PROGRAM);
+
+// Filtre par programme (?program= dans l'URL) : "all" | "pfe-pack" | "summer-camp" ; toute autre valeur → "all".
+export const normalizeProgramFilter = (value) => (PROGRAMS.includes(value) ? value : "all");
+
+const inProgram = (registration, program) => !program || program === "all" || programOf(registration) === program;
 
 // Une demande enregistrée avant l'ajout du suivi n'a pas de statut : « new ».
 export const registrationStatus = (registration) => normalizeRequestStatus(registration?.status);
 
-export function countByStatus(list = []) {
+export function countByProgram(list = []) {
+  const counts = { all: 0, "pfe-pack": 0, "summer-camp": 0 };
+  for (const registration of list) {
+    counts.all += 1;
+    counts[programOf(registration)] += 1;
+  }
+  return counts;
+}
+
+// Nombre de demandes de chaque statut, à l'intérieur du programme choisi ("all" : tous).
+export function countByStatus(list = [], { program = "all" } = {}) {
   const counts = { all: 0, new: 0, contacted: 0, confirmed: 0 };
   for (const registration of list) {
+    if (!inProgram(registration, program)) continue;
     counts.all += 1;
     counts[registrationStatus(registration)] += 1;
   }
@@ -53,17 +79,19 @@ const searchableText = (registration) => normalizeSearchText([
   ...(Array.isArray(registration.technologies) ? registration.technologies : []),
 ].join(" "));
 
-/* status : "all" (ou vide) | "new" | "contacted" | "confirmed".
+/* program : "all" (ou vide) | "pfe-pack" | "summer-camp".
+   status : "all" (ou vide) | "new" | "contacted" | "confirmed".
    search : chaque mot doit apparaître dans au moins un champ (nom et prénom
    dans n'importe quel ordre, e-mail, téléphone, établissement, ville,
    technologies), sans tenir compte de la casse ni des accents. */
-export function filterRegistrations(list = [], { status = "all", search = "" } = {}) {
+export function filterRegistrations(list = [], { program = "all", status = "all", search = "" } = {}) {
   const rawSearch = String(search ?? "").trim();
   const query = normalizeSearchText(rawSearch);
   const tokens = query ? query.split(" ") : [];
   const phones = phoneQueries(rawSearch);
 
   return list.filter((registration) => {
+    if (!inProgram(registration, program)) return false;
     if (status && status !== "all" && registrationStatus(registration) !== status) return false;
     if (!tokens.length) return true;
     const text = searchableText(registration);

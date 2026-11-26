@@ -1,5 +1,14 @@
+// Programmes servis par le même formulaire public et la même collection :
+// Pack PFE (/pack-pfe) et Summer Camp (/summer-camp). Mêmes valeurs côté
+// frontend : src/utils/pfePackAdmin.js.
+export const PFE_PACK_PROGRAMS = ["pfe-pack", "summer-camp"];
+export const DEFAULT_PFE_PACK_PROGRAM = "pfe-pack";
+
+// Une demande enregistrée avant l'ajout du programme n'en a pas : « pfe-pack ».
+export const normalizePfePackProgram = (program) => (PFE_PACK_PROGRAMS.includes(program) ? program : DEFAULT_PFE_PACK_PROGRAM);
+
 export function validatePfePackRegistration(input) {
-  const { firstName, lastName, phone, email, university, city, technologies, locationMode, preferredLocation, subject, consentConfirmed } = input || {};
+  const { firstName, lastName, phone, email, university, city, technologies, locationMode, preferredLocation, subject, consentConfirmed, program } = input || {};
   const requiredText = [
     ["firstName", firstName, 80],
     ["lastName", lastName, 80],
@@ -61,6 +70,14 @@ export function validatePfePackRegistration(input) {
     error.statusCode = 400;
     throw error;
   }
+  // Programme facultatif : absent (ou vide) → Pack PFE ; toute autre valeur,
+  // y compris un type autre qu'une chaîne (null, tableau, objet…), est refusée.
+  const cleanedProgram = typeof program === "string" ? program.trim() : program;
+  if (cleanedProgram !== undefined && cleanedProgram !== "" && !PFE_PACK_PROGRAMS.includes(cleanedProgram)) {
+    const error = new Error("Programme invalide.");
+    error.statusCode = 400;
+    throw error;
+  }
 
   return {
     firstName: firstName.trim(),
@@ -73,6 +90,7 @@ export function validatePfePackRegistration(input) {
     locationMode,
     preferredLocation: locationMode === "onsite" ? cleanedLocation : "",
     consentConfirmed,
+    program: cleanedProgram || DEFAULT_PFE_PACK_PROGRAM,
     ...(typeof subject === "string" ? { subject: subject.trim() } : {}),
   };
 }

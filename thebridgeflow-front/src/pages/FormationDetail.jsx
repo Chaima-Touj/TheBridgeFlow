@@ -18,6 +18,7 @@ import VideoTestimonialCarousel from "../components/common/VideoTestimonialCarou
 import TechMarquee from "../components/common/TechMarquee.jsx";
 import { formationsService } from "../services/formations.service.js";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import { DEFAULT_THUMB, getWeekThumb } from "../utils/thumbUtils.js";
 import { getAllFormationTestimonials } from "../constants/testimonials.js";
 import { getTechLogo } from "../constants/techLogos.js";
@@ -199,7 +200,7 @@ const FormationDetail = () => {
   // SEO — uniquement une fois la formation chargée (pas pendant loading,
   // pour ne pas écraser le titre générique par un état vide/transitoire).
   useDocumentMeta({
-    title:       formation ? `${formation.title} — TheBridgeFlow` : undefined,
+    title:       formation ? `${formation.title} — ${BRAND_NAME}` : undefined,
     description: formation?.description ? truncateForSEO(formation.description) : undefined,
   });
 

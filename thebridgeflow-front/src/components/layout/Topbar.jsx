@@ -9,6 +9,7 @@ import { useAuth }  from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import LangFlags    from "../common/LangFlags.jsx";
 import NotificationPanel from "./NotificationPanel.jsx";
+import { BRAND_NAME } from "../../constants/brand.js";
 import "./Topbar.css";
 
 const AVATAR_COLORS = [
@@ -90,7 +91,7 @@ export default function Topbar({
             plus emoji had no room left on ~390px screens once the hamburger,
             language flags and avatar took their share, and got hard-clipped
             by topbar-left's overflow:hidden (e.g. "TheBridgeFlow" → "TheBr"). */}
-        <img src="/favicon.png" alt="TheBridgeFlow" className="topbar-mobile-brand" />
+        <img src="/favicon.png" alt={BRAND_NAME} className="topbar-mobile-brand" />
       </div>
 
       {/* ── Droite : actions ─────────────────────────────────────────── */}

@@ -9,6 +9,7 @@ import {
   FiClipboard, FiRss, FiStar, FiAward, FiCode,
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
+import BrandName from "../common/BrandName.jsx";
 import "./Sidebar.css";
 
 /* ─── Structure menus par rôle ────────────────────────────────────────────── */
@@ -102,9 +103,7 @@ export default function Sidebar({ isOpen, onToggle, onNavigate, unreadNotifCount
         <Link to="/" className="msb__logo">
           <img src="/favicon.png" alt="Logo" className="msb__logo-ico" />
           {isOpen && (
-            <span className="msb__logo-txt">
-              TheBridge<span className="msb__logo-accent">Flow</span>
-            </span>
+            <BrandName className="msb__logo-txt" accentClassName="msb__logo-accent" />
           )}
         </Link>
         <button

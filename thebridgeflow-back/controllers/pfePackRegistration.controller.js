@@ -1,7 +1,7 @@
 import PfePackRegistration from "../models/pfePackRegistration.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { isRequestStatus } from "../utils/requestStatuses.js";
-import { validatePfePackRegistration } from "../utils/validatePfePackRegistration.js";
+import { normalizePfePackProgram, validatePfePackRegistration } from "../utils/validatePfePackRegistration.js";
 
 function fail(message, statusCode) {
   const error = new Error(message);
@@ -12,11 +12,18 @@ function fail(message, statusCode) {
 // Identifiant MongoDB : uniquement 24 caractères hexadécimaux.
 const isRegistrationId = (value) => typeof value === "string" && /^[a-f\d]{24}$/i.test(value);
 
-// Champs nécessaires à la liste du tableau de bord (filtre et recherche côté client).
-const LIST_FIELDS = "firstName lastName email phone university city technologies locationMode preferredLocation status statusUpdatedAt createdAt";
+// Champs nécessaires à la liste du tableau de bord (filtres et recherche côté client).
+const LIST_FIELDS = "firstName lastName email phone university city technologies locationMode preferredLocation program status statusUpdatedAt createdAt";
+
+// Message de confirmation affiché au visiteur, selon le programme demandé.
+const SUCCESS_MESSAGES = {
+  "pfe-pack": "Votre demande pour le Pack PFE a bien été envoyée.",
+  "summer-camp": "Votre demande pour le Summer Camp a bien été envoyée.",
+};
 
 /* Format renvoyé au tableau de bord admin. Une demande enregistrée avant
-   l'ajout du suivi n'a pas de statut : elle est renvoyée comme « new ».
+   l'ajout du suivi n'a pas de statut : elle est renvoyée comme « new » ; avant
+   l'ajout du programme, elle n'a pas de programme : « pfe-pack ».
    detail = true ajoute le sujet, l'accord et l'auteur du dernier changement
    de statut (peuplé avec { _id, name }, ou null). */
 export function serializePfePackRegistration(registration, { detail = false } = {}) {
@@ -31,6 +38,7 @@ export function serializePfePackRegistration(registration, { detail = false } = 
     technologies: Array.isArray(registration.technologies) ? registration.technologies : [],
     locationMode: registration.locationMode || "",
     preferredLocation: registration.preferredLocation || "",
+    program: normalizePfePackProgram(registration.program),
     status: isRequestStatus(registration.status) ? registration.status : "new",
     statusUpdatedAt: registration.statusUpdatedAt || null,
     createdAt: registration.createdAt,
@@ -49,19 +57,22 @@ export function serializePfePackRegistration(registration, { detail = false } = 
 }
 
 /* ── POST /api/pfe-pack/registrations (public, reCAPTCHA) ──────────────────
-   Le validateur ne garde que les champs du formulaire : le statut et son
-   suivi ne peuvent jamais être fixés par le visiteur. */
+   Formulaire commun aux pages Pack PFE et Summer Camp (champ program, absent
+   → « pfe-pack »). Le validateur ne garde que les champs du formulaire : le
+   statut et son suivi ne peuvent jamais être fixés par le visiteur. */
 export const createPfePackRegistration = asyncHandler(async (req, res) => {
-  const registration = await PfePackRegistration.create(validatePfePackRegistration(req.body));
+  const data = validatePfePackRegistration(req.body);
+  const registration = await PfePackRegistration.create(data);
 
   res.status(201).json({
-    message: "Votre demande pour le Pack PFE a bien été envoyée.",
+    message: SUCCESS_MESSAGES[data.program],
     registration: { id: registration._id },
   });
 });
 
 /* ── Admin ───────────────────────────────────────────────────────────────── */
-// GET /api/pfe-pack/registrations : toutes les demandes, les plus récentes d'abord.
+// GET /api/pfe-pack/registrations : toutes les demandes (Pack PFE et Summer
+// Camp), les plus récentes d'abord. Le tableau de bord filtre par programme.
 export const getPfePackRegistrations = asyncHandler(async (_req, res) => {
   const registrations = await PfePackRegistration.find()
     .sort({ createdAt: -1, _id: -1 })
@@ -76,7 +87,7 @@ export const getPfePackRegistrationById = asyncHandler(async (req, res) => {
   const registration = await PfePackRegistration.findById(req.params.id)
     .populate("statusUpdatedBy", "name")
     .lean();
-  if (!registration) fail("Demande Pack PFE introuvable.", 404);
+  if (!registration) fail("Demande introuvable.", 404);
   res.json(serializePfePackRegistration(registration, { detail: true }));
 });
 
@@ -91,6 +102,6 @@ export const updatePfePackRegistrationStatus = asyncHandler(async (req, res) => 
     { $set: { status, statusUpdatedAt: new Date(), statusUpdatedBy: req.user._id } },
     { returnDocument: "after", runValidators: true },
   ).populate("statusUpdatedBy", "name").lean();
-  if (!registration) fail("Demande Pack PFE introuvable.", 404);
+  if (!registration) fail("Demande introuvable.", 404);
   res.json({ registration: serializePfePackRegistration(registration, { detail: true }) });
 });

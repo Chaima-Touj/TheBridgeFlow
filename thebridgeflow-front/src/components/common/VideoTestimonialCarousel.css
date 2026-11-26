@@ -6,43 +6,46 @@
 ═══════════════════════════════════════════════════════════════════════════ */
 
 .vtc-section {
+  /* Nombre de cartes visibles et écart entre elles : seule source de vérité,
+     la largeur d'une carte en découle (voir .vtc-card-wrap) et le JS ne fait
+     que la mesurer. Paliers : 4 cartes > 1024px, 3 jusqu'à 1024px, 2 jusqu'à
+     768px, puis 1 carte + aperçu de la suivante en swipe sous 640px. */
+  --vtc-cols: 4;
+  --vtc-gap: 1rem;
   background: var(--bg);
-  padding: 3rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
 }
+/* Plusieurs carrousels à la suite sur le même fond (Landing : Formation,
+   Summer Camp, PFE) : sans changement de couleur pour marquer la frontière,
+   2 paddings complets empilés (bas + haut) laissaient un grand vide. Le
+   haut du suivant est réduit — l'écart reste nettement supérieur aux écarts
+   internes d'une section, chaque carrousel reste lisible comme un bloc.
+   :where() garde la spécificité d'une seule classe : les contextes qui
+   redéfinissent le padding (.pfe-testimonials, /testimonials) priment. */
+.vtc-section + :where(.vtc-section) { padding-top: calc(var(--section-pad-y) * 0.4); }
 .vtc-section__inner {
   max-width: 1280px;
   min-width: 0;
   margin: 0 auto;
 }
 
-/* ── En-tête de section ──────────────────────────────────────────────────── */
+/* ── En-tête de section — tokens partagés --section-* (index.css) ────────── */
 .vtc-header {
   text-align: center;
   max-width: 640px;
-  margin: 0 auto 3rem;
-}
-.vtc-header__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  margin-bottom: 1rem;
+  margin: 0 auto var(--section-head-gap);
 }
 .vtc-header__title {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: var(--section-title-size);
   font-weight: 800;
+  line-height: var(--section-title-lh);
   color: var(--text);
-  margin: 0 0 0.6rem;
+  margin: 0 0 var(--section-title-gap);
 }
 .vtc-header__sub {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: var(--section-sub-size);
+  line-height: var(--section-sub-lh);
   margin: 0;
 }
 
@@ -53,10 +56,16 @@
    (largeur en %) et mesuré côté JS, jamais dupliqué en dur.
    Mobile   : le rail redevient directement le conteneur de scroll natif avec
    snap tactile (inchangé), la fenêtre autour n'est qu'un passe-plat.       ── */
+/* Largeur plafonnée à 1160px (= .pfe-container) : sur desktop les 4 cartes
+   font ~250px de large (format 9:16 conservé, ~450px de haut) au lieu de
+   cartes de 375×668px qui faisaient d'une seule section ~980px de haut. Même
+   gabarit sur la Landing et sur Pack PFE / Summer Camp. */
 .vtc-carousel {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  max-width: 1160px;
+  margin-inline: auto;
 }
 
 .vtc-track-viewport {
@@ -67,7 +76,13 @@
 
 .vtc-row {
   display: flex;
-  gap: 1.25rem;
+  gap: var(--vtc-gap);
+  /* Moins de témoignages que de places (ex. une formation avec 2 vidéos) :
+     la rangée se centre sous l'en-tête au lieu de se coller à gauche.
+     "safe" : dès que les cartes débordent (cas normal du carrousel), retour
+     au début de ligne — le translateX calculé en JS part toujours de là, et
+     le scroll natif mobile reste atteignable jusqu'à la première carte. */
+  justify-content: safe center;
   transition: transform 480ms ease;
   /* will-change: transform retiré — c'était la cause du gel de peinture des
      cartes (vignettes chargées mais jamais affichées, confirmé en test réel :
@@ -88,17 +103,17 @@
   gap: 0.5rem;
   min-width: 0;
   flex: 0 0 auto;
-  /* Cartes agrandies (redesign validé) : 3 visibles par défaut au lieu de 4
-     — voir @media (max-width:900px) pour le palier à 2, inchangé. */
-  width: calc((100% - 2 * 1.25rem) / 3);
+  /* --vtc-cols cartes visibles (défini sur .vtc-section, paliers en bas de
+     fichier) : la rangée remplit exactement la fenêtre, sans carte coupée. */
+  width: calc((100% - (var(--vtc-cols) - 1) * var(--vtc-gap)) / var(--vtc-cols));
 }
 
 /* ── Flèches de navigation — cliquables à tout moment, design cohérent
    avec le reste du design system (tokens de index.css).                  ── */
 .vtc-arrow {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--bg-card);
@@ -118,7 +133,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   background: #000;
   cursor: pointer;
@@ -181,8 +196,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255,255,255,0.18);
   backdrop-filter: blur(3px);
@@ -215,13 +230,13 @@
 .vtc-cta {
   display: flex;
   justify-content: center;
-  margin-top: 2.5rem;
+  margin-top: var(--section-cta-gap);
 }
 .vtc-cta__btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.75rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 600;
 }
 /* Flèche "→" (FiArrowRight) : même pattern que [dir="rtl"] .stg-nav__item-chevron
@@ -404,9 +419,14 @@
    (JS ne fait QUE mesurer la largeur résultante de ces règles — le nombre de
    cartes visibles par palier n'est jamais dupliqué en dur côté JS.)
 ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .vtc-section { --vtc-cols: 3; }
+}
 @media (max-width: 900px) {
-  .vtc-card-wrap { width: calc((100% - 1 * 1.25rem) / 2); }
   .vtc-arrow { width: 38px; height: 38px; }
+}
+@media (max-width: 768px) {
+  .vtc-section { --vtc-cols: 2; }
 }
 
 /* En-dessous de BREAKPOINTS.md (640px) : le carousel desktop (flèches +
@@ -415,9 +435,9 @@
    conteneur de scroll (comme avant), la fenêtre autour n'est qu'un
    passe-plat et le transform JS n'est plus appliqué (voir le composant). */
 @media (max-width: 640px) {
-  .vtc-section { padding: 3.5rem 1.25rem; }
+  /* Padding de section : tokens --section-pad-* (déjà resserrés sur mobile). */
   .vtc-arrow { display: none; }
-  .vtc-track-viewport { overflow: visible; margin: 0 -1.25rem; padding: 0 1.25rem; }
+  .vtc-track-viewport { overflow: visible; margin: 0 calc(-1 * var(--section-pad-x)); padding: 0 var(--section-pad-x); }
   .vtc-row {
     transform: none !important;
     transition: none;
@@ -425,12 +445,12 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 1rem;
   }
   .vtc-row::-webkit-scrollbar { display: none; }
+  /* 1 carte + un bon tiers de la suivante visible (invite au swipe) :
+     ~230px de large sur 360px, plafonné à 260px sur les grands téléphones. */
   .vtc-card-wrap {
-    width: 78vw;
-    max-width: 300px;
+    width: min(64vw, 260px);
     scroll-snap-align: start;
   }
   /* Modale plein écran : les flèches passent en overlay absolu sur la vidéo
@@ -454,8 +474,4 @@
   .vtc-modal__nav--prev { left:  8px; }
   .vtc-modal__nav--next { right: 8px; }
   .vtc-modal__video-wrap { width: min(90vw, 400px, calc(88vh * 9 / 16)); }
-}
-
-@media (max-width: 400px) {
-  .vtc-card-wrap { width: 82vw; }
 }

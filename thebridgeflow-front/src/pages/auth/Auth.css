@@ -27,6 +27,9 @@
   gap:             0.5rem;
   font-weight:     800;
   font-size:       1.2rem;
+  /* Nom complet « 9antra.tn_the_bridge » toujours sur une ligne (le panneau
+     bleu n'est affiché qu'au-dessus de 900px : ≥ 370px utiles). */
+  white-space:     nowrap;
   color:           white;
   text-decoration: none;
   position:        relative;
@@ -37,7 +40,10 @@
   height:        52px;
   border-radius: 50%;
   object-fit:    cover;
+  flex-shrink:   0;
 }
+/* Partie « _the_bridge » du logo (anciennement opacité en style inline). */
+.auth-left__logo-accent { opacity: 0.85; }
 
 /* Texte central gauche */
 .auth-left__content {

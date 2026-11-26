@@ -17,8 +17,7 @@
 .public-info-content--testimonials .stc-section { padding-block: .75rem; }
 .pi-contact { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); overflow: hidden; margin-top: -5.5rem; border: 1px solid var(--border); border-radius: 1.35rem; background: var(--bg-card); box-shadow: 0 24px 70px rgb(15 23 42 / 14%); }
 .pi-contact__details { padding: clamp(1.5rem, 4vw, 2.75rem); color: #fff; background: linear-gradient(155deg, #0b2447, #123b75 65%, #1757a6); }
-.pi-contact__eyebrow, .pi-contact__form-heading > span { color: #93c5fd; font-size: .78rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-.pi-contact__details h2 { margin: .7rem 0; color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); }
+.pi-contact__details h2 { margin: 0 0 .7rem; color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); }
 .pi-contact__details > p, .pi-contact__form-heading p { margin: 0; color: #dbeafe; line-height: 1.7; }
 .pi-contact__methods { display: grid; gap: .7rem; margin: 1.75rem 0; }
 .pi-contact__methods > a, .pi-contact__methods > div { display: flex; align-items: center; gap: .85rem; padding: .8rem; border: 1px solid rgb(255 255 255 / 13%); border-radius: .85rem; color: #fff; text-decoration: none; background: rgb(255 255 255 / 6%); }
@@ -37,8 +36,7 @@
 .pi-contact__socials a:hover { transform: translateY(-2px); background: rgb(255 255 255 / 14%); }
 .pi-contact__form-panel { padding: clamp(1.5rem, 4vw, 3rem); }
 .pi-contact__form-heading { margin-bottom: 1.5rem; }
-.pi-contact__form-heading > span { color: var(--primary); }
-.pi-contact__form-heading h2 { margin: .45rem 0; color: var(--text); font-size: 1.65rem; }
+.pi-contact__form-heading h2 { margin: 0; color: var(--text); font-size: 1.65rem; }
 .pi-contact form { display: grid; gap: 1rem; }
 .pi-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .pi-contact label { display: grid; gap: .45rem; color: var(--text); font-size: .8rem; font-weight: 650; }

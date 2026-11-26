@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FiAlertCircle, FiCheckCircle, FiClock, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "../../components/common/LangFlags.jsx";
+import BrandName from "../../components/common/BrandName.jsx";
 import api from "../../services/api.js";
 import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./VerifyEmail.css";
@@ -153,7 +154,7 @@ export default function VerifyEmail() {
         {/* Logo */}
         <Link to="/" className="verify-logo">
           <img src="/favicon.png" alt="Logo" className="verify-logo__icon" />
-          <span>TheBridge<span className="verify-logo__accent">Flow</span></span>
+          <BrandName accentClassName="verify-logo__accent" />
         </Link>
 
         {/* Icône */}

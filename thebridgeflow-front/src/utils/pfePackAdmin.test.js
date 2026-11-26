@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  applyStatusUpdate, countByStatus, filterRegistrations, groupTechnologies, initials, mailtoHref,
-  normalizeSearchText, registrationStatus, splitTechnology, telHref,
+  applyStatusUpdate, countByProgram, countByStatus, filterRegistrations, groupTechnologies, initials, mailtoHref,
+  normalizeProgramFilter, normalizeSearchText, programOf, registrationStatus, splitTechnology, telHref,
 } from "./pfePackAdmin.js";
 
 const registrations = [
@@ -15,6 +15,7 @@ const registrations = [
     university: "Université de Tunis El Manar",
     city: "Tunis",
     technologies: ["Artificial Intelligence (AI Chatbot / Système de recommandation)", "DevOps"],
+    program: "summer-camp",
     status: "contacted",
   },
   {
@@ -26,7 +27,7 @@ const registrations = [
     university: "ISET Radès",
     city: "Ben Arous",
     technologies: ["Cyber Security", "MERN Stack Development (React + Node)"],
-    // Demande enregistrée avant l'ajout du suivi : pas de statut.
+    // Demande enregistrée avant l'ajout du suivi et du programme : ni statut ni programme.
   },
   {
     _id: "c",
@@ -37,9 +38,10 @@ const registrations = [
     university: "ENIS",
     city: "Sfax",
     technologies: ["Business Intelligence (BI)", "Internet of Things (IoT)"],
+    program: "pfe-pack",
     status: "confirmed",
   },
-  { _id: "d", firstName: "Ali", lastName: "Kefi", email: "ali@example.com", phone: "", university: "", city: "", technologies: [], status: "archived" },
+  { _id: "d", firstName: "Ali", lastName: "Kefi", email: "ali@example.com", phone: "", university: "", city: "", technologies: [], program: "bootcamp", status: "archived" },
 ];
 const ids = (list) => list.map((item) => item._id);
 
@@ -99,6 +101,45 @@ test("search and status filters combine", () => {
   assert.deepEqual(ids(filterRegistrations(registrations, { status: "confirmed", search: "ben" })), []);
 });
 
+test("a missing or unknown program counts as PFE Pack", () => {
+  assert.equal(programOf(registrations[0]), "summer-camp");
+  assert.equal(programOf(registrations[1]), "pfe-pack");
+  assert.equal(programOf(registrations[2]), "pfe-pack");
+  assert.equal(programOf(registrations[3]), "pfe-pack");
+  assert.equal(programOf(null), "pfe-pack");
+});
+
+test("normalizeProgramFilter only keeps the two programs, anything else shows all", () => {
+  assert.equal(normalizeProgramFilter("summer-camp"), "summer-camp");
+  assert.equal(normalizeProgramFilter("pfe-pack"), "pfe-pack");
+  for (const value of [null, undefined, "", "all", "Summer-Camp", "bootcamp", ["summer-camp"]]) {
+    assert.equal(normalizeProgramFilter(value), "all", JSON.stringify(value));
+  }
+});
+
+test("countByProgram counts every request once, old requests as PFE Pack", () => {
+  assert.deepEqual(countByProgram(registrations), { all: 4, "pfe-pack": 3, "summer-camp": 1 });
+  assert.deepEqual(countByProgram([]), { all: 0, "pfe-pack": 0, "summer-camp": 0 });
+  assert.deepEqual(countByProgram(), { all: 0, "pfe-pack": 0, "summer-camp": 0 });
+});
+
+test("countByStatus counts the statuses inside the selected program", () => {
+  assert.deepEqual(countByStatus(registrations, { program: "all" }), { all: 4, new: 2, contacted: 1, confirmed: 1 });
+  assert.deepEqual(countByStatus(registrations, { program: "pfe-pack" }), { all: 3, new: 2, contacted: 0, confirmed: 1 });
+  assert.deepEqual(countByStatus(registrations, { program: "summer-camp" }), { all: 1, new: 0, contacted: 1, confirmed: 0 });
+});
+
+test("filterRegistrations filters by program, then status and search", () => {
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "all" })), ["a", "b", "c", "d"]);
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "summer-camp" })), ["a"]);
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "pfe-pack" })), ["b", "c", "d"]);
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "pfe-pack", status: "new", search: "ben" })), ["b"]);
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "summer-camp", search: "ben" })), ["a"]);
+  assert.deepEqual(ids(filterRegistrations(registrations, { program: "summer-camp", status: "new" })), []);
+  // Le programme ne fait pas partie de la recherche.
+  assert.deepEqual(ids(filterRegistrations(registrations, { search: "summer" })), []);
+});
+
 test("normalizeSearchText removes accents and extra spaces", () => {
   assert.equal(normalizeSearchText("  Système   de  RECOMMANDATION "), "systeme de recommandation");
   assert.equal(normalizeSearchText(null), "");
@@ -140,6 +181,8 @@ test("applyStatusUpdate updates only the changed request", () => {
   assert.equal(result[1].statusUpdatedAt, "2026-11-24T10:00:00.000Z");
   assert.deepEqual(result[1].statusUpdatedBy, { _id: "u1", name: "Admin" });
   assert.equal(result[1].email, "yassine@example.com");
+  assert.equal(programOf(result[1]), "pfe-pack");
+  assert.equal(applyStatusUpdate(registrations, { _id: "a", status: "new" })[0].program, "summer-camp");
   assert.equal(result[0], registrations[0]);
   assert.equal(registrations[1].status, undefined);
   assert.deepEqual(countByStatus(result), { all: 4, new: 1, contacted: 1, confirmed: 2 });

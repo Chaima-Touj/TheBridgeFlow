@@ -88,7 +88,11 @@ export default function NewsSection({ lang = "fr", standalone = false, limit }) 
     <section id="news" className={`news-section${standalone ? " news-section--standalone" : ""}`}>
       <div className="news-section__inner">
         <div className="news-header">
-          <span className="news-header__badge"><Newspaper size={16} aria-hidden="true" /> {t("news.badge")}</span>
+          {/* Étiquette gardée seulement en tête de la page /blog (titre h1) :
+              sur la Landing, aucune étiquette au-dessus des titres de section. */}
+          {standalone && (
+            <span className="news-header__badge"><Newspaper size={16} aria-hidden="true" /> {t("news.badge")}</span>
+          )}
           {standalone
             ? <h1 className="news-header__title">{t("news.title")}</h1>
             : <h2 className="news-header__title">{t("news.title")}</h2>}

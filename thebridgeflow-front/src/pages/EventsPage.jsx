@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import "./Events.css";
 
@@ -51,7 +52,7 @@ export default function EventsPage() {
   const [alreadyRegisteredModal, setAlreadyRegisteredModal] = useState(false);
   const registrationsLoaded = user?.role !== "étudiant" || registrationsLoadedUserId === user?._id;
 
-  useDocumentMeta({ title: `${t("events.title")} — TheBridgeFlow`, description: t("events.description") });
+  useDocumentMeta({ title: `${t("events.title")} — ${BRAND_NAME}`, description: t("events.description") });
 
   useEffect(() => {
     let active = true;

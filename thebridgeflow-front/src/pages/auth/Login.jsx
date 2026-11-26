@@ -8,6 +8,7 @@ import GoogleAuthButton from "../../components/common/GoogleAuthButton.jsx";
 import AuthOrbit from "../../components/auth/AuthOrbit.jsx";
 import BoxReveal from "../../components/auth/BoxReveal.jsx";
 import Loader from "../../components/common/Loader.jsx";
+import BrandName from "../../components/common/BrandName.jsx";
 import api from "../../services/api.js";
 import { useRecaptchaCheckbox } from "../../hooks/useRecaptchaCheckbox.jsx";
 import "./Auth.css";
@@ -80,7 +81,7 @@ export default function Login() {
 
         <Link to="/" className="auth-left__logo">
           <img src="/favicon.png" alt="Logo" className="auth-left__logo-icon" />
-          <span>TheBridge<span style={{opacity:0.85}}>Flow</span></span>
+          <BrandName accentClassName="auth-left__logo-accent" />
         </Link>
 
         <div className="auth-left__content">

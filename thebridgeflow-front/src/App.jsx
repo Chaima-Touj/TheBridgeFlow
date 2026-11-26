@@ -228,7 +228,8 @@ export default function App() {
       }/>
 
       <Route path="/formations"        element={<FormationsPage />} />
-      <Route path="/pack-pfe"          element={<PfePackPage />} />
+      <Route path="/pack-pfe"          element={<PfePackPage key="pfe-pack" program="pfe-pack" />} />
+      <Route path="/summer-camp"       element={<PfePackPage key="summer-camp" program="summer-camp" />} />
       <Route path="/formations/:slug"  element={<FormationDetail />} />
       <Route path="/offers"            element={<OffersPage />} />
       <Route path="/offers/:id"        element={<PublicOfferDetail />} />

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FiUsers, FiTrendingUp, FiAward } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import { ceremonyService } from "../services/ceremony.service.js";
 import "../components/common/NewsSection.css";
 import "./FormationsPage.css";
@@ -22,8 +23,8 @@ export default function CeremonyArchives() {
   const [loading,  setLoading]  = useState(true);
 
   useDocumentMeta({
-    title: "Archives Cérémonie | TheBridgeFlow",
-    description: "Consultez les éditions précédentes de la Cérémonie TheBridgeFlow et leurs projets primés.",
+    title: `Archives Cérémonie | ${BRAND_NAME}`,
+    description: `Consultez les éditions précédentes de la Cérémonie ${BRAND_NAME} et leurs projets primés.`,
   });
 
   useEffect(() => {

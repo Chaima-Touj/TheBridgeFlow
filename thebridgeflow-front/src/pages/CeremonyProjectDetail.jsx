@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 import SiteNavbar from "../components/common/SiteNavbar.jsx";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import { useCeremonySelection, MAX_SELECTION } from "../hooks/useCeremonySelection.js";
 import { useCeremonyVoteGate } from "../hooks/useCeremonyVoteGate.js";
 import { useCeremonyVoteSubmit } from "../hooks/useCeremonyVoteSubmit.js";
@@ -50,7 +51,7 @@ export default function CeremonyProjectDetail() {
   }, [id, t]);
 
   useDocumentMeta({
-    title:       project ? `${project.title} — Cérémonie | TheBridgeFlow` : undefined,
+    title:       project ? `${project.title} — Cérémonie | ${BRAND_NAME}` : undefined,
     description: project?.description ? truncateForSEO(project.description) : undefined,
   });
 

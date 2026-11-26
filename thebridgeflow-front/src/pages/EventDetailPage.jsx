@@ -24,6 +24,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { eventsService } from "../services/events.service.js";
 import { usePhoneRequirement } from "../hooks/usePhoneRequirement.jsx";
 import { useDocumentMeta } from "../hooks/useDocumentMeta.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import { getEventVideoSource } from "../utils/eventVideoSource.js";
 import { compressImageToBase64 } from "../utils/imageCompression.js";
@@ -144,7 +145,7 @@ function EventDetailPage() {
     feedbackRequested && !feedbackLoginDismissed && !authLoading && !user ? "feedbackLogin" : ""
   );
 
-  useDocumentMeta({ title: event ? `${event.title} — TheBridgeFlow` : t("events.title"), description: event?.description || t("events.description") });
+  useDocumentMeta({ title: event ? `${event.title} — ${BRAND_NAME}` : t("events.title"), description: event?.description || t("events.description") });
 
   useEffect(() => {
     let active = true;
@@ -432,10 +433,7 @@ function EventDetailPage() {
                   {event.status === "published" && (
                     <section className="ev-detail__feedback-list" aria-labelledby="ev-feedback-list-title">
                       <div className="ev-detail__feedback-heading">
-                        <div>
-                          <span className="ev-detail__eyebrow">{t("events.feedback.eyebrow")}</span>
-                          <h2 id="ev-feedback-list-title">{t("events.feedback.publicTitle")}</h2>
-                        </div>
+                        <h2 id="ev-feedback-list-title">{t("events.feedback.publicTitle")}</h2>
                         {!publishedFeedbacksLoading && publishedFeedbacks.length > 0 && (
                           <span className="ev-detail__feedback-count">
                             {t("events.feedback.publishedCount", { count: publishedFeedbacks.length })}

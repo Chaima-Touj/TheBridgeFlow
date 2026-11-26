@@ -9,6 +9,7 @@ import { newsService } from "../services/news.service.js";
 import { useDocumentMeta, truncateForSEO } from "../hooks/useDocumentMeta.js";
 import { resolveDriveThumbnailProxyUrl, resolveDriveUrl } from "../constants/videoUrls.js";
 import { isSafeContentUrl } from "../utils/safeContentUrl.js";
+import { BRAND_NAME } from "../constants/brand.js";
 import "./NewsDetailPage.css";
 
 function formatDate(value, language) {
@@ -44,7 +45,7 @@ export default function NewsDetailPage() {
   const isLoading = loading || loadedId !== id;
 
   useDocumentMeta({
-    title: article ? `${article.metaTitle || article.title} — ${t("news.title")} | TheBridgeFlow` : t("news.seoTitle"),
+    title: article ? `${article.metaTitle || article.title} — ${t("news.title")} | ${BRAND_NAME}` : t("news.seoTitle"),
     description: article
       ? truncateForSEO(article.metaDescription || article.excerpt || article.content || article.title)
       : t("news.seoDescription"),

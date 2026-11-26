@@ -69,6 +69,10 @@ const allowedOrigins = [
   "https://the-bridge-flow-app.onrender.com",
   "https://stage-flow-app.onrender.com",
   "https://9antra.tn",
+  // Même site saisi avec « www » (le frontend redirige vers 9antra.tn, mais
+  // les premières requêtes ou un navigateur qui complète l'adresse avec www
+  // ne doivent jamais être bloqués).
+  "https://www.9antra.tn",
 ];
 
 app.use(cors({
@@ -144,7 +148,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
 }));
 
 app.get("/", (req, res) => {
-  res.json({ message: "🚀 TheBridgeFlow API is running!" });
+  res.json({ message: "🚀 9antra.tn_the_bridge API is running!" });
 });
 
 // ─── Sitemap XML — public, sans middleware protect, régénéré à chaque

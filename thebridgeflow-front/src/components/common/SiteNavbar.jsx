@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMoon, FiSun } from "react-icons/fi";
-import { Home, Briefcase, Info, MessageSquare, Mail, CalendarDays, Newspaper, BadgeDollarSign, Code2, BookOpen } from "lucide-react";
+import { Home, Briefcase, MessageSquare, CalendarDays, Newspaper, BadgeDollarSign, Code2, BookOpen, Sun } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useLang } from "../../context/langContext.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LangFlags from "./LangFlags.jsx";
+import BrandName from "./BrandName.jsx";
 import AnimatedNavBar, { AnimatedNavBarProbe } from "./AnimatedNavBar.jsx";
 import { useAdaptiveNav } from "../../hooks/useAdaptiveNav.js";
 import { scrollToSection } from "../../utils/scrollToSection.js";
@@ -14,18 +15,19 @@ import "./SiteNavbar.css";
 
 /* Config canonique unique de navigation. Les entrées publiques principales
    ont chacune une route réelle afin que les liens soient aussi accessibles
-   après actualisation ou ouverture directe de leur URL. */
+   après actualisation ou ouverture directe de leur URL. « À propos » et
+   « Contact » ne sont plus dans la barre : leurs pages (/about, /contact)
+   restent accessibles depuis le pied de page (SiteFooter). */
 const NAV_ITEMS = [
   { key: "home",         icon: Home,          to: "/",           anchorId: "hero" },
   { key: "pfePack",      icon: Code2,         to: "/pack-pfe" },
+  { key: "summerCamp",   icon: Sun,           to: "/summer-camp" },
   { key: "offers",       icon: Briefcase,     to: "/offers" },
   { key: "formations",   icon: BookOpen,      to: "/formations" },
   { key: "events",       icon: CalendarDays, to: "/events" },
   { key: "pricing",      icon: BadgeDollarSign,to: "/tarifs" },
   { key: "testimonials", icon: MessageSquare, to: "/testimonials" },
   { key: "news",         icon: Newspaper,     to: "/blog" },
-  { key: "about",        icon: Info,          to: "/about" },
-  { key: "contact",      icon: Mail,          to: "/contact" },
 ];
 const ANCHOR_ITEMS = NAV_ITEMS.filter((i) => i.anchorId);
 const AVATAR_COLORS = [
@@ -64,9 +66,10 @@ export default function SiteNavbar() {
   );
 
   /* Scroll-spy : uniquement pertinent sur la Landing Page elle-même — les
-     sections observées (hero/about/testimonials/contact) n'existent nulle
-     part ailleurs. Sur les autres pages, l'onglet actif est déterminé plus
-     bas par la route réelle (useLocation), pas par ce scroll-spy. */
+     sections observées (celles des entrées avec anchorId, aujourd'hui le
+     seul hero) n'existent nulle part ailleurs. Sur les autres pages,
+     l'onglet actif est déterminé plus bas par la route réelle
+     (useLocation), pas par ce scroll-spy. */
   useEffect(() => {
     if (!onLanding) return undefined;
     const sections = ANCHOR_ITEMS
@@ -175,7 +178,7 @@ export default function SiteNavbar() {
       <div className="lp-nav__inner" ref={navInnerRef}>
         <Link to="/" className="lp-nav__logo">
           <img src="/favicon.png" alt="Logo" className="lp-nav__logo-icon" />
-          <span>TheBridge<span className="lp-accent">Flow</span></span>
+          <BrandName accentClassName="lp-accent" />
         </Link>
 
         <div className="lp-nav__links">
@@ -216,7 +219,7 @@ export default function SiteNavbar() {
       <div className="lp-nav__probe" ref={navProbeRef} aria-hidden="true">
         <span className="lp-nav__logo">
           <img src="/favicon.png" alt="Logo" className="lp-nav__logo-icon" />
-          <span>TheBridge<span className="lp-accent">Flow</span></span>
+          <BrandName accentClassName="lp-accent" />
         </span>
         <div className="lp-nav__links">
           <AnimatedNavBarProbe items={navItems} />

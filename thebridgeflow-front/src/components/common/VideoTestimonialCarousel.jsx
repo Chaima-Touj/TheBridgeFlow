@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   FiX, FiChevronLeft, FiChevronRight, FiPlay, FiArrowRight, FiExternalLink,
-  FiBriefcase, FiFilm,
+  FiBriefcase,
 } from "react-icons/fi";
 import { BREAKPOINTS } from "../../constants/breakpoints.js";
 import { isGoogleDriveUrl, resolveDriveUrl, resolveDriveThumbnailProxyUrl, resolveDriveVideoProxyUrl, extractDriveFileId } from "../../constants/videoUrls.js";
@@ -509,7 +509,6 @@ export default function VideoTestimonialCarousel({ items, title, subtitle, ctaLa
     <section id={sectionId} className="vtc-section" ref={sectionRef}>
       <div className="vtc-section__inner">
         {!hideHeader && <div className="vtc-header">
-          <span className="vtc-header__badge"><FiFilm aria-hidden="true" /> {t("testimonials.eyebrow")}</span>
           <h2 className="vtc-header__title">{title}</h2>
           {subtitle && <p className="vtc-header__sub">{subtitle}</p>}
         </div>}

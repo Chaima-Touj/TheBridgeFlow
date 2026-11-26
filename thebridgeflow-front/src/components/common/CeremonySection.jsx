@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { FiAward, FiArrowRight, FiUpload, FiUsers, FiTrendingUp } from "react-icons/fi";
+import { FiArrowRight, FiUpload, FiUsers, FiTrendingUp } from "react-icons/fi";
 import "./CeremonySection.css";
 
 // Tilt 3D au survol — même mécanisme que .cp-card (CeremonyPage.jsx) :
@@ -33,8 +33,9 @@ const EASE_LAND = [0.16, 1, 0.3, 1];
  * Pas de fetch ici (contrairement à NewsSection) : texte + CTA statiques,
  * seul le QR code est généré dynamiquement (voir ceremonyUrl).
  *
- * Layout : colonne unique centrée (badge → titre → sous-titre → étapes →
- * CTA → carte QR). Animation d'entrée en cascade top→bottom (fade +
+ * Layout : colonne unique centrée (titre → sous-titre → étapes → CTA →
+ * carte QR), sans étiquette au-dessus du titre (même règle que les autres
+ * sections publiques). Animation d'entrée en cascade top→bottom (fade +
  * translateY vers le haut) plutôt qu'un glissement latéral, qui n'a plus de
  * sens dans un layout à une colonne — orchestrée via des variants Framer
  * Motion (staggerChildren sur le conteneur), pas un whileInView par élément.
@@ -100,10 +101,6 @@ export default function CeremonySection() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
       >
-        <motion.span className="lp-section-badge" variants={itemVariants}>
-          <FiAward size={13} /> {t("landing.ceremonyBadge")}
-        </motion.span>
-
         <motion.h2
           className="ceremony-section__title"
           variants={titleContainerVariants}

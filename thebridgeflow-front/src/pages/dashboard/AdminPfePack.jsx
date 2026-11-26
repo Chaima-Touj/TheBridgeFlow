@@ -1,8 +1,9 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  Building2, CalendarClock, CircleAlert, CircleCheck, Download, Inbox, Laptop, LoaderCircle, Mail, MapPin, MapPinned,
-  Phone, RefreshCw, School, Search, SearchX, UserRound, X,
+  Building2, CalendarClock, CircleAlert, CircleCheck, Code2, Download, Inbox, Laptop, Layers, LoaderCircle, Mail, MapPin,
+  MapPinned, Phone, RefreshCw, School, Search, SearchX, Sun, UserRound, X,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout.jsx";
 import BreakableEmail from "../../components/common/BreakableEmail.jsx";
@@ -10,8 +11,8 @@ import { RequestStatusBadge, RequestStatusFilter, RequestStatusPicker } from "..
 import { pfePackService } from "../../services/pfePack.service.js";
 import { buildPfePackEmailsPdf } from "../../utils/exportPfePackEmails.js";
 import {
-  applyStatusUpdate, countByStatus, filterRegistrations, groupTechnologies, initials, mailtoHref, registrationStatus,
-  telHref,
+  applyStatusUpdate, countByProgram, countByStatus, filterRegistrations, groupTechnologies, initials, mailtoHref,
+  normalizeProgramFilter, programOf, registrationStatus, telHref,
 } from "../../utils/pfePackAdmin.js";
 import "./AdminPfePack.css";
 
@@ -20,6 +21,16 @@ const LOCALES = { fr: "fr-FR", en: "en-GB", ar: "ar-TN" };
 const WIDE_LAYOUT = "(min-width: 1101px)";
 const matches = (query) => typeof window !== "undefined" && Boolean(window.matchMedia?.(query)?.matches);
 const FEEDBACK_DELAY_MS = 3500;
+/* Filtre par programme (même formulaire public, même collection), gardé dans
+   l'adresse (?program=pfe-pack | summer-camp ; absent = tous) pour qu'un lien
+   ouvre la bonne vue. Libellés : adminPfePack.programs.*. */
+const PROGRAM_PARAM = "program";
+const PROGRAM_FILTERS = [
+  { id: "all", Icon: Layers, labelKey: "all" },
+  { id: "pfe-pack", Icon: Code2, labelKey: "pfePack" },
+  { id: "summer-camp", Icon: Sun, labelKey: "summerCamp" },
+];
+const PROGRAM_META = Object.fromEntries(PROGRAM_FILTERS.map((item) => [item.id, item]));
 
 export default function AdminPfePack() {
   const { t, i18n } = useTranslation();
@@ -31,6 +42,10 @@ export default function AdminPfePack() {
       : { day: "2-digit", month: "short", year: "numeric" })
     : "");
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const programParam = searchParams.get(PROGRAM_PARAM);
+  const program = normalizeProgramFilter(programParam);
+  const programLabel = (id) => ta(`programs.${PROGRAM_META[id].labelKey}`);
   const [registrations, setRegistrations] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,14 +65,25 @@ export default function AdminPfePack() {
   const detailRef = useRef(null);
   const sectionId = useId();
 
+  // ?program= inconnu (ou « all ») : retiré de l'adresse, la vue « Tous » s'affiche.
+  useEffect(() => {
+    if (programParam === null || programParam === program) return;
+    setSearchParams((params) => { params.delete(PROGRAM_PARAM); return params; }, { replace: true });
+  }, [programParam, program, setSearchParams]);
+
+  // Grand écran : la première demande de la liste affichée (programme et
+  // filtres en cours) est sélectionnée par défaut.
+  const defaultActiveId = useEffectEvent((entries) => (
+    (matches(WIDE_LAYOUT) && filterRegistrations(entries, { program, status, search })[0]?._id) || ""
+  ));
+
   useEffect(() => {
     let active = true;
     pfePackService.getRegistrations()
       .then(({ data }) => {
         if (!active) return;
         const entries = Array.isArray(data) ? data : [];
-        // Grand écran : la première demande est affichée par défaut.
-        const fallbackId = (matches(WIDE_LAYOUT) && entries[0]?._id) || "";
+        const fallbackId = defaultActiveId(entries);
         setRegistrations(entries);
         setLoaded(true);
         setActiveId((current) => (entries.some((entry) => entry._id === current) ? current : fallbackId));
@@ -96,8 +122,14 @@ export default function AdminPfePack() {
     return () => clearTimeout(timer);
   }, [feedback]);
 
-  const counts = useMemo(() => countByStatus(registrations), [registrations]);
-  const filtered = useMemo(() => filterRegistrations(registrations, { status, search }), [registrations, status, search]);
+  // Compteurs : par programme (toutes les demandes), par statut (dans le programme choisi).
+  const programCounts = useMemo(() => countByProgram(registrations), [registrations]);
+  const programTotal = programCounts[program];
+  const counts = useMemo(() => countByStatus(registrations, { program }), [registrations, program]);
+  const filtered = useMemo(
+    () => filterRegistrations(registrations, { program, status, search }),
+    [registrations, program, status, search],
+  );
   const hasFilters = status !== "all" || search.trim() !== "";
 
   /* La ligne de la liste contient déjà l'essentiel : le détail s'affiche tout
@@ -121,9 +153,44 @@ export default function AdminPfePack() {
     setStatus("all");
     setSearch("");
   };
+  // E-mails des demandes du programme choisi (tous les programmes pour « Tous »).
   const exportEmails = () => {
-    const { doc, filename } = buildPfePackEmailsPdf(registrations);
+    const { doc, filename } = buildPfePackEmailsPdf(registrations, { program });
     doc.save(filename);
+  };
+
+  const changeProgram = (next) => {
+    if (next === program) return;
+    setSearchParams((params) => {
+      if (next === "all") params.delete(PROGRAM_PARAM);
+      else params.set(PROGRAM_PARAM, next);
+      return params;
+    }, { replace: true });
+    // La demande affichée n'appartient pas au programme choisi : grand écran →
+    // la première demande de la nouvelle liste, petit écran → aucune.
+    const current = registrations.find((registration) => registration._id === activeId);
+    if (current && next !== "all" && programOf(current) !== next) {
+      const first = filterRegistrations(registrations, { program: next, status, search })[0];
+      setActiveId((matches(WIDE_LAYOUT) && first?._id) || "");
+    }
+  };
+
+  // Le bouton disparaît avec l'état vide : le focus passe sur la liste.
+  const showAllPrograms = () => {
+    changeProgram("all");
+    requestAnimationFrame(() => listRef.current?.focus());
+  };
+
+  // Étiquette discrète du programme d'une demande (liste et en-tête du détail).
+  const programTag = (registration) => {
+    const id = programOf(registration);
+    const { Icon } = PROGRAM_META[id];
+    return (
+      <span className={`appfe-program-tag appfe-program-tone--${id}`}>
+        <Icon size={12} aria-hidden="true" />
+        {programLabel(id)}
+      </span>
+    );
   };
 
   const selectRegistration = (registration) => {
@@ -199,6 +266,16 @@ export default function AdminPfePack() {
         </div>
       );
     }
+    if (!programTotal) {
+      return (
+        <div className="appfe-state">
+          <span className="appfe-state__icon"><Inbox size={24} aria-hidden="true" /></span>
+          <strong>{ta("emptyProgramTitle", { program: programLabel(program) })}</strong>
+          <span>{ta("emptyProgramText", { program: programLabel(program) })}</span>
+          <button type="button" className="btn btn-ghost appfe-btn" onClick={showAllPrograms}>{ta("showAllPrograms")}</button>
+        </div>
+      );
+    }
     if (!filtered.length) {
       return (
         <div className="appfe-state">
@@ -227,7 +304,10 @@ export default function AdminPfePack() {
                   {initials(registration.firstName, registration.lastName) || <UserRound size={16} />}
                 </span>
                 <span className="appfe-row__main">
-                  <strong>{registration.firstName} {registration.lastName}</strong>
+                  <span className="appfe-row__name">
+                    <strong>{registration.firstName} {registration.lastName}</strong>
+                    {programTag(registration)}
+                  </span>
                   <small className="appfe-row__email" dir="ltr">{registration.email}</small>
                   {place && <small className="appfe-row__place">{place}</small>}
                 </span>
@@ -283,6 +363,7 @@ export default function AdminPfePack() {
           <div className="appfe-detail__title">
             <h2>{selected.firstName} {selected.lastName}</h2>
             <div className="appfe-detail__meta">
+              {programTag(selected)}
               <RequestStatusBadge status={selected.status} />
               <span className="appfe-detail__received">
                 <CalendarClock size={14} aria-hidden="true" />
@@ -376,25 +457,41 @@ export default function AdminPfePack() {
     );
   };
 
-  const showDetailPanel = loaded && registrations.length > 0;
+  // Aucune demande dans le programme choisi : pas de panneau de détail vide.
+  const showDetailPanel = loaded && programTotal > 0;
 
   return (
     <DashboardLayout title={ta("title")} subtitle={ta("subtitle")}>
       <div className="appfe-page">
         <section className="appfe-toolbar" aria-label={ta("toolbarLabel")}>
           <div className="appfe-toolbar__row">
-            <RequestStatusFilter value={status} counts={counts} onChange={setStatus} />
+            <div className="appfe-programs" role="group" aria-label={ta("programFilterLabel")}>
+              {PROGRAM_FILTERS.map(({ id, Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`appfe-program appfe-program-tone--${id}`}
+                  aria-pressed={program === id}
+                  onClick={() => changeProgram(id)}
+                >
+                  <Icon size={15} aria-hidden="true" />
+                  <span className="appfe-program__label">{programLabel(id)}</span>
+                  <span className="appfe-program__count">{programCounts[id]}</span>
+                </button>
+              ))}
+            </div>
             <div className="appfe-toolbar__actions">
               <button type="button" className="btn btn-ghost appfe-btn" onClick={refreshRegistrations} disabled={loading}>
                 <RefreshCw size={16} className={loading && loaded ? "appfe-spin" : ""} aria-hidden="true" />
                 {ta("refresh")}
               </button>
-              <button type="button" className="btn btn-primary appfe-btn" onClick={exportEmails} disabled={registrations.length === 0}>
+              <button type="button" className="btn btn-primary appfe-btn" onClick={exportEmails} disabled={!programTotal}>
                 <Download size={16} aria-hidden="true" />
                 {ta("export")}
               </button>
             </div>
           </div>
+          <RequestStatusFilter value={status} counts={counts} onChange={setStatus} />
           <label className="appfe-search">
             <span className="appfe-sr-only">{ta("searchLabel")}</span>
             <Search size={16} aria-hidden="true" />
@@ -426,8 +523,8 @@ export default function AdminPfePack() {
             {showDetailPanel && (
               <div className="appfe-list__head" aria-live="polite">
                 {hasFilters
-                  ? ta("filteredCount", { shown: filtered.length, total: registrations.length })
-                  : ta("count", { count: registrations.length })}
+                  ? ta("filteredCount", { shown: filtered.length, total: programTotal })
+                  : ta("count", { count: programTotal })}
               </div>
             )}
             {renderList()}

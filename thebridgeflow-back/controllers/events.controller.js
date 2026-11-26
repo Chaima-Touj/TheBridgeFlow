@@ -499,7 +499,8 @@ export const updateEvent = asyncHandler(async (req, res) => {
         link: eventLink,
       },
       emailMethod: "sendEventRegistrationCancelled",
-      emailData: { recipientName: student.name, event: getEventEmailData(event) },
+      // L'événement entier est annulé (pas une annulation par l'étudiant).
+      emailData: { recipientName: student.name, event: getEventEmailData(event), eventCancelled: true },
     }));
   } else if (becamePublished || (event.status === "published" && !event.publishedAnnouncementSentAt)) {
     await announcePublishedEvent(event);

@@ -30,6 +30,7 @@
   display:         flex;
   align-items:     center;
   justify-content: space-between;
+  gap:             0.5rem;
   margin-bottom:   1.5rem;
   flex-shrink:     0;
 }
@@ -38,7 +39,7 @@
 .msb__logo {
   display:     flex;
   align-items: center;
-  gap:         0.625rem;
+  gap:         0.5rem;
   overflow:    hidden;
   min-width:   0;
 }
@@ -52,12 +53,21 @@
   box-shadow:    0 4px 12px rgba(37,99,235,.3);
 }
 
+/* Sidebar ouverte (268px, 240px utiles) : icône + nom complet
+   « 9antra.tn_the_bridge » + bouton de repli doivent tenir sur une ligne.
+   Icône 40px (44px conservés en mode replié, où seule l'icône s'affiche),
+   texte resserré. Ellipse seulement en filet de sécurité. */
+.msb--open .msb__logo-ico { width: 40px; height: 40px; }
+
 .msb__logo-txt {
-  font-size:   1rem;
-  font-weight: 800;
-  color:       var(--text);
-  white-space: nowrap;
-  overflow:    hidden;
+  font-size:      0.875rem;
+  font-weight:    800;
+  letter-spacing: -0.01em;
+  color:          var(--text);
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  min-width:      0;
 }
 
 .msb__logo-accent {
@@ -385,4 +395,8 @@
     min-height: 44px;
   }
   .msb__toggle { min-width: 44px; }
+
+  /* Bouton de fermeture élargi à 44px : texte du logo un peu réduit pour que
+     le nom complet garde sa ligne à côté. */
+  .msb__logo-txt { font-size: 0.84rem; }
 }

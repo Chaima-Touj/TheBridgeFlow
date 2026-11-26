@@ -20,6 +20,7 @@ import {
   Video,
   X,
 } from "lucide-react";
+import { BRAND_NAME } from "../constants/brand.js";
 import "./EventFeedbackPreviewPage.css";
 
 const feedbackExamples = [
@@ -358,7 +359,7 @@ function CelebrationModal({ onClose }) {
           <span><Check size={33} /></span>
         </div>
         <h3>Votre avis a bien été pris en compte</h3>
-        <p>Merci de contribuer à améliorer les prochains événements TheBridgeFlow.</p>
+        <p>Merci de contribuer à améliorer les prochains événements {BRAND_NAME}.</p>
         <button className="evp-button evp-button--primary" type="button" onClick={onClose}>Continuer</button>
       </div>
     </PreviewModal>
@@ -370,7 +371,7 @@ function EmailPreview({ kind, onClose }) {
   return (
     <PreviewModal title={isFeedback ? "Email après l’événement" : "Rappel avant l’événement"} onClose={onClose} className="evp-email-modal">
       <div className="evp-email">
-        <div className="evp-email__from"><span className="evp-email__logo">B</span><span><strong>TheBridgeFlow</strong><small>contact@thebridgeflow.tn</small></span></div>
+        <div className="evp-email__from"><span className="evp-email__logo">B</span><span><strong>{BRAND_NAME}</strong><small>contact@thebridgeflow.tn</small></span></div>
         <div className="evp-email__subject"><small>Objet</small><strong>{isFeedback ? "Votre avis sur l’Atelier IA Générative" : "Votre événement commence dans 6 heures"}</strong></div>
         <p>Bonjour Amira,</p>
         <p>{isFeedback
@@ -413,7 +414,7 @@ function AdminFeedbackPreview({
         <div>
           <span className="evp-eyebrow">Espace administration</span>
           <h1>Feedback des événements</h1>
-          <p>{selectedEvent ? selectedEvent.title : "Consultez les avis envoyés après les événements TheBridgeFlow."}</p>
+          <p>{selectedEvent ? selectedEvent.title : `Consultez les avis envoyés après les événements ${BRAND_NAME}.`}</p>
         </div>
         {selectedEvent && (
           <a
@@ -564,7 +565,7 @@ export default function EventFeedbackPreviewPage() {
   return (
     <div className="evp-page">
       <header className="evp-topbar">
-        <a className="evp-brand" href="/" aria-label="TheBridgeFlow, accueil">
+        <a className="evp-brand" href="/" aria-label={`${BRAND_NAME}, accueil`}>
           <img src="/favicon.png" alt="" />
           <span>TheBridge<span>Flow</span></span>
         </a>
@@ -617,7 +618,7 @@ export default function EventFeedbackPreviewPage() {
         </main>
       )}
 
-      <footer className="evp-footer">TheBridgeFlow <span>·</span> Maquette de validation — données de démonstration uniquement</footer>
+      <footer className="evp-footer">{BRAND_NAME} <span>·</span> Maquette de validation — données de démonstration uniquement</footer>
 
       {modal === "feedback" && <FeedbackModal onClose={() => setModal("")} onSubmitted={handleFeedbackSubmitted} />}
       {modal === "thanks" && <CelebrationModal onClose={() => setModal("")} />}

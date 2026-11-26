@@ -9,13 +9,18 @@
 .lp-hero {
   position:   relative;
   overflow:   hidden;
-  padding-top: 64px;
-  min-height: 100vh;
+  padding-top: var(--public-nav-h);
+  /* Plein écran plafonné à 800px : sur un grand écran (1080px de haut et
+     plus) le hero ne monopolise plus toute la hauteur et le début de la
+     section suivante reste visible. svh après vh : hauteur réellement
+     visible sur mobile (barre d'adresse déployée), vh en repli. */
+  min-height: min(100vh, 800px);
+  min-height: min(100svh, 800px);
   /* Reste le fond visible tant que la vidéo n'a pas chargé (connexion lente,
      erreur réseau...) — fallback naturel, pas besoin d'image poster dédiée. */
   background: linear-gradient(160deg, #f0f7ff 0%, #e8f4fd 40%, #f0f0ff 100%);
   display: flex;
-  align-items: centeRr;
+  align-items: center;
 }
 [data-theme="dark"] .lp-hero {
   background: linear-gradient(160deg, #0f172a 0%, #1a2744 50%, #1a1040 100%);
@@ -85,10 +90,10 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 5rem 2rem;
+  padding: clamp(2.5rem, 6vh, 4rem) 2rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: 3.5rem;
   align-items: center;
 }
 .lp-badge {
@@ -115,22 +120,22 @@
   line-height: 1.14;
   letter-spacing: -0.01em;
   color: var(--text);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   text-shadow: 0 2px 24px rgba(15, 23, 42, 0.12);
 }
 [data-theme="dark"] .lp-hero__title { text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55); }
 .lp-hero__desc {
   font-size: 1.0625rem;
   color: var(--text-secondary);
-  line-height: 1.75;
-  margin-bottom: 2.25rem;
+  line-height: 1.7;
+  margin-bottom: 1.75rem;
   max-width: 520px;
 }
 .lp-hero__ctas {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 .btn-lg { padding: 0.875rem 1.75rem; font-size: 1rem; }
 
@@ -211,20 +216,24 @@
     text-shadow: 0 0 4px rgba(255,255,255,0.9), 0 0 14px rgba(255,255,255,0.8), 0 2px 8px rgba(15,23,42,0.2);
   }
   :root:not([data-theme="dark"]) .lp-hero__desc {
+    /* Texte plus foncé que --text-secondary : reste lisible sur la vidéo. */
+    color: #1E293B;
     text-shadow: 0 1px 10px rgba(255,255,255,0.85);
   }
 }
 
-/* ─── Titres de section ──────────────────────────────────────────────────── */
-.lp-section-header { text-align: center; margin-bottom: 3rem; }
-.lp-section-title  { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 0.75rem; }
-.lp-section-sub    { font-size: 1rem; color: var(--text-secondary); }
+/* ─── Titres de section ──────────────────────────────────────────────────────
+   Tailles/écarts = tokens partagés --section-* (index.css), identiques à
+   ceux des en-têtes des composants communs (vtc-, stc-, tm-, fcat-, news-). */
+.lp-section-header { text-align: center; margin-bottom: var(--section-head-gap); }
+.lp-section-title  { font-size: var(--section-title-size); font-weight: 800; line-height: var(--section-title-lh); color: var(--text); margin-bottom: var(--section-title-gap); }
+.lp-section-sub    { font-size: var(--section-sub-size); line-height: var(--section-sub-lh); color: var(--text-secondary); }
 
 /* ─── Features ───────────────────────────────────────────────────────────── */
 .lp-features {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 5rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
 }
 .lp-features__grid {
   display: grid;
@@ -252,7 +261,7 @@
 
 /* ─── Présentation vidéo ─────────────────────────────────────────────────── */
 .lp-promo-video {
-  padding: 3.5rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
   background: var(--bg);
   border-top: 1px solid var(--border);
 }
@@ -270,7 +279,7 @@
   position:      relative;
   width:         100%;
   max-width:     940px;
-  margin:        0 auto 3.5rem;
+  margin:        0 auto var(--section-cta-gap);
   padding:       18px;
   background:    linear-gradient(160deg, #2a2a2a, #161616 65%);
   border-radius: 30px;
@@ -482,9 +491,7 @@
 
 /* Responsive */
 @media (max-width: 640px) {
-  .lp-promo-video { padding: 3.5rem 1.25rem; }
   .lp-promo-video__frame {
-    margin-bottom: 2.5rem;
     padding:       8px;
     border-radius: 20px;
   }
@@ -494,14 +501,10 @@
 }
 
 /* ─── Contact ────────────────────────────────────────────────────────────── */
-.lp-contact { padding: 5rem 2rem; max-width: 1280px; margin: 0 auto; }
-.lp-contact__inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  align-items: start;
-}
-.lp-contact__title { font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 1.5rem; }
+/* padding/max-width réels : voir « Contact enhancements » plus bas (la
+   section passe en pleine largeur, le padding est porté par __inner). */
+.lp-contact { max-width: 1280px; margin: 0 auto; }
+.lp-contact__title { font-size: var(--section-title-size); font-weight: 800; line-height: var(--section-title-lh); color: var(--text); margin-bottom: var(--section-title-gap); }
 .lp-contact__success {
   background: #d1fae5;
   color: #065f46;
@@ -548,18 +551,18 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 2rem;
+  padding: 1.75rem;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 .lp-contact__info-desc {
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.7;
 }
-.lp-contact__info-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.lp-contact__info-list { display: flex; flex-direction: column; gap: 1rem; }
 .lp-contact__info-item {
   display: flex;
   align-items: flex-start;
@@ -582,7 +585,7 @@
 /* ─── Newsletter ─────────────────────────────────────────────────────────── */
 .lp-newsletter {
   background: linear-gradient(135deg, var(--primary) 0%, #1D4ED8 100%);
-  padding: 2.5rem 2rem;
+  padding: var(--section-pad-y-compact) var(--section-pad-x);
 }
 .lp-newsletter__inner {
   max-width: 1280px;
@@ -593,7 +596,7 @@
   gap: 2rem;
   flex-wrap: wrap;
 }
-.lp-newsletter__icon  { font-size: 2rem; margin-bottom: 0.5rem; }
+.lp-newsletter__icon  { font-size: 1.75rem; margin-bottom: 0.35rem; }
 .lp-newsletter__title { font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
 .lp-newsletter__sub   { font-size: 0.875rem; color: rgba(255,255,255,0.8); }
 .lp-newsletter__form  { display: flex; gap: 0.75rem; flex-wrap: wrap; }
@@ -615,42 +618,27 @@
 .lp-newsletter .btn-primary { background: white; color: var(--primary); font-weight: 700; }
 .lp-newsletter .btn-primary:hover { background: #f0f9ff; }
 
-/* ─── Section badge pill ──────────────────────────────────────────────────────── */
-.lp-section-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--primary-light);
-  color: var(--primary);
-  padding: 0.3rem 1rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 /* ─── Popular formations — redesign premium (Feature 4) ─────────────────────────
    Même logique/données qu'avant (4 formations max, mêmes champs) — uniquement
    la présentation visuelle change : respiration généreuse, badges technos
    circulaires avec ombre, chips durée/prix repensés, hover lift progressif. */
-.lp-popular { background: var(--bg); padding: 3.5rem 2rem; }
+.lp-popular { background: var(--bg); padding: var(--section-pad-y) var(--section-pad-x); }
 .lp-popular__inner { max-width: 1280px; margin: 0 auto; }
+/* Pas de margin-top : l'écart en-tête → grille est déjà porté par
+   .lp-section-header (--section-head-gap), comme dans toutes les sections. */
 .lp-popular__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.75rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
 }
 .lp-pop-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2.25rem 2rem;
+  padding: 1.75rem 1.6rem;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 0.9rem;
   box-shadow: var(--shadow);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   position: relative;
@@ -674,7 +662,7 @@
 
 .lp-pop-card__icons { display: flex; gap: 0.6rem; align-items: center; color: inherit; text-decoration: none; }
 .lp-pop-card__icon {
-  width: 52px; height: 52px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -683,10 +671,10 @@
 }
 .lp-pop-card:hover .lp-pop-card__icon { transform: translateY(-2px); }
 
-.lp-pop-card__title { font-size: 1.15rem; font-weight: 800; color: var(--text); line-height: 1.35; }
+.lp-pop-card__title { font-size: 1.08rem; font-weight: 800; color: var(--text); line-height: 1.35; }
 .lp-pop-card__title a { color: inherit; text-decoration: none; }
 .lp-pop-card__title a:hover { color: var(--primary); }
-.lp-pop-card__desc  { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.7; flex: 1; }
+.lp-pop-card__desc  { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.65; flex: 1; }
 .lp-pop-card__meta  { display: flex; flex-wrap: wrap; gap: 0.55rem; }
 .lp-pop-chip {
   display: inline-flex;
@@ -718,18 +706,18 @@
   font-weight: 700;
   text-decoration: none;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  margin-top: 0.35rem;
+  margin-top: 0.2rem;
   align-self: flex-start;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 .lp-pop-card__cta:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.32); }
-.lp-popular__footer { display: flex; justify-content: center; margin-top: 3rem; }
+.lp-popular__footer { display: flex; justify-content: center; margin-top: var(--section-cta-gap); }
 .lp-popular__empty { text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem; }
 
-/* ─── About ───────────────────────────────────────────────────────────────────── */
+/* ─── About (components/common/AboutSection.jsx, page /about) ─────────────────── */
 .lp-about {
   background: var(--bg-card);
-  padding: 3.5rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -738,18 +726,20 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: 3rem;
   align-items: start;
 }
+/* Mise en page en 2 colonnes (texte à gauche, cartes à droite) : le titre
+   reste aligné sur sa colonne, seule sa taille suit le token partagé. */
 .lp-about__title {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: var(--section-title-size);
   font-weight: 800;
   color: var(--text);
-  line-height: 1.2;
-  margin: 0.5rem 0 1rem;
+  line-height: var(--section-title-lh);
+  margin: 0 0 0.75rem;
 }
-.lp-about__sub { font-size: 1rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem; }
-.lp-about__pillars { display: flex; flex-direction: column; gap: 1.25rem; }
+.lp-about__sub { font-size: var(--section-sub-size); color: var(--text-secondary); line-height: 1.7; margin-bottom: var(--section-head-gap); }
+.lp-about__pillars { display: flex; flex-direction: column; gap: 1.1rem; }
 .lp-pillar { display: flex; gap: 1rem; align-items: flex-start; }
 .lp-pillar__icon {
   width: 40px; height: 40px;
@@ -762,7 +752,7 @@
 .lp-pillar__icon--green { background: #d1fae5; color: #059669; }
 .lp-pillar__label { font-size: 0.82rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
 .lp-pillar__text  { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.65; }
-.lp-about__right  { display: flex; flex-direction: column; gap: 1rem; }
+.lp-about__right  { display: flex; flex-direction: column; gap: 0.85rem; }
 .lp-about-card {
   display: flex;
   gap: 1rem;
@@ -770,7 +760,7 @@
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.1rem 1.25rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .lp-about-card:hover { transform: translateX(4px); box-shadow: var(--shadow-md); }
@@ -785,23 +775,24 @@
 .lp-about-card__desc  { font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6; }
 
 /* ─── Why choose us ───────────────────────────────────────────────────────────── */
-.lp-why { background: var(--bg); padding: 3.5rem 2rem; }
+/* 3 cartes : une seule rangée de 3 jusqu'à 768px (pas de palier à 2 colonnes,
+   qui laisserait une carte seule sur la 2e ligne), puis empilées. */
+.lp-why { background: var(--bg); padding: var(--section-pad-y) var(--section-pad-x); }
 .lp-why__inner { max-width: 1280px; margin: 0 auto; }
 .lp-why__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
-  margin-top: 1rem;
 }
 .lp-why-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.75rem;
+  padding: 1.5rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .lp-why-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.lp-why-card__icon { width: 52px; height: 52px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+.lp-why-card__icon { width: 46px; height: 46px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem; }
 .lp-why-card__title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
 .lp-why-card__desc  { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.65; }
 
@@ -814,16 +805,16 @@
 .lp-contact__inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 3.5rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 2.5rem;
   align-items: start;
 }
 .lp-contact__form-wrap,
 .lp-contact__info-wrap,
 .lp-contact__info-card--full { min-width: 0; }
-.lp-contact__sub   { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
+.lp-contact__sub   { font-size: var(--section-sub-size); color: var(--text-secondary); line-height: var(--section-sub-lh); margin-bottom: var(--section-head-gap); }
 .lp-form-row       { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .lp-contact__socials { display: flex; gap: 0.6rem; margin-top: 0.75rem; }
 .lp-contact__social-btn {
@@ -885,11 +876,12 @@
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
-  .lp-why__grid { grid-template-columns: repeat(2, 1fr); }
+  .lp-why__grid { gap: 1rem; }
+  .lp-why-card  { padding: 1.35rem; }
 }
 @media (max-width: 1024px) {
   .lp-features__grid     { grid-template-columns: repeat(2, 1fr); }
-  .lp-about__inner       { grid-template-columns: 1fr; gap: 2.5rem; }
+  .lp-about__inner       { grid-template-columns: 1fr; gap: 2rem; }
   .lp-contact__inner     { grid-template-columns: minmax(0, 1fr); }
   .lp-form-row           { grid-template-columns: 1fr; }
 }
@@ -901,7 +893,7 @@
   .lp-hero__inner        { grid-template-columns: 1fr; text-align: center; }
   .lp-hero__title        { font-size: 2.25rem; }
   .lp-hero__ctas         { justify-content: center; }
-  .lp-hero__desc         { margin: 0 auto 2.25rem; }
+  .lp-hero__desc         { margin: 0 auto 1.75rem; }
 }
 @media (max-width: 480px) {
   .lp-hero__title { font-size: 2rem; }
@@ -910,7 +902,7 @@
   .lp-features__grid     { grid-template-columns: 1fr; }
   .lp-newsletter__inner  { flex-direction: column; text-align: center; }
   .lp-newsletter__form   { justify-content: center; }
-  .lp-why__grid          { grid-template-columns: 1fr; }
+  .lp-why__grid          { grid-template-columns: minmax(0, 1fr); max-width: 560px; margin-inline: auto; }
   .lp-popular__grid      { grid-template-columns: 1fr; }
 }
 
@@ -923,22 +915,30 @@
 
 /* ── Skeleton de chargement des témoignages/captures (voir TestimonialsLoadingSkeleton
    dans LandingPage.jsx) — mêmes dimensions de section que .vtc-section pour éviter
-   un saut de mise en page une fois les vraies données chargées. ──────────────────── */
+   un saut de mise en page une fois les vraies données chargées : mêmes tokens de
+   padding, même largeur utile que .vtc-track-viewport (1160px de carrousel moins
+   2 × (flèche 40px + écart 0.75rem)), mêmes paliers de colonnes (4/3/2). ──────── */
 .lp-testi-skeleton {
+  --lp-testi-cols: 4;
+  --lp-testi-gap: 1rem;
   background: var(--bg);
-  padding: 3rem 2rem;
+  padding: var(--section-pad-y) var(--section-pad-x);
 }
+/* Deux carrousels consécutifs sur le même fond : même resserrement que
+   .vtc-section + .vtc-section (VideoTestimonialCarousel.css). */
+.lp-testi-skeleton + .lp-testi-skeleton { padding-top: calc(var(--section-pad-y) * 0.4); }
 .lp-testi-skeleton__row {
-  max-width: 1280px;
+  max-width: calc(1160px - 2 * (40px + 0.75rem));
   margin: 0 auto;
   display: flex;
-  gap: 1.25rem;
+  gap: var(--lp-testi-gap);
+  overflow: hidden;
 }
 .lp-testi-skeleton__card {
   flex: 0 0 auto;
-  width: calc((100% - 3 * 1.25rem) / 4);
+  width: calc((100% - (var(--lp-testi-cols) - 1) * var(--lp-testi-gap)) / var(--lp-testi-cols));
   aspect-ratio: 9 / 16;
-  border-radius: 16px;
+  border-radius: 14px;
   background: linear-gradient(90deg, var(--border) 25%, var(--bg-card) 50%, var(--border) 75%);
   background-size: 200% 100%;
   animation: lp-testi-skeleton-pulse 1.4s ease-in-out infinite;
@@ -947,6 +947,12 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-@media (max-width: 900px) {
-  .lp-testi-skeleton__card { width: calc((100% - 1 * 1.25rem) / 2); }
+@media (max-width: 1024px) {
+  .lp-testi-skeleton { --lp-testi-cols: 3; }
+}
+@media (max-width: 768px) {
+  .lp-testi-skeleton { --lp-testi-cols: 2; }
+}
+@media (max-width: 640px) {
+  .lp-testi-skeleton__card { width: min(64vw, 260px); }
 }
